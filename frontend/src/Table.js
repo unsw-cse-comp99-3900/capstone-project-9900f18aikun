@@ -59,6 +59,8 @@ const reservations = [
   { room: '302', time: '02:00 PM'},
 ];
 
+
+
 const Table = () => {
   const [times, setTimes] = useState(getTime());
   const [selectWindow, setSelectWindow] = useState({ visible: false, content: '', position: { top: 0, left: 0 } });
