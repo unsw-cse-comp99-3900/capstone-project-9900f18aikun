@@ -1,25 +1,54 @@
-import logo from './logo.svg';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import './App.css';
 
-function App() {
+// backup classroom, update when backend connected
+const classroom = ['301 A', '301 B', '301 C', '302', '303']
+
+const times = [
+  '12:00 am', '1:00 am', '2:00 am', '3:00 am', '4:00 am', '5:00 am', '6:00 am', '7:00 am',
+  '8:00 am', '9:00 am', '10:00 am', '11:00 am', '12:00 pm', '1:00 pm', '2:00 pm', '3:00 pm',
+  '4:00 pm', '5:00 pm', '6:00 pm', '7:00 pm', '8:00 pm', '9:00 pm', '10:00 pm', '11:00 pm'
+];
+
+const reservations = [
+  { room: '302', time: '1:00 pm'},
+];
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="table-container">
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Room/Time</th>
+              {times.map(time => (
+                <th key={time} className="time-column">{time}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {classroom.map(room => (
+              <tr key={room}>
+                <td className="room-column">{room}</td>
+                {times.map(time=> {
+                  const isReserved = reservations.some(
+                    reservation => reservation.room === room && reservation.time === time
+                  );
+                  return (
+                    <td key={time} className={isReserved ? 'reserved' : ''}></td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
+const rootElement = document.getElementById('root');
+ReactDOM.render(<App />, rootElement);
 
 export default App;
