@@ -30,10 +30,15 @@ td.reserved {
   background-color: #b9b9b9;
 }
 
-td:not(.reserved) {
+td.selfreserved {
+  background-color: blue;
+  color: white;
+}
+
+td:not(.reserved):not(.selfreserved) {
   background-color: #fce8a3;
 }
-td:not(.reserved):hover {
+td:not(.reserved):not(.selfreserved):hover:hover {
   background-color: #fac833;
   cursor: pointer;
 }

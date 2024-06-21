@@ -6,7 +6,7 @@ import './Table.css';
 const classroom = ['301 A', '301 B', '301 C', '302', '303'];
 
 let selfReservation = [
-  { room: '302', time: ['02:00 PM'] },
+  { room: '303', time: ['02:00 PM'] },
 ];
 
 // const times = [
@@ -66,7 +66,7 @@ const SelectWindow = ({ visible, time, room, position, close, self }) => {
     return times;
   };
 
-  const dropdownTime = gettimeList(time, 4);
+  const dropdownTime = gettimeList(time, 8);
 
   const confirmHandler = () => {
     const newTimes = gettimeList(time, selectedIdx);
@@ -148,9 +148,12 @@ const Table = () => {
                   const isReserved = reservations.some(
                     reservation => reservation.room === room && reservation.time.includes(time)
                   );
+                  const isSelfReserved = selfReservation.some(
+                    reservation => reservation.room === room && reservation.time.includes(time)
+                  );
                   return (
                     <td key={time}
-                    className={`time-column ${isReserved ? 'reserved' : ''}`}
+                    className={`time-column ${isReserved ? 'reserved' : (isSelfReserved ? 'selfreserved' : '')}`}
                     onClick={(event) => {
                       event.stopPropagation(); // Prevent triggering the hideSelectWindow
                       clickHandler(room, time, event);
