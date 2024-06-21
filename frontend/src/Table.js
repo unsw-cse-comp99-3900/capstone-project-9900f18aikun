@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 // import ReactDOM from 'react-dom';
 // import { createRoot } from 'react-dom/client';
 import './Table.css';
-
 // backup classroom, update when backend connected
-const classroom = ['301 A', '301 B', '301 C', '302', '303']
+const classroom = ['301 A', '301 B', '301 C', '302', '303'];
+
+let selfTime = ['02:00 PM'];
 
 // const times = [
 //   '12:00 am', '1:00 am', '2:00 am', '3:00 am', '4:00 am', '5:00 am', '6:00 am', '7:00 am',
@@ -20,16 +21,16 @@ const getTime = () => {
 
   // show whole hour before 15 or after 45, otherwise show half an hour
   if (minutes < 15) {
-    cur.setMinutes(0, 0, 0)
+    cur.setMinutes(0, 0, 0);
   } else if (minutes < 45) {
     cur.setMinutes(30, 0, 0);
   } else {
     cur.setHours(cur.getHours() + 1);
-    cur.setMinutes(0, 0, 0)
+    cur.setMinutes(0, 0, 0);
   }
 
   // timeslot next 12 hours
-  for (let i=0; i<48; i++) {
+  for (let i = 0; i < 48; i++) {
     times.push(cur.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
     cur.setMinutes(cur.getMinutes() + 30);
     if (cur.getHours() === 0) {
@@ -40,7 +41,8 @@ const getTime = () => {
   return times;
 }
 
-const SelectWindow = ({ visible, content, position }) => {
+const SelectWindow = ({ visible, content, time, position, close, self }) => {
+  const [selectedIdx, setSelectedIdx] = useState(0);
   if (!visible) return null;
 
   const style = {
@@ -48,22 +50,56 @@ const SelectWindow = ({ visible, content, position }) => {
     left: position.left
   };
 
+  const gettimeList = (time, idx) => {
+    const times = [];
+    const [hour, minute, period] = time.match(/(\d+):(\d+) (AM|PM)/).slice(1);
+    const baseTime = new Date();
+    baseTime.setHours(hour % 12 + (period === 'PM' ? 12 : 0), minute, 0, 0);
+
+    for (let i = 1; i <= idx; i++) {
+      baseTime.setMinutes(baseTime.getMinutes() + 30);
+      times.push(baseTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
+    }
+
+    return times;
+  };
+
+  const dropdownTime = gettimeList(time, 4);
+
+  const confirmHandler = () => {
+    const newTimes = gettimeList(time, selectedIdx);
+    self.push(...newTimes);
+    console.log(self);
+    close();
+  };
+
   return (
-    <div className="select-window" style = {style}>
+    <div className="select-window" style={style}>
       {content}
+      
+      <select id="dropdown" onChange={(e) => setSelectedIdx(e.target.selectedIndex)}>
+        {dropdownTime.map((time, idx) => (
+          <option key={idx} value={idx}>{time}</option>
+        ))}
+      </select>
+      <br />
+      <br />
+      <div className="button-class">
+        <button onClick={confirmHandler}>Confirm</button>
+        <button onClick={close}>Close</button>
+      </div>
+      
     </div>
-  )
+  );
 }
 
 const reservations = [
-  { room: '302', time: '02:00 PM'},
+  { room: '302', time: '02:00 PM' },
 ];
-
-
 
 const Table = () => {
   const [times, setTimes] = useState(getTime());
-  const [selectWindow, setSelectWindow] = useState({ visible: false, content: '', position: { top: 0, left: 0 } });
+  const [selectWindow, setSelectWindow] = useState({ visible: false, content: '', time: '10:00 AM', position: { top: 0, left: 0 }, self: selfTime });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -76,14 +112,15 @@ const Table = () => {
     console.log(`Room: ${room}, Time: ${time}`);
     const content = `${room}: ${time} until... `;
     const position = { top: event.clientY + 10, left: event.clientX + 10 };
-    setSelectWindow({ visible: true, content, position });
+    setSelectWindow({ visible: true, content, time, position, self: selfTime });
   };
 
   const hideSelectWindow = () => {
     setSelectWindow({ ...selectWindow, visible: false });
   };
+
   return (
-    <div className="table-container" onClick={hideSelectWindow}>
+    <div className="table-container">
       <div className="table-wrapper">
         <table id="mytable">
           <thead>
@@ -99,7 +136,7 @@ const Table = () => {
             {classroom.map(room => (
               <tr key={room}>
                 <td className="room-column">{room}</td>
-                {times.map(time=> {
+                {times.map(time => {
                   const isReserved = reservations.some(
                     reservation => reservation.room === room && reservation.time === time
                   );
@@ -118,7 +155,7 @@ const Table = () => {
           </tbody>
         </table>
       </div>
-      <SelectWindow visible={selectWindow.visible} content={selectWindow.content} position={selectWindow.position} />
+      <SelectWindow visible={selectWindow.visible} content={selectWindow.content} position={selectWindow.position} close = {hideSelectWindow} time = {selectWindow.time} self={selfTime}/>
     </div>
   );
 };
