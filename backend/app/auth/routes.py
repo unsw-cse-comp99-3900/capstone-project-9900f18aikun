@@ -1,14 +1,27 @@
-from flask import render_template, redirect, url_for, flash, request
-from . import auth
+from flask_restx import Namespace, Resource, fields
+from flask import send_file, make_response,  request, Flask
+from app.database import db
+from app.models import User
 
-@auth.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
+auth_ns = Namespace('auth', description='Authentication operations')
 
-        pass
-    return render_template('auth/login.html')
+user_model = auth_ns.model('User', {
+    'zid': fields.String(required=True, description='The user zid'),
+    'password': fields.String(required=True, description='The user password')
+})
 
-@auth.route('/logout')
-def logout():
+@auth_ns.route('/create')
+class CreateUser(Resource):
+    @auth_ns.expect(user_model)
+    def post(self):
+        data = request.json
 
-    return redirect(url_for('main.index'))
+        if not data['zid'].startswith('z') or not data['zid'][1:].isdigit():
+            return {'error': 'Invalid zid'}, 400
+        zid = int(data['zid'][1:])
+        new_user = User(zid=zid, username=data['zid'], password=data['password'])
+        db.session.add(new_user)
+        db.session.commit()
+        return {'message': "New user created"}
+
+

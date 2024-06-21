@@ -1,11 +1,8 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_restx import Api
 from .config import Config
+from .database import db, migrate
+from flask_restx import Api
 
-db = SQLAlchemy()
-migrate = Migrate()
 api = Api()
 
 def create_app():
@@ -14,9 +11,14 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    api.init_app(app)
 
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    @app.route('/')
+    def index():
+        return "Welcome to the API"
+
+    from .auth.routes import auth_ns
+    api.add_namespace(auth_ns, path='/auth')
 
     with app.app_context():
         db.create_all()
