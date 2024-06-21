@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import send_file, make_response,  request, Flask
 from app.database import db
-from app.models import User
+from app.models import Users
 
 auth_ns = Namespace('auth', description='Authentication operations')
 
@@ -9,6 +9,7 @@ user_model = auth_ns.model('User', {
     'zid': fields.String(required=True, description='The user zid'),
     'password': fields.String(required=True, description='The user password')
 })
+
 
 @auth_ns.route('/create')
 class CreateUser(Resource):
@@ -19,7 +20,7 @@ class CreateUser(Resource):
         if not data['zid'].startswith('z') or not data['zid'][1:].isdigit():
             return {'error': 'Invalid zid'}, 400
         zid = int(data['zid'][1:])
-        new_user = User(zid=zid, username=data['zid'], password=data['password'])
+        new_user = Users(zid=zid, username=data['zid'], password=data['password'])
         db.session.add(new_user)
         db.session.commit()
         return {'message': "New user created"}

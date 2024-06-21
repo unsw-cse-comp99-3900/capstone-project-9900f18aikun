@@ -2,6 +2,7 @@ from flask import Flask
 from .config import Config
 from .database import db, migrate
 from flask_restx import Api
+from .database_setup import set_up_database
 
 api = Api()
 
@@ -13,6 +14,7 @@ def create_app():
     migrate.init_app(app, db)
     api.init_app(app)
 
+
     @app.route('/')
     def index():
         return "Welcome to the API"
@@ -22,5 +24,6 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        set_up_database()
 
     return app

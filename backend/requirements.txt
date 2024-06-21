@@ -46,3 +46,5 @@ Werkzeug==3.0.3
 Flask-Migrate==4.0.4
 Flask-SQLAlchemy==3.0.3
 psycopg2-binary
+pandas
+openpyxl
