@@ -5,7 +5,9 @@ import './Table.css';
 // backup classroom, update when backend connected
 const classroom = ['301 A', '301 B', '301 C', '302', '303'];
 
-let selfTime = ['02:00 PM'];
+let selfReservation = [
+  { room: '302', time: ['02:00 PM'] },
+];
 
 // const times = [
 //   '12:00 am', '1:00 am', '2:00 am', '3:00 am', '4:00 am', '5:00 am', '6:00 am', '7:00 am',
@@ -41,7 +43,7 @@ const getTime = () => {
   return times;
 }
 
-const SelectWindow = ({ visible, content, time, position, close, self }) => {
+const SelectWindow = ({ visible, time, room, position, close, self }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   if (!visible) return null;
 
@@ -68,21 +70,28 @@ const SelectWindow = ({ visible, content, time, position, close, self }) => {
 
   const confirmHandler = () => {
     const newTimes = gettimeList(time, selectedIdx);
-    self.push(...newTimes);
+    newTimes.push(time);
+    const existing = self.find(reservation => reservation.room === room);
+    if (existing) {
+      existing.time.push(...newTimes)
+    } else {
+      self.push({room, time: newTimes})
+    }
+    console.log(newTimes);
     console.log(self);
     close();
   };
 
   return (
     <div className="select-window" style={style}>
-      {content}
-      
-      <select id="dropdown" onChange={(e) => setSelectedIdx(e.target.selectedIndex)}>
-        {dropdownTime.map((time, idx) => (
-          <option key={idx} value={idx}>{time}</option>
-        ))}
-      </select>
-      <br />
+      <div>
+        <strong>{room}</strong>: {time} until... 
+        <select id="dropdown" onChange={(e) => setSelectedIdx(e.target.selectedIndex)}>
+          {dropdownTime.map((time, idx) => (
+            <option key={idx} value={idx}>{time}</option>
+          ))}
+        </select>
+      </div>
       <br />
       <div className="button-class">
         <button onClick={confirmHandler}>Confirm</button>
@@ -93,13 +102,13 @@ const SelectWindow = ({ visible, content, time, position, close, self }) => {
   );
 }
 
-const reservations = [
-  { room: '302', time: '02:00 PM' },
+let reservations = [
+  { room: '302', time: ['02:00 PM', '03:00 PM'] },
 ];
 
 const Table = () => {
   const [times, setTimes] = useState(getTime());
-  const [selectWindow, setSelectWindow] = useState({ visible: false, content: '', time: '10:00 AM', position: { top: 0, left: 0 }, self: selfTime });
+  const [selectWindow, setSelectWindow] = useState({ visible: false, time: '10:00 AM', room: '302', position: { top: 0, left: 0 }, self: selfReservation });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -110,9 +119,8 @@ const Table = () => {
 
   const clickHandler = (room, time, event) => {
     console.log(`Room: ${room}, Time: ${time}`);
-    const content = `${room}: ${time} until... `;
     const position = { top: event.clientY + 10, left: event.clientX + 10 };
-    setSelectWindow({ visible: true, content, time, position, self: selfTime });
+    setSelectWindow({ visible: true, room, time, position, self: selfReservation });
   };
 
   const hideSelectWindow = () => {
@@ -138,7 +146,7 @@ const Table = () => {
                 <td className="room-column">{room}</td>
                 {times.map(time => {
                   const isReserved = reservations.some(
-                    reservation => reservation.room === room && reservation.time === time
+                    reservation => reservation.room === room && reservation.time.includes(time)
                   );
                   return (
                     <td key={time}
@@ -155,7 +163,7 @@ const Table = () => {
           </tbody>
         </table>
       </div>
-      <SelectWindow visible={selectWindow.visible} content={selectWindow.content} position={selectWindow.position} close = {hideSelectWindow} time = {selectWindow.time} self={selfTime}/>
+      <SelectWindow visible={selectWindow.visible} room={selectWindow.room} position={selectWindow.position} close = {hideSelectWindow} time = {selectWindow.time} self={selfReservation}/>
     </div>
   );
 };
