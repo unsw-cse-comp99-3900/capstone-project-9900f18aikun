@@ -15,6 +15,7 @@ def set_up_database():
     student_sheet.replace({'NA': np.nan, '': np.nan}, inplace=True)
     staff_sheet.replace({'NA': np.nan, '': np.nan}, inplace=True)
 
+
     # drop useless column
     student_sheet = student_sheet.drop('No', axis=1)
     student_sheet = student_sheet.drop('Test', axis=1)
@@ -43,8 +44,10 @@ def set_up_database():
                                 'Password': 'password'
                                 }, inplace=True)
 
+    # update data to users table and HDRStudent table
     for index, row in student_sheet.iterrows():
-        if not HDRStudent.query.filter_by(zid=row['zid']).first():
+        # skip the exist users
+        if not db.session.get(HDRStudent, row['zid']):
             student = HDRStudent(
                 zid=row['zid'],
                 name=row['name'],
@@ -56,7 +59,7 @@ def set_up_database():
                 password=row['password']
             )
             db.session.add(student)
-        if not Users.query.filter_by(zid=row['zid']).first():
+        if not db.session.get(Users, row['zid']):
             users = Users(
                 zid=row['zid'],
                 password=row['password'],
@@ -64,8 +67,9 @@ def set_up_database():
             )
             db.session.add(users)
 
+    # update data to staff table and users table
     for index, row in staff_sheet.iterrows():
-        if not CSEStaff.query.filter_by(zid=row['zid']).first():
+        if not db.session.get(CSEStaff, row['zid']):
             staff = CSEStaff(
                 zid=row['zid'],
                 name=row['name'],
@@ -77,7 +81,7 @@ def set_up_database():
                 password=row['password']
             )
             db.session.add(staff)
-        if not Users.query.filter_by(zid=row['zid']).first():
+        if not db.session.get(Users, row['zid']):
             users = Users(
                 zid=row['zid'],
                 password=row['password'],

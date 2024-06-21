@@ -48,3 +48,4 @@ Flask-SQLAlchemy==3.0.3
 psycopg2-binary
 pandas
 openpyxl
+flask-jwt-extended==4.4.4
