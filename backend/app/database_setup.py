@@ -90,3 +90,23 @@ def set_up_database():
             db.session.add(users)
 
     db.session.commit()
+
+    # room information update
+    file_path = "data/Meeting Rooms CSE K17 and J17 L5.xlsx"
+    room_detail_sheet = pd.read_excel(file_path)
+    print(room_detail_sheet)
+
+    # replace empty
+    room_detail_sheet.replace({'NA': np.nan, '': np.nan}, inplace=True)
+
+
+
+
+    # rename
+    student_sheet.rename(columns={'No': 'id',
+                                  'Building': 'building',
+                                  'Room No': 'name',
+                                  'Level': 'level',
+                                  'Capacity': 'capacity',
+                                  }, inplace=True)
+

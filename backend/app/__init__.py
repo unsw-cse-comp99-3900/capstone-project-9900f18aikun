@@ -4,12 +4,15 @@ from .database import db, migrate
 from flask_restx import Api
 from .database_setup import set_up_database
 from flask_jwt_extended import JWTManager
+import time
 
 api = Api()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    time.sleep(3)
 
     db.init_app(app)
     migrate.init_app(app, db)

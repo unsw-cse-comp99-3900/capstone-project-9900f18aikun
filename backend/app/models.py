@@ -32,3 +32,16 @@ class CSEStaff(db.Model):
     title = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(128))
     password = db.Column(db.String(128), nullable=False)
+
+
+class RoomDetail(db.Model):
+    __tablename__ = "RoomDetail"
+    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+    building = db.Column(db.String(128), primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    level = db.Column(db.String(128), nullable=False)
+    capacity = db.Column(db.Integer, nullable=False)
+    HDR_student_permission = db.Column(db.Boolean, nullable=False)
+    CSE_staff_permission = db.Column(db.Boolean, nullable=False)
+
+
