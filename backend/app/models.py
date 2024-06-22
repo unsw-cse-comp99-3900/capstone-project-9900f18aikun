@@ -37,7 +37,7 @@ class CSEStaff(db.Model):
 class RoomDetail(db.Model):
     __tablename__ = "RoomDetail"
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    building = db.Column(db.String(128), primary_key=True)
+    building = db.Column(db.String(128), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     level = db.Column(db.String(128), nullable=False)
     capacity = db.Column(db.Integer, nullable=False)

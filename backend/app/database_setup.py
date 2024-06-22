@@ -1,6 +1,6 @@
 from .database import db
 import pandas as pd
-from .models import HDRStudent, CSEStaff, Users
+from .models import HDRStudent, CSEStaff, Users, RoomDetail
 import numpy as np
 
 
@@ -10,18 +10,15 @@ def set_up_database():
     student_sheet = pd.read_excel(file_path, sheet_name='HDR students')
     staff_sheet = pd.read_excel(file_path, sheet_name='CSE staff')
 
-
     # replace NA letter and empty to np.nan
     student_sheet.replace({'NA': np.nan, '': np.nan}, inplace=True)
     staff_sheet.replace({'NA': np.nan, '': np.nan}, inplace=True)
-
 
     # drop useless column
     student_sheet = student_sheet.drop('No', axis=1)
     student_sheet = student_sheet.drop('Test', axis=1)
     staff_sheet = staff_sheet.drop('No', axis=1)
     staff_sheet = staff_sheet.drop('Test', axis=1)
-
 
     # rename columns
     student_sheet.rename(columns={'Candidate zID': 'zid',
@@ -91,22 +88,39 @@ def set_up_database():
 
     db.session.commit()
 
-    # room information update
+    # room information update, excel start from line 3
     file_path = "data/Meeting Rooms CSE K17 and J17 L5.xlsx"
-    room_detail_sheet = pd.read_excel(file_path)
-    print(room_detail_sheet)
+    room_detail_sheet = pd.read_excel(file_path, header=2)
 
     # replace empty
-    room_detail_sheet.replace({'NA': np.nan, '': np.nan}, inplace=True)
 
-
-
+    # get the accessibility
+    room_detail_sheet['HDR_student_permission'] = room_detail_sheet['Who can use it?'].str.contains(r'HDR students',
+                                                                                                    case=False)
+    room_detail_sheet['CSE_staff_permission'] = room_detail_sheet['Who can use it?'].str.contains(r'CSE staff',
+                                                                                                  case=False)
+    room_detail_sheet = room_detail_sheet.drop('Who can use it?', axis=1)
 
     # rename
-    student_sheet.rename(columns={'No': 'id',
-                                  'Building': 'building',
-                                  'Room No': 'name',
-                                  'Level': 'level',
-                                  'Capacity': 'capacity',
-                                  }, inplace=True)
+    room_detail_sheet.rename(columns={'No': 'id',
+                                      'Building': 'building',
+                                      'Room No': 'name',
+                                      'Level': 'level',
+                                      'Capacity': 'capacity',
+                                      }, inplace=True)
+    print(room_detail_sheet)
 
+    for index, row in room_detail_sheet.iterrows():
+        if not db.session.get(RoomDetail, row['id']):
+            print(1);
+            staff = RoomDetail(
+                id=row['id'],
+                building=row['building'],
+                name=row['name'],
+                level=row['level'],
+                capacity=row['capacity'],
+                HDR_student_permission=row['HDR_student_permission'],
+                CSE_staff_permission=row['CSE_staff_permission']
+            )
+            db.session.add(staff)
+    db.session.commit()
