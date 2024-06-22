@@ -12,7 +12,7 @@ class Users(db.Model):
 
 class HDRStudent(db.Model):
     __tablename__ = "HDR_students"
-    zid = db.Column(db.String(128), primary_key=True, unique=True, nullable=False)
+    zid = db.Column(db.String(128), db.ForeignKey('users.zid'), primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False, unique=True)
     faculty_name = db.Column(db.String(256), nullable=False)
@@ -24,7 +24,7 @@ class HDRStudent(db.Model):
 
 class CSEStaff(db.Model):
     __tablename__ = "CSE_staff"
-    zid = db.Column(db.String(128), primary_key=True, unique=True, nullable=False)
+    zid = db.Column(db.String(128), db.ForeignKey('users.zid'), primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False, unique=True)
     faculty_name = db.Column(db.String(256), nullable=False)

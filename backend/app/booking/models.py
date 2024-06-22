@@ -15,7 +15,7 @@ class Space(db.Model):
 
 class RoomDetail(db.Model):
     __tablename__ = "room_detail"
-    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+    id = db.Column(db.Integer, db.ForeignKey('space.id'), primary_key=True, unique=True, nullable=False)
     building = db.Column(db.String(128), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     level = db.Column(db.String(128), nullable=False)

@@ -93,8 +93,6 @@ def set_up_database():
     file_path = "data/Meeting Rooms CSE K17 and J17 L5.xlsx"
     room_detail_sheet = pd.read_excel(file_path, header=2)
 
-    # replace empty
-
     # get the accessibility
     room_detail_sheet['HDR_student_permission'] = room_detail_sheet['Who can use it?'].str.contains(r'HDR students',
                                                                                                     case=False)
@@ -109,7 +107,6 @@ def set_up_database():
                                       'Level': 'level',
                                       'Capacity': 'capacity',
                                       }, inplace=True)
-    print(room_detail_sheet)
 
 
     for index, row in room_detail_sheet.iterrows():
