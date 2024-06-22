@@ -5,6 +5,10 @@ import './Table.css';
 import axios from 'axios'
 import { Button } from '@mui/material';
 // backup classroom, update when backend connected
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import dayjs from 'dayjs';
 const classroom = ['301 A', '301 B', '301 C', '302', '303'];
 
 let selfReservation = [
@@ -57,6 +61,7 @@ const getTime = async () => {
   return times;
 }
 
+// dropdown list function
 const SelectWindow = ({ visible, time, room, position, close, self }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   if (!visible) return null;
@@ -124,6 +129,18 @@ let reservations = [
 const Table = () => {
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({ visible: false, time: '10:00 AM', room: '302', position: { top: 0, left: 0 }, self: selfReservation });
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+
+
+  const toggleCalendarVisibility = () => {
+    setIsCalendarVisible(!isCalendarVisible);
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setIsCalendarVisible(false);
+  };
 
   useEffect(() => {
     const fetchTimes = async () => {
@@ -150,8 +167,29 @@ const Table = () => {
     setSelectWindow({ ...selectWindow, visible: false });
   };
 
+  const disableDates = (date) => {
+    const today = dayjs();
+    const sevenDaysFromNow = today.add(7, 'day');
+    return date.isBefore(today, 'day') || date.isAfter(sevenDaysFromNow, 'day');
+  };
+
   return (
     <div className="table-container">
+      <div className="calendar-container">
+        <Button onClick={toggleCalendarVisibility} variant="contained" color="info">
+          {isCalendarVisible ? 'Hide Calendar' : 'Go to Date'}
+        </Button>
+        {isCalendarVisible && (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateCalendar shouldDisableDate={disableDates} className="date-calendar-overlay" onChange={handleDateChange}
+            />
+          </LocalizationProvider>
+        )}
+        <div>
+          <strong>Chosen Date: </strong>{selectedDate.format('dddd, MMMM D, YYYY')}
+        </div>
+      </div>
+
       <div className="table-wrapper">
         <table id="mytable">
           <thead>

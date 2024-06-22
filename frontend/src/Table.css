@@ -1,7 +1,99 @@
 .table-container {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin-top: 20px;
+  position: relative;
+}
+
+.calendar-container {
+  position: relative;
+  z-index: 10;
+  margin-bottom: 10px;
+}
+
+.date-calendar-overlay {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  z-index: 20;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table wrapper styling */
+.table-wrapper {
+  overflow-x: scroll;
+  max-width: 780px;
+}
+
+table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #d3a6d4;
+  color: black;
+}
+
+/* Color coding for table cells */
+td.reserved {
+  background-color: #b9b9b9;
+}
+
+td:not(.reserved) {
+  background-color: #fce8a3;
+}
+td:not(.reserved):hover {
+  background-color: #fac833;
+  cursor: pointer;
+}
+
+thead tr th:first-child,
+tbody tr td.room-column {
+  background-color: white;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.time-column {
+  min-width: 50px;
+  max-width: 50px;
+}
+
+.room-column {
+  min-width: 50px;
+  max-width: 50px;
+}
+
+.select-window {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.button-class {
+  display: flex;
+  justify-content: space-between;
+}.table-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  position: relative;
 }
 
 .table-wrapper {
@@ -38,6 +130,7 @@ td.selfreserved {
 td:not(.reserved):not(.selfreserved) {
   background-color: #fce8a3;
 }
+
 td:not(.reserved):not(.selfreserved):hover {
   background-color: #fac833;
   cursor: pointer;
@@ -73,4 +166,31 @@ tbody tr td.room-column {
 .button-class {
   display: flex;
   justify-content: space-between;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  height: 12px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .table-container, .table-wrapper {
+    width: 100%;
+  }
+
+  th, td {
+    font-size: 0.9em;
+  }
 }
