@@ -1,6 +1,7 @@
 from .database import db
 import pandas as pd
-from .models import HDRStudent, CSEStaff, Users, RoomDetail
+from .models import HDRStudent, CSEStaff, Users
+from app.booking.models import RoomDetail, Space
 import numpy as np
 
 
@@ -110,11 +111,17 @@ def set_up_database():
                                       }, inplace=True)
     print(room_detail_sheet)
 
+
     for index, row in room_detail_sheet.iterrows():
-        if not db.session.get(RoomDetail, row['id']):
-            print(1);
-            staff = RoomDetail(
-                id=row['id'],
+        space = Space(
+            space_type='Room'
+        )
+        db.session.add(space)
+        db.session.commit()
+
+        if not db.session.get(RoomDetail, space.id):
+            room_detail = RoomDetail(
+                id=space.id,
                 building=row['building'],
                 name=row['name'],
                 level=row['level'],
@@ -122,5 +129,6 @@ def set_up_database():
                 HDR_student_permission=row['HDR_student_permission'],
                 CSE_staff_permission=row['CSE_staff_permission']
             )
-            db.session.add(staff)
+            db.session.add(room_detail)
+
     db.session.commit()

@@ -35,6 +35,7 @@ class UserLogin(Resource):
 
 @auth_ns.route('/auto-login')
 class AutoLogin(Resource):
+    @auth_ns.doc(security='Bearer Auth')
     @auth_ns.response(200, "Success")
     @auth_ns.response(400, "Bad Request")
     @auth_ns.response(404, "Not Found")
