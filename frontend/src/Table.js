@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 // import ReactDOM from 'react-dom';
 // import { createRoot } from 'react-dom/client';
 import './Table.css';
+import axios from 'axios'
+import { Button } from '@mui/material';
 // backup classroom, update when backend connected
 const classroom = ['301 A', '301 B', '301 C', '302', '303'];
 
 let selfReservation = [
-  { room: '303', time: ['02:00 PM'] },
+  { room: '303', time: ['02:00 PM, 06/22/2024'] },
 ];
 
 // const times = [
@@ -15,10 +17,22 @@ let selfReservation = [
 //   '4:00 pm', '5:00 pm', '6:00 pm', '7:00 pm', '8:00 pm', '9:00 pm', '10:00 pm', '11:00 pm'
 // ];
 
+
+// get sydney time
+const getSydneyTime = async () => {
+  try {
+    const response = await axios.get('http://worldtimeapi.org/api/timezone/Australia/Sydney');
+    const datetime = new Date(response.data.datetime);
+    return datetime;
+  } catch (error) {
+    console.error('Error fetching Sydney time:', error);
+    return new Date(); // Fallback to local time in case of error
+  }
+};
 // function to get time
-const getTime = () => {
+const getTime = async () => {
   const times = [];
-  const cur = new Date();
+  const cur = await getSydneyTime();
   const minutes = cur.getMinutes();
 
   // show whole hour before 15 or after 45, otherwise show half an hour
@@ -57,6 +71,7 @@ const SelectWindow = ({ visible, time, room, position, close, self }) => {
     const [hour, minute, period] = time.match(/(\d+):(\d+) (AM|PM)/).slice(1);
     const baseTime = new Date();
     baseTime.setHours(hour % 12 + (period === 'PM' ? 12 : 0), minute, 0, 0);
+    // baseTime.setHours(hour % 12 + (period === 'PM' ? 12 : 0), minute, 0, 0);
 
     for (let i = 1; i <= idx; i++) {
       baseTime.setMinutes(baseTime.getMinutes() + 30);
@@ -85,8 +100,8 @@ const SelectWindow = ({ visible, time, room, position, close, self }) => {
   return (
     <div className="select-window" style={style}>
       <div>
-        <strong>{room}</strong>: {time} until... 
-        <select id="dropdown" onChange={(e) => setSelectedIdx(e.target.selectedIndex)}>
+      <strong>{room}</strong>: {time} until...
+      <select id="dropdown" onChange={(e) => setSelectedIdx(e.target.selectedIndex)}>
           {dropdownTime.map((time, idx) => (
             <option key={idx} value={idx}>{time}</option>
           ))}
@@ -94,8 +109,8 @@ const SelectWindow = ({ visible, time, room, position, close, self }) => {
       </div>
       <br />
       <div className="button-class">
-        <button onClick={confirmHandler}>Confirm</button>
-        <button onClick={close}>Close</button>
+        <Button onClick={confirmHandler}>Confirm</Button>
+        <Button onClick={close}>Close</Button>
       </div>
       
     </div>
@@ -107,12 +122,20 @@ let reservations = [
 ];
 
 const Table = () => {
-  const [times, setTimes] = useState(getTime());
+  const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({ visible: false, time: '10:00 AM', room: '302', position: { top: 0, left: 0 }, self: selfReservation });
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimes(getTime());
+    const fetchTimes = async () => {
+      const newTimes = await getTime();
+      setTimes(newTimes);
+    };
+
+    fetchTimes();
+
+    const timer = setInterval(async () => {
+      const newTimes = await getTime();
+      setTimes(newTimes);
     }, 60000);
     return () => clearInterval(timer);
   }, []);
@@ -166,7 +189,7 @@ const Table = () => {
           </tbody>
         </table>
       </div>
-      <SelectWindow visible={selectWindow.visible} room={selectWindow.room} position={selectWindow.position} close = {hideSelectWindow} time = {selectWindow.time} self={selfReservation}/>
+      <SelectWindow visible={selectWindow.visible} room={selectWindow.room} position={selectWindow.position} close={hideSelectWindow} time={selectWindow.time} self={selfReservation} />
     </div>
   );
 };
