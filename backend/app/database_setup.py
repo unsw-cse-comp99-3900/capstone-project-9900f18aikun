@@ -115,8 +115,15 @@ def set_up_database():
         )
         db.session.add(space)
         db.session.commit()
+        # check db whether exist
+        exists = db.session.query(
+            db.exists().where(
+                RoomDetail.building == row['building'],
+                RoomDetail.name == str(row['name'])
+            )
+        ).scalar()
 
-        if not db.session.get(RoomDetail, space.id):
+        if not exists:
             room_detail = RoomDetail(
                 id=space.id,
                 building=row['building'],

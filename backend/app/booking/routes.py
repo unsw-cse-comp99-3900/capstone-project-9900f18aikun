@@ -1,11 +1,13 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.database import db
-from .models import Booking
+from .models import Booking, RoomDetail
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
+from app.utils import start_end_time_convert
 
 booking_ns = Namespace('booking', description='Booking operations')
 
+# booking room model
 booking_model = booking_ns.model('Booking request', {
     'room_id': fields.Integer(required=True, description='The room id'),
     'date': fields.Date(required=True, description='Date of the booking'),
@@ -13,8 +15,11 @@ booking_model = booking_ns.model('Booking request', {
     'end_time': fields.String(required=True, description='End time of the booking (HH:MM)')
 })
 
+# TODO: long term booking
+# Apis about booking
 @booking_ns.route('/book')
 class BookSpace(Resource):
+    # Book a room
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Book a space")
@@ -53,3 +58,55 @@ class BookSpace(Resource):
         db.session.commit()
 
         return {'message': 'Booking confirmed'}, 200
+
+
+date_query = booking_ns.parser()
+date_query.add_argument('date', type=str, required=True, help='Date to request')
+
+
+# Apis about meeting room
+@booking_ns.route('/meetingroom')
+class BookSpace(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.doc(description="Get meeting room time list")
+    @booking_ns.expect(date_query)
+    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        date = request.args.get('date')
+
+        # define output list
+        output = {}
+
+        rooms = RoomDetail.query.all()
+        for room in rooms:
+            output[room.id] = {
+                "name": room.name,
+                "building": room.building,
+                "level": room.level,
+                "capacity": room.capacity,
+                "HDR_student_permission": room.HDR_student_permission,
+                "CSE_staff_permission": room.CSE_staff_permission,
+                "time_table":  [[] for _ in range(48)]
+            }
+
+        for key, value in output.items():
+            bookings = Booking.query.filter(
+                Booking.date == date,
+                Booking.room_id == key,
+            ).all()
+            for booking in bookings:
+                start_index, end_index = start_end_time_convert(booking.start_time,booking.end_time)
+                print(f"{start_index}, {end_index}")
+                for index in range(start_index, end_index):
+                    value["time_table"][index] = {
+                        "id": booking.id,
+                        "current_user_booking": True if booking.user_id == user_zid else False
+                    }
+
+        return output, 200

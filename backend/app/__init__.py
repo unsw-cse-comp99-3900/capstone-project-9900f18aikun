@@ -14,7 +14,8 @@ authorizations = {
     }
 }
 
-api = Api(authorizations=authorizations, security='Bearer Auth', version='1.0', title='My API', description='A simple API')
+api = Api(authorizations=authorizations, security='Bearer Auth', version='1.0', title='UNSW CSE booking system',
+          description='An api helping you book space in j17 and k17')
 
 def create_app():
     app = Flask(__name__)
