@@ -2,17 +2,36 @@ import React, { useEffect, useState } from 'react';
 // import ReactDOM from 'react-dom';
 // import { createRoot } from 'react-dom/client';
 import './Table.css';
-import axios from 'axios'
+import axios from 'axios';
 import { Button } from '@mui/material';
 // backup classroom, update when backend connected
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import dayjs from 'dayjs';
+
 const classroom = ['301 A', '301 B', '301 C', '302', '303'];
 
+// let selfReservation = [
+//   { room: '303', time: ['02:00 PM, 06/22/2024'] },
+// ];
+
 let selfReservation = [
-  { room: '303', time: ['02:00 PM, 06/22/2024'] },
+  { room: '303', time: 
+    [{
+      date: '06/24/2024',
+      timeslot: ['02:00 PM', '04:00 PM']
+    }]
+  },
+];
+
+let reservations = [
+  {
+    room: '302',
+    time: [
+      { date: '06/24/2024', timeslot: ['02:00 PM', '03:00 PM'] }
+    ]
+  }
 ];
 
 // const times = [
@@ -33,6 +52,7 @@ const getSydneyTime = async () => {
     return new Date(); // Fallback to local time in case of error
   }
 };
+
 // function to get time
 const getTime = async () => {
   const times = [];
@@ -59,10 +79,10 @@ const getTime = async () => {
   }
 
   return times;
-}
+};
 
 // dropdown list function
-const SelectWindow = ({ visible, time, room, position, close, self }) => {
+const SelectWindow = ({ visible, time, room, position, close, self, selectedDate }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   if (!visible) return null;
 
@@ -91,16 +111,36 @@ const SelectWindow = ({ visible, time, room, position, close, self }) => {
   const confirmHandler = () => {
     const newTimes = gettimeList(time, selectedIdx);
     newTimes.push(time);
+  
     const existing = self.find(reservation => reservation.room === room);
     if (existing) {
-      existing.time.push(...newTimes)
+      const existingDate = existing.time.find(date => date.date === selectedDate.format('DD/MM/YYYY'));
+      if (existingDate) {
+        existingDate.timeslot.push(...newTimes);
+      } else {
+        existing.time.push({ date: selectedDate.format('DD/MM/YYYY'), timeslot: newTimes });
+      }
     } else {
-      self.push({room, time: newTimes})
+      self.push({ room, time: [{ date: selectedDate.format('DD/MM/YYYY'), timeslot: newTimes }] });
     }
-    console.log(newTimes);
     console.log(self);
     close();
   };
+  
+
+  // const confirmHandler = () => {
+  //   const newTimes = gettimeList(time, selectedIdx);
+  //   newTimes.push(time);
+  //   const existing = self.find(reservation => reservation.room === room);
+  //   if (existing) {
+  //     existing.time.push(...newTimes)
+  //   } else {
+  //     self.push({room, time: newTimes})
+  //   }
+  //   console.log(newTimes);
+  //   console.log(self);
+  //   close();
+  // };
 
   return (
     <div className="select-window" style={style}>
@@ -122,9 +162,6 @@ const SelectWindow = ({ visible, time, room, position, close, self }) => {
   );
 }
 
-let reservations = [
-  { room: '302', time: ['02:00 PM', '03:00 PM'] },
-];
 
 const Table = () => {
   const [times, setTimes] = useState([]);
@@ -158,6 +195,11 @@ const Table = () => {
   }, []);
 
   const clickHandler = (room, time, event) => {
+    const target = event.target;
+    if (target.classList.contains('reserved')) {
+      return;
+    }
+
     console.log(`Room: ${room}, Time: ${time}`);
     const position = { top: event.clientY + 10, left: event.clientX + 10 };
     setSelectWindow({ visible: true, room, time, position, self: selfReservation });
@@ -181,8 +223,7 @@ const Table = () => {
         </Button>
         {isCalendarVisible && (
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar shouldDisableDate={disableDates} className="date-calendar-overlay" onChange={handleDateChange}
-            />
+            <DateCalendar shouldDisableDate={disableDates} className="date-calendar-overlay" onChange={handleDateChange} />
           </LocalizationProvider>
         )}
         <div>
@@ -206,14 +247,24 @@ const Table = () => {
               <tr key={room}>
                 <td className="room-column">{room}</td>
                 {times.map(time => {
+
                   const isReserved = reservations.some(
-                    reservation => reservation.room === room && reservation.time.includes(time)
+                    reservation => reservation.room === room && reservation.time.some(slot => slot.date === selectedDate.format('MM/DD/YYYY') && slot.timeslot.includes(time))
                   );
+
                   const isSelfReserved = selfReservation.some(
-                    reservation => reservation.room === room && reservation.time.includes(time)
+                    reservation => reservation.room === room && reservation.time.some(slot => slot.date === selectedDate.format('MM/DD/YYYY') && slot.timeslot.includes(time))
                   );
+
+                  // const isReserved = reservations.some(
+                  //   reservation => reservation.room === room && reservation.time.includes(time)
+                  // );
+                  // const isSelfReserved = selfReservation.some(
+                  //   reservation => reservation.room === room && reservation.time.includes(time)
+                  // );
                   return (
-                    <td key={time}
+                    <td
+                    key={time}
                     className={`time-column ${isReserved ? 'reserved' : (isSelfReserved ? 'selfreserved' : '')}`}
                     onClick={(event) => {
                       event.stopPropagation(); // Prevent triggering the hideSelectWindow
@@ -227,7 +278,7 @@ const Table = () => {
           </tbody>
         </table>
       </div>
-      <SelectWindow visible={selectWindow.visible} room={selectWindow.room} position={selectWindow.position} close={hideSelectWindow} time={selectWindow.time} self={selfReservation} />
+      <SelectWindow visible={selectWindow.visible} room={selectWindow.room} position={selectWindow.position} close={hideSelectWindow} time={selectWindow.time} self={selfReservation} selectedDate={selectedDate}/>
     </div>
   );
 };
