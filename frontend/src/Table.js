@@ -62,7 +62,7 @@ const getTime = async (selectedDate) => {
   const curDate = dayjs(cur);
 
   // if today, only show available time
-  if (selectedDate.isSame(curDate, 'day')) {
+  if (selectedDate.isSame(curDate, "day")) {
     const minutes = cur.getMinutes();
 
     // show whole hour before 15 or after 45, otherwise show half an hour
@@ -90,7 +90,7 @@ const getTime = async (selectedDate) => {
       }
     }
 
-  // if other days, show all time
+    // if other days, show all time
   } else {
     const date = new Date(selectedDate.format("YYYY-MM-DD"));
     date.setHours(0, 0, 0, 0);
@@ -119,6 +119,7 @@ const SelectWindow = ({
   selectedDate,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [limit, setLimit] = useState(false);
   if (!visible) return null;
 
   const style = {
@@ -153,6 +154,22 @@ const SelectWindow = ({
   const confirmHandler = () => {
     const newTimes = gettimeList(time, selectedIdx);
     newTimes.push(time);
+    console.log(newTimes)
+    // Total booked hours calculation
+    const totalBooked = self.reduce((total, reservation) => {
+      reservation.time.forEach((slot) => {
+        if (slot.date === selectedDate.format("DD/MM/YYYY")) {
+          total += slot.timeslot.length;
+        }
+      });
+      return total;
+    }, 0);
+    console.log(self)
+    console.log(totalBooked)
+    if (totalBooked + newTimes.length > 16) {
+      setLimit(true);
+      return;
+    }
 
     // if already has reservation for this day
     const existing = self.find((reservation) => reservation.room === room);
@@ -168,7 +185,7 @@ const SelectWindow = ({
           timeslot: newTimes,
         });
       }
-    // if no reservation for this day
+      // if no reservation for this day
     } else {
       self.push({
         room,
@@ -181,24 +198,48 @@ const SelectWindow = ({
 
   return (
     <div className="select-window" style={style}>
-      <div>
-        <strong>{room}</strong>: {time} until...
-        <select
-          id="dropdown"
-          onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
+      {limit ? (
+        <div
+          style={{
+            style
+          }}
         >
-          {dropdownTime.map((time, idx) => (
-            <option key={idx} value={idx}>
-              {time}
-            </option>
-          ))}
-        </select>
-      </div>
-      <br />
-      <div className="button-class">
-        <Button onClick={confirmHandler}>Confirm</Button>
-        <Button onClick={close}>Close</Button>
-      </div>
+          <p>
+            Booking limit exceeded for the day. You cannot book more than 8
+            hours for one day.
+          </p>
+          <Button
+            onClick={() => {
+              setLimit(false);
+              setSelectedIdx(1);
+              close();
+            }}
+          >
+            Close
+          </Button>
+        </div>
+      ) : (
+        <>
+          <div>
+            <strong>{room}</strong>: {time} until...
+            <select
+              id="dropdown"
+              onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
+            >
+              {dropdownTime.map((time, idx) => (
+                <option key={idx} value={idx}>
+                  {time}
+                </option>
+              ))}
+            </select>
+          </div>
+          <br />
+          <div className="button-class">
+            <Button onClick={confirmHandler}>Confirm</Button>
+            <Button onClick={close}>Close</Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -310,7 +351,6 @@ const Table = () => {
               <tr key={room}>
                 <td className="room-column">{room}</td>
                 {times.map((time) => {
-
                   // define reserved class
                   const isReserved = reservations.some(
                     (reservation) =>
