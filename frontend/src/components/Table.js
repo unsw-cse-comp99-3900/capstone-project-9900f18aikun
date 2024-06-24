@@ -10,7 +10,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 
-const classroom = ["301 A", "301 B", "301 C", "302", "303"];
+// const classroom = ["301 A", "301 B", "301 C", "302", "303"];
 
 let selfReservation = [
   {
@@ -28,12 +28,14 @@ let selfReservation = [
   },
 ];
 
-let reservations = [
-  {
-    room: "302",
-    time: [{ date: "24/06/2024", timeslot: ["14:00", "15:00"] }],
-  },
-];
+// let reservations = [
+//   {
+//     room: "302",
+//     time: [
+//       { date: "25/06/2024", timeslot: ["1:00", "15:00", "16:30", "17:00"] },
+//     ],
+//   },
+// ];
 
 // const times = [
 //   '12:00 am', '1:00 am', '2:00 am', '3:00 am', '4:00 am', '5:00 am', '6:00 am', '7:00 am',
@@ -118,6 +120,7 @@ const SelectWindow = ({
   close,
   self,
   selectedDate,
+  reservations,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
@@ -128,32 +131,45 @@ const SelectWindow = ({
     left: position.left,
   };
 
+  // already reserved time
+  const reserved = [...reservations, ...self]
+    .filter((reservation) => reservation.room === room)
+    .flatMap((reservation) =>
+      reservation.time
+        .filter((slot) => slot.date === selectedDate.format("DD/MM/YYYY"))
+        .flatMap((slot) => slot.timeslot)
+    );
+
   // get next x hours
-  const gettimeList = (time, idx) => {
+  const gettimeList = (time, idx, reserved) => {
     const times = [];
     const [hour, minute] = time.split(":").map(Number);
     const baseTime = new Date();
     baseTime.setHours(hour, minute, 0, 0);
 
-    for (let i = 1; i <= idx; i++) {
+    for (let i = 0; i <= idx; i++) {
+      const time = baseTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      // stop if meets a already reserved spot
+      if (reserved.includes(time)) {
+        break;
+      }
+      times.push(time);
       baseTime.setMinutes(baseTime.getMinutes() + 30);
-      times.push(
-        baseTime.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
     }
 
     return times;
   };
 
-  const dropdownTime = gettimeList(time, 8);
+  const dropdownTime = gettimeList(time, 8, reserved);
 
   // confirm selection function
   const confirmHandler = () => {
-    const newTimes = gettimeList(time, selectedIdx);
+    const newTimes = gettimeList(time, selectedIdx, reserved);
     newTimes.push(time);
     // Total booked hours calculation
     const totalBooked = self.reduce((total, reservation) => {
@@ -219,11 +235,22 @@ const SelectWindow = ({
               id="dropdown"
               onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
             >
-              {dropdownTime.map((time, idx) => (
-                <option key={idx} value={idx}>
-                  {time}
-                </option>
-              ))}
+              {dropdownTime.map((time, idx) => {
+                const [hour, minute] = time.split(":").map(Number);
+                let endTime = new Date();
+                endTime.setHours(hour, minute + 30, 0, 0);
+                endTime = endTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                });
+                return (
+                  <option key={idx} value={idx}>
+                    {endTime}
+                  </option>
+                );
+              })}
+              ;
             </select>
           </div>
           <br />
@@ -238,7 +265,37 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = () => {
+const Table = ({ data }) => {
+  const [reservations, setReservations] = useState([]);
+
+  useEffect(() => {
+    const reserved = extractData(data);
+    setReservations(reserved);
+    console.log("Filtered Data:", reserved);
+  }, [data]);
+
+
+  const extractData = (data) => {
+    return data.map((item) => ({
+      room: item.name,
+      time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: extractTime(item.time_table) }],
+    }));
+  };
+
+  const extractTime = (timeTable) => {
+    const timeslots = [];
+    // Assuming timetable splitted by half an hour
+    timeTable.forEach((slot, index) => {
+      if (Array.isArray(slot) && slot.length > 0) {
+        const hour = Math.floor(index / 2);
+        const minute = index % 2 === 0 ? "00" : "30";
+        const time = `${hour.toString().padStart(2, "0")}:${minute}`;
+        timeslots.push(time);
+      }
+    });
+    return timeslots;
+  };
+
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
@@ -277,7 +334,10 @@ const Table = () => {
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event) => {
     const target = event.target;
-    if (target.classList.contains("reserved")) {
+    if (
+      target.classList.contains("reserved") ||
+      target.classList.contains("selfreserved")
+    ) {
       return;
     }
 
@@ -300,6 +360,8 @@ const Table = () => {
     const sevenDaysFromNow = today.add(7, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
+
+  const classroom = reservations.map(item => item.room)
 
   return (
     <div className="table-container">
@@ -396,6 +458,7 @@ const Table = () => {
         time={selectWindow.time}
         self={selectWindow.self}
         selectedDate={selectedDate}
+        reservations={reservations}
       />
     </div>
   );
