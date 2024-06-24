@@ -1,51 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from './components/Table';
 import Filter from './components/filter';
+import './App.css'; // 引入CSS文件
 
+function App() {
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [filters, setFilters] = useState({
+    level: '',
+    capacity: '',
+    category: 'meetingroom'
+  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // 控制侧边栏的状态
 
-const data = {
-    "3": {"name": "CSE Basement", "building": "K17", "level": "LG", "capacity": 100, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], {"id": 1, "current_user_booking": true}, [], [], []]},
-    "4": {"name": "CSE Basement Board Room", "building": "K17", "level": "LG", "capacity": 12, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "5": {"name": "G01", "building": "K17", "level": "G", "capacity": 3, "HDR_student_permission": true, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "6": {"name": "G02", "building": "K17", "level": "G", "capacity": 3, "HDR_student_permission": true, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "12": {"name": "103", "building": "K17", "level": "1", "capacity": 8, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "13": {"name": "113", "building": "K17", "level": "1", "capacity": 90, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "14": {"name": "201-B", "building": "K17", "level": "2", "capacity": 14, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "15": {"name": "302", "building": "K17", "level": "3", "capacity": 15, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "16": {"name": "401 K", "building": "K17", "level": "4", "capacity": 15, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "17": {"name": "402", "building": "K17", "level": "4", "capacity": 5, "HDR_student_permission": true, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "18": {"name": "403", "building": "K17", "level": "4", "capacity": 5, "HDR_student_permission": true, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "19": {"name": "501M", "building": "K17", "level": "5", "capacity": 15, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "20": {"name": "508", "building": "K17", "level": "5", "capacity": 6, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]},
-    "21": {"name": "Design Next Studio", "building": "J17", "level": "5", "capacity": 110, "HDR_student_permission": false, "CSE_staff_permission": true, "time_table": [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]}
+  const fetchBookingData = async () => {
+    try {
+      const response = await fetch('/api/booking/meetingroom?date=2024-07-01', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTExNTc5OSwianRpIjoiYzA5Y2IwZTEtYzFjYS00ZDY4LTg5NTAtMTI2MGQ4NzIwMGEyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6MTEzMzAifSwibmJmIjoxNzE5MTE1Nzk5LCJjc3JmIjoiZjlmMGI0YmItMTgwYi00ZDllLThlNGYtN2I4MTk4OWNhMzllIiwiZXhwIjo3NzE5MTE1NzM5fQ.ZU768uMtq-LuJZYOjznoIb3zNha0XDvQu7JH8AYls1w'
+        }
+      });
+      const text = await response.text();
+      const bookingData = JSON.parse(text);
+      const dataArray = Object.values(bookingData);
+      setData(dataArray);
+      setFilteredData(dataArray);
+    } catch (error) {
+      console.error('Error fetching booking data:', error);
+    }
   };
 
+  const handleFilter = (filters) => {
+    const newFilteredData = data.filter((item) => {
+      return (
+        (filters.level === '' || item.level === filters.level) &&
+        (filters.capacity === '' || item.capacity >= filters.capacity) &&
+        (filters.category === '' || filters.category === 'meetingroom')
+      );
+    });
+    setFilteredData(newFilteredData);
+    setFilters(filters);
+  };
 
-  function App() {
-    const [filteredData, setFilteredData] = useState(Object.values(data));
-  
-    const handleFilter = (filters) => {
-      const newFilteredData = Object.values(data).filter((item) => {
-        return (
-          (filters.level === '' || item.level === filters.level) &&
-          (filters.capacity === '' || item.capacity >= filters.capacity) &&
-          (filters.category === '' || filters.category === 'meetingroom')
-        );
-      });
-      setFilteredData(newFilteredData);
-    };
-  
-    return (
-      <div style={{ display: 'flex' }}>
-        <div style={{ width: '200px', marginRight: '20px' }}>
-          <Filter onFilter={handleFilter} />
-          {console.log(filteredData)}
-        </div>
-        <div>
-          <Table data={filteredData} />
-        </div>
+  useEffect(() => {
+    fetchBookingData();
+  }, []);
+
+  useEffect(() => {
+    handleFilter(filters);
+  }, [filters, data]);
+  //输出筛选后的数据到控制台
+  useEffect(() => {
+    console.log(filteredData);
+  }, [filteredData]);
+
+  return (
+    <div className="app">
+      <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+        <button className="toggle-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          {isSidebarOpen ? '<<' : '>>'}
+        </button>
+        {isSidebarOpen && <Filter onFilter={handleFilter} />}
       </div>
-    );
-  }
-  
-  export default App;
+      <div className="content">
+        <Table data={filteredData} />
+      </div>
+    </div>
+  );
+}
+
+export default App;
