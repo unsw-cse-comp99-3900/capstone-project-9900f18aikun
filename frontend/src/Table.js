@@ -304,7 +304,7 @@ const Table = () => {
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event) => {
     const target = event.target;
-    if (target.classList.contains("reserved")) {
+    if (target.classList.contains("reserved") || target.classList.contains("selfreserved")){
       return;
     }
 
