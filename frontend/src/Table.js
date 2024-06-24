@@ -21,7 +21,11 @@ let selfReservation = [
     room: "303",
     time: [
       {
-        date: "06/24/2024",
+        date: "24/06/2024",
+        timeslot: ["02:00 PM", "04:00 PM"],
+      },
+      {
+        date: "25/06/2024",
         timeslot: ["02:00 PM", "04:00 PM"],
       },
     ],
@@ -31,7 +35,7 @@ let selfReservation = [
 let reservations = [
   {
     room: "302",
-    time: [{ date: "06/24/2024", timeslot: ["02:00 PM", "03:00 PM"] }],
+    time: [{ date: "24/06/2024", timeslot: ["02:00 PM", "03:00 PM"] }],
   },
 ];
 
@@ -56,36 +60,52 @@ const getSydneyTime = async () => {
 };
 
 // function to get time
-const getTime = async () => {
+const getTime = async (selectedDate) => {
   const times = [];
   const cur = await getSydneyTime();
-  const minutes = cur.getMinutes();
+  const curDate = dayjs(cur);
 
-  // show whole hour before 15 or after 45, otherwise show half an hour
-  if (minutes < 15) {
-    cur.setMinutes(0, 0, 0);
-  } else if (minutes < 45) {
-    cur.setMinutes(30, 0, 0);
+  if (selectedDate.isSame(curDate, 'day')) {
+    const minutes = cur.getMinutes();
+
+    // show whole hour before 15 or after 45, otherwise show half an hour
+    if (minutes < 15) {
+      cur.setMinutes(0, 0, 0);
+    } else if (minutes < 45) {
+      cur.setMinutes(30, 0, 0);
+    } else {
+      cur.setHours(cur.getHours() + 1);
+      cur.setMinutes(0, 0, 0);
+    }
+
+    // timeslot next 12 hours
+    for (let i = 0; i < 48; i++) {
+      times.push(
+        cur.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      );
+      cur.setMinutes(cur.getMinutes() + 30);
+      if (cur.getHours() === 0) {
+        break;
+      }
+    }
   } else {
-    cur.setHours(cur.getHours() + 1);
-    cur.setMinutes(0, 0, 0);
-  }
-
-  // timeslot next 12 hours
-  for (let i = 0; i < 48; i++) {
-    times.push(
-      cur.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })
-    );
-    cur.setMinutes(cur.getMinutes() + 30);
-    if (cur.getHours() === 0) {
-      break;
+    const date = new Date(selectedDate.format("YYYY-MM-DD"));
+    date.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 48; i++) {
+      times.push(
+        date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      );
+      date.setMinutes(date.getMinutes() + 30);
     }
   }
-
   return times;
 };
 
@@ -204,18 +224,18 @@ const Table = () => {
 
   useEffect(() => {
     const fetchTimes = async () => {
-      const newTimes = await getTime();
+      const newTimes = await getTime(selectedDate);
       setTimes(newTimes);
     };
 
     fetchTimes();
 
     const timer = setInterval(async () => {
-      const newTimes = await getTime();
+      const newTimes = await getTime(selectedDate);
       setTimes(newTimes);
     }, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [selectedDate]);
 
   const clickHandler = (room, time, event) => {
     const target = event.target;
@@ -335,7 +355,7 @@ const Table = () => {
         position={selectWindow.position}
         close={hideSelectWindow}
         time={selectWindow.time}
-        self={selfReservation}
+        self={selectWindow.self}
         selectedDate={selectedDate}
       />
     </div>
