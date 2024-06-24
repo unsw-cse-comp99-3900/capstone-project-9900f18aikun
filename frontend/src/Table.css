@@ -35,7 +35,8 @@ table {
   min-width: 100%;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -89,7 +90,8 @@ tbody tr td.room-column {
 .button-class {
   display: flex;
   justify-content: space-between;
-}.table-container {
+}
+.table-container {
   display: flex;
   justify-content: center;
   margin-top: 20px;
@@ -107,7 +109,8 @@ table {
   min-width: 100%;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -186,11 +189,13 @@ tbody tr td.room-column {
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .table-container, .table-wrapper {
+  .table-container,
+  .table-wrapper {
     width: 100%;
   }
 
-  th, td {
+  th,
+  td {
     font-size: 0.9em;
   }
 }
