@@ -12,10 +12,6 @@ import dayjs from "dayjs";
 
 const classroom = ["301 A", "301 B", "301 C", "302", "303"];
 
-// let selfReservation = [
-//   { room: '303', time: ['02:00 PM, 06/22/2024'] },
-// ];
-
 let selfReservation = [
   {
     room: "303",
@@ -59,12 +55,13 @@ const getSydneyTime = async () => {
   }
 };
 
-// function to get time
+// get time for table column
 const getTime = async (selectedDate) => {
   const times = [];
   const cur = await getSydneyTime();
   const curDate = dayjs(cur);
 
+  // if today, only show available time
   if (selectedDate.isSame(curDate, 'day')) {
     const minutes = cur.getMinutes();
 
@@ -92,6 +89,8 @@ const getTime = async (selectedDate) => {
         break;
       }
     }
+
+  // if other days, show all time
   } else {
     const date = new Date(selectedDate.format("YYYY-MM-DD"));
     date.setHours(0, 0, 0, 0);
@@ -127,12 +126,12 @@ const SelectWindow = ({
     left: position.left,
   };
 
+  // get next x hours
   const gettimeList = (time, idx) => {
     const times = [];
     const [hour, minute, period] = time.match(/(\d+):(\d+) (AM|PM)/).slice(1);
     const baseTime = new Date();
     baseTime.setHours((hour % 12) + (period === "PM" ? 12 : 0), minute, 0, 0);
-    // baseTime.setHours(hour % 12 + (period === 'PM' ? 12 : 0), minute, 0, 0);
 
     for (let i = 1; i <= idx; i++) {
       baseTime.setMinutes(baseTime.getMinutes() + 30);
@@ -150,10 +149,12 @@ const SelectWindow = ({
 
   const dropdownTime = gettimeList(time, 8);
 
+  // confirm selection function
   const confirmHandler = () => {
     const newTimes = gettimeList(time, selectedIdx);
     newTimes.push(time);
 
+    // if already has reservation for this day
     const existing = self.find((reservation) => reservation.room === room);
     if (existing) {
       const existingDate = existing.time.find(
@@ -167,6 +168,7 @@ const SelectWindow = ({
           timeslot: newTimes,
         });
       }
+    // if no reservation for this day
     } else {
       self.push({
         room,
@@ -201,6 +203,7 @@ const SelectWindow = ({
   );
 };
 
+// main table
 const Table = () => {
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
@@ -237,13 +240,13 @@ const Table = () => {
     return () => clearInterval(timer);
   }, [selectedDate]);
 
+  // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event) => {
     const target = event.target;
     if (target.classList.contains("reserved")) {
       return;
     }
 
-    console.log(`Room: ${room}, Time: ${time}`);
     const position = { top: event.clientY + 10, left: event.clientX + 10 };
     setSelectWindow({
       visible: true,
@@ -307,6 +310,8 @@ const Table = () => {
               <tr key={room}>
                 <td className="room-column">{room}</td>
                 {times.map((time) => {
+
+                  // define reserved class
                   const isReserved = reservations.some(
                     (reservation) =>
                       reservation.room === room &&
@@ -317,6 +322,7 @@ const Table = () => {
                       )
                   );
 
+                  // define reserved by current user class
                   const isSelfReserved = selfReservation.some(
                     (reservation) =>
                       reservation.room === room &&
