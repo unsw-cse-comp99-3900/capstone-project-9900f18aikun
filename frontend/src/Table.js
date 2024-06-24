@@ -31,7 +31,9 @@ let selfReservation = [
 let reservations = [
   {
     room: "302",
-    time: [{ date: "24/06/2024", timeslot: ["14:00", "15:00"] }],
+    time: [
+      { date: "25/06/2024", timeslot: ["1:00", "15:00", "16:30", "17:00"] },
+    ],
   },
 ];
 
@@ -128,32 +130,46 @@ const SelectWindow = ({
     left: position.left,
   };
 
+  // already reserved time
+  const reserved = reservations
+    .concat(self)
+    .filter((reservation) => reservation.room === room)
+    .flatMap((reservation) =>
+      reservation.time
+        .filter((slot) => slot.date === selectedDate.format("DD/MM/YYYY"))
+        .flatMap((slot) => slot.timeslot)
+    );
+
   // get next x hours
-  const gettimeList = (time, idx) => {
+  const gettimeList = (time, idx, reserved) => {
     const times = [];
     const [hour, minute] = time.split(":").map(Number);
     const baseTime = new Date();
     baseTime.setHours(hour, minute, 0, 0);
 
-    for (let i = 1; i <= idx; i++) {
+    for (let i = 0; i <= idx; i++) {
+      const time = baseTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      // stop if meets a already reserved spot
+      if (reserved.includes(time)) {
+        break;
+      }
+      times.push(time);
       baseTime.setMinutes(baseTime.getMinutes() + 30);
-      times.push(
-        baseTime.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
     }
 
     return times;
   };
 
-  const dropdownTime = gettimeList(time, 8);
+  const dropdownTime = gettimeList(time, 8, reserved);
 
   // confirm selection function
   const confirmHandler = () => {
-    const newTimes = gettimeList(time, selectedIdx);
+    const newTimes = gettimeList(time, selectedIdx, reserved);
     newTimes.push(time);
     // Total booked hours calculation
     const totalBooked = self.reduce((total, reservation) => {
@@ -219,11 +235,22 @@ const SelectWindow = ({
               id="dropdown"
               onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
             >
-              {dropdownTime.map((time, idx) => (
-                <option key={idx} value={idx}>
-                  {time}
-                </option>
-              ))}
+              {dropdownTime.map((time, idx) => {
+                const [hour, minute] = time.split(":").map(Number);
+                let endTime = new Date();
+                endTime.setHours(hour, minute + 30, 0, 0);
+                endTime = endTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                });
+                return (
+                  <option key={idx} value={idx}>
+                    {endTime}
+                  </option>
+                );
+              })}
+              ;
             </select>
           </div>
           <br />
