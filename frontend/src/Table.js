@@ -18,11 +18,11 @@ let selfReservation = [
     time: [
       {
         date: "24/06/2024",
-        timeslot: ["02:00 PM", "04:00 PM"],
+        timeslot: ["14:00", "16:00"],
       },
       {
         date: "25/06/2024",
-        timeslot: ["02:00 PM", "04:00 PM"],
+        timeslot: ["14:00", "16:00"],
       },
     ],
   },
@@ -31,7 +31,7 @@ let selfReservation = [
 let reservations = [
   {
     room: "302",
-    time: [{ date: "24/06/2024", timeslot: ["02:00 PM", "03:00 PM"] }],
+    time: [{ date: "24/06/2024", timeslot: ["14:00", "15:00"] }],
   },
 ];
 
@@ -43,15 +43,17 @@ let reservations = [
 
 // get sydney time
 const getSydneyTime = async () => {
-  try {
-    const response = await axios.get(
-      "http://worldtimeapi.org/api/timezone/Australia/Sydney"
-    );
-    const datetime = new Date(response.data.datetime);
-    return datetime;
-  } catch (error) {
-    console.error("Error fetching Sydney time:", error);
-    return new Date(); // Fallback to local time in case of error
+  while (true) {
+    try {
+      const response = await axios.get(
+        "http://worldtimeapi.org/api/timezone/Australia/Sydney"
+      );
+      const datetime = new Date(response.data.datetime);
+      return datetime;
+    } catch (error) {
+      console.error("Error fetching Sydney time:", error);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
   }
 };
 
@@ -59,10 +61,9 @@ const getSydneyTime = async () => {
 const getTime = async (selectedDate) => {
   const times = [];
   const cur = await getSydneyTime();
-  const curDate = dayjs(cur);
 
   // if today, only show available time
-  if (selectedDate.isSame(curDate, "day")) {
+  if (selectedDate.isSame(cur, "day")) {
     const minutes = cur.getMinutes();
 
     // show whole hour before 15 or after 45, otherwise show half an hour
@@ -81,7 +82,7 @@ const getTime = async (selectedDate) => {
         cur.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-          hour12: true,
+          hour12: false,
         })
       );
       cur.setMinutes(cur.getMinutes() + 30);
@@ -99,7 +100,7 @@ const getTime = async (selectedDate) => {
         date.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-          hour12: true,
+          hour12: false,
         })
       );
       date.setMinutes(date.getMinutes() + 30);
@@ -130,9 +131,9 @@ const SelectWindow = ({
   // get next x hours
   const gettimeList = (time, idx) => {
     const times = [];
-    const [hour, minute, period] = time.match(/(\d+):(\d+) (AM|PM)/).slice(1);
+    const [hour, minute] = time.split(":").map(Number);
     const baseTime = new Date();
-    baseTime.setHours((hour % 12) + (period === "PM" ? 12 : 0), minute, 0, 0);
+    baseTime.setHours(hour, minute, 0, 0);
 
     for (let i = 1; i <= idx; i++) {
       baseTime.setMinutes(baseTime.getMinutes() + 30);
@@ -140,7 +141,7 @@ const SelectWindow = ({
         baseTime.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-          hour12: true,
+          hour12: false,
         })
       );
     }
@@ -154,7 +155,6 @@ const SelectWindow = ({
   const confirmHandler = () => {
     const newTimes = gettimeList(time, selectedIdx);
     newTimes.push(time);
-    console.log(newTimes)
     // Total booked hours calculation
     const totalBooked = self.reduce((total, reservation) => {
       reservation.time.forEach((slot) => {
@@ -164,8 +164,6 @@ const SelectWindow = ({
       });
       return total;
     }, 0);
-    console.log(self)
-    console.log(totalBooked)
     if (totalBooked + newTimes.length > 16) {
       setLimit(true);
       return;
@@ -192,18 +190,13 @@ const SelectWindow = ({
         time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes }],
       });
     }
-    console.log(self);
     close();
   };
 
   return (
     <div className="select-window" style={style}>
       {limit ? (
-        <div
-          style={{
-            style
-          }}
-        >
+        <div style={{ style }}>
           <p>
             Booking limit exceeded for the day. You cannot book more than 8
             hours for one day.
@@ -249,7 +242,7 @@ const Table = () => {
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
-    time: "10:00 AM",
+    time: "10:00",
     room: "302",
     position: { top: 0, left: 0 },
     self: selfReservation,
