@@ -1,4 +1,4 @@
-from .database import db
+from .extensions import db
 import pandas as pd
 from .models import HDRStudent, CSEStaff, Users
 from app.booking.models import RoomDetail, Space

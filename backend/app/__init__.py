@@ -1,6 +1,6 @@
 from flask import Flask
 from .config import Config
-from .database import db, migrate
+from .extensions import db, migrate, jwt
 from .database_setup import set_up_database
 from flask_jwt_extended import JWTManager
 import time
@@ -27,8 +27,10 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     api.init_app(app)
+    jwt.init_app(app)
 
-    jwt = JWTManager(app)
+
+
 
 
     @app.route('/')

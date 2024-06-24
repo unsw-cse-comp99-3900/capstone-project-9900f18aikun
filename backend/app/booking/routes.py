@@ -1,9 +1,10 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
-from app.database import db
+from app.extensions import db
 from .models import Booking, RoomDetail
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert
+from jwt import exceptions
 
 booking_ns = Namespace('booking', description='Booking operations')
 
@@ -66,15 +67,25 @@ date_query.add_argument('date', type=str, required=True, help='Date to request')
 
 # Apis about meeting room
 @booking_ns.route('/meetingroom')
-class BookSpace(Resource):
+class MeetingRoom(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Get meeting room time list")
     @booking_ns.expect(date_query)
     @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
-    @jwt_required()
     def get(self):
+        try:
+            verify_jwt_in_request()
+        except exceptions.ExpiredSignatureError:
+            return {"error": "Token is invalid"}, 401
+        except exceptions.DecodeError:
+            return {"error": "Token decode error"}, 422
+        except exceptions.InvalidTokenError:
+            return {"error": "Token is invalid"}, 422
+        except Exception as e:
+            print(e)
+            return {"error": str(e)}, 500
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
 
