@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
-from app.extensions import db
+from app.extensions import db, api
 from .models import Booking, RoomDetail
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert
@@ -73,7 +73,8 @@ class MeetingRoom(Resource):
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Get meeting room time list")
     @booking_ns.expect(date_query)
-    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @jwt_required()
     def get(self):
         try:
             verify_jwt_in_request()

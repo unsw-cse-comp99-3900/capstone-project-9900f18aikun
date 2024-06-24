@@ -5,7 +5,6 @@ from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 
 
-
 auth_ns = Namespace('auth', description='Authentication operations')
 
 user_model = auth_ns.model('User', {
@@ -13,12 +12,14 @@ user_model = auth_ns.model('User', {
     'password': fields.String(required=True, description='The user password')
 })
 
+
 @jwt.invalid_token_loader
 def custom_invalid_token_callback(error_string):
     return jsonify({
         'error': 'Invalid Token',
         'message': error_string
     }), 401
+
 
 @auth_ns.route('/login')
 class UserLogin(Resource):
@@ -39,6 +40,7 @@ class UserLogin(Resource):
 
         access_token = create_access_token(identity={'zid': user_data.zid})
         return {'access_token': access_token}, 200
+
 
 @auth_ns.route('/auto-login')
 class AutoLogin(Resource):
