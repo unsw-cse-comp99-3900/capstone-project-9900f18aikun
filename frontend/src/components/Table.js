@@ -319,7 +319,7 @@ const Table = ({ data }) => {
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
     time: "",
-    room:"",
+    room: "",
     roomid: "",
     position: { top: 0, left: 0 },
     self: selfReservations,
@@ -522,13 +522,12 @@ const Table = ({ data }) => {
                   return (
                     <td
                       key={time}
-                      className={`time-column ${
-                        isReserved
-                          ? "reserved"
-                          : isSelfReserved
+                      className={`time-column ${isReserved
+                        ? "reserved"
+                        : isSelfReserved
                           ? "selfreserved"
                           : ""
-                      }`}
+                        }`}
                       onClick={(event) => {
                         event.stopPropagation(); // Prevent triggering the hideSelectWindow
                         clickHandler(item.room, time, event, item.roomid);
