@@ -121,7 +121,7 @@ const SelectWindow = ({
   self,
   selectedDate,
   reservations,
-  index,
+  // index,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
@@ -186,9 +186,9 @@ const SelectWindow = ({
       setLimit(true);
       return;
     }
-
+    console.log(room)
     const obj = {
-      "room_id": index,
+      "room_id": room,
       "date": selectedDate.format("YYYY-MM-DD"),
       "start_time": newTimes[0],
       "end_time": newTimes[newTimes.length - 1],
@@ -371,8 +371,8 @@ const Table = ({ data }) => {
   }, [selectedDate]);
 
   // allows popup when clicked on a given timeslot
-  const clickHandler = (room, time, event, idx) => {
-    console.log(room, idx)
+  const clickHandler = (room, time, event, roomid) => {
+    console.log(room, roomid)
     const target = event.target;
     if (
       target.classList.contains("reserved") ||
@@ -442,8 +442,8 @@ const Table = ({ data }) => {
           </thead>
           <tbody>
             {/* map room to time */}
-            {classroom.map((room, idx) => (
-              <tr key={room} id={idx}>
+            {classroom.map((room, roomid) => (
+              <tr key={room} id={roomid}>
                 <td className="room-column">{room}</td>
                 {times.map((time) => {
                   // define reserved class
@@ -480,7 +480,7 @@ const Table = ({ data }) => {
                       }`}
                       onClick={(event) => {
                         event.stopPropagation(); // Prevent triggering the hideSelectWindow
-                        clickHandler(room, time, event, idx);
+                        clickHandler(room, time, event, roomid);
                       }}
                     ></td>
                   );
@@ -492,9 +492,8 @@ const Table = ({ data }) => {
       </div>
       <SelectWindow
         visible={selectWindow.visible}
-        room={selectWindow.room}
+        roomid={selectWindow.room}
         position={selectWindow.position}
-        idx={selectWindow.idx}
         close={hideSelectWindow}
         time={selectWindow.time}
         self={selectWindow.self}
