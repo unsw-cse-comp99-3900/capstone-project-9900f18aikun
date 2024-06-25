@@ -122,6 +122,7 @@ class MeetingRoom(Resource):
         rooms = RoomDetail.query.all()
         for room in rooms:
             output[room.id] = {
+                "id": room.id,
                 "name": room.name,
                 "building": room.building,
                 "level": room.level,
