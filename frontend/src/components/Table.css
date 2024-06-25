@@ -130,3 +130,27 @@ tbody tr td.room-column {
     font-size: 0.9em;
   }
 }
+
+.legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.legend-text {
+  font-size: 14px;
+}

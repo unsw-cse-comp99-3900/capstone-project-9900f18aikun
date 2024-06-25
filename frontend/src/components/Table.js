@@ -421,6 +421,37 @@ const Table = ({ data }) => {
         </div>
       </div>
 
+      <div className="legend">
+        <div className="legend-item">
+          <div
+            className="legend-color"
+            style={{ backgroundColor: "#b9b9b9" }}
+          ></div>
+          <div className="legend-text">Reserved</div>
+        </div>
+        <div className="legend-item">
+          <div
+            className="legend-color"
+            style={{ backgroundColor: "blue" }}
+          ></div>
+          <div className="legend-text">Self-Reserved</div>
+        </div>
+        <div className="legend-item">
+          <div
+            className="legend-color"
+            style={{ backgroundColor: "#fce8a3" }}
+          ></div>
+          <div className="legend-text">Available</div>
+        </div>
+        <div className="legend-item">
+          <div
+            className="legend-color"
+            style={{ backgroundColor: "rgb(221, 216, 169)" }}
+          ></div>
+          <div className="legend-text">No Permission</div>
+        </div>
+      </div>
+
       <div className="table-wrapper">
         <table id="mytable">
           <thead>
