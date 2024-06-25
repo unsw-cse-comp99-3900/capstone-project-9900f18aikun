@@ -86,10 +86,13 @@ const SelectWindow = ({
   self,
   selectedDate,
   reservations,
+  permission,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
   if (!visible) return null;
+
+  console.log(permission);
 
   const style = {
     top: position.top,
@@ -162,20 +165,20 @@ const SelectWindow = ({
 
     // send request to backend
     const obj = {
-      "room_id": roomid,
-      "date": selectedDate.format("YYYY-MM-DD"),
-      "start_time": newTimes[0],
-      "end_time": endTime,
+      room_id: roomid,
+      date: selectedDate.format("YYYY-MM-DD"),
+      start_time: newTimes[0],
+      end_time: endTime,
     };
-    console.log("object is", obj)
+    console.log("object is", obj);
 
     try {
       const response = await fetch("/api/booking/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization":
+          Accept: "application/json",
+          Authorization:
             "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTExNTc5OSwianRpIjoiYzA5Y2IwZTEtYzFjYS00ZDY4LTg5NTAtMTI2MGQ4NzIwMGEyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6MTEzMzAifSwibmJmIjoxNzE5MTE1Nzk5LCJjc3JmIjoiZjlmMGI0YmItMTgwYi00ZDllLThlNGYtN2I4MTk4OWNhMzllIiwiZXhwIjo3NzE5MTE1NzM5fQ.ZU768uMtq-LuJZYOjznoIb3zNha0XDvQu7JH8AYls1w",
         },
         body: JSON.stringify(obj),
@@ -265,7 +268,9 @@ const SelectWindow = ({
           </div>
           <br />
           <div className="button-class">
-            <Button onClick={confirmHandler}>Confirm</Button>
+            <Button onClick={confirmHandler}>
+              {permission ? "Confirm" : "Request"}
+            </Button>
             <Button onClick={close}>Close</Button>
           </div>
         </>
@@ -276,7 +281,6 @@ const SelectWindow = ({
 
 // main table
 const Table = ({ data }) => {
-
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfreservations] = useState([]);
   const [times, setTimes] = useState([]);
@@ -287,10 +291,11 @@ const Table = ({ data }) => {
     roomid: "",
     position: { top: 0, left: 0 },
     self: selfReservations,
+    permission: false,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  console.log("reservation is", reservations)
+  console.log("reservation is", reservations);
 
   useEffect(() => {
     setReservations(extractData(data, false));
@@ -303,7 +308,7 @@ const Table = ({ data }) => {
     return data.map((item) => ({
       room: item.name,
       roomid: item.id,
-      permission: item.HDR_student_permission && item.CSE_staff_permission,
+      permission: item.HDR_student_permission,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
@@ -318,7 +323,9 @@ const Table = ({ data }) => {
     // Assuming timetable splitted by half an hour
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
-        const include = self ? slot.current_user_booking : !slot.current_user_booking;
+        const include = self
+          ? slot.current_user_booking
+          : !slot.current_user_booking;
         if (include) {
           const hour = Math.floor(index / 2);
           const minute = index % 2 === 0 ? "00" : "30";
@@ -356,7 +363,7 @@ const Table = ({ data }) => {
 
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
-    console.log(room, roomid)
+    console.log(room, roomid);
     const target = event.target;
     if (
       target.classList.contains("reserved") ||
@@ -373,6 +380,7 @@ const Table = ({ data }) => {
       roomid,
       position,
       self: selfReservations,
+      permission: false,
     });
   };
 
@@ -456,12 +464,13 @@ const Table = ({ data }) => {
                   return (
                     <td
                       key={time}
-                      className={`time-column ${isReserved
-                        ? "reserved"
-                        : isSelfReserved
+                      className={`time-column ${
+                        isReserved
+                          ? "reserved"
+                          : isSelfReserved
                           ? "selfreserved"
                           : ""
-                        }`}
+                      }`}
                       onClick={(event) => {
                         event.stopPropagation(); // Prevent triggering the hideSelectWindow
                         clickHandler(item.room, time, event, item.roomid);
@@ -484,6 +493,7 @@ const Table = ({ data }) => {
         self={selectWindow.self}
         selectedDate={selectedDate}
         reservations={reservations}
+        permission={selectWindow.permission}
       />
     </div>
   );
