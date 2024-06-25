@@ -282,7 +282,7 @@ const SelectWindow = ({
 // main table
 const Table = ({ data }) => {
   const [reservations, setReservations] = useState([]);
-  const [selfReservations, setSelfreservations] = useState([]);
+  const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
@@ -299,9 +299,7 @@ const Table = ({ data }) => {
 
   useEffect(() => {
     setReservations(extractData(data, false));
-    setSelfreservations(extractData(data, true));
-
-    // console.log("Filtered Data:", reserved);
+    setSelfReservations(extractData(data, true));
   }, [data]);
 
   const extractData = (data, self) => {
@@ -312,15 +310,18 @@ const Table = ({ data }) => {
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
-          timeslot: extractTime(item.time_table, self),
+          timeslot: extractTime(
+            item.time_table,
+            self,
+            item.HDR_student_permission
+          ),
         },
       ],
     }));
   };
 
-  const extractTime = (timeTable, self) => {
+  const extractTime = (timeTable, self, permission) => {
     const timeslots = [];
-    // Assuming timetable splitted by half an hour
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
         const include = self
@@ -330,7 +331,7 @@ const Table = ({ data }) => {
           const hour = Math.floor(index / 2);
           const minute = index % 2 === 0 ? "00" : "30";
           const time = `${hour.toString().padStart(2, "0")}:${minute}`;
-          timeslots.push(time);
+          timeslots.push({ time, permission });
         }
       }
     });
@@ -365,6 +366,7 @@ const Table = ({ data }) => {
   const clickHandler = (room, time, event, roomid) => {
     console.log(room, roomid);
     const target = event.target;
+    console.log("Class name:", target.className);
     if (
       target.classList.contains("reserved") ||
       target.classList.contains("selfreserved")
@@ -372,7 +374,7 @@ const Table = ({ data }) => {
       return;
     }
 
-    const position = { top: event.clientY + 10, left: event.clientX + 10 };
+    const position = { top: event.clientY + 10, left: event.clientX - 200 };
     setSelectWindow({
       visible: true,
       time,
@@ -393,8 +395,6 @@ const Table = ({ data }) => {
     const sevenDaysFromNow = today.add(7, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
-
-  // const classroom = reservations.map((item) => item.room);
 
   return (
     <div className="table-container">
@@ -434,19 +434,19 @@ const Table = ({ data }) => {
             </tr>
           </thead>
           <tbody>
-            {/* map room to time */}
             {reservations.map((item) => (
               <tr key={item.room} id={item.roomid}>
                 <td className="room-column">{item.room}</td>
                 {times.map((time) => {
-                  // define reserved class
                   const isReserved = reservations.some(
                     (reservation) =>
                       reservation.room === item.room &&
                       reservation.time.some(
                         (slot) =>
                           slot.date === selectedDate.format("DD/MM/YYYY") &&
-                          slot.timeslot.includes(time)
+                          slot.timeslot.some(
+                            (t) => t.time === time && !t.permission
+                          )
                       )
                   );
 
@@ -457,9 +457,26 @@ const Table = ({ data }) => {
                       reservation.time.some(
                         (slot) =>
                           slot.date === selectedDate.format("DD/MM/YYYY") &&
-                          slot.timeslot.includes(time)
+                          slot.timeslot.some(
+                            (t) => t.time === time && t.permission
+                          )
                       )
                   );
+
+                  const timeSlot = reservations.find(
+                    (reservation) =>
+                      reservation.room === item.room &&
+                      reservation.time.some(
+                        (slot) =>
+                          slot.date === selectedDate.format("DD/MM/YYYY") &&
+                          slot.timeslot.some((t) => t.time === time)
+                      )
+                  );
+
+                  const permission = timeSlot
+                    ? timeSlot.time[0].timeslot.find((t) => t.time === time)
+                        .permission
+                    : false;
 
                   return (
                     <td
@@ -469,10 +486,12 @@ const Table = ({ data }) => {
                           ? "reserved"
                           : isSelfReserved
                           ? "selfreserved"
-                          : ""
+                          : permission
+                          ? ""
+                          : "no-permission"
                       }`}
                       onClick={(event) => {
-                        event.stopPropagation(); // Prevent triggering the hideSelectWindow
+                        event.stopPropagation();
                         clickHandler(item.room, time, event, item.roomid);
                       }}
                     ></td>
