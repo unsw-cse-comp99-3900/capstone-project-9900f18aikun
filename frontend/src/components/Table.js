@@ -1,47 +1,11 @@
 import React, { useEffect, useState } from "react";
-// import ReactDOM from 'react-dom';
-// import { createRoot } from 'react-dom/client';
 import "./Table.css";
 import axios from "axios";
 import { Button } from "@mui/material";
-// backup classroom, update when backend connected
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
-
-// const classroom = ["301 A", "301 B", "301 C", "302", "303"];
-
-// let selfReservation = [
-//   {
-//     room: "303",
-//     time: [
-//       {
-//         date: "24/06/2024",
-//         timeslot: ["14:00", "16:00"],
-//       },
-//       {
-//         date: "25/06/2024",
-//         timeslot: ["14:00", "16:00"],
-//       },
-//     ],
-//   },
-// ];
-
-// let reservations = [
-//   {
-//     room: "302",
-//     time: [
-//       { date: "25/06/2024", timeslot: ["1:00", "15:00", "16:30", "17:00"] },
-//     ],
-//   },
-// ];
-
-// const times = [
-//   '12:00 am', '1:00 am', '2:00 am', '3:00 am', '4:00 am', '5:00 am', '6:00 am', '7:00 am',
-//   '8:00 am', '9:00 am', '10:00 am', '11:00 am', '12:00 pm', '1:00 pm', '2:00 pm', '3:00 pm',
-//   '4:00 pm', '5:00 pm', '6:00 pm', '7:00 pm', '8:00 pm', '9:00 pm', '10:00 pm', '11:00 pm'
-// ];
 
 // get sydney time
 const getSydneyTime = async () => {
@@ -122,7 +86,6 @@ const SelectWindow = ({
   self,
   selectedDate,
   reservations,
-  // index,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
@@ -172,7 +135,6 @@ const SelectWindow = ({
   // confirm selection function
   const confirmHandler = async () => {
     const newTimes = gettimeList(time, selectedIdx, reserved);
-    // newTimes.push(time);
 
     // Total booked hours calculation
     const totalBooked = self.reduce((total, reservation) => {
@@ -188,6 +150,7 @@ const SelectWindow = ({
       return;
     }
 
+    // getting end time
     const [hour, minute] = newTimes[newTimes.length - 1].split(":").map(Number);
     let endTime = new Date();
     endTime.setHours(hour, minute + 30, 0, 0);
@@ -197,7 +160,7 @@ const SelectWindow = ({
       hour12: false,
     });
 
-    console.log(roomid)
+    // send request to backend
     const obj = {
       "room_id": roomid,
       "date": selectedDate.format("YYYY-MM-DD"),
@@ -205,6 +168,7 @@ const SelectWindow = ({
       "end_time": endTime,
     };
     console.log("object is", obj)
+
     try {
       const response = await fetch("/api/booking/book", {
         method: "POST",
@@ -229,8 +193,8 @@ const SelectWindow = ({
     } catch (error) {
       console.error("Error fetching booking data:", error);
     }
-    // };
 
+    // reservation
     // if already has reservation for this day
     const existing = self.find((reservation) => reservation.room === room);
     if (existing) {
@@ -339,6 +303,7 @@ const Table = ({ data }) => {
     return data.map((item) => ({
       room: item.name,
       roomid: item.id,
+      permission: item.HDR_student_permission && item.CSE_staff_permission,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
