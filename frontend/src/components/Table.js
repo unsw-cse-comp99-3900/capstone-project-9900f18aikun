@@ -116,6 +116,7 @@ const SelectWindow = ({
   visible,
   time,
   room,
+  roomid,
   position,
   close,
   self,
@@ -186,9 +187,9 @@ const SelectWindow = ({
       setLimit(true);
       return;
     }
-    console.log(room)
+    console.log(roomid)
     const obj = {
-      "room_id": room,
+      "room_id": roomid,
       "date": selectedDate.format("YYYY-MM-DD"),
       "start_time": newTimes[0],
       "end_time": newTimes[newTimes.length - 1],
@@ -302,6 +303,17 @@ const SelectWindow = ({
 // main table
 const Table = ({ data }) => {
   const [reservations, setReservations] = useState([]);
+  const [times, setTimes] = useState([]);
+  const [selectWindow, setSelectWindow] = useState({
+    visible: false,
+    time: "",
+    room:"",
+    roomid: "",
+    position: { top: 0, left: 0 },
+    self: selfReservation,
+  });
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   useEffect(() => {
     const reserved = extractData(data);
@@ -335,16 +347,7 @@ const Table = ({ data }) => {
     return timeslots;
   };
 
-  const [times, setTimes] = useState([]);
-  const [selectWindow, setSelectWindow] = useState({
-    visible: false,
-    time: "",
-    room: "",
-    position: { top: 0, left: 0 },
-    self: selfReservation,
-  });
-  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+
 
   const toggleCalendarVisibility = () => {
     setIsCalendarVisible(!isCalendarVisible);
@@ -384,8 +387,9 @@ const Table = ({ data }) => {
     const position = { top: event.clientY + 10, left: event.clientX + 10 };
     setSelectWindow({
       visible: true,
-      room,
       time,
+      room,
+      roomid,
       position,
       self: selfReservation,
     });
@@ -492,7 +496,8 @@ const Table = ({ data }) => {
       </div>
       <SelectWindow
         visible={selectWindow.visible}
-        roomid={selectWindow.room}
+        room={selectWindow.room}
+        roomid={selectWindow.roomid}
         position={selectWindow.position}
         close={hideSelectWindow}
         time={selectWindow.time}
