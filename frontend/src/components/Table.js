@@ -295,6 +295,7 @@ const Table = ({ data }) => {
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [hoveredRoom, setHoveredRoom] = useState(null);
   console.log("reservation is", reservations);
 
   useEffect(() => {
@@ -465,71 +466,89 @@ const Table = ({ data }) => {
             </tr>
           </thead>
           <tbody>
-            {reservations.map((item) => (
-              <tr key={item.room} id={item.roomid}>
-                <td className="room-column">{item.room}</td>
-                {times.map((time) => {
-                  const isReserved = reservations.some(
-                    (reservation) =>
-                      reservation.room === item.room &&
-                      reservation.time.some(
-                        (slot) =>
-                          slot.date === selectedDate.format("DD/MM/YYYY") &&
-                          slot.timeslot.some(
-                            (t) => t.time === time && !t.permission
-                          )
-                      )
-                  );
+            {reservations.map((item) => {
+              const roomData = data.find((d) => d.name === item.room);
+              return (
+                <tr key={item.room} id={item.roomid}>
+                  <td
+                    className="room-column"
+                    onMouseEnter={() => setHoveredRoom(roomData)}
+                    onMouseLeave={() => setHoveredRoom(null)}
+                    style={{ position: "relative", zIndex: 2 }}
+                  >
+                    {item.room}
+                    {hoveredRoom && hoveredRoom.name === item.room && (
+                      <div className="room-info">
+                        <p>Name: {hoveredRoom.name}</p>
+                        <p>Building: {hoveredRoom.building}</p>
+                        <p>Level: {hoveredRoom.level}</p>
+                        <p>Capacity: {hoveredRoom.capacity}</p>
+                      </div>
+                    )}
+                  </td>
+                  {times.map((time) => {
+                    const isReserved = reservations.some(
+                      (reservation) =>
+                        reservation.room === item.room &&
+                        reservation.time.some(
+                          (slot) =>
+                            slot.date === selectedDate.format("DD/MM/YYYY") &&
+                            slot.timeslot.some(
+                              (t) => t.time === time && !t.permission
+                            )
+                        )
+                    );
 
-                  // define reserved by current user class
-                  const isSelfReserved = selfReservations.some(
-                    (reservation) =>
-                      reservation.room === item.room &&
-                      reservation.time.some(
-                        (slot) =>
-                          slot.date === selectedDate.format("DD/MM/YYYY") &&
-                          slot.timeslot.some(
-                            (t) => t.time === time && t.permission
-                          )
-                      )
-                  );
+                    // define reserved by current user class
+                    const isSelfReserved = selfReservations.some(
+                      (reservation) =>
+                        reservation.room === item.room &&
+                        reservation.time.some(
+                          (slot) =>
+                            slot.date === selectedDate.format("DD/MM/YYYY") &&
+                            slot.timeslot.some(
+                              (t) => t.time === time && t.permission
+                            )
+                        )
+                    );
 
-                  const timeSlot = reservations.find(
-                    (reservation) =>
-                      reservation.room === item.room &&
-                      reservation.time.some(
-                        (slot) =>
-                          slot.date === selectedDate.format("DD/MM/YYYY") &&
-                          slot.timeslot.some((t) => t.time === time)
-                      )
-                  );
+                    const timeSlot = reservations.find(
+                      (reservation) =>
+                        reservation.room === item.room &&
+                        reservation.time.some(
+                          (slot) =>
+                            slot.date === selectedDate.format("DD/MM/YYYY") &&
+                            slot.timeslot.some((t) => t.time === time)
+                        )
+                    );
 
-                  const permission = timeSlot
-                    ? timeSlot.time[0].timeslot.find((t) => t.time === time)
-                        .permission
-                    : false;
+                    const permission = timeSlot
+                      ? timeSlot.time[0].timeslot.find((t) => t.time === time)
+                          .permission
+                      : false;
 
-                  return (
-                    <td
-                      key={time}
-                      className={`time-column ${
-                        isReserved
-                          ? "reserved"
-                          : isSelfReserved
-                          ? "selfreserved"
-                          : permission
-                          ? ""
-                          : "no-permission"
-                      }`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        clickHandler(item.room, time, event, item.roomid);
-                      }}
-                    ></td>
-                  );
-                })}
-              </tr>
-            ))}
+                    return (
+                      <td
+                        key={time}
+                        className={`time-column ${
+                          isReserved
+                            ? "reserved"
+                            : isSelfReserved
+                            ? "selfreserved"
+                            : permission
+                            ? ""
+                            : "no-permission"
+                        }`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          clickHandler(item.room, time, event, item.roomid);
+                        }}
+                      ></td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
