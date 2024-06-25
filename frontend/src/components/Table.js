@@ -329,31 +329,32 @@ const Table = ({ data }) => {
   console.log("reservation is", reservations)
 
   useEffect(() => {
-    setReservations(extractData(data));
-    setSelfreservations(extractSelfdata(data));
+    setReservations(extractData(data, false));
+    setSelfreservations(extractData(data, true));
 
     // console.log("Filtered Data:", reserved);
   }, [data]);
 
-  const extractData = (data) => {
+  const extractData = (data, self) => {
     return data.map((item) => ({
       room: item.name,
       roomid: item.id,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
-          timeslot: extractTime(item.time_table),
+          timeslot: extractTime(item.time_table, self),
         },
       ],
     }));
   };
 
-  const extractTime = (timeTable) => {
+  const extractTime = (timeTable, self) => {
     const timeslots = [];
     // Assuming timetable splitted by half an hour
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
-        if (!slot.current_user_booking) {
+        const include = self ? slot.current_user_booking : !slot.current_user_booking;
+        if (include) {
           const hour = Math.floor(index / 2);
           const minute = index % 2 === 0 ? "00" : "30";
           const time = `${hour.toString().padStart(2, "0")}:${minute}`;
@@ -363,38 +364,6 @@ const Table = ({ data }) => {
     });
     return timeslots;
   };
-
-
-  const extractSelfdata = (data) => {
-    return data.map((item) => ({
-      room: item.name,
-      roomid: item.id,
-      time: [
-        {
-          date: selectedDate.format("DD/MM/YYYY"),
-          timeslot: extractSelftime(item.time_table),
-        },
-      ],
-    }));
-  };
-
-  const extractSelftime = (timeTable) => {
-    const timeslots = [];
-    // Assuming timetable splitted by half an hour
-    timeTable.forEach((slot, index) => {
-      if (!Array.isArray(slot)) {
-        if (slot.current_user_booking) {
-          const hour = Math.floor(index / 2);
-          const minute = index % 2 === 0 ? "00" : "30";
-          const time = `${hour.toString().padStart(2, "0")}:${minute}`;
-          timeslots.push(time);
-        }
-      }
-    });
-    return timeslots;
-  };
-
-
 
   const toggleCalendarVisibility = () => {
     setIsCalendarVisible(!isCalendarVisible);
@@ -452,7 +421,7 @@ const Table = ({ data }) => {
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
-  const classroom = reservations.map((item) => item.room);
+  // const classroom = reservations.map((item) => item.room);
 
   return (
     <div className="table-container">
