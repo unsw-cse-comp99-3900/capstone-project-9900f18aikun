@@ -33,18 +33,25 @@ class BookSpace(Resource):
         current_user = get_jwt_identity()
         zid = current_user['zid']
 
-
         room_id = data['room_id']
         start_time = data['start_time']
         end_time = data['end_time']
         date = data['date']
-        print(f'room id: {room_id}'
-              f'start time: {start_time}'
-              f'end time: {end_time}'
-              f'date: {date}')
+
+        if not isinstance(data['room_id'], int):
+            return {'error': 'room id must be integer'}, 400
+
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
+
+        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', start_time) or not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', end_time):
+            return {'error': 'time must be in HH:MM format'}, 400
 
         if start_time > end_time:
             return {'error': 'Start time must earlier than end time'}, 400
+
+        if start_time == end_time:
+            return {'error': 'Start time and end time are same'}, 400
 
         conflict_bookings = Booking.query.filter(
             Booking.date == date,
@@ -105,8 +112,9 @@ class MeetingRoom(Resource):
         user_zid = current_user['zid']
 
         date = request.args.get('date')
-        print(f'user id: {user_zid}'
-              f'date: {date}')
+
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         # define output list
         output = {}
