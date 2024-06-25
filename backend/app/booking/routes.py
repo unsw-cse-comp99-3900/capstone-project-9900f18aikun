@@ -5,6 +5,7 @@ from .models import Booking, RoomDetail
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert
 from jwt import exceptions
+import re
 
 booking_ns = Namespace('booking', description='Booking operations')
 
@@ -66,7 +67,12 @@ class BookSpace(Resource):
         db.session.add(new_booking)
         db.session.commit()
 
-        return {'message': 'Booking confirmed'}, 200
+        return {'message': f'Booking confirmed'
+                           f'room id: {room_id}'
+                           f'start time: {start_time}'
+                           f'end time: {end_time}'
+                           f'date: {date}'
+                }, 200
 
 
 date_query = booking_ns.parser()
