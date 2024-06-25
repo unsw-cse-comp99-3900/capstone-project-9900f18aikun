@@ -170,7 +170,7 @@ const SelectWindow = ({
   // confirm selection function
   const confirmHandler = async () => {
     const newTimes = gettimeList(time, selectedIdx, reserved);
-    newTimes.push(time);
+    // newTimes.push(time);
 
     // Total booked hours calculation
     const totalBooked = self.reduce((total, reservation) => {
@@ -187,12 +187,12 @@ const SelectWindow = ({
     }
 
     const obj = {
-      "room_id": "1",
+      "room_id": "3",
       "date": selectedDate.format("YYYY-MM-DD"),
       "start_time": newTimes[0],
       "end_time": newTimes[newTimes.length - 1],
     };
-    console.log(obj)
+    console.log("object is", obj)
     try {
       const response = await fetch("/api/booking/book", {
         method: "POST",
@@ -370,7 +370,8 @@ const Table = ({ data }) => {
   }, [selectedDate]);
 
   // allows popup when clicked on a given timeslot
-  const clickHandler = (room, time, event) => {
+  const clickHandler = (room, time, event, idx) => {
+    console.log(room, idx)
     const target = event.target;
     if (
       target.classList.contains("reserved") ||
@@ -440,8 +441,8 @@ const Table = ({ data }) => {
           </thead>
           <tbody>
             {/* map room to time */}
-            {classroom.map((room) => (
-              <tr key={room}>
+            {classroom.map((idx, room) => (
+              <tr key={room} id={idx}>
                 <td className="room-column">{room}</td>
                 {times.map((time) => {
                   // define reserved class
@@ -478,7 +479,7 @@ const Table = ({ data }) => {
                       }`}
                       onClick={(event) => {
                         event.stopPropagation(); // Prevent triggering the hideSelectWindow
-                        clickHandler(room, time, event);
+                        clickHandler(room, time, event, idx);
                       }}
                     ></td>
                   );
