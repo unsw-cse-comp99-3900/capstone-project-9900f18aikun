@@ -168,9 +168,10 @@ const SelectWindow = ({
   const dropdownTime = gettimeList(time, 8, reserved);
 
   // confirm selection function
-  const confirmHandler = () => {
+  const confirmHandler = async () => {
     const newTimes = gettimeList(time, selectedIdx, reserved);
     newTimes.push(time);
+
     // Total booked hours calculation
     const totalBooked = self.reduce((total, reservation) => {
       reservation.time.forEach((slot) => {
@@ -184,6 +185,39 @@ const SelectWindow = ({
       setLimit(true);
       return;
     }
+
+    const obj = {
+      "room_id": "1",
+      "date": selectedDate.format("YYYY-MM-DD"),
+      "start_time": newTimes[0],
+      "end_time": newTimes[newTimes.length - 1],
+    };
+    console.log(obj)
+    try {
+      const response = await fetch("/api/booking/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization":
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTExNTc5OSwianRpIjoiYzA5Y2IwZTEtYzFjYS00ZDY4LTg5NTAtMTI2MGQ4NzIwMGEyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6MTEzMzAifSwibmJmIjoxNzE5MTE1Nzk5LCJjc3JmIjoiZjlmMGI0YmItMTgwYi00ZDllLThlNGYtN2I4MTk4OWNhMzllIiwiZXhwIjo3NzE5MTE1NzM5fQ.ZU768uMtq-LuJZYOjznoIb3zNha0XDvQu7JH8AYls1w",
+        },
+        body: JSON.stringify(obj),
+      });
+
+      if (response.ok) {
+        console.log("Successfully sent");
+        const result = await response.json();
+        console.log(result);
+      } else {
+        const errorText = await response.text();
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
+    // };
 
     // if already has reservation for this day
     const existing = self.find((reservation) => reservation.room === room);
@@ -271,14 +305,18 @@ const Table = ({ data }) => {
   useEffect(() => {
     const reserved = extractData(data);
     setReservations(reserved);
-    console.log("Filtered Data:", reserved);
+    // console.log("Filtered Data:", reserved);
   }, [data]);
-
 
   const extractData = (data) => {
     return data.map((item) => ({
       room: item.name,
-      time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: extractTime(item.time_table) }],
+      time: [
+        {
+          date: selectedDate.format("DD/MM/YYYY"),
+          timeslot: extractTime(item.time_table),
+        },
+      ],
     }));
   };
 
@@ -361,7 +399,7 @@ const Table = ({ data }) => {
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
-  const classroom = reservations.map(item => item.room)
+  const classroom = reservations.map((item) => item.room);
 
   return (
     <div className="table-container">

@@ -15,7 +15,8 @@ function App() {
 
   const fetchBookingData = async () => {
     try {
-      const response = await fetch('/api/booking/meetingroom?date=2024-07-01', {
+      const response = await fetch('/api/booking/meetingroom?date=2024-06-25', {
+        method: "GET",
         headers: {
           'accept': 'application/json',
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTExNTc5OSwianRpIjoiYzA5Y2IwZTEtYzFjYS00ZDY4LTg5NTAtMTI2MGQ4NzIwMGEyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6MTEzMzAifSwibmJmIjoxNzE5MTE1Nzk5LCJjc3JmIjoiZjlmMGI0YmItMTgwYi00ZDllLThlNGYtN2I4MTk4OWNhMzllIiwiZXhwIjo3NzE5MTE1NzM5fQ.ZU768uMtq-LuJZYOjznoIb3zNha0XDvQu7JH8AYls1w'
@@ -24,6 +25,7 @@ function App() {
       const text = await response.text();
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
+      console.log("data is", dataArray)
       setData(dataArray);
       setFilteredData(dataArray);
     } catch (error) {
@@ -52,7 +54,7 @@ function App() {
   }, [filters, data]);
   //输出筛选后的数据到控制台
   useEffect(() => {
-    console.log(filteredData);
+    // console.log(filteredData);
   }, [filteredData]);
 
   return (

@@ -7,7 +7,7 @@ module.exports = function(app) {
       target: 'http://s2.gnip.vip:37895',
       changeOrigin: true,
       pathRewrite: {
-        '^/api': '', // 移除 /api 前缀
+        '^/api': '', // Remove /api prefix
       },
     })
   );
