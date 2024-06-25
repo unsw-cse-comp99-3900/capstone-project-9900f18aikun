@@ -20,7 +20,6 @@ def create_app():
     api.init_app(app)
     jwt.init_app(app)
 
-
     from .auth.routes import auth_ns
     api.add_namespace(auth_ns, path='/auth')
 
