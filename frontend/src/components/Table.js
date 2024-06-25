@@ -187,12 +187,22 @@ const SelectWindow = ({
       setLimit(true);
       return;
     }
+
+    const [hour, minute] = newTimes[newTimes.length - 1].split(":").map(Number);
+    let endTime = new Date();
+    endTime.setHours(hour, minute + 30, 0, 0);
+    endTime = endTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
     console.log(roomid)
     const obj = {
       "room_id": roomid,
       "date": selectedDate.format("YYYY-MM-DD"),
       "start_time": newTimes[0],
-      "end_time": newTimes[newTimes.length - 1],
+      "end_time": endTime,
     };
     console.log("object is", obj)
     try {
@@ -302,6 +312,7 @@ const SelectWindow = ({
 
 // main table
 const Table = ({ data }) => {
+
   const [reservations, setReservations] = useState([]);
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
@@ -314,6 +325,7 @@ const Table = ({ data }) => {
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  console.log("reservation is", reservations)
 
   useEffect(() => {
     const reserved = extractData(data);
@@ -324,6 +336,7 @@ const Table = ({ data }) => {
   const extractData = (data) => {
     return data.map((item) => ({
       room: item.name,
+      roomid: item.id,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
@@ -337,7 +350,7 @@ const Table = ({ data }) => {
     const timeslots = [];
     // Assuming timetable splitted by half an hour
     timeTable.forEach((slot, index) => {
-      if (Array.isArray(slot) && slot.length > 0) {
+      if (!Array.isArray(slot)) {
         const hour = Math.floor(index / 2);
         const minute = index % 2 === 0 ? "00" : "30";
         const time = `${hour.toString().padStart(2, "0")}:${minute}`;
@@ -446,14 +459,14 @@ const Table = ({ data }) => {
           </thead>
           <tbody>
             {/* map room to time */}
-            {classroom.map((room, roomid) => (
-              <tr key={room} id={roomid}>
-                <td className="room-column">{room}</td>
+            {reservations.map((item) => (
+              <tr key={item.room} id={item.roomid}>
+                <td className="room-column">{item.room}</td>
                 {times.map((time) => {
                   // define reserved class
                   const isReserved = reservations.some(
                     (reservation) =>
-                      reservation.room === room &&
+                      reservation.room === item.room &&
                       reservation.time.some(
                         (slot) =>
                           slot.date === selectedDate.format("DD/MM/YYYY") &&
@@ -464,7 +477,7 @@ const Table = ({ data }) => {
                   // define reserved by current user class
                   const isSelfReserved = selfReservation.some(
                     (reservation) =>
-                      reservation.room === room &&
+                      reservation.room === item.room &&
                       reservation.time.some(
                         (slot) =>
                           slot.date === selectedDate.format("DD/MM/YYYY") &&
@@ -484,7 +497,7 @@ const Table = ({ data }) => {
                       }`}
                       onClick={(event) => {
                         event.stopPropagation(); // Prevent triggering the hideSelectWindow
-                        clickHandler(room, time, event, roomid);
+                        clickHandler(item.room, time, event, item.roomid);
                       }}
                     ></td>
                   );
