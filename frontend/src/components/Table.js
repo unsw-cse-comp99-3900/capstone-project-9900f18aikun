@@ -12,21 +12,21 @@ import dayjs from "dayjs";
 
 // const classroom = ["301 A", "301 B", "301 C", "302", "303"];
 
-let selfReservation = [
-  {
-    room: "303",
-    time: [
-      {
-        date: "24/06/2024",
-        timeslot: ["14:00", "16:00"],
-      },
-      {
-        date: "25/06/2024",
-        timeslot: ["14:00", "16:00"],
-      },
-    ],
-  },
-];
+// let selfReservation = [
+//   {
+//     room: "303",
+//     time: [
+//       {
+//         date: "24/06/2024",
+//         timeslot: ["14:00", "16:00"],
+//       },
+//       {
+//         date: "25/06/2024",
+//         timeslot: ["14:00", "16:00"],
+//       },
+//     ],
+//   },
+// ];
 
 // let reservations = [
 //   {
@@ -314,6 +314,7 @@ const SelectWindow = ({
 const Table = ({ data }) => {
 
   const [reservations, setReservations] = useState([]);
+  const [selfReservations, setSelfreservations] = useState([]);
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
@@ -321,15 +322,16 @@ const Table = ({ data }) => {
     room:"",
     roomid: "",
     position: { top: 0, left: 0 },
-    self: selfReservation,
+    self: selfReservations,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   console.log("reservation is", reservations)
 
   useEffect(() => {
-    const reserved = extractData(data);
-    setReservations(reserved);
+    setReservations(extractData(data));
+    setSelfreservations(extractSelfdata(data));
+
     // console.log("Filtered Data:", reserved);
   }, [data]);
 
@@ -351,10 +353,42 @@ const Table = ({ data }) => {
     // Assuming timetable splitted by half an hour
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
-        const hour = Math.floor(index / 2);
-        const minute = index % 2 === 0 ? "00" : "30";
-        const time = `${hour.toString().padStart(2, "0")}:${minute}`;
-        timeslots.push(time);
+        if (!slot.current_user_booking) {
+          const hour = Math.floor(index / 2);
+          const minute = index % 2 === 0 ? "00" : "30";
+          const time = `${hour.toString().padStart(2, "0")}:${minute}`;
+          timeslots.push(time);
+        }
+      }
+    });
+    return timeslots;
+  };
+
+
+  const extractSelfdata = (data) => {
+    return data.map((item) => ({
+      room: item.name,
+      roomid: item.id,
+      time: [
+        {
+          date: selectedDate.format("DD/MM/YYYY"),
+          timeslot: extractSelftime(item.time_table),
+        },
+      ],
+    }));
+  };
+
+  const extractSelftime = (timeTable) => {
+    const timeslots = [];
+    // Assuming timetable splitted by half an hour
+    timeTable.forEach((slot, index) => {
+      if (!Array.isArray(slot)) {
+        if (slot.current_user_booking) {
+          const hour = Math.floor(index / 2);
+          const minute = index % 2 === 0 ? "00" : "30";
+          const time = `${hour.toString().padStart(2, "0")}:${minute}`;
+          timeslots.push(time);
+        }
       }
     });
     return timeslots;
@@ -404,7 +438,7 @@ const Table = ({ data }) => {
       room,
       roomid,
       position,
-      self: selfReservation,
+      self: selfReservations,
     });
   };
 
@@ -475,7 +509,7 @@ const Table = ({ data }) => {
                   );
 
                   // define reserved by current user class
-                  const isSelfReserved = selfReservation.some(
+                  const isSelfReserved = selfReservations.some(
                     (reservation) =>
                       reservation.room === item.room &&
                       reservation.time.some(
