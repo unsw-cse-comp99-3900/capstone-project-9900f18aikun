@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import dayjs from 'dayjs'; // 导入 dayjs
 import Table from './components/Table';
+
 import Filter from './components/filter';
 import './App.css'; // 引入CSS文件
 
@@ -12,10 +14,14 @@ function App() {
     category: 'meetingroom'
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // 控制侧边栏的状态
+  const [selectedDate, setSelectedDate] = useState(dayjs()); 
+  // console.log(selectedDate);
 
   const fetchBookingData = async () => {
     try {
-      const response = await fetch('/api/booking/meetingroom?date=2024-06-25', {
+      const formattedDate = selectedDate.format('YYYY-MM-DD'); // 将 selectedDate 转换成 'YYYY-MM-DD' 格式
+      console.log(formattedDate)
+      const response = await fetch(`/api/booking/meetingroom?date=${formattedDate}`, {
         method: "GET",
         headers: {
           'accept': 'application/json',
@@ -45,9 +51,10 @@ function App() {
     setFilters(filters);
   };
 
+
   useEffect(() => {
     fetchBookingData();
-  }, []);
+  }, [selectedDate]); // 添加 selectedDate 作为依赖项
 
   useEffect(() => {
     handleFilter(filters);
@@ -66,7 +73,7 @@ function App() {
         {isSidebarOpen && <Filter onFilter={handleFilter} />}
       </div>
       <div className="content">
-        <Table data={filteredData} />
+        <Table data={filteredData} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
       </div>
     </div>
   );

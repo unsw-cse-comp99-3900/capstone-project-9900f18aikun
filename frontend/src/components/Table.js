@@ -280,7 +280,7 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = ({ data }) => {
+const Table = ({ data,selectedDate, setSelectedDate }) => {
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
@@ -294,7 +294,7 @@ const Table = ({ data }) => {
     permission: false,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  // const [selectedDate, setSelectedDate] = useState(dayjs());
   const [hoveredRoom, setHoveredRoom] = useState(null);
   console.log("reservation is", reservations);
 
@@ -314,7 +314,7 @@ const Table = ({ data }) => {
           timeslot: extractTime(
             item.time_table,
             self,
-            item.HDR_student_permission
+            item.permission
           ),
         },
       ],
