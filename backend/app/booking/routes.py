@@ -32,10 +32,18 @@ class BookSpace(Resource):
         current_user = get_jwt_identity()
         zid = current_user['zid']
 
+
         room_id = data['room_id']
         start_time = data['start_time']
         end_time = data['end_time']
         date = data['date']
+        print(f'room id: {room_id}'
+              f'start time: {start_time}'
+              f'end time: {end_time}'
+              f'date: {date}')
+
+        if start_time > end_time:
+            return {'error': 'Start time must earlier than end time'}, 400
 
         conflict_bookings = Booking.query.filter(
             Booking.date == date,
@@ -91,6 +99,8 @@ class MeetingRoom(Resource):
         user_zid = current_user['zid']
 
         date = request.args.get('date')
+        print(f'user id: {user_zid}'
+              f'date: {date}')
 
         # define output list
         output = {}
