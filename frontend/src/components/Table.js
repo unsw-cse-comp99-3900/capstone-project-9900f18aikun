@@ -121,6 +121,7 @@ const SelectWindow = ({
   self,
   selectedDate,
   reservations,
+  index,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
@@ -187,7 +188,7 @@ const SelectWindow = ({
     }
 
     const obj = {
-      "room_id": "3",
+      "room_id": index,
       "date": selectedDate.format("YYYY-MM-DD"),
       "start_time": newTimes[0],
       "end_time": newTimes[newTimes.length - 1],
@@ -337,8 +338,8 @@ const Table = ({ data }) => {
   const [times, setTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
-    time: "10:00",
-    room: "302",
+    time: "",
+    room: "",
     position: { top: 0, left: 0 },
     self: selfReservation,
   });
@@ -441,7 +442,7 @@ const Table = ({ data }) => {
           </thead>
           <tbody>
             {/* map room to time */}
-            {classroom.map((idx, room) => (
+            {classroom.map((room, idx) => (
               <tr key={room} id={idx}>
                 <td className="room-column">{room}</td>
                 {times.map((time) => {
@@ -493,6 +494,7 @@ const Table = ({ data }) => {
         visible={selectWindow.visible}
         room={selectWindow.room}
         position={selectWindow.position}
+        idx={selectWindow.idx}
         close={hideSelectWindow}
         time={selectWindow.time}
         self={selectWindow.self}
