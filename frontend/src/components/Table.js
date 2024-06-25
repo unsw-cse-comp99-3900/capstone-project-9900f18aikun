@@ -427,12 +427,12 @@ const Table = ({ data }) => {
             className="legend-color"
             style={{ backgroundColor: "#b9b9b9" }}
           ></div>
-          <div className="legend-text">Reserved</div>
+          <div className="legend-text">Reserved By Others</div>
         </div>
         <div className="legend-item">
           <div
             className="legend-color"
-            style={{ backgroundColor: "blue" }}
+            style={{ backgroundColor: "#4c2d83" }}
           ></div>
           <div className="legend-text">Self-Reserved</div>
         </div>
@@ -448,7 +448,7 @@ const Table = ({ data }) => {
             className="legend-color"
             style={{ backgroundColor: "rgb(221, 216, 169)" }}
           ></div>
-          <div className="legend-text">No Permission</div>
+          <div className="legend-text">Booking Request Required</div>
         </div>
       </div>
 
