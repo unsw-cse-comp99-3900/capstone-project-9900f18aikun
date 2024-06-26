@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import dayjs from 'dayjs'; // 导入 dayjs
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 import Table from './components/Table';
-
 import Filter from './components/filter';
-import './App.css'; // 引入CSS文件
-
+import LoginPage from './components/LoginPage';
+import HeaderBar from './components/HeaderBar';
+import ToMap from './components/toMap';
+import SelectMap from './components/selectMap';
+import './App.css';
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -13,14 +17,14 @@ function App() {
     capacity: '',
     category: 'meetingroom'
   });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // 控制侧边栏的状态
-  const [selectedDate, setSelectedDate] = useState(dayjs()); 
-  // console.log(selectedDate);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const navigate = useNavigate();
 
   const fetchBookingData = async () => {
     try {
-      const formattedDate = selectedDate.format('YYYY-MM-DD'); // 将 selectedDate 转换成 'YYYY-MM-DD' 格式
-      console.log(formattedDate)
+      const formattedDate = selectedDate.format('YYYY-MM-DD');
+      console.log(formattedDate);
       const response = await fetch(`/api/booking/meetingroom?date=${formattedDate}`, {
         method: "GET",
         headers: {
@@ -31,7 +35,7 @@ function App() {
       const text = await response.text();
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
-      console.log("data is", dataArray)
+      console.log("data is", dataArray);
       setData(dataArray);
       setFilteredData(dataArray);
     } catch (error) {
@@ -51,30 +55,81 @@ function App() {
     setFilters(filters);
   };
 
-
   useEffect(() => {
-    fetchBookingData();
-  }, [selectedDate]); // 添加 selectedDate 作为依赖项
+    if (isLoggedIn) {
+      fetchBookingData();
+    }
+  }, [selectedDate, isLoggedIn]);
 
   useEffect(() => {
     handleFilter(filters);
   }, [filters, data]);
-  //输出筛选后的数据到控制台
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    navigate('/dashboard');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   useEffect(() => {
-    // console.log(filteredData);
-  }, [filteredData]);
+    if (isLoggedIn) {
+      fetchBookingData();
+    }
+  }, [isLoggedIn, selectedDate]);
 
   return (
     <div className="app">
-      <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-        <button className="toggle-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-          {isSidebarOpen ? '<<' : '>>'}
-        </button>
-        {isSidebarOpen && <Filter onFilter={handleFilter} />}
-      </div>
-      <div className="content">
-        <Table data={filteredData} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
-      </div>
+      <Routes>
+        <Route 
+          path="/login" 
+          element={!isLoggedIn ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/dashboard" />} 
+        />
+        <Route
+          path="/dashboard"
+          element={
+            isLoggedIn ? (
+              <>
+                <HeaderBar onLogout={handleLogout} />
+                <div className="main-content">
+                  <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+                    <button className="toggle-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                      {isSidebarOpen ? '<<' : '>>'}
+                    </button>
+                    {isSidebarOpen && <Filter onFilter={handleFilter} />}
+                  </div>
+                  <div className="content">
+                    <Table data={filteredData} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+                    <div className="to-map-wrapper">
+                      <ToMap />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route 
+          path="/select-map" 
+          element={
+            isLoggedIn ? (
+              <>
+                <HeaderBar onLogout={handleLogout} />
+                <SelectMap />
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
+          } 
+        />
+        <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
+      </Routes>
     </div>
   );
 }
