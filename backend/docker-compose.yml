@@ -1,13 +1,21 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./key:/etc/nginx/ssl
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - web
+
   web:
     build: .
     command: python run.py
-    ports:
-      - "5001:5001"
-    depends_on:
-      - db
     environment:
       - DATABASE_URL=postgresql://bookadmin:qweasdzxc9@db:5432/bookingsystem
       - JWT_SECRET_KEY=87654321
@@ -21,9 +29,6 @@ services:
       POSTGRES_USER: bookadmin
       POSTGRES_PASSWORD: qweasdzxc9
       POSTGRES_DB: bookingsystem
-      TZ: Australia/Sydney
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
