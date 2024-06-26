@@ -48,7 +48,7 @@ function App() {
       return (
         (filters.level === '' || item.level === filters.level) &&
         (filters.capacity === '' || item.capacity >= filters.capacity) &&
-        (filters.type === '' || filters.type === 'meetingroom')
+        (filters.category === '' || filters.category === 'meetingroom')
         // (filters.type === '' || item.type === filters.type)
       );
     });

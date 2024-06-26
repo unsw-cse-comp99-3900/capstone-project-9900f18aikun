@@ -5,7 +5,7 @@ function Filter({ onFilter }) {
   const [filters, setFilters] = useState({
     level: '',
     capacity: '',
-    type: 'meetingroom'
+    category: 'meetingroom'
   });
 
   const handleFilterChange = (e) => {
@@ -15,7 +15,7 @@ function Filter({ onFilter }) {
       ...filters,
       [name]: name === 'capacity' ? parseInt(value) || '' : value
     });
-    console.log(filters.category)
+    // console.log(filters.category)
   };
 
   const handleSubmit = (e) => {
@@ -54,7 +54,7 @@ function Filter({ onFilter }) {
         </div>
         <div className="form-group">
           <label>Category:</label>
-          <select name="type" value={filters.type} onChange={handleFilterChange}>
+          <select name="category" value={filters.category} onChange={handleFilterChange}>
             <option value="meetingroom">Meeting Room</option>
             <option value="hotdesk">Hot Desk</option>
           </select>
