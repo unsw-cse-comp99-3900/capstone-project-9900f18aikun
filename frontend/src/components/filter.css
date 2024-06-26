@@ -1,0 +1,69 @@
+.sidebar {
+    background-color: #4b2e83;
+    color: white;
+    padding: 20px;
+    transition: width 0.3s;
+    overflow: hidden;
+  }
+  
+  .sidebar.open {
+    width: 250px;
+  }
+  
+  .sidebar.closed {
+    width: 50px;
+  }
+  
+  .toggle-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .filter-title {
+    color: white;
+    font-size: 22px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    margin-bottom: 5px;
+    font-size: 16px;
+    display: block;
+  }
+  
+  select, button {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+  }
+  
+  select {
+    background-color: #6a4f9c;
+    color: white;
+  }
+  
+  button {
+    background-color: #8a6bb8;
+    color: white;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #7a5ba8;
+  }
