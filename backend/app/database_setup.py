@@ -64,7 +64,7 @@ def set_up_database():
                 user_type='HDR_student',
             )
             db.session.add(users)
-
+    print(staff_sheet)
     # update data to staff table and users table
     for index, row in staff_sheet.iterrows():
         if not db.session.get(CSEStaff, row['zid']):
@@ -78,12 +78,13 @@ def set_up_database():
                 role=row.get('role', None),
                 password=row['password']
             )
+
             db.session.add(staff)
         if not db.session.get(Users, row['zid']):
             users = Users(
                 zid=row['zid'],
                 password=row['password'],
-                user_type='HDR_student',
+                user_type='CSE staff',
             )
             db.session.add(users)
 

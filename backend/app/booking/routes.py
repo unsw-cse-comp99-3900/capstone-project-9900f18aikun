@@ -2,6 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api
 from .models import Booking, RoomDetail
+from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert
 from jwt import exceptions
@@ -17,7 +18,9 @@ booking_model = booking_ns.model('Booking request', {
     'end_time': fields.String(required=True, description='End time of the booking (HH:MM)')
 })
 
-# TODO: long term booking
+
+# TODO!: long term booking request
+
 # Apis about booking
 @booking_ns.route('/book')
 class BookSpace(Resource):
@@ -44,7 +47,8 @@ class BookSpace(Resource):
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', start_time) or not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', end_time):
+        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', start_time) or not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', end_time):
             return {'error': 'time must be in HH:MM format'}, 400
 
         if start_time > end_time:
@@ -63,29 +67,50 @@ class BookSpace(Resource):
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 400
 
+        user = db.session.get(Users, zid)
+        if not user:
+            return {'error': 'Invalid zid'}, 400
+        user_type = user.user_type
+        is_request = False
+        if user_type != "CSE staff":
+            is_request = True
+
         new_booking = Booking(
             room_id=room_id,
             user_id=zid,
             start_time=start_time,
             end_time=end_time,
             date=date,
-            booking_status='confirmed'
+            booking_status='confirmed',
+            is_request=is_request
         )
+
         db.session.add(new_booking)
         db.session.commit()
 
-        return {'message': f'Booking confirmed'
-                           f'room id: {room_id}'
-                           f'start time: {start_time}'
-                           f'end time: {end_time}'
-                           f'date: {date}'
-                }, 200
+        if not is_request:
+            return {'message': f'Booking confirmed'
+                               f'room id: {room_id}'
+                               f'start time: {start_time}'
+                               f'end time: {end_time}'
+                               f'date: {date}'
+                    }, 200
+        else:
+            return {'message': f'Booking confirmed'
+                               f'room id: {room_id}'
+                               f'start time: {start_time}'
+                               f'end time: {end_time}'
+                               f'date: {date}'
+                               f'is_request: {is_request}'
+
+                    }, 200
 
 
 date_query = booking_ns.parser()
 date_query.add_argument('date', type=str, required=True, help='Date to request')
 
 
+# TODO! permission
 # Apis about meeting room
 @booking_ns.route('/meetingroom')
 class MeetingRoom(Resource):
@@ -112,6 +137,7 @@ class MeetingRoom(Resource):
         user_zid = current_user['zid']
 
         date = request.args.get('date')
+        user_type = db.session.get(Users, user_zid)
 
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
@@ -127,9 +153,11 @@ class MeetingRoom(Resource):
                 "building": room.building,
                 "level": room.level,
                 "capacity": room.capacity,
-                "HDR_student_permission": room.HDR_student_permission,
-                "CSE_staff_permission": room.CSE_staff_permission,
-                "time_table":  [[] for _ in range(48)]
+                "type": "meeting_room",
+                "permission": room.HDR_student_permission if user_type == "HDR_student"
+                                else room.CSE_staff_permission if user_type == "CSE_staff"
+                                else room.HDR_student_permission,
+                "time_table": [[] for _ in range(48)]
             }
 
         for key, value in output.items():
@@ -138,8 +166,7 @@ class MeetingRoom(Resource):
                 Booking.room_id == key,
             ).all()
             for booking in bookings:
-                start_index, end_index = start_end_time_convert(booking.start_time,booking.end_time)
-                print(f"{start_index}, {end_index}")
+                start_index, end_index = start_end_time_convert(booking.start_time, booking.end_time)
                 for index in range(start_index, end_index):
                     value["time_table"][index] = {
                         "id": booking.id,

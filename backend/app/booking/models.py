@@ -33,5 +33,5 @@ class Booking(db.Model):
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     booking_status = db.Column(db.String(128), nullable=False)
-
+    is_request = db.Column(db.Boolean, nullable=False)
 
