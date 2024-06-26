@@ -1,8 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api
-from .models import Booking, RoomDetail
-from app.models import Users
+from .models import Booking, RoomDetail, Space, HotDeskDetail
+from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert
 from jwt import exceptions
@@ -72,8 +72,11 @@ class BookSpace(Resource):
             return {'error': 'Invalid zid'}, 400
         user_type = user.user_type
         is_request = False
-        if user_type != "CSE staff":
+        if user_type != "CSE staff" and db.session.get(Space, room_id).space_type == "room":
             is_request = True
+        if user_type == "CSE staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+            is_request = True
+
 
         new_booking = Booking(
             room_id=room_id,
@@ -88,22 +91,16 @@ class BookSpace(Resource):
         db.session.add(new_booking)
         db.session.commit()
 
-        if not is_request:
-            return {'message': f'Booking confirmed'
-                               f'room id: {room_id}'
-                               f'start time: {start_time}'
-                               f'end time: {end_time}'
-                               f'date: {date}'
-                    }, 200
-        else:
-            return {'message': f'Booking confirmed'
-                               f'room id: {room_id}'
-                               f'start time: {start_time}'
-                               f'end time: {end_time}'
-                               f'date: {date}'
-                               f'is_request: {is_request}'
 
-                    }, 200
+
+        return {'message': f'Booking confirmed'
+                           f'room id: {room_id}'
+                           f'start time: {start_time}'
+                           f'end time: {end_time}'
+                           f'date: {date}'
+                           f'is_request: {is_request}'
+
+                }, 200
 
 
 date_query = booking_ns.parser()
@@ -158,6 +155,24 @@ class MeetingRoom(Resource):
                 "time_table": [[] for _ in range(48)]
             }
 
+        hot_desks = HotDeskDetail.query.all()
+        for hot_desk in hot_desks:
+            output[hot_desk.id] = {
+                "id": hot_desk.id,
+                "name": hot_desk.name,
+                "building": hot_desk.building,
+                "level": hot_desk.level,
+                "capacity": hot_desk.capacity,
+                "type": "hot_desk",
+                "permission": hot_desk.HDR_student_permission if user_type == "HDR_student"
+                                else hot_desk.CSE_staff_permission if user_type == "CSE_staff"
+                                else hot_desk.HDR_student_permission,
+                "time_table": [[] for _ in range(48)]
+            }
+
+
+
+        # add time content
         for key, value in output.items():
             bookings = Booking.query.filter(
                 Booking.date == date,
