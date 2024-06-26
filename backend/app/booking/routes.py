@@ -120,7 +120,6 @@ class MeetingRoom(Resource):
     @booking_ns.doc(description="Get meeting room time list")
     @booking_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
-    @jwt_required()
     def get(self):
         try:
             verify_jwt_in_request()
@@ -131,7 +130,6 @@ class MeetingRoom(Resource):
         except exceptions.InvalidTokenError:
             return {"error": "Token is invalid"}, 422
         except Exception as e:
-            print(e)
             return {"error": str(e)}, 500
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
