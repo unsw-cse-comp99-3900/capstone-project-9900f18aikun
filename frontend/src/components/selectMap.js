@@ -16,7 +16,7 @@ const level = [
 ];
 
 function SelectMap() {
-  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('A-K17-B');
 
   const handleLevelChange = (event) => {
     setSelectedLevel(event.target.value);
@@ -24,6 +24,7 @@ function SelectMap() {
 
   return (
     <div className="selectMapContainer">
+      {/* <h2 className="map-title">Select by Map</h2>  */}
       <Link to="/dashboard" className="back-button">Back to Dashboard</Link>
       <div className="selectRow">
         <label htmlFor="levelSelect" className="selectLabel">

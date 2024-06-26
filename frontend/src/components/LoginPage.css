@@ -13,6 +13,7 @@
         height: 1024px;
         overflow: hidden;
         width: 1440px;
+        
     }
     
     .login-page .overlap-group {
@@ -265,3 +266,5 @@
       .login-page .text-wrapper-3:hover{
         color: #FFFEF8
       }
+
+      

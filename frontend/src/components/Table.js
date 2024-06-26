@@ -6,7 +6,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
-
+import ToMap from './toMap';
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -400,6 +400,7 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
   return (
     <div className="table-container">
       <div className="calendar-container">
+      <div className="calendar-row">
         <Button
           onClick={toggleCalendarVisibility}
           variant="contained"
@@ -416,9 +417,13 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
             />
           </LocalizationProvider>
         )}
-        <div>
+        <div className="calendar-text">
           <strong>Chosen Date: </strong>
           {selectedDate.format("dddd, MMMM D, YYYY")}
+        </div>
+        </div>
+        <div className="to-map">
+            <ToMap />
         </div>
       </div>
 

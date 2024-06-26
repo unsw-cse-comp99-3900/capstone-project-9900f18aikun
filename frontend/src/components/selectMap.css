@@ -3,13 +3,27 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
+
+}
+
+.map-title {
+  align-self: flex-start; /* Align the title to the left */
+  margin: 10px 0px 0 300px; /* Space between title and button */
 }
 
 .selectMapContainer .selectLabel {
   background-color: #fff3cd; /* 浅黄色背景 */
   border-radius: 8px; /* 圆滑边框 */
-  padding: 5px 10px;
+  padding: 8px 10px 0 12px;
   margin-right: 10px; /* 在标签和选择框之间添加间隔 */
+  width: 150px;
+  height: 25px;
+  background-color: #e8e8e8; /* Neutral background */
+  border-radius: 8px;
+
+  margin-top: 10px;
+/* Adjust width to content */
+  /* font-weight: bold;  */
 }
 
 .selectMapContainer .selectRow {
@@ -23,6 +37,8 @@
   font-size: 16px;
   border-radius: 4px;
   border: 1px solid #ccc;
+  background-color: white;
+  color: black;
 }
 
 .selectMapContainer img {
@@ -43,3 +59,4 @@
 .back-button:hover {
   background-color: #4b2e83;
 }
+

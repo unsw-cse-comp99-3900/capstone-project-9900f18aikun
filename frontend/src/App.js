@@ -5,7 +5,7 @@ import Table from './components/Table';
 import Filter from './components/filter';
 import LoginPage from './components/LoginPage';
 import HeaderBar from './components/HeaderBar';
-import ToMap from './components/toMap';
+// import ToMap from './components/toMap';
 import SelectMap from './components/selectMap';
 import './App.css';
 function App() {
@@ -104,9 +104,9 @@ function App() {
                   </div>
                   <div className="content">
                     <Table data={filteredData} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
-                    <div className="to-map-wrapper">
+                    {/* <div className="to-map-wrapper">
                       <ToMap />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </>
