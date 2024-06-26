@@ -1,12 +1,9 @@
 from .extensions import db
 import pandas as pd
 from .models import HDRStudent, CSEStaff, Users
-from app.booking.models import RoomDetail, Space
+from app.booking.models import RoomDetail, Space, HotDeskDetail
 import numpy as np
-
-
-# Read user data from given excel
-def set_up_database():
+def set_up_HDRstudent_db():
     file_path = "data/CSE Active HDR candidates staff details 210624.xlsx"
     student_sheet = pd.read_excel(file_path, sheet_name='HDR students')
     staff_sheet = pd.read_excel(file_path, sheet_name='CSE staff')
@@ -64,7 +61,6 @@ def set_up_database():
                 user_type='HDR_student',
             )
             db.session.add(users)
-    print(staff_sheet)
     # update data to staff table and users table
     for index, row in staff_sheet.iterrows():
         if not db.session.get(CSEStaff, row['zid']):
@@ -89,10 +85,10 @@ def set_up_database():
             db.session.add(users)
 
     db.session.commit()
-
+def set_up_space_db():
     # room information update, excel start from line 3
-    file_path = "data/Meeting Rooms CSE K17 and J17 L5.xlsx"
-    room_detail_sheet = pd.read_excel(file_path, header=2)
+    meeting_room_path = "data/Meeting Rooms CSE K17 and J17 L5.xlsx"
+    room_detail_sheet = pd.read_excel(meeting_room_path, header=2)
 
     # get the accessibility
     room_detail_sheet['HDR_student_permission'] = room_detail_sheet['Who can use it?'].str.contains(r'HDR students',
@@ -111,12 +107,6 @@ def set_up_database():
 
 
     for index, row in room_detail_sheet.iterrows():
-        space = Space(
-            space_type='Room'
-        )
-        db.session.add(space)
-        db.session.commit()
-        # check db whether exist
         exists = db.session.query(
             db.exists().where(
                 RoomDetail.building == row['building'],
@@ -124,16 +114,72 @@ def set_up_database():
             )
         ).scalar()
 
+        if exists:
+            continue
+
+        space = Space(
+            space_type='room'
+        )
+        db.session.add(space)
+        db.session.commit()
+
+
+        room_detail = RoomDetail(
+            id=space.id,
+            building=row['building'],
+            name=row['name'],
+            level=row['level'],
+            capacity=row['capacity'],
+            HDR_student_permission=row['HDR_student_permission'],
+            CSE_staff_permission=row['CSE_staff_permission']
+        )
+        db.session.add(room_detail)
+    db.session.commit()
+
+    hot_desk_path = "data/hot_desk_data.xlsx"
+    hot_desk_sheet = pd.read_excel(hot_desk_path)
+
+    for index, row in hot_desk_sheet.iterrows():
+        exists = db.session.query(
+            db.exists().where(
+                HotDeskDetail.building == row['building'],
+                HotDeskDetail.number == int(row['number']),
+                HotDeskDetail.room == str(row['room'])
+            )
+        ).scalar()
+
+        if exists:
+            continue
+
+        space = Space(
+            space_type='hot_desk'
+        )
+        db.session.add(space)
+        db.session.commit()
+
         if not exists:
-            room_detail = RoomDetail(
+            hot_desk_detail = HotDeskDetail(
                 id=space.id,
                 building=row['building'],
-                name=row['name'],
+                room=row['room'],
                 level=row['level'],
-                capacity=row['capacity'],
-                HDR_student_permission=row['HDR_student_permission'],
-                CSE_staff_permission=row['CSE_staff_permission']
+                number=row['number'],
+                name=f'Room {row["room"]} {row["number"]}',
+                capacity=1,
+                HDR_student_permission=True,
+                CSE_staff_permission=True,
             )
-            db.session.add(room_detail)
-
+            db.session.add(hot_desk_detail)
     db.session.commit()
+
+
+
+
+
+
+
+# Read user data from given excel
+def set_up_database():
+    set_up_HDRstudent_db()
+    set_up_space_db()
+
