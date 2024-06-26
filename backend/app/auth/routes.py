@@ -1,12 +1,13 @@
 from flask_restx import Namespace, Resource, fields
 from flask import redirect, send_file, make_response,  request, Flask, jsonify, current_app, url_for
 import requests
-from app.extensions import db, jwt
+from app.extensions import db, jwt, api
 from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 
 
 auth_ns = Namespace('auth', description='Authentication operations')
+api.add_namespace(auth_ns)
 
 user_model = auth_ns.model('User', {
     'zid': fields.String(required=True, description='The user zid'),

@@ -1,10 +1,11 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
+import config from './config';
 
 module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://s2.gnip.vip:37895',
+      target: config.backendUrl,
       changeOrigin: true,
       pathRewrite: {
         '^/api': '', // Remove /api prefix

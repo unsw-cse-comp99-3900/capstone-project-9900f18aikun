@@ -1,5 +1,6 @@
 import './LoginPage.css';
 import React, { useEffect, useState } from 'react';
+import config from '../config';
 
 const LoginPage = ({ onLogin }) => {
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -20,7 +21,7 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     try {
-      const response = await fetch('http://s2.gnip.vip:37895/auth/login', {
+      const response = await fetch(`${config.backendUrl}/auth/login` , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

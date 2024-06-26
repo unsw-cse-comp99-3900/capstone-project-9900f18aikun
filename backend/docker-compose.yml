@@ -6,6 +6,7 @@ services:
     command: python run.py
     ports:
       - "5001:5001"
+      - "5443:5443"
     depends_on:
       - db
     environment:
@@ -13,6 +14,7 @@ services:
       - JWT_SECRET_KEY=87654321
     volumes:
       - ./data:/app/data
+      - ./key:/app/key
       - /etc/localtime:/etc/localtime:ro
 
   db:
