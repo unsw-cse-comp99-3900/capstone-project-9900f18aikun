@@ -140,36 +140,8 @@ class MeetingRoom(Resource):
         # define output list
         output = {}
 
-        rooms = RoomDetail.query.all()
-        for room in rooms:
-            output[room.id] = {
-                "id": room.id,
-                "name": room.name,
-                "building": room.building,
-                "level": room.level,
-                "capacity": room.capacity,
-                "type": "meeting_room",
-                "permission": room.HDR_student_permission if user_type == "HDR_student"
-                                else room.CSE_staff_permission if user_type == "CSE_staff"
-                                else room.HDR_student_permission,
-                "time_table": [[] for _ in range(48)]
-            }
-
-        hot_desks = HotDeskDetail.query.all()
-        for hot_desk in hot_desks:
-            output[hot_desk.id] = {
-                "id": hot_desk.id,
-                "name": hot_desk.name,
-                "building": hot_desk.building,
-                "level": hot_desk.level,
-                "capacity": hot_desk.capacity,
-                "type": "hot_desk",
-                "permission": hot_desk.HDR_student_permission if user_type == "HDR_student"
-                                else hot_desk.CSE_staff_permission if user_type == "CSE_staff"
-                                else hot_desk.HDR_student_permission,
-                "time_table": [[] for _ in range(48)]
-            }
-
+        output = generate_space_output(output, "meeting_room", user_type)
+        output = generate_space_output(output, "hot_desk", user_type)
 
 
         # add time content
@@ -187,3 +159,23 @@ class MeetingRoom(Resource):
                     }
 
         return output, 200
+
+def generate_space_output(output, book_type, user_type):
+    if book_type == "meeting_room":
+        details = RoomDetail.query.all()
+    else:
+        details = HotDeskDetail.query.all()
+    for detail in details:
+        output[detail.id] = {
+            "id": detail.id,
+            "name": detail.name,
+            "building": detail.building,
+            "level": detail.level,
+            "capacity": detail.capacity,
+            "type": book_type,
+            "permission": detail.HDR_student_permission if user_type == "HDR_student"
+            else detail.CSE_staff_permission if user_type == "CSE_staff"
+            else detail.HDR_student_permission,
+            "time_table": [[] for _ in range(48)]
+        }
+    return output
