@@ -5,8 +5,6 @@ from app.models import CSEStaff, HDRStudent, Users
 
 # convert time HH:MM to index for every half hour
 def time_convert(time):
-    print(time)
-
     index = time.hour * 2 + time.minute / 30
     return index
 

@@ -1,8 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api
-from .models import Booking, RoomDetail
-from app.models import Users
+from .models import Booking, RoomDetail, Space, HotDeskDetail
+from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import get_email, get_name, is_student, send_simple_email, start_end_time_convert
 from jwt import exceptions
@@ -41,26 +41,6 @@ class BookSpace(Resource):
         end_time = data['end_time']
         date = data['date']
 
-        subject = "Confirmation of K17 Room Booking"
-        message = f"""
-        Hi {get_name(zid)},
-
-        I am writing to confirm your booking at our system. Details of the booking are as follows:
-
-        - Room Number: {room_id}
-        - Date: {date}
-        - Time: {start_time} -- {end_time}
-
-        Please contact us if you need to make any changes or have any questions.
-
-        Best regards,
-
-        K17 Room Booking System
-        """
-
-        send_simple_email(get_email(zid), subject, message)
-        return {"email": get_email(zid)}, 200
-
         if not isinstance(data['room_id'], int):
             return {'error': 'room id must be integer'}, 400
 
@@ -92,8 +72,11 @@ class BookSpace(Resource):
             return {'error': 'Invalid zid'}, 400
         user_type = user.user_type
         is_request = False
-        if user_type != "CSE staff":
+        if user_type != "CSE staff" and db.session.get(Space, room_id).space_type == "room":
             is_request = True
+        if user_type == "CSE staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+            is_request = True
+
 
         new_booking = Booking(
             room_id=room_id,
@@ -107,26 +90,42 @@ class BookSpace(Resource):
 
         db.session.add(new_booking)
         db.session.commit()
-        
-        return {"email": get_email(zid)}, 200
 
+        subject = "Confirmation of K17 Room Booking"
+        message = f"""
+        Hi {get_name(zid)},
 
-        # if not is_request:
-        #     return {'message': f'Booking confirmed'
-        #                        f'room id: {room_id}'
-        #                        f'start time: {start_time}'
-        #                        f'end time: {end_time}'
-        #                        f'date: {date}'
-        #             }, 200
-        # else:
-        #     return {'message': f'Booking confirmed'
-        #                        f'room id: {room_id}'
-        #                        f'start time: {start_time}'
-        #                        f'end time: {end_time}'
-        #                        f'date: {date}'
-        #                        f'is_request: {is_request}'
+        I am writing to confirm your booking at our system. Details of the booking are as follows:
 
-        #             }, 200
+        - Room Number: {room_id}
+        - Date: {date}
+        - Time: {start_time} -- {end_time}
+
+        Please contact us if you need to make any changes or have any questions.
+
+        Best regards,
+
+        K17 Room Booking System
+        """
+
+        send_simple_email(get_email(zid), subject, message)
+
+        if not is_request:
+            return {'message': f'Booking confirmed'
+                               f'room id: {room_id}'
+                               f'start time: {start_time}'
+                               f'end time: {end_time}'
+                               f'date: {date}'
+                    }, 200
+        else:
+            return {'message': f'Booking confirmed'
+                               f'room id: {room_id}'
+                               f'start time: {start_time}'
+                               f'end time: {end_time}'
+                               f'date: {date}'
+                               f'is_request: {is_request}'
+
+                    }, 200
 
 
 date_query = booking_ns.parser()
@@ -166,21 +165,11 @@ class MeetingRoom(Resource):
         # define output list
         output = {}
 
-        rooms = RoomDetail.query.all()
-        for room in rooms:
-            output[room.id] = {
-                "id": room.id,
-                "name": room.name,
-                "building": room.building,
-                "level": room.level,
-                "capacity": room.capacity,
-                "type": "meeting_room",
-                "permission": room.HDR_student_permission if user_type == "HDR_student"
-                                else room.CSE_staff_permission if user_type == "CSE_staff"
-                                else room.HDR_student_permission,
-                "time_table": [[] for _ in range(48)]
-            }
+        output = generate_space_output(output, "meeting_room", user_type)
+        output = generate_space_output(output, "hot_desk", user_type)
 
+
+        # add time content
         for key, value in output.items():
             bookings = Booking.query.filter(
                 Booking.date == date,
@@ -195,3 +184,23 @@ class MeetingRoom(Resource):
                     }
 
         return output, 200
+
+def generate_space_output(output, book_type, user_type):
+    if book_type == "meeting_room":
+        details = RoomDetail.query.all()
+    else:
+        details = HotDeskDetail.query.all()
+    for detail in details:
+        output[detail.id] = {
+            "id": detail.id,
+            "name": detail.name,
+            "building": detail.building,
+            "level": detail.level,
+            "capacity": detail.capacity,
+            "type": book_type,
+            "permission": detail.HDR_student_permission if user_type == "HDR_student"
+            else detail.CSE_staff_permission if user_type == "CSE_staff"
+            else detail.HDR_student_permission,
+            "time_table": [[] for _ in range(48)]
+        }
+    return output
