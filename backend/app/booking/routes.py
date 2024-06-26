@@ -4,7 +4,7 @@ from app.extensions import db, api
 from .models import Booking, RoomDetail
 from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert
+from app.utils import get_email, get_name, is_student, send_simple_email, start_end_time_convert
 from jwt import exceptions
 import re
 
@@ -40,6 +40,26 @@ class BookSpace(Resource):
         start_time = data['start_time']
         end_time = data['end_time']
         date = data['date']
+
+        subject = "Confirmation of K17 Room Booking"
+        message = f"""
+        Hi {get_name(zid)},
+
+        I am writing to confirm your booking at our system. Details of the booking are as follows:
+
+        - Room Number: {room_id}
+        - Date: {date}
+        - Time: {start_time} -- {end_time}
+
+        Please contact us if you need to make any changes or have any questions.
+
+        Best regards,
+
+        K17 Room Booking System
+        """
+
+        send_simple_email(get_email(zid), subject, message)
+        return {"email": get_email(zid)}, 200
 
         if not isinstance(data['room_id'], int):
             return {'error': 'room id must be integer'}, 400
@@ -87,23 +107,26 @@ class BookSpace(Resource):
 
         db.session.add(new_booking)
         db.session.commit()
+        
+        return {"email": get_email(zid)}, 200
 
-        if not is_request:
-            return {'message': f'Booking confirmed'
-                               f'room id: {room_id}'
-                               f'start time: {start_time}'
-                               f'end time: {end_time}'
-                               f'date: {date}'
-                    }, 200
-        else:
-            return {'message': f'Booking confirmed'
-                               f'room id: {room_id}'
-                               f'start time: {start_time}'
-                               f'end time: {end_time}'
-                               f'date: {date}'
-                               f'is_request: {is_request}'
 
-                    }, 200
+        # if not is_request:
+        #     return {'message': f'Booking confirmed'
+        #                        f'room id: {room_id}'
+        #                        f'start time: {start_time}'
+        #                        f'end time: {end_time}'
+        #                        f'date: {date}'
+        #             }, 200
+        # else:
+        #     return {'message': f'Booking confirmed'
+        #                        f'room id: {room_id}'
+        #                        f'start time: {start_time}'
+        #                        f'end time: {end_time}'
+        #                        f'date: {date}'
+        #                        f'is_request: {is_request}'
+
+        #             }, 200
 
 
 date_query = booking_ns.parser()
