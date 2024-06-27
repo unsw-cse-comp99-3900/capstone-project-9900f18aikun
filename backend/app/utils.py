@@ -1,6 +1,6 @@
 
 from app.extensions import db
-from app.booking.models import RoomDetail
+from app.booking.models import RoomDetail, Space, HotDeskDetail
 from app.models import CSEStaff, HDRStudent, Users
 
 # convert time HH:MM to index for every half hour
@@ -30,6 +30,14 @@ def is_staff(zid: str) -> bool:
     else:
         return False
 
+def is_meeting_room(room_id: int) -> bool:
+    space = db.session.get(Space, room_id)
+    space_type = space.space_type
+    if space_type == "meeting_room":
+        return True
+    else:
+        return False
+
 # get usr's name
 def get_user_name(zid: str) -> str:
     if is_student(zid):
@@ -40,7 +48,13 @@ def get_user_name(zid: str) -> str:
         return staff.name
 
 # get room's name
-def get_room_name(room_id: str) -> str:
-    room = db.session.get(RoomDetail, room_id)
-    return room.name
+def get_room_name(room_id: int) -> str:
+    if is_meeting_room(room_id):
+        meeting_room = db.session.get(RoomDetail, room_id)
+        return meeting_room.name
+    else:
+        hot_desk = db.session.get(HotDeskDetail, room_id)
+        return hot_desk.name
+
+
 
