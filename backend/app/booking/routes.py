@@ -1,12 +1,17 @@
+from datetime import datetime, timedelta
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api
 from .models import Booking, RoomDetail, Space, HotDeskDetail
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import get_email, get_room_name, get_user_name, is_student, send_email, send_email_async, start_end_time_convert
+from app.utils import start_end_time_convert
+from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 import re
+from apscheduler.schedulers.background import BackgroundScheduler
+
+scheduler = BackgroundScheduler()
 
 booking_ns = Namespace('booking', description='Booking operations')
 
@@ -91,30 +96,13 @@ class BookSpace(Resource):
         db.session.add(new_booking)
         db.session.commit()
 
-        subject = "Confirmation of K17 Room Booking"
-        message = f"""
-        Hi {get_user_name(zid)},
-
-        I am writing to confirm your booking at our system. Details of the booking are as follows:
-
-        - Room: {get_room_name(room_id)}
-        - Date: {date}
-        - Time: {start_time} -- {end_time}
-
-        Please contact us if you need to make any changes or have any questions.
-
-        Best regards,
-
-        K17 Room Booking System
-        """
-
-        # this is single thread send 
-        # send_email(get_email(zid), subject, message)
-
-        # this is multi thread send email 
-        send_email_async(zid, subject, message)
-
-
+        send_confirm_email_async(zid, room_id, date, start_time, end_time)
+        schedule_reminder(zid, room_id, start_time, date, end_time)
+        dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+        reminder_time = dt_start_time - timedelta(hours=1)
+        return {"dt_start_time": dt_start_time.isoformat(),
+                "reminder_time": reminder_time.isoformat()
+                }, 200
         if not is_request:
             return {'message': f'Booking confirmed'
                                f'room id: {room_id}'
