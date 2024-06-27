@@ -11,14 +11,23 @@ import dayjs from "dayjs";
 const getSydneyTime = async () => {
   while (true) {
     try {
-      const response = await axios.get(
-        "http://worldtimeapi.org/api/timezone/Australia/Sydney"
-      );
-      const datetime = new Date(response.data.datetime);
-      return datetime;
+      const response = await fetch("/api/support/time", {
+        method: "GET",
+      });
+  
+      if (response.ok) {
+        // console.log("Successfully sent");
+        const result = await response.json();
+        const datetime = new Date(result.datetime);
+        console.log("datetime is", datetime);
+        return datetime
+      } else {
+        const errorText = await response.text();
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
     } catch (error) {
-      console.error("Error fetching Sydney time:", error);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      console.error("Error fetching booking data:", error);
     }
   }
 };
