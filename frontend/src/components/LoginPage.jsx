@@ -1,6 +1,5 @@
 import './LoginPage.css';
 import React, { useEffect, useState } from 'react';
-import config from '../config';
 
 const LoginPage = ({ onLogin }) => {
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -21,7 +20,7 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     try {
-      const response = await fetch(`${config.backendUrl}/auth/login` , {
+      const response = await fetch('http://127.0.0.1:5001/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
