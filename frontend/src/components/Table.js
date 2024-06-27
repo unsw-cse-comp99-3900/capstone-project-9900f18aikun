@@ -479,7 +479,6 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
                     className="room-column"
                     onMouseEnter={() => setHoveredRoom(roomData)}
                     onMouseLeave={() => setHoveredRoom(null)}
-                    style={{ position: "relative", zIndex: 2 }}
                   >
                     {item.room}
                     {hoveredRoom && hoveredRoom.name === item.room && (

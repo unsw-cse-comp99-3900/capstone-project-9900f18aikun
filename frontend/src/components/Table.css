@@ -40,6 +40,10 @@
 .table-wrapper {
   overflow-x: scroll;
   max-width: 780px;
+  overflow-y: scroll;
+  max-height: 600px;
+
+
 }
 
 table {
@@ -97,8 +101,11 @@ tbody tr td.room-column {
 }
 
 .room-column {
-  min-width: 50px;
-  max-width: 50px;
+  /* min-width: 50px;
+  max-width: 50px; */
+  width: max-content;
+  position: absolute;
+  z-index: 2;
 }
 
 .select-window {
