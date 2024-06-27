@@ -26,6 +26,9 @@ def create_app():
     from .booking.routes import booking_ns
     api.add_namespace(booking_ns, path='/booking')
 
+    from .support.routes import support_ns
+    api.add_namespace(support_ns, path='/support')
+
     with app.app_context():
         db.create_all()
         set_up_database()

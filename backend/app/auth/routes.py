@@ -7,7 +7,6 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 
 
 auth_ns = Namespace('auth', description='Authentication operations')
-api.add_namespace(auth_ns)
 
 user_model = auth_ns.model('User', {
     'zid': fields.String(required=True, description='The user zid'),
