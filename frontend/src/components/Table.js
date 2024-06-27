@@ -6,7 +6,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
-import ToMap from './toMap';
+import ToMap from "./toMap";
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -92,7 +92,7 @@ const SelectWindow = ({
   const [limit, setLimit] = useState(false);
   if (!visible) return null;
 
-  console.log(permission);
+  console.log("permission for room is", room, permission);
 
   const style = {
     top: position.top,
@@ -170,7 +170,7 @@ const SelectWindow = ({
       start_time: newTimes[0],
       end_time: endTime,
     };
-    console.log("object is", obj);
+    // console.log("object is", obj);
 
     try {
       const response = await fetch("/api/booking/book", {
@@ -280,7 +280,7 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = ({ data,selectedDate, setSelectedDate }) => {
+const Table = ({ data, selectedDate, setSelectedDate }) => {
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
@@ -291,7 +291,7 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
     roomid: "",
     position: { top: 0, left: 0 },
     self: selfReservations,
-    permission: false,
+    permission: "",
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   // const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -307,11 +307,12 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
     return data.map((item) => ({
       room: item.name,
       roomid: item.id,
-      permission: item.HDR_student_permission,
+      permission: item.permission,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
           timeslot: extractTime(
+            item.name,
             item.time_table,
             self,
             item.permission
@@ -321,7 +322,9 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
     }));
   };
 
-  const extractTime = (timeTable, self, permission) => {
+  const extractTime = (room, timeTable, self, permission) => {
+    console.log("room is", room);
+    console.log("timetable is ", timeTable);
     const timeslots = [];
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
@@ -329,13 +332,16 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
           ? slot.current_user_booking
           : !slot.current_user_booking;
         if (include) {
+          // console.log("did this print")
           const hour = Math.floor(index / 2);
           const minute = index % 2 === 0 ? "00" : "30";
           const time = `${hour.toString().padStart(2, "0")}:${minute}`;
-          timeslots.push({ time, permission });
+          console.log("time is", time);
+          timeslots.push(time);
         }
       }
     });
+    console.log("time is", timeslots);
     return timeslots;
   };
 
@@ -365,9 +371,20 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
 
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
-    console.log(room, roomid);
+    const className = event.currentTarget.className;
+    let permissionClass = "";
+
+    if (className.includes("reserved")) {
+      permissionClass = false;
+    } else if (className.includes("selfreserved")) {
+      permissionClass = false;
+    } else if (className.includes("no-permission")) {
+      permissionClass = false;
+    } else {
+      permissionClass = true;
+    }
     const target = event.target;
-    console.log("Class name:", target.className);
+
     if (
       target.classList.contains("reserved") ||
       target.classList.contains("selfreserved")
@@ -383,7 +400,7 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
       roomid,
       position,
       self: selfReservations,
-      permission: false,
+      permission: permissionClass, // Set the permission class
     });
   };
 
@@ -400,30 +417,30 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
   return (
     <div className="table-container">
       <div className="calendar-container">
-      <div className="calendar-row">
-        <Button
-          onClick={toggleCalendarVisibility}
-          variant="contained"
-          color="info"
-        >
-          {isCalendarVisible ? "Hide Calendar" : "Go to Date"}
-        </Button>
-        {isCalendarVisible && (
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar
-              shouldDisableDate={disableDates}
-              className="date-calendar-overlay"
-              onChange={handleDateChange}
-            />
-          </LocalizationProvider>
-        )}
-        <div className="calendar-text">
-          <strong>Chosen Date: </strong>
-          {selectedDate.format("dddd, MMMM D, YYYY")}
-        </div>
+        <div className="calendar-row">
+          <Button
+            onClick={toggleCalendarVisibility}
+            variant="contained"
+            color="info"
+          >
+            {isCalendarVisible ? "Hide Calendar" : "Go to Date"}
+          </Button>
+          {isCalendarVisible && (
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateCalendar
+                shouldDisableDate={disableDates}
+                className="date-calendar-overlay"
+                onChange={handleDateChange}
+              />
+            </LocalizationProvider>
+          )}
+          <div className="calendar-text">
+            <strong>Chosen Date: </strong>
+            {selectedDate.format("dddd, MMMM D, YYYY")}
+          </div>
         </div>
         <div className="to-map">
-            <ToMap />
+          <ToMap />
         </div>
       </div>
 
@@ -472,6 +489,7 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
           </thead>
           <tbody>
             {reservations.map((item) => {
+              const permission = item.permission;
               const roomData = data.find((d) => d.name === item.room);
               return (
                 <tr key={item.room} id={item.roomid}>
@@ -490,6 +508,7 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
                       </div>
                     )}
                   </td>
+
                   {times.map((time) => {
                     const isReserved = reservations.some(
                       (reservation) =>
@@ -516,20 +535,22 @@ const Table = ({ data,selectedDate, setSelectedDate }) => {
                         )
                     );
 
-                    const timeSlot = reservations.find(
-                      (reservation) =>
-                        reservation.room === item.room &&
-                        reservation.time.some(
-                          (slot) =>
-                            slot.date === selectedDate.format("DD/MM/YYYY") &&
-                            slot.timeslot.some((t) => t.time === time)
-                        )
-                    );
+                    // const timeSlot = reservations.find(
+                    //   (reservation) =>
+                    //     reservation.room === item.room &&
+                    //     reservation.time.some(
+                    //       (slot) =>
+                    //         slot.date === selectedDate.format("DD/MM/YYYY") &&
+                    //         slot.timeslot.some((t) => t.time === time)
+                    //     )
+                    // );
 
-                    const permission = timeSlot
-                      ? timeSlot.time[0].timeslot.find((t) => t.time === time)
-                          .permission
-                      : false;
+                    // const permission = timeSlot
+                    //   ? timeSlot.time[0].timeslot.find((t) => t.time === time)
+                    //       .permission
+                    //   : false;
+                    // ? timeSlot.permission
+                    // : false;
 
                     return (
                       <td
