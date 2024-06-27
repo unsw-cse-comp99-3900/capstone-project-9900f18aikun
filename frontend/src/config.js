@@ -1,5 +1,5 @@
 const config = {
-    backendUrl: process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:5001',
+    backendUrl: process.env.REACT_APP_BACKEND_URL || 'http://s2.gnip.vip:37895',
   };
   
   export default config;
