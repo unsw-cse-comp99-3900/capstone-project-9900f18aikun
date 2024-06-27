@@ -91,9 +91,6 @@ const SelectWindow = ({
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
   if (!visible) return null;
-
-  console.log("permission for room is", room, permission);
-
   const style = {
     top: position.top,
     left: position.left,
@@ -185,7 +182,6 @@ const SelectWindow = ({
       });
 
       if (response.ok) {
-        console.log("Successfully sent");
         const result = await response.json();
         console.log(result);
       } else {
@@ -312,19 +308,15 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         {
           date: selectedDate.format("DD/MM/YYYY"),
           timeslot: extractTime(
-            item.name,
             item.time_table,
             self,
-            item.permission
           ),
         },
       ],
     }));
   };
 
-  const extractTime = (room, timeTable, self, permission) => {
-    console.log("room is", room);
-    console.log("timetable is ", timeTable);
+  const extractTime = (timeTable, self) => {
     const timeslots = [];
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
@@ -332,16 +324,13 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
           ? slot.current_user_booking
           : !slot.current_user_booking;
         if (include) {
-          // console.log("did this print")
           const hour = Math.floor(index / 2);
           const minute = index % 2 === 0 ? "00" : "30";
           const time = `${hour.toString().padStart(2, "0")}:${minute}`;
-          console.log("time is", time);
           timeslots.push(time);
         }
       }
     });
-    console.log("time is", timeslots);
     return timeslots;
   };
 
@@ -534,23 +523,6 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                             )
                         )
                     );
-
-                    // const timeSlot = reservations.find(
-                    //   (reservation) =>
-                    //     reservation.room === item.room &&
-                    //     reservation.time.some(
-                    //       (slot) =>
-                    //         slot.date === selectedDate.format("DD/MM/YYYY") &&
-                    //         slot.timeslot.some((t) => t.time === time)
-                    //     )
-                    // );
-
-                    // const permission = timeSlot
-                    //   ? timeSlot.time[0].timeslot.find((t) => t.time === time)
-                    //       .permission
-                    //   : false;
-                    // ? timeSlot.permission
-                    // : false;
 
                     return (
                       <td
