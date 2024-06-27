@@ -1,7 +1,9 @@
 from email.mime.text import MIMEText
 import smtplib
 from app.extensions import db
+from app.booking.models import RoomDetail
 from app.models import CSEStaff, HDRStudent, Users
+from threading import Thread
 
 # convert time HH:MM to index for every half hour
 def time_convert(time):
@@ -40,7 +42,7 @@ def get_email(zid: str) -> str:
         return staff.email
     
 # send email
-def send_simple_email(to_addr, subject, message):
+def send_email(to_addr, subject, message):
     from_addr = "wangweiyi6191@outlook.com"
     smtp_server = 'smtp.office365.com'
     smtp_port = 587
@@ -56,8 +58,13 @@ def send_simple_email(to_addr, subject, message):
         server.login(from_addr, password)
         server.sendmail(from_addr, to_addr, msg.as_string())
 
+def send_email_async(zid, subject, message):
+    email = get_email(zid)
+    thread = Thread(target=send_email, args=(email, subject, message))
+    thread.start()
+
 # get use's name
-def get_name(zid: str) -> str:
+def get_user_name(zid: str) -> str:
     if is_student(zid):
         student = db.session.get(HDRStudent, zid)
         return student.name
@@ -65,3 +72,8 @@ def get_name(zid: str) -> str:
         staff = db.session.get(CSEStaff, zid)
         return staff.name
 
+# get use's name
+def get_room_name(room_id: str) -> str:
+    room = db.session.get(RoomDetail, room_id)
+    return room.name
+    

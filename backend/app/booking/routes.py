@@ -4,7 +4,7 @@ from app.extensions import db, api
 from .models import Booking, RoomDetail, Space, HotDeskDetail
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import get_email, get_name, is_student, send_simple_email, start_end_time_convert
+from app.utils import get_email, get_room_name, get_user_name, is_student, send_email, send_email_async, start_end_time_convert
 from jwt import exceptions
 import re
 
@@ -93,11 +93,11 @@ class BookSpace(Resource):
 
         subject = "Confirmation of K17 Room Booking"
         message = f"""
-        Hi {get_name(zid)},
+        Hi {get_user_name(zid)},
 
         I am writing to confirm your booking at our system. Details of the booking are as follows:
 
-        - Room Number: {room_id}
+        - Room: {get_room_name(room_id)}
         - Date: {date}
         - Time: {start_time} -- {end_time}
 
@@ -108,7 +108,12 @@ class BookSpace(Resource):
         K17 Room Booking System
         """
 
-        send_simple_email(get_email(zid), subject, message)
+        # this is single thread send 
+        # send_email(get_email(zid), subject, message)
+
+        # this is multi thread send email 
+        send_email_async(zid, subject, message)
+
 
         if not is_request:
             return {'message': f'Booking confirmed'
