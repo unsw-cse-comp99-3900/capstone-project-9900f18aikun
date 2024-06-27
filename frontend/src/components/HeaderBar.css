@@ -1,0 +1,158 @@
+/* CSS for the HeaderBar component */
+.header-bar {
+    background-color: #ffdc00;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 80px;
+  }
+  
+  .overlap {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .image {
+    height: 50px;
+  }
+  
+  .group {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 20px;
+  }
+  
+  .overlap-group {
+    display: flex;
+    align-items: center;
+    background-color: #f5e6a5;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .text-wrapper {
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .icon-filter {
+    height: 20px;
+  }
+  
+  .text-wrapper-2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: auto;
+  }
+  
+  /* General CSS for the entire page layout */
+  .page-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px 0;
+  }
+  
+  @media (max-width: 768px) {
+    .header-bar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .overlap-group {
+      margin-top: 10px;
+    }
+  
+    .content {
+      padding: 10px;
+    }
+  }
+  /* CSS for the HeaderBar component */
+.header-bar {
+  background-color: #ffdc00;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 80px;
+}
+
+.overlap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.image {
+  height: 50px;
+}
+
+.text-wrapper-2 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.logout-button {
+  background-color: #f5e6a5;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  width: 6%;
+}
+
+.logout-button:hover {
+  background-color: #e6d080;
+}
+
+.header-bar {
+  background-color: #ffdc00;
+  padding: 10px 20px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 50px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logout-button {
+  background-color: #4b2e83;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 17px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.logout-button:hover {
+  background-color: #3a2368;
+}

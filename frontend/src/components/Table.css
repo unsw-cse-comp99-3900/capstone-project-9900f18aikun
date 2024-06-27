@@ -1,0 +1,283 @@
+.table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  position: relative;
+}
+
+.calendar-container {
+  position: relative;
+  z-index: 10;
+  align-self: flex-start; 
+  margin-bottom: 10px;
+  margin-left: 300px;
+  display: flex; /* Use flexbox to align children inline */
+  align-items: center; /* Align items vertically in the center */
+  justify-content: space-between; /* Space out the button and the date */
+  margin-bottom: 10px;
+  
+}
+
+.calendar-text{
+  margin-left: 6px;
+  margin-top: 8px;
+}
+
+
+.date-calendar-overlay {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  z-index: 20;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table wrapper styling */
+.table-wrapper {
+  overflow-x: scroll;
+  max-width: 780px;
+}
+
+table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #d3a6d4;
+  color: black;
+}
+
+/* Color coding for table cells */
+td.reserved {
+  background-color: #b9b9b9;
+}
+
+td.selfreserved {
+  background-color: #4c2d83;
+  color: white;
+}
+
+td:not(.reserved):not(.selfreserved) {
+  background-color: #fce8a3;
+}
+
+td:not(.reserved):not(.selfreserved):hover {
+  background-color: #fac833;
+  cursor: pointer;
+}
+
+td.no-permission {
+  background-color: rgb(221, 216, 169) !important;
+}
+
+thead tr th:first-child,
+tbody tr td.room-column {
+  background-color: white;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.time-column {
+  min-width: 50px;
+  max-width: 50px;
+}
+
+.room-column {
+  min-width: 50px;
+  max-width: 50px;
+}
+
+.select-window {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.button-class {
+  display: flex;
+  justify-content: space-between;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  height: 12px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .table-container,
+  .table-wrapper {
+    width: 100%;
+  }
+
+  th,
+  td {
+    font-size: 0.9em;
+  }
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.legend-text {
+  font-size: 14px;
+}
+
+.room-info {
+  top: 0;
+  position: absolute;
+  left: 100%;
+  background-color: white;
+  border: 1px solid black;
+  padding: 10px;
+  z-index: 1500;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Ensure the text does not wrap */
+}
+
+/* Targeting the button specifically by using its unique class combination */
+.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedInfo.MuiButton-sizeMedium.MuiButton-containedSizeMedium.MuiButton-colorInfo.css-kjirbw-MuiButtonBase-root-MuiButton-root {
+  /* background-color: #4A90E2;  */
+  color: white; /* Change text color */
+  width: 145px; /* Set the width as needed */
+  height: 32px; /* Set the height as needed */
+  font-size: 9;
+  background-color: #4b2e83;
+  margin-bottom: 6px;
+}
+
+.table-container {
+  /* Centering the table */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.calendar-container {
+  /* Adjusting calendar position */
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10px;
+}
+
+.calendar-container {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: flex-start; /* Align children to the start of the flex container */
+  margin-bottom: 10px;
+}
+
+.calendar-row {
+  display: flex;
+  justify-content: space-between; /* Space out the button and the date */
+  width: 100%;
+  margin-left: 15px; /* Ensure it takes full width */
+}
+
+.to-map {
+  align-self: flex-start; /* Align to the left */
+  width: 100%; 
+  margin-top: 3px;
+  margin-left: 15px;/* Take full width to maintain alignment */
+}
+
+.table-wrapper {
+  /* Enhancing the table appearance */
+  overflow-x: auto; /* Ensures the table is scrollable horizontally */
+}
+
+/* Base table styles */
+#mytable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#mytable th, #mytable td {
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Header styles */
+#mytable th {
+  background-color: #4b2e83; /* Dark purple to match the theme */
+  color: white;
+  font-weight: bold;
+}
+
+/* Row styling for different statuses */
+#mytable tr.available td {
+  background-color: #e8f5e9; /* Soft green for available slots */
+}
+
+#mytable tr.booking-request td {
+  background-color: #fffde7; /* Soft yellow for booking requests */
+}
+
+#mytable tr.reserved td {
+  background-color: #eeeeee; /* Light grey for reserved slots */
+}
+
+#mytable tr:hover {
+  background-color: #f5f5f5; /* Lighter grey for hover effect */
+}
+
+.legend-item {
+  /* Individual legend items */
+  display: flex;
+  align-items: center;
+}
+
+.legend-color {
+  /* Color boxes in the legend */
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}

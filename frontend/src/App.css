@@ -1,0 +1,99 @@
+* {
+  margin: 0;
+  padding: 0;
+  
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header styles */
+.header {
+  background-color: #FFD700; /* UNSW yellow */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.logo {
+  height: 40px;
+}
+
+.history-button {
+  background: none;
+  border: none;
+  color: #000;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Main content styles */
+.main-content {
+  display: flex;
+  flex: 1;
+}
+
+/* Sidebar styles */
+.sidebar {
+  background-color: #4B0082; /* Dark purple */
+  color: white;
+  width: 250px;
+  padding: 20px;
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.filter-section select,
+.filter-section input[type="checkbox"] {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+/* Booking grid styles */
+.booking-grid {
+  flex: 1;
+  padding: 20px;
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 1px;
+  background-color: #E6E6FA; /* Light purple */
+  padding: 1px;
+}
+
+.time-slot {
+  background-color: #FFF;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.available {
+  background-color: #FFFACD; /* Light yellow */
+}
+
+.booked {
+  background-color: #D3D3D3; /* Light gray */
+}
+
+.your-booking {
+  background-color: #FFD700; /* UNSW yellow */
+}
