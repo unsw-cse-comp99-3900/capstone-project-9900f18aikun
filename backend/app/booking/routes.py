@@ -178,12 +178,16 @@ class MeetingRoom(Resource):
 
         return output, 200
 
+
 def generate_space_output(output, book_type, user_type):
+
     if book_type == "meeting_room":
         details = RoomDetail.query.all()
     else:
         details = HotDeskDetail.query.all()
     for detail in details:
+        if book_type == "meeting_room":
+            print(detail.name)
         output[detail.id] = {
             "id": detail.id,
             "name": detail.name,
@@ -194,10 +198,12 @@ def generate_space_output(output, book_type, user_type):
             "permission": check_permission(detail, user_type),
             "time_table": [[] for _ in range(48)]
         }
+        print(check_permission(detail, user_type))
     return output
 
 
 def check_permission(detail, user_type):
+
     if user_type == "HDR_student":
         return detail.HDR_student_permission
     elif user_type == "CSE_staff":

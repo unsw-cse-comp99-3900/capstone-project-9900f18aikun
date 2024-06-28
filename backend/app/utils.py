@@ -33,7 +33,7 @@ def is_staff(zid: str) -> bool:
 def is_meeting_room(room_id: int) -> bool:
     space = db.session.get(Space, room_id)
     space_type = space.space_type
-    if space_type == "meeting_room":
+    if space_type == "room":
         return True
     else:
         return False
@@ -49,11 +49,15 @@ def get_user_name(zid: str) -> str:
 
 # get room's name
 def get_room_name(room_id: int) -> str:
+    print(room_id)
     if is_meeting_room(room_id):
         meeting_room = db.session.get(RoomDetail, room_id)
+        print(meeting_room
+        )
         return meeting_room.name
     else:
         hot_desk = db.session.get(HotDeskDetail, room_id)
+        print(hot_desk)
         return hot_desk.name
 
 

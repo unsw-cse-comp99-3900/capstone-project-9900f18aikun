@@ -80,7 +80,7 @@ def set_up_HDRstudent_db():
             users = Users(
                 zid=row['zid'],
                 password=row['password'],
-                user_type='CSE staff',
+                user_type='CSE_staff',
             )
             db.session.add(users)
 
