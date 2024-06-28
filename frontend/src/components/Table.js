@@ -146,8 +146,8 @@ const SelectWindow = ({
       return total;
     }, 0);
     if (totalBooked + newTimes.length > 16) {
-      setLimit(false);
-      // return;
+      setLimit(true);
+      return;
     }
 
     // getting end time
@@ -176,12 +176,13 @@ const SelectWindow = ({
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: token,
+          Authorization: "Bearer " + token,
         },
         body: JSON.stringify(obj),
       });
 
       if (response.ok) {
+        console.log("successfully sent");
         const result = await response.json();
         console.log(result);
       } else {

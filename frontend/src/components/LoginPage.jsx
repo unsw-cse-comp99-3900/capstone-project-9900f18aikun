@@ -32,7 +32,7 @@ const LoginPage = ({ onLogin }) => {
       
       if (response.ok) {
         // Store the token in localStorage
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.access_token);
         
         // Log success message
         console.log('Login successful');
