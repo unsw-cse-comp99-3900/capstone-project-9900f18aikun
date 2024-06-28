@@ -15,7 +15,7 @@ function App() {
   const [filters, setFilters] = useState({
     level: '',
     capacity: '',
-    category: 'meetingroom'
+    category: 'meeting_room'
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -36,8 +36,8 @@ function App() {
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
       console.log("data is", dataArray);
-      setData(dataArray);
-      setFilteredData(dataArray);
+      setData(dataArray); // 存储原始数据
+      setFilteredData(dataArray); // 存储筛选后的数据
     } catch (error) {
       console.error('Error fetching booking data:', error);
     }
@@ -48,12 +48,12 @@ function App() {
       return (
         (filters.level === '' || item.level === filters.level) &&
         (filters.capacity === '' || item.capacity >= filters.capacity) &&
-        (filters.category === '' || filters.category === 'meetingroom')
+        (filters.category === '' || item.type === filters.category) // 修改筛选条件
         // (filters.type === '' || item.type === filters.type)
       );
     });
-    setFilteredData(newFilteredData);
-    setFilters(filters);
+    setFilteredData(newFilteredData); // 更新筛选后的数据
+    setFilters(filters); // 更新筛选条件
   };
 
   useEffect(() => {
