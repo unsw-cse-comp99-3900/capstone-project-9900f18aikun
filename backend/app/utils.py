@@ -49,15 +49,11 @@ def get_user_name(zid: str) -> str:
 
 # get room's name
 def get_room_name(room_id: int) -> str:
-    print(room_id)
     if is_meeting_room(room_id):
         meeting_room = db.session.get(RoomDetail, room_id)
-        print(meeting_room
-        )
         return meeting_room.name
     else:
         hot_desk = db.session.get(HotDeskDetail, room_id)
-        print(hot_desk)
         return hot_desk.name
 
 

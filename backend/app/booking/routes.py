@@ -150,14 +150,13 @@ class MeetingRoom(Resource):
         user_zid = current_user['zid']
 
         date = request.args.get('date')
-        user_type = db.session.get(Users, user_zid)
+        user_type = db.session.get(Users, user_zid).user_type
 
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         # define output list
         output = {}
-
         output = generate_space_output(output, "meeting_room", user_type)
         output = generate_space_output(output, "hot_desk", user_type)
 
@@ -175,7 +174,6 @@ class MeetingRoom(Resource):
                         "id": booking.id,
                         "current_user_booking": True if booking.user_id == user_zid else False
                     }
-
         return output, 200
 
 
@@ -186,8 +184,6 @@ def generate_space_output(output, book_type, user_type):
     else:
         details = HotDeskDetail.query.all()
     for detail in details:
-        if book_type == "meeting_room":
-            print(detail.name)
         output[detail.id] = {
             "id": detail.id,
             "name": detail.name,
@@ -198,12 +194,10 @@ def generate_space_output(output, book_type, user_type):
             "permission": check_permission(detail, user_type),
             "time_table": [[] for _ in range(48)]
         }
-        print(check_permission(detail, user_type))
     return output
 
 
 def check_permission(detail, user_type):
-
     if user_type == "HDR_student":
         return detail.HDR_student_permission
     elif user_type == "CSE_staff":
