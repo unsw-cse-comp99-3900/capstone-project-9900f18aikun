@@ -101,3 +101,19 @@ def schedule_reminder(zid, room_id, start_time, date, end_time):
     user_name = get_user_name(zid)
     room_name = get_room_name(room_id)
     scheduler.add_job(send_reminder_email, 'date', run_date=reminder_time, args=[user_name, room_name, date, start_time, end_time, to_addr])
+
+# check if this is student email
+def check_is_student_email(email):
+    return db.session.query(HDRStudent).filter_by(email=email).first()
+
+# check if this is staff email 
+def check_is_staff_email(email):
+    return db.session.query(CSEStaff).filter_by(email=email).first()
+
+def get_student_zid(email):
+    student = db.session.query(HDRStudent).filter_by(email=email).first()
+    return student.zid
+
+def get_staff_zid(email):
+    staff = db.session.query(CSEStaff).filter_by(email=email).first()
+    return staff.zid
