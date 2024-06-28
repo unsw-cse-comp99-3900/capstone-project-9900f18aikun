@@ -9,7 +9,7 @@ const HeaderBar = ({ onLogout }) => {
         {/* <div className="text-wrapper-2">History</div> */}
         <div className="button-group">
           {/* 这里可以添加其他按钮 */}
-          <button className="logout-button">Logout</button>
+          <button className="logout-button" onClick={onLogout} >Logout</button>
         </div>
       </div>
     </div>
