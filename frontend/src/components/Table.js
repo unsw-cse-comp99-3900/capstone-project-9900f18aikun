@@ -147,7 +147,7 @@ const SelectWindow = ({
     }, 0);
     if (totalBooked + newTimes.length > 16) {
       setLimit(false);
-      return;
+      // return;
     }
 
     // getting end time
@@ -167,6 +167,7 @@ const SelectWindow = ({
       start_time: newTimes[0],
       end_time: endTime,
     };
+    const token = localStorage.getItem("token");
     // console.log("object is", obj);
 
     try {
@@ -175,8 +176,7 @@ const SelectWindow = ({
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTExNTc5OSwianRpIjoiYzA5Y2IwZTEtYzFjYS00ZDY4LTg5NTAtMTI2MGQ4NzIwMGEyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6MTEzMzAifSwibmJmIjoxNzE5MTE1Nzk5LCJjc3JmIjoiZjlmMGI0YmItMTgwYi00ZDllLThlNGYtN2I4MTk4OWNhMzllIiwiZXhwIjo3NzE5MTE1NzM5fQ.ZU768uMtq-LuJZYOjznoIb3zNha0XDvQu7JH8AYls1w",
+          Authorization: token,
         },
         body: JSON.stringify(obj),
       });
@@ -293,7 +293,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
   // const [selectedDate, setSelectedDate] = useState(dayjs());
   const [hoveredRoom, setHoveredRoom] = useState(null);
   // console.log("reservation is", reservations);
-  console.log("selfReservation is", selfReservations);
+  // console.log("selfReservation is", selfReservations);
 
   useEffect(() => {
     setReservations(extractData(data, false));
