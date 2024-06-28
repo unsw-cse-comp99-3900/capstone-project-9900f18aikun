@@ -51,7 +51,7 @@ function App() {
       return (
         (filters.level === "" || item.level === filters.level) &&
         (filters.capacity === "" || item.capacity >= filters.capacity) &&
-        (filters.category === "" || item.type === filters.category) // 修改筛选条件
+        (filters.category === "all" || item.type === filters.category)
         // (filters.type === '' || item.type === filters.type)
       );
     });

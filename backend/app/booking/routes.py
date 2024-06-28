@@ -191,9 +191,18 @@ def generate_space_output(output, book_type, user_type):
             "level": detail.level,
             "capacity": detail.capacity,
             "type": book_type,
-            "permission": detail.HDR_student_permission if user_type == "HDR_student"
-            else detail.CSE_staff_permission if user_type == "CSE_staff"
-            else detail.HDR_student_permission,
+            "permission": check_permission(detail, user_type),
             "time_table": [[] for _ in range(48)]
         }
     return output
+
+
+def check_permission(detail, user_type):
+    if user_type == "HDR_student":
+        return detail.HDR_student_permission
+    elif user_type == "CSE_staff":
+        return detail.CSE_staff_permission
+    else:
+        return False
+
+
