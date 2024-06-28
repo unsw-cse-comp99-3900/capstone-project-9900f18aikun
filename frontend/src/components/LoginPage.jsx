@@ -1,16 +1,55 @@
 import './LoginPage.css';
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const LoginPage = ({ onLogin }) => {
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [zid, setZid] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // Clear any existing token when the login page loads
-    localStorage.removeItem('token');
-  }, []);
+    const queryParams = new URLSearchParams(location.search);
+    const accessToken = queryParams.get('access_token');
+    const loginFailed = queryParams.get('false');
+
+    if (accessToken) {
+      handleAutoLogin(accessToken);
+    } else if (loginFailed) {
+      setError('Outlook login failed. Please try again.');
+    } else {
+      // Clear any existing token when the login page loads
+      localStorage.removeItem('token');
+    }
+  }, [location]);
+
+  const handleAutoLogin = async (token) => {
+    try {
+      const response = await fetch('http://s2.gnip.vip:37895/auth/auto-login', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.setItem('token', token);
+        console.log('Auto-login successful');
+        onLogin();
+        navigate('/dashboard');
+      } else {
+        console.log('Auto-login failed, token may be invalid');
+        setError('Auto-login failed. Please try again.');
+        localStorage.removeItem('token');
+      }
+    } catch (error) {
+      console.error('Auto-login error:', error);
+      setError('Network error. Please try again.');
+      localStorage.removeItem('token');
+    }
+  };
 
   const handleZIDLogin = () => {
     setShowLoginForm(true);
@@ -31,15 +70,10 @@ const LoginPage = ({ onLogin }) => {
       const data = await response.json();
       
       if (response.ok) {
-        // Store the token in localStorage
         localStorage.setItem('token', data.access_token);
-        
-        // Log success message
         console.log('Login successful');
-        console.log('Response data:', data);
-        
-        // Call the onLogin function passed as a prop
         onLogin();
+        navigate('/dashboard');
       } else {
         console.log('Login failed:', data);
         setError(data.message || 'Login failed. Please try again.');
@@ -51,20 +85,7 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleOutlookLogin = () => {
-    const outlookLoginUrl = "http://3.27.247.88/auth/outlook-login";
-    const clientId = "72e7ab5f-0d1c-48ee-9fde-fe74a8095189";
-    const redirectUri = encodeURIComponent("YOUR_REDIRECT_URI_HERE"); // replace with real URI
-    const scope = encodeURIComponent("openid profile email https://outlook.office.com/mail.read");
-    const fullLoginUrl = `${outlookLoginUrl}?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&prompt=select_account`;
-    openPopupWindow(fullLoginUrl, 'OutlookLogin');
-  };
-
-  const openPopupWindow = (url, name) => {
-    const width = 600;
-    const height = 600;
-    const left = (window.innerWidth - width) / 2;
-    const top = (window.innerHeight - height) / 2;
-    window.open(url, name, `width=${width},height=${height},left=${left},top=${top}`);
+    window.location.href = 'http://localhost:5001/auth/outlook-login';
   };
 
   const handleForgotPassword = () => {
