@@ -51,8 +51,7 @@ function App() {
       return (
         (filters.level === "" || item.level === filters.level) &&
         (filters.capacity === "" || item.capacity >= filters.capacity) &&
-        (filters.category === "all" || item.type === filters.category) || // 修改筛选条件
-        (filters.category === "all" && (item.type === "meeting_room" || item.type === "hot_desk")) // 处理 'all' 选项
+        (filters.category === "all" || item.type === filters.category)
         // (filters.type === '' || item.type === filters.type)
       );
     });
