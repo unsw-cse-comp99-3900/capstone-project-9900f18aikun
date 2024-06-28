@@ -292,7 +292,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   // const [selectedDate, setSelectedDate] = useState(dayjs());
   const [hoveredRoom, setHoveredRoom] = useState(null);
-  console.log("reservation is", reservations);
+  // console.log("reservation is", reservations);
+  console.log("selfReservation is", selfReservations);
 
   useEffect(() => {
     setReservations(extractData(data, false));
@@ -307,10 +308,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
-          timeslot: extractTime(
-            item.time_table,
-            self,
-          ),
+          timeslot: extractTime(item.time_table, self),
         },
       ],
     }));
@@ -361,6 +359,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
     const className = event.currentTarget.className;
+    console.log("classname is ", className);
     let permissionClass = "";
 
     if (className.includes("reserved")) {
@@ -499,43 +498,42 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                   </td>
 
                   {times.map((time) => {
-                    const isReserved = reservations.some(
-                      (reservation) =>
-                        reservation.room === item.room &&
-                        reservation.time.some(
-                          (slot) =>
-                            slot.date === selectedDate.format("DD/MM/YYYY") &&
-                            slot.timeslot.some(
-                              (t) => t.time === time && !t.permission
-                            )
-                        )
-                    );
-
-                    // define reserved by current user class
-                    const isSelfReserved = selfReservations.some(
-                      (reservation) =>
-                        reservation.room === item.room &&
-                        reservation.time.some(
-                          (slot) =>
-                            slot.date === selectedDate.format("DD/MM/YYYY") &&
-                            slot.timeslot.some(
-                              (t) => t.time === time && t.permission
-                            )
-                        )
-                    );
-
                     return (
                       <td
                         key={time}
-                        className={`time-column ${
-                          isReserved
-                            ? "reserved"
-                            : isSelfReserved
-                            ? "selfreserved"
-                            : permission
-                            ? ""
-                            : "no-permission"
-                        }`}
+                        className={`time-column ${(() => {
+                          const isReserved = reservations.some(
+                            (reservation) =>
+                              reservation.room === item.room &&
+                              reservation.time.some(
+                                (slot) =>
+                                  slot.date ===
+                                    selectedDate.format("DD/MM/YYYY") &&
+                                  slot.timeslot.some((t) => t === time)
+                              )
+                          );
+
+                          const isSelfReserved = selfReservations.some(
+                            (reservation) =>
+                              reservation.room === item.room &&
+                              reservation.time.some(
+                                (slot) =>
+                                  slot.date ===
+                                    selectedDate.format("DD/MM/YYYY") &&
+                                  slot.timeslot.some((t) => t === time)
+                              )
+                          );
+
+                          if (isSelfReserved) {
+                            return "selfreserved";
+                          } else if (isReserved) {
+                            return "reserved";
+                          } else if (permission) {
+                            return "permission";
+                          } else {
+                            return "no-permission";
+                          }
+                        })()}`}
                         onClick={(event) => {
                           event.stopPropagation();
                           clickHandler(item.room, time, event, item.roomid);
