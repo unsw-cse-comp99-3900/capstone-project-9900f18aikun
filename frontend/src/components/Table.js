@@ -187,28 +187,28 @@ const SelectWindow = ({
         console.log(result);
         // reservation
         // if already has reservation for this day
-        const existing = self.find((reservation) => reservation.room === room);
-        if (existing) {
-          const existingDate = existing.time.find(
-            (date) => date.date === selectedDate.format("DD/MM/YYYY")
-          );
-          if (existingDate) {
-            existingDate.timeslot.push(...newTimes);
-          } else {
-            existing.time.push({
-              date: selectedDate.format("DD/MM/YYYY"),
-              timeslot: newTimes,
-            });
-          }
-          // if no reservation for this day
-        } else {
-          self.push({
-            room,
-            time: [
-              { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
-            ],
-          });
-        }
+        // const existing = self.find((reservation) => reservation.room === room);
+        // if (existing) {
+        //   const existingDate = existing.time.find(
+        //     (date) => date.date === selectedDate.format("DD/MM/YYYY")
+        //   );
+        //   if (existingDate) {
+        //     existingDate.timeslot.push(...newTimes);
+        //   } else {
+        //     existing.time.push({
+        //       date: selectedDate.format("DD/MM/YYYY"),
+        //       timeslot: newTimes,
+        //     });
+        //   }
+        //   // if no reservation for this day
+        // } else {
+        //   self.push({
+        //     room,
+        //     time: [
+        //       { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
+        //     ],
+        //   });
+        // }
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -216,6 +216,27 @@ const SelectWindow = ({
       }
     } catch (error) {
       console.error("Error fetching booking data:", error);
+    }
+
+    const existing = self.find((reservation) => reservation.room === room);
+    if (existing) {
+      const existingDate = existing.time.find(
+        (date) => date.date === selectedDate.format("DD/MM/YYYY")
+      );
+      if (existingDate) {
+        existingDate.timeslot.push(...newTimes);
+      } else {
+        existing.time.push({
+          date: selectedDate.format("DD/MM/YYYY"),
+          timeslot: newTimes,
+        });
+      }
+      // if no reservation for this day
+    } else {
+      self.push({
+        room,
+        time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes }],
+      });
     }
 
     close();
