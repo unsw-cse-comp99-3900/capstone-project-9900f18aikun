@@ -185,6 +185,30 @@ const SelectWindow = ({
         console.log("successfully sent");
         const result = await response.json();
         console.log(result);
+        // reservation
+        // if already has reservation for this day
+        const existing = self.find((reservation) => reservation.room === room);
+        if (existing) {
+          const existingDate = existing.time.find(
+            (date) => date.date === selectedDate.format("DD/MM/YYYY")
+          );
+          if (existingDate) {
+            existingDate.timeslot.push(...newTimes);
+          } else {
+            existing.time.push({
+              date: selectedDate.format("DD/MM/YYYY"),
+              timeslot: newTimes,
+            });
+          }
+          // if no reservation for this day
+        } else {
+          self.push({
+            room,
+            time: [
+              { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
+            ],
+          });
+        }
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -194,28 +218,6 @@ const SelectWindow = ({
       console.error("Error fetching booking data:", error);
     }
 
-    // reservation
-    // if already has reservation for this day
-    const existing = self.find((reservation) => reservation.room === room);
-    if (existing) {
-      const existingDate = existing.time.find(
-        (date) => date.date === selectedDate.format("DD/MM/YYYY")
-      );
-      if (existingDate) {
-        existingDate.timeslot.push(...newTimes);
-      } else {
-        existing.time.push({
-          date: selectedDate.format("DD/MM/YYYY"),
-          timeslot: newTimes,
-        });
-      }
-      // if no reservation for this day
-    } else {
-      self.push({
-        room,
-        time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes }],
-      });
-    }
     close();
   };
 
@@ -468,7 +470,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         <table id="mytable">
           <thead>
             <tr>
-              <th>Select Space</th>
+              <th className="select-space">Select Space</th>
               {times.map((time) => (
                 <th key={time} className="time-column">
                   {time}

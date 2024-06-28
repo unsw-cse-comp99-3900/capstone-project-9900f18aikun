@@ -10,21 +10,19 @@
 .calendar-container {
   position: relative;
   z-index: 10;
-  align-self: flex-start; 
+  align-self: flex-start;
   margin-bottom: 10px;
   margin-left: 300px;
   display: flex; /* Use flexbox to align children inline */
   align-items: center; /* Align items vertically in the center */
   justify-content: space-between; /* Space out the button and the date */
   margin-bottom: 10px;
-  
 }
 
-.calendar-text{
+.calendar-text {
   margin-left: 6px;
   margin-top: 8px;
 }
-
 
 .date-calendar-overlay {
   position: absolute;
@@ -42,8 +40,6 @@
   max-width: 780px;
   overflow-y: scroll;
   max-height: 600px;
-
-
 }
 
 table {
@@ -63,6 +59,10 @@ th {
   background-color: #d3a6d4;
   color: black;
 }
+
+/* .time-row {
+  position: absolute;
+} */
 
 /* Color coding for table cells */
 td.reserved {
@@ -92,7 +92,7 @@ tbody tr td.room-column {
   background-color: white;
   position: sticky;
   left: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 .time-column {
@@ -230,9 +230,9 @@ tbody tr td.room-column {
 
 .to-map {
   align-self: flex-start; /* Align to the left */
-  width: 100%; 
+  width: 100%;
   margin-top: 3px;
-  margin-left: 15px;/* Take full width to maintain alignment */
+  margin-left: 15px; /* Take full width to maintain alignment */
 }
 
 .table-wrapper {
@@ -246,7 +246,8 @@ tbody tr td.room-column {
   border-collapse: collapse;
 }
 
-#mytable th, #mytable td {
+#mytable th,
+#mytable td {
   text-align: center;
   padding: 8px;
   border: 1px solid #ddd;
@@ -287,4 +288,16 @@ tbody tr td.room-column {
   width: 20px;
   height: 20px;
   margin-right: 5px;
+}
+
+#mytable thead th {
+  position: -webkit-sticky; /* For Safari */
+  position: sticky;
+  top: 0;
+  background-color: #4b2e83;
+  z-index: 1; /* Ensure the header stays above other content */
+}
+
+#mytable thead th.select-space {
+  z-index: 5;
 }
