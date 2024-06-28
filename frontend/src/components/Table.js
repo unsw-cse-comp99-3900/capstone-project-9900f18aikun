@@ -187,7 +187,7 @@ const SelectWindow = ({
         console.log(result);
         // reservation
         // if already has reservation for this day
-        const existing = self.find((reservation) => reservation.room === room);
+        // const existing = self.find((reservation) => reservation.room === room);
         // if (existing) {
         //   const existingDate = existing.time.find(
         //     (date) => date.date === selectedDate.format("DD/MM/YYYY")
@@ -218,6 +218,7 @@ const SelectWindow = ({
       console.error("Error fetching booking data:", error);
     }
 
+    const existing = self.find((reservation) => reservation.room === room);
     if (existing) {
       const existingDate = existing.time.find(
         (date) => date.date === selectedDate.format("DD/MM/YYYY")
