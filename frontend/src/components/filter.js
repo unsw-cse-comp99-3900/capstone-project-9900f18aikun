@@ -55,6 +55,7 @@ function Filter({ onFilter }) {
         <div className="form-group">
           <label>Category:</label>
           <select name="category" value={filters.category} onChange={handleFilterChange}>
+            <option value="all">All</option> {/* 添加 'all' 选项 */}
             <option value="meeting_room">Meeting Room</option>
             <option value="hot_desk">Hot Desk</option>
           </select>
