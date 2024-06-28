@@ -470,7 +470,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         <table id="mytable">
           <thead>
             <tr>
-              <th>Select Space</th>
+              <th className="select-space">Select Space</th>
               {times.map((time) => (
                 <th key={time} className="time-column">
                   {time}
