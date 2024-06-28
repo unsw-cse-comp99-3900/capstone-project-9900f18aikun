@@ -404,7 +404,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       return;
     }
 
-    const position = { top: event.clientY + 10, left: event.clientX - 200 };
+    const position = { top: event.clientY - 100, left: event.clientX - 290 };
     setSelectWindow({
       visible: true,
       time,
