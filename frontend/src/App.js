@@ -109,12 +109,12 @@ function App() {
                   <div
                     className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
                   >
-                    <button
-                      className="toggle-button"
+                  <img
+                      src='/On@2x.png' // 替换按钮为图标
+                      alt="Toggle Sidebar"
+                      className="toggle-icon" // 添加图标样式类
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    >
-                      {isSidebarOpen ? "<<" : ">>"}
-                    </button>
+                    />
                     {isSidebarOpen && <Filter onFilter={handleFilter} />}
                   </div>
                   <div className="content">
