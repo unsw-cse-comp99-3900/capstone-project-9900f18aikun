@@ -1,9 +1,10 @@
 from flask_restx import Namespace, Resource, fields
 from flask import redirect, send_file, make_response,  request, Flask, jsonify, current_app, url_for
 import requests
-from app.extensions import db, jwt
+from app.extensions import db, jwt, microsoft
 from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
+
 
 
 auth_ns = Namespace('auth', description='Authentication operations')
@@ -62,74 +63,18 @@ class AutoLogin(Resource):
                 return {'message': 'User not found'}, 404
         except Exception as e:
             return {'error': str(e)}, 401
-
-
+        
 @auth_ns.route('/outlook-login')
 class OutlookLogin(Resource):
-    @auth_ns.doc(description="Redirect to Outlook login")
     def get(self):
-        client_id = current_app.config['OUTLOOK_CLIENT_ID']
-        redirect_uri = url_for('auth_outlook_callback', _external=True)
-        auth_url = (
-            'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
-            '?response_type=code'
-            f'&client_id={client_id}'
-            f'&redirect_uri={redirect_uri}'
-            '&response_mode=query'
-            '&scope=openid%20profile%20email'
-            '&state=12345'
-        )
-        return redirect(auth_url)
+        redirect_uri = url_for('auth_outlook_login_callback', _external=True)
+        return microsoft.authorize_redirect(redirect_uri)
 
-@auth_ns.route('/outlook-callback')
-class OutlookCallback(Resource):
-    @auth_ns.doc(description="Handle Outlook login callback")
+@auth_ns.route('/outlook-login/callback')
+class OutlookLoginCallback(Resource):
     def get(self):
-        code = request.args.get('code')
-        client_id = current_app.config['OUTLOOK_CLIENT_ID']
-        client_secret = current_app.config['OUTLOOK_CLIENT_SECRET']
-        redirect_uri = url_for('auth_outlook_callback', _external=True)
-        token_url = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
-        token_data = {
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': redirect_uri
-        }
-        token_headers = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-
-        r = requests.post(token_url, data=token_data, headers=token_headers)
-        token_response = r.json()
-        access_token = token_response.get('access_token')
-        if not access_token:
-            return {'error': 'Invalid token response from Outlook'}, 400
-
-        user_info = get_user_info(access_token)
-        if not user_info:
-            return {'error': 'Unable to fetch user info'}, 400
-
-        user_data = db.session.get(Users, user_info['zid'])
-        if not user_data:
-            user_data = Users(zid=user_info['zid'], email=user_info['email'])  # Adjust fields accordingly
-            db.session.add(user_data)
-            db.session.commit()
-
-        access_token = create_access_token(identity={'zid': user_data.zid})
-        return {'access_token': access_token}, 200
-
-def get_user_info(access_token):
-    user_info_url = 'https://graph.microsoft.com/v1.0/me'
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-    r = requests.get(user_info_url, headers=headers)
-    if r.status_code == 200:
-        user_info = r.json()
-        return {
-            'zid': user_info['id'],  # Adjust this field to match your user model
-            'email': user_info['mail'] or user_info['userPrincipalName']
-        }
-    return None
+        token = microsoft.authorize_access_token()
+        resp = microsoft.get('https://graph.microsoft.com/v1.0/me')
+        user_info = resp.json()
+        # {"info": {"@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users/$entity", "userPrincipalName": "wangweiyi6191@outlook.com", "id": "fc04e2dba170b844", "displayName": "Escalade Wang", "surname": "Wang", "givenName": "Escalade", "preferredLanguage": "zh-CN", "mail": "wangweiyi6191@outlook.com", "mobilePhone": null, "jobTitle": null, "officeLocation": null, "businessPhones": []}}
+        return redirect('http://localhost:5001')

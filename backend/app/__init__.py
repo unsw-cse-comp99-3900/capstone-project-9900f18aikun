@@ -4,7 +4,6 @@ from .database_setup import set_up_database
 import time
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
-
 def create_app():
     CORS(app)
     app.config.from_object(Config)
