@@ -4,7 +4,7 @@ import requests
 from app.extensions import db, jwt, microsoft
 from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-
+from app.email import check_is_staff_email, check_is_student_email, get_staff_zid, get_student_zid
 
 
 auth_ns = Namespace('auth', description='Authentication operations')
@@ -76,5 +76,19 @@ class OutlookLoginCallback(Resource):
         token = microsoft.authorize_access_token()
         resp = microsoft.get('https://graph.microsoft.com/v1.0/me')
         user_info = resp.json()
+        user_email = user_info.get('mail')
         # {"info": {"@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users/$entity", "userPrincipalName": "wangweiyi6191@outlook.com", "id": "fc04e2dba170b844", "displayName": "Escalade Wang", "surname": "Wang", "givenName": "Escalade", "preferredLanguage": "zh-CN", "mail": "wangweiyi6191@outlook.com", "mobilePhone": null, "jobTitle": null, "officeLocation": null, "businessPhones": []}}
-        return redirect('http://localhost:5001')
+        
+        if check_is_student_email(user_email):
+            zid = get_student_zid(user_email)
+            access_token = create_access_token(identity={'zid': zid})
+            return redirect(f'http://localhost:3000/login?access_token={access_token}')
+        elif check_is_staff_email(user_email):
+            zid = get_staff_zid(user_email)
+            access_token = create_access_token(identity={'zid': zid})
+            return redirect(f'http://localhost:3000/login?access_token={access_token}')
+        else:
+            return redirect(f'http://localhost:3000/login?false')
+
+        
+        
