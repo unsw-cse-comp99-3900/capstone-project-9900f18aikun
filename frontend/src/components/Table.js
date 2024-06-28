@@ -146,7 +146,7 @@ const SelectWindow = ({
       return total;
     }, 0);
     if (totalBooked + newTimes.length > 16) {
-      setLimit(true);
+      setLimit(false);
       return;
     }
 
