@@ -100,25 +100,14 @@ class BookSpace(Resource):
         schedule_reminder(zid, room_id, start_time, date, end_time)
         dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
         reminder_time = dt_start_time - timedelta(hours=1)
-        return {"dt_start_time": dt_start_time.isoformat(),
-                "reminder_time": reminder_time.isoformat()
-                }, 200
-        if not is_request:
-            return {'message': f'Booking confirmed'
-                               f'room id: {room_id}'
-                               f'start time: {start_time}'
-                               f'end time: {end_time}'
-                               f'date: {date}'
-                    }, 200
-        else:
-            return {'message': f'Booking confirmed'
-                               f'room id: {room_id}'
-                               f'start time: {start_time}'
-                               f'end time: {end_time}'
-                               f'date: {date}'
-                               f'is_request: {is_request}'
 
-                    }, 200
+        return {'message': f'Booking confirmed'
+                           f'room id: {room_id}'
+                           f'start time: {start_time}'
+                           f'end time: {end_time}'
+                           f'date: {date}'
+                }, 200
+
 
 
 date_query = booking_ns.parser()
