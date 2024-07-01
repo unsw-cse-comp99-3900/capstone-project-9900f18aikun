@@ -25,6 +25,9 @@ def create_app():
     from .history.routes import history_ns
     api.add_namespace(history_ns, path='/history')
 
+    from .room.routes import room_ns
+    api.add_namespace(room_ns, path='/room')
+
     with app.app_context():
         db.create_all()
         set_up_database()
