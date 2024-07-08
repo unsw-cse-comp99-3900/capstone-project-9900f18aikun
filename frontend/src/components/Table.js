@@ -54,9 +54,11 @@ const SelectWindow = ({
   selectedDate,
   reservations,
   permission,
+  isself,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
+
   if (!visible) return null;
   const style = {
     top: position.top,
@@ -188,9 +190,36 @@ const SelectWindow = ({
     close();
   };
 
+  const cancelHandler = (time, room, roomid, selectedDate) => {
+    console.log("cancel", time, "date is", selectedDate.format("YYYY-MM-DD"), "for room ", room, roomid)
+  }
+
   return (
     <div className="select-window" style={style}>
-      {limit ? (
+      {isself ? (
+        <div style={{ style }}>
+          <p>
+            Do you want to cancel booking for {time}?
+          </p>
+          <div className="button-class">
+            <Button
+              onClick={() => {
+                cancelHandler(time, room, roomid, selectedDate);
+                close();
+              }}
+            >
+              Confirm
+            </Button>
+            <Button
+              onClick={() => {
+                close();
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      ) : limit ? (
         <div style={{ style }}>
           <p>
             Booking limit exceeded for the day. You cannot book more than 8
@@ -258,6 +287,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     position: { top: 0, left: 0 },
     self: selfReservations,
     permission: "",
+    isself: "",
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   // const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -354,13 +384,14 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       if (currentTimeIndex !== -1) {
         const table = document.getElementById("mytable");
         const currentTimeCell = table.querySelector(
-          `thead th:nth-child(${currentTimeIndex + 11})`
+          `thead th:nth-child(${currentTimeIndex})`
         );
 
         if (currentTimeCell) {
           currentTimeCell.scrollIntoView({
             behavior: "smooth",
-            block: "center",
+            block: "nearest",
+            inline: "start",
           });
         }
       }
@@ -370,15 +401,33 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       const today = dayjs().format("YYYY-MM-DD");
       if (selectedDate.format("YYYY-MM-DD") === today) {
         scrollToCurrentTime();
+      } else {
+        const morning = "08:00";
+        const currentTimeIndex = times.indexOf(morning);
+        if (currentTimeIndex !== -1) {
+          const table = document.getElementById("mytable");
+          const currentTimeCell = table.querySelector(
+            `thead th:nth-child(${currentTimeIndex})`
+          );
+
+          if (currentTimeCell) {
+            currentTimeCell.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+              inline: "start",
+            });
+          }
+        }
       }
     }
   }, [times, selectedDate]);
-  
+
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
     const className = event.currentTarget.className;
     console.log("classname is ", className);
     let permissionClass = "";
+    let isself = "";
 
     if (className.includes("reserved")) {
       permissionClass = false;
@@ -389,12 +438,14 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     } else {
       permissionClass = true;
     }
-    const target = event.target;
 
-    if (
-      target.classList.contains("reserved") ||
-      target.classList.contains("selfreserved")
-    ) {
+    if (className.includes("selfreserved")) {
+      isself = true;
+    } else {
+      isself = false;
+    }
+    const target = event.target;
+    if (target.classList.contains("reserved")) {
       return;
     }
 
@@ -407,6 +458,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       position,
       self: selfReservations,
       permission: permissionClass, // Set the permission class
+      isself: isself,
     });
   };
 
@@ -576,6 +628,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         selectedDate={selectedDate}
         reservations={reservations}
         permission={selectWindow.permission}
+        isself={selectWindow.isself}
       />
     </div>
   );

@@ -78,8 +78,15 @@ td:not(.reserved):not(.selfreserved) {
   background-color: #fce8a3;
 }
 
+td.selfreserved:hover {
+  background-color: #8346ee;
+}
+
 td:not(.reserved):not(.selfreserved):hover {
   background-color: #fac833;
+}
+
+td:not(.reserved):hover {
   cursor: pointer;
 }
 
