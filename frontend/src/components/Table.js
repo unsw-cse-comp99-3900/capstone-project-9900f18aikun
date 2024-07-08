@@ -26,51 +26,18 @@ const getSydneyTime = async () => {
 // get time for table column
 const getTime = async (selectedDate) => {
   const times = [];
-  const cur = await getSydneyTime();
 
-  // if today, only show available time
-  if (selectedDate.isSame(cur, "day")) {
-    const minutes = cur.getMinutes();
-
-    // show whole hour before 15 or after 45, otherwise show half an hour
-    if (minutes < 15) {
-      cur.setMinutes(0, 0, 0);
-    } else if (minutes < 45) {
-      cur.setMinutes(30, 0, 0);
-    } else {
-      cur.setHours(cur.getHours() + 1);
-      cur.setMinutes(0, 0, 0);
-    }
-
-    // timeslot next 12 hours
-    for (let i = 0; i < 48; i++) {
-      times.push(
-        cur.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
-      cur.setMinutes(cur.getMinutes() + 30);
-      if (cur.getHours() === 0) {
-        break;
-      }
-    }
-
-    // if other days, show all time
-  } else {
-    const date = new Date(selectedDate.format("YYYY-MM-DD"));
-    date.setHours(0, 0, 0, 0);
-    for (let i = 0; i < 48; i++) {
-      times.push(
-        date.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
-      date.setMinutes(date.getMinutes() + 30);
-    }
+  const date = new Date(selectedDate.format("YYYY-MM-DD"));
+  date.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 48; i++) {
+    times.push(
+      date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+    );
+    date.setMinutes(date.getMinutes() + 30);
   }
   return times;
 };
@@ -218,27 +185,6 @@ const SelectWindow = ({
       console.error("Error fetching booking data:", error);
     }
 
-    // const existing = self.find((reservation) => reservation.room === room);
-    // if (existing) {
-    //   const existingDate = existing.time.find(
-    //     (date) => date.date === selectedDate.format("DD/MM/YYYY")
-    //   );
-    //   if (existingDate) {
-    //     existingDate.timeslot.push(...newTimes);
-    //   } else {
-    //     existing.time.push({
-    //       date: selectedDate.format("DD/MM/YYYY"),
-    //       timeslot: newTimes,
-    //     });
-    //   }
-    //   // if no reservation for this day
-    // } else {
-    //   self.push({
-    //     room,
-    //     time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes }],
-    //   });
-    // }
-
     close();
   };
 
@@ -380,6 +326,54 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     return () => clearInterval(timer);
   }, [selectedDate]);
 
+  // Scroll to the current time slot when times are updated
+  useEffect(() => {
+    const scrollToCurrentTime = async () => {
+      const currentTime = await getSydneyTime();
+
+      const minutes = currentTime.getMinutes();
+
+      // show whole hour before 15 or after 45, otherwise show half an hour
+      if (minutes < 15) {
+        currentTime.setMinutes(0, 0, 0);
+      } else if (minutes < 45) {
+        currentTime.setMinutes(30, 0, 0);
+      } else {
+        currentTime.setHours(currentTime.getHours() + 1);
+        currentTime.setMinutes(0, 0, 0);
+      }
+
+      const cur = currentTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      const currentTimeIndex = times.indexOf(cur);
+
+      if (currentTimeIndex !== -1) {
+        const table = document.getElementById("mytable");
+        const currentTimeCell = table.querySelector(
+          `thead th:nth-child(${currentTimeIndex + 11})`
+        );
+
+        if (currentTimeCell) {
+          currentTimeCell.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }
+    };
+
+    if (times.length > 0) {
+      const today = dayjs().format("YYYY-MM-DD");
+      if (selectedDate.format("YYYY-MM-DD") === today) {
+        scrollToCurrentTime();
+      }
+    }
+  }, [times, selectedDate]);
+  
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
     const className = event.currentTarget.className;
