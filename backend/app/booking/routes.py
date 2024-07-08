@@ -5,7 +5,7 @@ from app.extensions import db, api
 from .models import Booking, RoomDetail, Space, HotDeskDetail
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert
+from app.utils import start_end_time_convert, verify_jwt
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 import re
@@ -109,6 +109,32 @@ class BookSpace(Resource):
                 }, 200
 
 
+@booking_ns.route('/book/<int:booking_id>')
+class BookSpace(Resource):
+    @booking_ns.response(200, "Booking cancelled successfully")
+    @booking_ns.response(404, "Booking not found")
+    @booking_ns.response(401, "Unauthorized")
+    @booking_ns.doc(description="Cancel a booking")
+    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def delete(self, booking_id):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
+
+        booking = Booking.query.filter_by(id=booking_id, user_id=zid).first()
+        if not booking:
+            return {'error': 'Booking not found'}, 404
+
+        if booking.user_id != zid:
+            return {'error': 'Unauthorized'}, 401
+
+        booking.booking_status = 'cancelled'
+        db.session.commit()
+
+        return {'message': 'Booking cancelled successfully'}, 200
+
 
 date_query = booking_ns.parser()
 date_query.add_argument('date', type=str, required=True, help='Date to request')
@@ -155,6 +181,7 @@ class MeetingRoom(Resource):
             bookings = Booking.query.filter(
                 Booking.date == date,
                 Booking.room_id == key,
+                Booking.booking_status != "cancelled"
             ).all()
             for booking in bookings:
                 start_index, end_index = start_end_time_convert(booking.start_time, booking.end_time)
