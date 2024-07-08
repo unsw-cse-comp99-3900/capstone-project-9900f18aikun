@@ -84,10 +84,8 @@ td.selfreserved:hover {
 
 td:not(.reserved):not(.selfreserved):hover {
   background-color: #fac833;
-}
-
-td:not(.reserved):hover {
   cursor: pointer;
+
 }
 
 td.no-permission {

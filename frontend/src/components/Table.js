@@ -58,7 +58,6 @@ const SelectWindow = ({
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
-
   if (!visible) return null;
   const style = {
     top: position.top,
@@ -190,13 +189,42 @@ const SelectWindow = ({
     close();
   };
 
-  const cancelHandler = (time, room, roomid, selectedDate) => {
-    console.log("cancel", time, "date is", selectedDate.format("YYYY-MM-DD"), "for room ", room, roomid)
-  }
+  // const cancelHandler = async(time, room, roomid, selectedDate) => {
+  //   const obj = {
+  //     room_id: roomid,
+  //     date: selectedDate.format("YYYY-MM-DD"),
+  //     time: time,
+  //   };
+  //   const token = localStorage.getItem("token");
+
+  //   try {
+  //     const response = await fetch("/api/booking/book/" + roomid, {
+  //       method: "DELETE",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //         Authorization: "Bearer " + token,
+  //       },
+  //       body: JSON.stringify(obj),
+  //     });
+
+  //     if (response.ok) {
+  //       console.log("successfully deleted");
+  //         // if no reservation for this day
+  //     } else {
+  //       const errorText = await response.text();
+  //       console.error("Server responded with an error:", errorText);
+  //       throw new Error("Something went wrong");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching booking data:", error);
+  //   }
+  //   console.log("cancel", time, "date is", selectedDate.format("YYYY-MM-DD"), "for room ", room, roomid)
+  // }
 
   return (
     <div className="select-window" style={style}>
-      {isself ? (
+      {/* {isself ? (
         <div style={{ style }}>
           <p>
             Do you want to cancel booking for {time}?
@@ -219,7 +247,8 @@ const SelectWindow = ({
             </Button>
           </div>
         </div>
-      ) : limit ? (
+      ) :  */}
+      {limit ? (
         <div style={{ style }}>
           <p>
             Booking limit exceeded for the day. You cannot book more than 8
@@ -445,7 +474,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       isself = false;
     }
     const target = event.target;
-    if (target.classList.contains("reserved")) {
+    if (target.classList.contains("reserved") || target.classList.contains("selfreserved")) {
       return;
     }
 
