@@ -5,15 +5,17 @@ function Filter({ onFilter }) {
   const [filters, setFilters] = useState({
     level: '',
     capacity: '',
-    category: 'meetingroom'
+    category: 'meeting_room'
   });
 
   const handleFilterChange = (e) => {
+    
     const { name, value } = e.target;
     setFilters({
       ...filters,
       [name]: name === 'capacity' ? parseInt(value) || '' : value
     });
+    // console.log(filters.category)
   };
 
   const handleSubmit = (e) => {
@@ -53,10 +55,12 @@ function Filter({ onFilter }) {
         <div className="form-group">
           <label>Category:</label>
           <select name="category" value={filters.category} onChange={handleFilterChange}>
-            <option value="meetingroom">Meeting Room</option>
+            <option value="all">All</option> {/* 添加 'all' 选项 */}
+            <option value="meeting_room">Meeting Room</option>
+            <option value="hot_desk">Hot Desk</option>
           </select>
         </div>
-        <button type="submit">Apply Filters</button>
+        <button type="submit">Submit</button>
       </form>
     </div>
   );

@@ -1,80 +1,157 @@
-import React, { useState, useEffect } from 'react';
-import dayjs from 'dayjs'; // 导入 dayjs
-import Table from './components/Table';
-
-import Filter from './components/filter';
-import './App.css'; // 引入CSS文件
-
+import React, { useState, useEffect } from "react";
+import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import Table from "./components/Table";
+import Filter from "./components/filter";
+import LoginPage from "./components/LoginPage";
+import HeaderBar from "./components/HeaderBar";
+// import ToMap from './components/toMap';
+import SelectMap from "./components/selectMap";
+import "./App.css";
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
-    level: '',
-    capacity: '',
-    category: 'meetingroom'
+    level: "",
+    capacity: "",
+    category: "meeting_room",
   });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // 控制侧边栏的状态
-  const [selectedDate, setSelectedDate] = useState(dayjs()); 
-  // console.log(selectedDate);
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   const fetchBookingData = async () => {
     try {
-      const formattedDate = selectedDate.format('YYYY-MM-DD'); // 将 selectedDate 转换成 'YYYY-MM-DD' 格式
-      console.log(formattedDate)
-      const response = await fetch(`/api/booking/meetingroom?date=${formattedDate}`, {
-        method: "GET",
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTExNTc5OSwianRpIjoiYzA5Y2IwZTEtYzFjYS00ZDY4LTg5NTAtMTI2MGQ4NzIwMGEyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6MTEzMzAifSwibmJmIjoxNzE5MTE1Nzk5LCJjc3JmIjoiZjlmMGI0YmItMTgwYi00ZDllLThlNGYtN2I4MTk4OWNhMzllIiwiZXhwIjo3NzE5MTE1NzM5fQ.ZU768uMtq-LuJZYOjznoIb3zNha0XDvQu7JH8AYls1w'
+      const formattedDate = selectedDate.format("YYYY-MM-DD");
+      console.log(formattedDate);
+      const response = await fetch(
+        `/api/booking/meetingroom?date=${formattedDate}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
         }
-      });
+      );
       const text = await response.text();
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
-      console.log("data is", dataArray)
-      setData(dataArray);
-      setFilteredData(dataArray);
+      console.log("data is", dataArray);
+      setData(dataArray); // 存储原始数据
+      setFilteredData(dataArray); // 存储筛选后的数据
     } catch (error) {
-      console.error('Error fetching booking data:', error);
+      console.error("Error fetching booking data:", error);
     }
   };
 
   const handleFilter = (filters) => {
     const newFilteredData = data.filter((item) => {
       return (
-        (filters.level === '' || item.level === filters.level) &&
-        (filters.capacity === '' || item.capacity >= filters.capacity) &&
-        (filters.category === '' || filters.category === 'meetingroom')
+        (filters.level === "" || item.level === filters.level) &&
+        (filters.capacity === "" || item.capacity >= filters.capacity) &&
+        (filters.category === "all" || item.type === filters.category)
+        // (filters.type === '' || item.type === filters.type)
       );
     });
-    setFilteredData(newFilteredData);
-    setFilters(filters);
+    setFilteredData(newFilteredData); // 更新筛选后的数据
+    setFilters(filters); // 更新筛选条件
   };
 
-
   useEffect(() => {
-    fetchBookingData();
-  }, [selectedDate]); // 添加 selectedDate 作为依赖项
+    if (isLoggedIn) {
+      fetchBookingData();
+    }
+  }, [selectedDate, isLoggedIn]);
 
   useEffect(() => {
     handleFilter(filters);
   }, [filters, data]);
-  //输出筛选后的数据到控制台
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    navigate("/dashboard");
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   useEffect(() => {
-    // console.log(filteredData);
-  }, [filteredData]);
+    if (isLoggedIn) {
+      fetchBookingData();
+    }
+  }, [isLoggedIn, selectedDate]);
 
   return (
     <div className="app">
-      <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-        <button className="toggle-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-          {isSidebarOpen ? '<<' : '>>'}
-        </button>
-        {isSidebarOpen && <Filter onFilter={handleFilter} />}
-      </div>
-      <div className="content">
-        <Table data={filteredData} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
-      </div>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            !isLoggedIn ? (
+              <LoginPage onLogin={handleLogin} />
+            ) : (
+              <Navigate to="/dashboard" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            isLoggedIn ? (
+              <>
+                <HeaderBar onLogout={handleLogout} />
+                <div className="main-content">
+                  <div
+                    className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
+                  >
+                  <img
+                      src='/On@2x.png' // 替换按钮为图标
+                      alt="Toggle Sidebar"
+                      className="toggle-icon" // 添加图标样式类
+                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    />
+                    {isSidebarOpen && <Filter onFilter={handleFilter} />}
+                  </div>
+                  <div className="content">
+                    <Table
+                      data={filteredData}
+                      selectedDate={selectedDate}
+                      setSelectedDate={setSelectedDate}
+                    />
+                    {/* <div className="to-map-wrapper">
+                      <ToMap />
+                    </div> */}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/select-map"
+          element={
+            isLoggedIn ? (
+              <>
+                <HeaderBar onLogout={handleLogout} />
+                <SelectMap />
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="*"
+          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+        />
+      </Routes>
     </div>
   );
 }
