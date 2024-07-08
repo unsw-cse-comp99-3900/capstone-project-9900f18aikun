@@ -195,3 +195,52 @@ def check_permission(detail, user_type):
         return False
 
 
+
+
+@booking_ns.route('/meetingroom_report')
+class meetingroom_report(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.doc(description="Get meeting room time list to report edition")
+    @booking_ns.expect(date_query)
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        try:
+            verify_jwt_in_request()
+        except exceptions.ExpiredSignatureError:
+            return {"error": "Token is invalid"}, 401
+        except exceptions.DecodeError:
+            return {"error": "Token decode error"}, 422
+        except exceptions.InvalidTokenError:
+            return {"error": "Token is invalid"}, 422
+        except Exception as e:
+            return {"error": str(e)}, 500
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        date = request.args.get('date')
+
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
+
+        # define output list
+        output = self.generate_report_output(date)
+        # output["date"] = date
+        return output, 200
+    
+    def generate_report_output(self, date):
+        output = {}
+        output["date"] = date
+        bookings = Booking.query.filter(
+                    Booking.date == date,
+                ).all()
+        res = [0 for _ in range(48)]
+        for booking in bookings:
+            start_slot, end_slot = start_end_time_convert(booking.start_time, booking.end_time)
+            for i in range(start_slot, end_slot):
+                res[i] += 1
+        output["time_slot"] = res
+        return output
+
+    
