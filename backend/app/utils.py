@@ -39,6 +39,16 @@ def is_meeting_room(room_id: int) -> bool:
         return False
 
 
+def is_student_permit(room_id: int) -> bool:
+    if is_meeting_room(room_id):
+        meeting_room = db.session.get(RoomDetail, room_id)
+        if meeting_room.HDR_student_permission:
+            return True
+        else:
+            return False
+    else:
+        return True
+
 # get usr's name
 def get_user_name(zid: str) -> str:
     if is_student(zid):

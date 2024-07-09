@@ -5,7 +5,7 @@ from app.extensions import db, api
 from .models import Booking, RoomDetail, Space, HotDeskDetail
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert, verify_jwt, get_room_name
+from app.utils import start_end_time_convert, verify_jwt, get_room_name, is_student_permit
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -95,7 +95,7 @@ class BookSpace(Resource):
             return {'error': 'Invalid zid'}, 400
         user_type = user.user_type
         is_request = False
-        if user_type != "CSE_staff" and db.session.get(Space, room_id).space_type == "room":
+        if user_type != "CSE_staff" and not is_student_permit(room_id):
             is_request = True
         if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
             is_request = True
