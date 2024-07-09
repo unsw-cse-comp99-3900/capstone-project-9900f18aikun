@@ -5,9 +5,10 @@ from app.extensions import db, api
 from .models import Booking, RoomDetail, Space, HotDeskDetail
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert, verify_jwt
+from app.utils import start_end_time_convert, verify_jwt, get_room_name
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
+from sqlalchemy import and_, or_, not_
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -61,6 +62,10 @@ class BookSpace(Resource):
 
         if start_time == end_time:
             return {'error': 'Start time and end time are same'}, 400
+        try:
+            room_name = get_room_name(room_id)
+        except:
+            return {'error': 'Invalid room id'}, 400
 
         conflict_bookings = Booking.query.filter(
             Booking.date == date,
@@ -85,14 +90,15 @@ class BookSpace(Resource):
 
         new_booking = Booking(
             room_id=room_id,
+            room_name=room_name,
             user_id=zid,
             start_time=start_time,
             end_time=end_time,
             date=date,
-            booking_status='confirmed',
+            booking_status='requested' if is_request else 'booked',
             is_request=is_request
         )
-
+        statu = new_booking.booking_status
         db.session.add(new_booking)
         db.session.commit()
 
@@ -101,11 +107,12 @@ class BookSpace(Resource):
         dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
         reminder_time = dt_start_time - timedelta(hours=1)
 
-        return {'message': f'Booking confirmed'
-                           f'room id: {room_id}'
-                           f'start time: {start_time}'
-                           f'end time: {end_time}'
-                           f'date: {date}'
+        return {'message': f'Booking confirmed\n'
+                           f'room id: {room_id}\n'
+                           f'start time: {start_time}\n'
+                           f'end time: {end_time}\n'
+                           f'date: {date}\n'
+                           f'statu: {statu}\n'
                 }, 200
 
 
@@ -181,7 +188,8 @@ class MeetingRoom(Resource):
             bookings = Booking.query.filter(
                 Booking.date == date,
                 Booking.room_id == key,
-                Booking.booking_status != "cancelled"
+                Booking.booking_status != "cancelled",
+                not_(and_(Booking.booking_status == "requested", Booking.user_id != user_zid)),
             ).all()
             for booking in bookings:
                 start_index, end_index = start_end_time_convert(booking.start_time, booking.end_time)

@@ -42,6 +42,7 @@ class Booking(db.Model):
     __tablename__ = "booking"
     id = db.Column(db.Integer, primary_key=True)
     room_id = db.Column(db.Integer, db.ForeignKey('space.id'), nullable=False)
+    room_name = db.Column(db.String(128), nullable=False)
     user_id = db.Column(db.String(128), db.ForeignKey('users.zid'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     start_time = db.Column(db.Time, nullable=False)
