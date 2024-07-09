@@ -389,7 +389,58 @@ class meetingroom_usage(Resource):
         return formatted_date
 
         
+
+@booking_ns.route('/meetingroom-top10-byCount')
+class meetingroom_top10(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.doc(description="Get meeting room top10 list")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        top_list = self.get_top_list()
+
+        return {
+            "top_list": top_list
+        }, 200
+
+    def get_top_list(self):
+        current_date, date_seven_days_later = self.get_sydney_current_dates()
+        rooms = db.session.query(
+            Booking.room_id,
+            Booking.room_name,
+            func.count(Booking.id).label('booking_count')
+        ).filter(
+            Booking.date.between(current_date, date_seven_days_later)
+        ).group_by(
+            Booking.room_id,
+            Booking.room_name,
+        ).order_by(
+            func.count(Booking.id).desc()
+        ).limit(10).all()
+
+        top_list = [{
+            'room_id': room_id, 
+            "room_name": room_name,
+            'booking_count': booking_count} for room_id, room_name, booking_count in rooms]
+        return top_list
+
+
         
+    def get_sydney_current_dates(self):
+        sydney_tz = pytz.timezone('Australia/Sydney')
+        current_sydney_time = datetime.now(timezone.utc).astimezone(sydney_tz)
+        current_date = current_sydney_time.strftime('%Y-%m-%d')
+        date_seven_days_later = (current_sydney_time + timedelta(days=7)).strftime('%Y-%m-%d')
+        return current_date, date_seven_days_later
+    
+
     
     # {
     #     "total room": 100,
