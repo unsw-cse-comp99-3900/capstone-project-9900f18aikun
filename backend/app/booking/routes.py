@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api
@@ -15,6 +15,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import google.generativeai as genai
 from datetime import datetime
 import json
+from sqlalchemy import func
+import pytz
 
 
 scheduler = BackgroundScheduler()
@@ -226,7 +228,7 @@ class MeetingRoom(Resource):
             return False
 
 
-@booking_ns.route('/meetingroom_report')
+@booking_ns.route('/meetingroom-report')
 class meetingroom_report(Resource):
     # Get the
     @booking_ns.response(200, "success")
@@ -276,6 +278,7 @@ class meetingroom_report(Resource):
 express_booking_model = booking_ns.model('Express booking request', {
     'query': fields.String(required=True, description='The description of the room what user want'),
 })
+
 #
 # @booking_ns.route('/express-book')
 # class ExpressBook(Resource):
@@ -329,3 +332,80 @@ express_booking_model = booking_ns.model('Express booking request', {
 #         print(f"Level: {level}")
 #         print(f"Start Time: {start_time}")
 #         print(f"End Time: {end_time}")
+
+@booking_ns.route('/meetingroom-usage')
+class meetingroom_usage(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.doc(description="Get meeting room usage detail list to report edition")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        try:
+            verify_jwt_in_request()
+        except exceptions.ExpiredSignatureError:
+            return {"error": "Token is invalid"}, 401
+        except exceptions.DecodeError:
+            return {"error": "Token decode error"}, 422
+        except exceptions.InvalidTokenError:
+            return {"error": "Token is invalid"}, 422
+        except Exception as e:
+            return {"error": str(e)}, 500
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        total_room = self.get_total_room()
+        usage = self.get_booking_list()
+        today = self.get_sydney_current_date()
+
+        return {
+            "total_number": total_room,
+            "today": today,
+            "usage": usage
+        }, 200
+
+    def get_total_room(self):
+        room_number = db.session.query(func.count(RoomDetail.id)).scalar()
+        desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
+        return room_number + desk_number
+
+    def get_booking_list(self):
+        usage = []
+        sydney_date = self.get_sydney_current_date()
+        for i in range(7):
+            current_date = datetime.strptime(sydney_date, '%Y-%m-%d')
+            future_date = current_date + timedelta(days=i)
+            temp_date = future_date.strftime('%Y-%m-%d')
+            booking_number = Booking.query.filter(
+                    Booking.date == temp_date,
+                ).distinct(Booking.room_id).count()
+            usage.append(booking_number)
+        return usage
+    
+    def get_sydney_current_date(self):
+        sydney_tz = pytz.timezone('Australia/Sydney')
+        sydney_time = datetime.now(timezone.utc).astimezone(sydney_tz)
+        formatted_date = sydney_time.strftime('%Y-%m-%d')
+        return formatted_date
+
+        
+        
+    
+    # {
+    #     "total room": 100,
+    #     "usage": [10, 20,10 ,30,100, 80,70]
+    # }
+
+    # {
+    #     [
+    #         {
+    #             "id":1,
+    #             "times": 30,
+    #             "total time": "20h"
+    #         },
+    #         {
+                
+    #         }
+    #     ]
+    # }
+
