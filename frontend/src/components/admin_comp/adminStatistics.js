@@ -1,0 +1,117 @@
+import React, { useState, useEffect,useRef } from 'react';
+import { DatePicker } from '@arco-design/web-react';
+import "@arco-design/web-react/dist/css/arco.css";
+import dayjs from 'dayjs';
+import './adminStatistics.css';
+import VChart from '@visactor/vchart';
+
+function AdminStatistics() {
+    const [date, setDate] = useState('');
+    const [apiDate, setApiDate] = useState('');
+    const [timeSlots, setTimeSlots] = useState([]);
+    const [hourlyCounts, setHourlyCounts] = useState([]);
+    const chartRef = useRef(null);
+
+    const handleDateChange = (dateValue) => {
+        const formattedDate = dayjs(dateValue).format('YYYY-MM-DD');
+        setDate(formattedDate);
+        fetchData(formattedDate);
+    };
+
+    const fetchData = async (formattedDate) => {
+        try {
+            const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-report?date=${formattedDate}`, {
+                method: "GET",
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setApiDate(data.date);
+            setTimeSlots(data.time_slot);
+
+            // 计算每小时的预约数
+            const counts = new Array(24).fill(0);
+            data.time_slot.forEach((count, index) => {
+                counts[Math.floor(index / 2)] += count;
+            });
+            setHourlyCounts(counts);
+
+            // 在控制台输出每小时的预约数
+            console.log("Hourly Counts:", counts);
+
+            // 在控制台输出apiDate和timeSlots
+            console.log("API Date:", data.date);
+            console.log("Time Slots:", data.time_slot);
+
+            // 准备图表数据
+            const chartData = prepareChartData(counts);
+
+            // 清空图表容器的内容
+            const chartContainer = document.getElementById('chart');
+            if (chartContainer) {
+                chartContainer.innerHTML = '';
+            }
+
+            // 创建新的折线图
+            const spec = {
+                type: 'line',
+                data: {
+                    values: chartData
+                },
+                xField: 'time',
+                yField: 'value',
+                width: 800,
+                height: 500,
+                autoFit: true
+            };
+
+            chartRef.current = new VChart(spec, { dom: 'chart' });
+            chartRef.current.renderSync();
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
+
+    // 准备图表数据的函数
+    const prepareChartData = (hourlyCounts) => {
+        return hourlyCounts.map((count, index) => ({
+            time: `${index + 1}:00`,  // 将索引值加1小时
+            value: count
+        }));
+    };
+
+    useEffect(() => {
+        if (date) {
+            fetchData(date);
+        }
+    }, [date]);
+
+    return (
+        <div>
+            <h1>Statistic report</h1>
+            <div className='pickDate'>
+                <label htmlFor="date-picker">Select date: </label>
+                <DatePicker 
+                    id="date-picker"
+                    style={{ width: 200 }}
+                    onChange={(_, dateValue) => handleDateChange(dateValue)}
+                    format="YYYY-MM-DD"
+                />
+                <p>Selected Date: {date}</p>
+            </div>
+            <div className='plot'>
+                <div className='plot-header'>Real-time Appointment statistic</div>
+                <div className='plot-content'>
+                    <div id="chart" style={{ width: '800px', height: '400px' }}></div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default AdminStatistics;
