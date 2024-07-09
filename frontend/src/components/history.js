@@ -26,7 +26,7 @@ const ReservationHistory = () => {
 
         if (response.ok) {
           const result = await response.json();
-          console.log(result)
+          console.log(result);
           setHistory(result);
         } else {
           const errorText = await response.text();
@@ -40,19 +40,19 @@ const ReservationHistory = () => {
     };
 
     fetchHistory();
-  }, []); 
+  }, []);
 
   const handleCancelClick = (id) => {
     console.log("Cancel clicked for ID:", id);
   };
 
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
+  //   if (loading) {
+  //     return <div>Loading...</div>;
+  //   }
 
-//   if (error) {
-//     return <div>Error: {error.message}</div>;
-//   }
+  //   if (error) {
+  //     return <div>Error: {error.message}</div>;
+  //   }
 
   return (
     <div className="reservation-history">
@@ -63,28 +63,26 @@ const ReservationHistory = () => {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell align="right">Time</TableCell>
-              <TableCell align="right">Room</TableCell>
-              <TableCell align="right">Booking Status</TableCell>
-              <TableCell align="right">Operation</TableCell>
+              <TableCell align="center">Date</TableCell>
+              <TableCell align="center">Time</TableCell>
+              <TableCell align="center">Room</TableCell>
+              <TableCell align="center">Booking Status</TableCell>
+              <TableCell align="center">Operation</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {history.map((row) => (
-              <TableRow
-                key={row.booking_id}
-              >
-                <TableCell component="th" scope="row">
+              <TableRow key={row.booking_id} align="center">
+                <TableCell component="th" scope="row" align="center">
                   {row.date}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="center">
                   {row.start_time} - {row.end_time}
                 </TableCell>
-                <TableCell align="right">{row.room_id}</TableCell>
-                <TableCell align="right">{row.booking_status}</TableCell>
+                <TableCell align="center">{row.room_id}</TableCell>
+                <TableCell align="center">{row.booking_status}</TableCell>
                 <TableCell
-                  align="right"
+                  align="center"
                   id={row.booking_id}
                   onClick={() => handleCancelClick(row.booking_id)}
                   style={{ cursor: "pointer", color: "red" }}

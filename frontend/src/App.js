@@ -7,16 +7,18 @@ import LoginPage from "./components/LoginPage";
 import HeaderBar from "./components/HeaderBar";
 import SelectMap from "./components/selectMap";
 import History from "./components/history";
+import RoomInfo from "./components/roompage";
+
 import "./App.css";
 
 const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   return isLoggedIn ? children : <Navigate to="/login" />;
 };
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('token') !== null;
+    return localStorage.getItem("token") !== null;
   });
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -79,7 +81,7 @@ function App() {
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem("isLoggedIn", "true");
     navigate("/dashboard");
   };
 
@@ -89,14 +91,14 @@ function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem('token');
-    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem("token");
+    localStorage.removeItem("isLoggedIn");
     navigate("/login");
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const loggedIn = localStorage.getItem('isLoggedIn');
+    const token = localStorage.getItem("token");
+    const loggedIn = localStorage.getItem("isLoggedIn");
     if (token && loggedIn) {
       setIsLoggedIn(true);
     }
@@ -126,7 +128,7 @@ function App() {
                     className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
                   >
                     <img
-                      src='/On@2x.png'
+                      src="/On@2x.png" // 替换按钮为图标
                       alt="Toggle Sidebar"
                       className="toggle-icon"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -165,6 +167,19 @@ function App() {
                 <History />
               </>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/room/*"
+          element={
+            isLoggedIn ? (
+              <>
+                <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
+                <RoomInfo />
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
           }
         />
         <Route
