@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { Route, Routes, Navigate, useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import Table from "./components/Table";
 import Filter from "./components/filter";
@@ -11,12 +11,18 @@ import "./App.css";
 
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  return isLoggedIn ? children : <Navigate to="/login" />;
+  const location = useLocation();
+  
+  if (!isLoggedIn) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  
+  return children;
 };
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('token') !== null;
+    return localStorage.getItem('isLoggedIn') === 'true';
   });
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -28,6 +34,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const navigate = useNavigate();
+  const location = useLocation();
 
   const fetchBookingData = async () => {
     try {
@@ -80,7 +87,8 @@ function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
-    navigate("/dashboard");
+    const from = location.state?.from?.pathname || "/dashboard";
+    navigate(from, { replace: true });
   };
 
   const handleHistory = () => {
@@ -111,7 +119,7 @@ function App() {
             !isLoggedIn ? (
               <LoginPage onLogin={handleLogin} />
             ) : (
-              <Navigate to="/dashboard" />
+              <Navigate to="/dashboard" replace />
             )
           }
         />
@@ -169,7 +177,7 @@ function App() {
         />
         <Route
           path="*"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />}
         />
       </Routes>
     </div>
