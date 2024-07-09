@@ -9,8 +9,13 @@ from app.utils import start_end_time_convert, verify_jwt, get_room_name
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
+from app.config import Config
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
+import google.generativeai as genai
+from datetime import datetime
+import json
+
 
 scheduler = BackgroundScheduler()
 
@@ -107,12 +112,12 @@ class BookSpace(Resource):
         dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
         reminder_time = dt_start_time - timedelta(hours=1)
 
-        return {'message': f'Booking confirmed\n'
-                           f'room id: {room_id}\n'
-                           f'start time: {start_time}\n'
-                           f'end time: {end_time}\n'
-                           f'date: {date}\n'
-                           f'statu: {statu}\n'
+        return {'message': f"Booking confirmed\n"
+                           f"room id: {room_id}\n"
+                           f"start time: {start_time}\n"
+                           f"end time: {end_time}\n"
+                           f"date: {date}\n"
+                           f"statu: {statu}\n"
                 }, 200
 
 
@@ -158,16 +163,9 @@ class MeetingRoom(Resource):
     @booking_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
-        try:
-            verify_jwt_in_request()
-        except exceptions.ExpiredSignatureError:
-            return {"error": "Token is invalid"}, 401
-        except exceptions.DecodeError:
-            return {"error": "Token decode error"}, 422
-        except exceptions.InvalidTokenError:
-            return {"error": "Token is invalid"}, 422
-        except Exception as e:
-            return {"error": str(e)}, 500
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
 
@@ -179,8 +177,8 @@ class MeetingRoom(Resource):
 
         # define output list
         output = {}
-        output = generate_space_output(output, "meeting_room", user_type)
-        output = generate_space_output(output, "hot_desk", user_type)
+        output = self.generate_space_output(output, "meeting_room", user_type)
+        output = self.generate_space_output(output, "hot_desk", user_type)
 
 
         # add time content
@@ -200,36 +198,32 @@ class MeetingRoom(Resource):
                     }
         return output, 200
 
+    def generate_space_output(self, output, book_type, user_type):
 
-def generate_space_output(output, book_type, user_type):
+        if book_type == "meeting_room":
+            details = RoomDetail.query.all()
+        else:
+            details = HotDeskDetail.query.all()
+        for detail in details:
+            output[detail.id] = {
+                "id": detail.id,
+                "name": detail.name,
+                "building": detail.building,
+                "level": detail.level,
+                "capacity": detail.capacity,
+                "type": book_type,
+                "permission": self.check_permission(detail, user_type),
+                "time_table": [[] for _ in range(48)]
+            }
+        return output
 
-    if book_type == "meeting_room":
-        details = RoomDetail.query.all()
-    else:
-        details = HotDeskDetail.query.all()
-    for detail in details:
-        output[detail.id] = {
-            "id": detail.id,
-            "name": detail.name,
-            "building": detail.building,
-            "level": detail.level,
-            "capacity": detail.capacity,
-            "type": book_type,
-            "permission": check_permission(detail, user_type),
-            "time_table": [[] for _ in range(48)]
-        }
-    return output
-
-
-def check_permission(detail, user_type):
-    if user_type == "HDR_student":
-        return detail.HDR_student_permission
-    elif user_type == "CSE_staff":
-        return detail.CSE_staff_permission
-    else:
-        return False
-
-
+    def check_permission(self, detail, user_type):
+        if user_type == "HDR_student":
+            return detail.HDR_student_permission
+        elif user_type == "CSE_staff":
+            return detail.CSE_staff_permission
+        else:
+            return False
 
 
 @booking_ns.route('/meetingroom_report')
@@ -278,4 +272,60 @@ class meetingroom_report(Resource):
         output["time_slot"] = res
         return output
 
-    
+
+express_booking_model = booking_ns.model('Express booking request', {
+    'query': fields.String(required=True, description='The description of the room what user want'),
+})
+#
+# @booking_ns.route('/express-book')
+# class ExpressBook(Resource):
+#     # Book a room
+#     @booking_ns.response(200, "success")
+#     @booking_ns.response(400, "Bad request")
+#     @booking_ns.doc(description="Express booking")
+#     @booking_ns.expect(express_booking_model)
+#     @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+#     def post(self):
+#         jwt_error = verify_jwt()
+#         if jwt_error:
+#             return jwt_error
+#         data = request.json
+#         current_user = get_jwt_identity()
+#         zid = current_user['zid']
+#
+#         query = data['query']
+#         api_key = Config.API_KEY
+#
+#         model = genai.GenerativeModel('gemini-1.5-flash',
+#                                       generation_config={"response_mime_type": "application/json"})
+#
+#         prompt = f"""
+#           {query}
+#
+#           Recipe = {{
+#                 "level": ,
+#                 "start_time": "",
+#                 "end_time": ""
+#             }}
+#           if information is not full return false
+#
+#           Return a `return a json format like this {'level': 3, 'start_time': '2023-12-16T14:00:00', 'end_time': '2023-12-16T17:00:00'}`
+#           """
+#
+#         response = model.generate_content(prompt)
+#
+#         # Assuming response.text is a valid JSON string
+#         response_json = json.loads(response.text)
+#
+#         # Print the entire JSON response
+#         print(response_json)
+#
+#         # Extracting specific fields from the JSON response
+#         level = response_json.get('level')
+#         start_time = response_json.get('start_time')
+#         end_time = response_json.get('end_time')
+#
+#         # Print the extracted data
+#         print(f"Level: {level}")
+#         print(f"Start Time: {start_time}")
+#         print(f"End Time: {end_time}")
