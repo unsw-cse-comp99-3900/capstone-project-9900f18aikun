@@ -5,12 +5,19 @@ import Table from "./components/Table";
 import Filter from "./components/filter";
 import LoginPage from "./components/LoginPage";
 import HeaderBar from "./components/HeaderBar";
-// import ToMap from './components/toMap';
 import SelectMap from "./components/selectMap";
-import History from "./components/history"
+import History from "./components/history";
 import "./App.css";
+
+const ProtectedRoute = ({ children }) => {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  return isLoggedIn ? children : <Navigate to="/login" />;
+};
+
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('token') !== null;
+  });
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -21,9 +28,10 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+
   const fetchBookingData = async () => {
     try {
+      const token = localStorage.getItem("token");
       const formattedDate = selectedDate.format("YYYY-MM-DD");
       console.log(formattedDate);
       const response = await fetch(
@@ -40,8 +48,8 @@ function App() {
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
       console.log("data is", dataArray);
-      setData(dataArray); // 存储原始数据
-      setFilteredData(dataArray); // 存储筛选后的数据
+      setData(dataArray);
+      setFilteredData(dataArray);
     } catch (error) {
       console.error("Error fetching booking data:", error);
     }
@@ -53,11 +61,10 @@ function App() {
         (filters.level === "" || item.level === filters.level) &&
         (filters.capacity === "" || item.capacity >= filters.capacity) &&
         (filters.category === "all" || item.type === filters.category)
-        // (filters.type === '' || item.type === filters.type)
       );
     });
-    setFilteredData(newFilteredData); // 更新筛选后的数据
-    setFilters(filters); // 更新筛选条件
+    setFilteredData(newFilteredData);
+    setFilters(filters);
   };
 
   useEffect(() => {
@@ -72,6 +79,7 @@ function App() {
 
   const handleLogin = () => {
     setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
     navigate("/dashboard");
   };
 
@@ -81,15 +89,18 @@ function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
+    localStorage.removeItem('isLoggedIn');
     navigate("/login");
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetchBookingData();
+    const token = localStorage.getItem('token');
+    const loggedIn = localStorage.getItem('isLoggedIn');
+    if (token && loggedIn) {
+      setIsLoggedIn(true);
     }
-  }, [isLoggedIn, selectedDate]);
+  }, []);
 
   return (
     <div className="app">
@@ -107,17 +118,17 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <div className="main-content">
                   <div
                     className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
                   >
-                  <img
-                      src='/On@2x.png' // 替换按钮为图标
+                    <img
+                      src='/On@2x.png'
                       alt="Toggle Sidebar"
-                      className="toggle-icon" // 添加图标样式类
+                      className="toggle-icon"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     />
                     {isSidebarOpen && <Filter onFilter={handleFilter} />}
@@ -128,41 +139,32 @@ function App() {
                       selectedDate={selectedDate}
                       setSelectedDate={setSelectedDate}
                     />
-                    {/* <div className="to-map-wrapper">
-                      <ToMap />
-                    </div> */}
                   </div>
                 </div>
               </>
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
           }
         />
         <Route
           path="/select-map"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <SelectMap />
               </>
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
           }
         />
         <Route
           path="/history"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <History />
               </>
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
           }
         />
         <Route

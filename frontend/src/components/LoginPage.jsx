@@ -20,8 +20,8 @@ const LoginPage = ({ onLogin }) => {
     } else if (loginFailed) {
       setError('Outlook login failed. Please try again.');
     } else {
-      // Clear any existing token when the login page loads
       localStorage.removeItem('token');
+      localStorage.removeItem('isLoggedIn');
     }
   }, [location]);
 
@@ -36,6 +36,7 @@ const LoginPage = ({ onLogin }) => {
 
       if (response.ok) {
         localStorage.setItem('token', token);
+        localStorage.setItem('isLoggedIn', 'true');
         console.log('Auto-login successful');
         onLogin();
         navigate('/dashboard');
@@ -43,11 +44,13 @@ const LoginPage = ({ onLogin }) => {
         console.log('Auto-login failed, token may be invalid');
         setError('Auto-login failed. Please try again.');
         localStorage.removeItem('token');
+        localStorage.removeItem('isLoggedIn');
       }
     } catch (error) {
       console.error('Auto-login error:', error);
       setError('Network error. Please try again.');
       localStorage.removeItem('token');
+      localStorage.removeItem('isLoggedIn');
     }
   };
 
@@ -71,6 +74,7 @@ const LoginPage = ({ onLogin }) => {
       
       if (response.ok) {
         localStorage.setItem('token', data.access_token);
+        localStorage.setItem('isLoggedIn', 'true');
         console.log('Login successful');
         onLogin();
         navigate('/dashboard');
