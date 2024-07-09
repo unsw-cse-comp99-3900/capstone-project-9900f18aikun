@@ -140,7 +140,7 @@
   font-weight: bold;
 }
 
-.logout-button {
+.logout-button, .history-button {
   background-color: #ffdc00; /* 颜色与header-bar一致 */
   color: black;
   border: none;
@@ -159,7 +159,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 添加阴影 */
 }
 
-.logout-button:hover {
+.logout-button:hover, .history-button:hover {
   background-color: #e6b800; /* 鼠标移到button上时颜色变为深黄色 */
 }
 
@@ -169,3 +169,4 @@
   gap: 5px; /* 按钮之间的间距 */
   margin-left: auto; /* 将按钮组推到最右侧 */
 }
+

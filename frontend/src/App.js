@@ -7,6 +7,7 @@ import LoginPage from "./components/LoginPage";
 import HeaderBar from "./components/HeaderBar";
 // import ToMap from './components/toMap';
 import SelectMap from "./components/selectMap";
+import History from "./components/history"
 import "./App.css";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -74,6 +75,10 @@ function App() {
     navigate("/dashboard");
   };
 
+  const handleHistory = () => {
+    navigate("/history");
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("token");
@@ -104,7 +109,7 @@ function App() {
           element={
             isLoggedIn ? (
               <>
-                <HeaderBar onLogout={handleLogout} />
+                <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <div className="main-content">
                   <div
                     className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
@@ -139,8 +144,21 @@ function App() {
           element={
             isLoggedIn ? (
               <>
-                <HeaderBar onLogout={handleLogout} />
+                <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <SelectMap />
+              </>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            isLoggedIn ? (
+              <>
+                <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
+                <History />
               </>
             ) : (
               <Navigate to="/login" />
