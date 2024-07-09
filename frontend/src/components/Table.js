@@ -7,6 +7,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import ToMap from "./toMap";
+import { Navigate, useNavigate } from "react-router-dom";
+
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -324,6 +326,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
   // console.log("reservation is", reservations);
   // console.log("selfReservation is", selfReservations);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     setReservations(extractData(data, false));
     setSelfReservations(extractData(data, true));
@@ -474,7 +478,10 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       isself = false;
     }
     const target = event.target;
-    if (target.classList.contains("reserved") || target.classList.contains("selfreserved")) {
+    if (
+      target.classList.contains("reserved") ||
+      target.classList.contains("selfreserved")
+    ) {
       return;
     }
 
@@ -584,6 +591,9 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                     className="room-column"
                     onMouseEnter={() => setHoveredRoom(roomData)}
                     onMouseLeave={() => setHoveredRoom(null)}
+                    onClick={() => {
+                      navigate("/room/" + item.roomid);
+                    }}
                   >
                     {item.room}
                     {hoveredRoom && hoveredRoom.name === item.room && (
