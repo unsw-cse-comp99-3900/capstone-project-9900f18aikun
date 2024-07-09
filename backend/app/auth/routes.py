@@ -41,7 +41,16 @@ class UserLogin(Resource):
             return {'error': 'Invalid zid or password'}, 400
 
         access_token = create_access_token(identity={'zid': user_data.zid})
-        return {'access_token': access_token}, 200
+        if zid == "z99":
+            return {
+                'access_token': access_token,
+                "is_admin": True
+                }, 200
+        else:
+            return {
+                'access_token': access_token,
+                "is_admin": False
+                }, 200
 
 
 @auth_ns.route('/auto-login')
@@ -58,7 +67,18 @@ class AutoLogin(Resource):
             current_user = get_jwt_identity()
             user_data = db.session.get(Users, current_user['zid'])
             if user_data:
-                return {'zid': user_data.zid, 'message': 'User verified'}, 200
+                if user_data.zid == "z99":
+                    return {
+                        'zid': user_data.zid, 
+                        'message': 'User verified',
+                        "is_admin": True
+                        }, 200
+                else:
+                    return {
+                        'zid': user_data.zid, 
+                        'message': 'User verified',
+                        "is_admin": False
+                        }, 200
             else:
                 return {'message': 'User not found'}, 404
         except Exception as e:
