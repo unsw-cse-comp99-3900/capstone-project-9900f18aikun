@@ -77,8 +77,14 @@ class BookSpace(Resource):
         conflict_bookings = Booking.query.filter(
             Booking.date == date,
             Booking.room_id == room_id,
-            Booking.end_time > start_time,
-            Booking.start_time < end_time
+            Booking.booking_status != "requested",
+            Booking.booking_status != "cancelled",
+            or_(
+                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
+                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
+                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
+                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
+            )
         ).all()
 
         if conflict_bookings:
@@ -89,11 +95,13 @@ class BookSpace(Resource):
             return {'error': 'Invalid zid'}, 400
         user_type = user.user_type
         is_request = False
-        if user_type != "CSE staff" and db.session.get(Space, room_id).space_type == "room":
+        if user_type != "CSE_staff" and db.session.get(Space, room_id).space_type == "room":
             is_request = True
-        if user_type == "CSE staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+        if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
             is_request = True
-
+        status = 'booked'
+        if is_request:
+            status = 'requested'
 
         new_booking = Booking(
             room_id=room_id,
@@ -102,7 +110,7 @@ class BookSpace(Resource):
             start_time=start_time,
             end_time=end_time,
             date=date,
-            booking_status='requested' if is_request else 'booked',
+            booking_status=status,
             is_request=is_request
         )
         statu = new_booking.booking_status
@@ -277,61 +285,120 @@ class meetingroom_report(Resource):
 
 express_booking_model = booking_ns.model('Express booking request', {
     'query': fields.String(required=True, description='The description of the room what user want'),
+    'room_type': fields.String(required=True, description='The description of the room what user want'),
 })
 
-#
-# @booking_ns.route('/express-book')
-# class ExpressBook(Resource):
-#     # Book a room
-#     @booking_ns.response(200, "success")
-#     @booking_ns.response(400, "Bad request")
-#     @booking_ns.doc(description="Express booking")
-#     @booking_ns.expect(express_booking_model)
-#     @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
-#     def post(self):
-#         jwt_error = verify_jwt()
-#         if jwt_error:
-#             return jwt_error
-#         data = request.json
-#         current_user = get_jwt_identity()
-#         zid = current_user['zid']
-#
-#         query = data['query']
-#         api_key = Config.API_KEY
-#
-#         model = genai.GenerativeModel('gemini-1.5-flash',
-#                                       generation_config={"response_mime_type": "application/json"})
-#
-#         prompt = f"""
-#           {query}
-#
-#           Recipe = {{
-#                 "level": ,
-#                 "start_time": "",
-#                 "end_time": ""
-#             }}
-#           if information is not full return false
-#
-#           Return a `return a json format like this {'level': 3, 'start_time': '2023-12-16T14:00:00', 'end_time': '2023-12-16T17:00:00'}`
-#           """
-#
-#         response = model.generate_content(prompt)
-#
-#         # Assuming response.text is a valid JSON string
-#         response_json = json.loads(response.text)
-#
-#         # Print the entire JSON response
-#         print(response_json)
-#
-#         # Extracting specific fields from the JSON response
-#         level = response_json.get('level')
-#         start_time = response_json.get('start_time')
-#         end_time = response_json.get('end_time')
-#
-#         # Print the extracted data
-#         print(f"Level: {level}")
-#         print(f"Start Time: {start_time}")
-#         print(f"End Time: {end_time}")
+
+@booking_ns.route('/express-book')
+class ExpressBook(Resource):
+    # Book a room
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.doc(description="Express booking")
+    @booking_ns.expect(express_booking_model)
+    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def post(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        data = request.json
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
+
+        query = data['query']
+        room_type = data['room_type']
+        today = datetime.now()
+        today = today.strftime('%Y-%m-%d')
+        api_key = Config.API_KEY
+        genai.configure(api_key=api_key)
+
+        model = genai.GenerativeModel('gemini-1.5-flash',
+                                      generation_config={"response_mime_type": "application/json"})
+
+        prompt = f"""
+          {query}
+
+          Recipe = {{
+                "level": string, chooe one from ("LG", "G", "1", "2", "3", "4", "5", "6", "7") or None if not provide
+                "start_time": string "HH:NN", or None if not provide,
+                "end_time": string "HH:NN", or None if not provide,
+                 "date": string "YYYY-MM-DD" as type, or None if not provide,
+                 “max_capacity”: int, or None if not provide,   
+            }}
+          if the data is not provide filled with  Null.
+          today is {today}
+
+          Return a `return recipe, a json format`
+          """
+
+        try:
+            response = model.generate_content(prompt)
+            response_json = json.loads(response.text)
+        except Exception as e:
+            print("Error generating content:", str(e))
+            return {'error':  str(e)}, 500
+
+        level = response_json.get('level')
+        start_time = response_json.get('start_time')
+        end_time = response_json.get('end_time')
+        date = response_json.get('date')
+        max_capacity = response_json.get('max_capacity')
+        #
+        # # Print the extracted data
+        # print(f"Level: {level}")
+        # print(f"Start Time: {start_time}")
+        # print(f"End Time: {end_time}")
+        # print(f"date: {date}")
+        # print(f"max capacity: {max_capacity}")
+
+        if not start_time or not end_time:
+            return {'error': "Sorry, we can't get start time or end time, please try again"}, 400
+        if not max_capacity:
+            max_capacity = 1
+        if not date:
+            date = today
+
+        booked_rooms = db.session.query(Booking.room_id).filter(
+            Booking.date == date,
+            Booking.booking_status != "requested",
+            Booking.booking_status != "cancelled",
+            or_(
+                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
+                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
+                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
+                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
+            )
+        ).distinct().subquery()
+
+        if room_type == "meeting_room":
+            query = db.session.query(RoomDetail).filter(
+                RoomDetail.capacity >= max_capacity,
+                RoomDetail.id.notin_(booked_rooms),
+            )
+        else:
+            query = db.session.query(HotDeskDetail).filter(
+                HotDeskDetail.capacity >= max_capacity,
+                HotDeskDetail.id.notin_(booked_rooms),
+            )
+
+        if level:
+            query = query.filter(RoomDetail.level == level)
+
+        available_rooms = query.all()
+
+        available_room_details = [
+            {"room_id": room.id,
+             "name": room.name,
+             "level": room.level,
+             "capacity": room.capacity,
+             "date": date,
+             "start_time": start_time,
+             "end_time": end_time}
+            for room in available_rooms
+        ]
+
+        return available_room_details, 200
+
 
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
