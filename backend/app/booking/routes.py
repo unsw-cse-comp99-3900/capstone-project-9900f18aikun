@@ -358,7 +358,7 @@ class ExpressBook(Resource):
         if not date:
             date = today
 
-        booked_rooms = db.session.query(Booking.room_id).filter(
+        booked_rooms_subquery = db.session.query(Booking.room_id).filter(
             Booking.date == date,
             Booking.booking_status != "requested",
             Booking.booking_status != "cancelled",
@@ -373,12 +373,12 @@ class ExpressBook(Resource):
         if room_type == "meeting_room":
             query = db.session.query(RoomDetail).filter(
                 RoomDetail.capacity >= max_capacity,
-                RoomDetail.id.notin_(booked_rooms),
+                RoomDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))  # 明确引用子查询的列
             )
         else:
             query = db.session.query(HotDeskDetail).filter(
                 HotDeskDetail.capacity >= max_capacity,
-                HotDeskDetail.id.notin_(booked_rooms),
+                HotDeskDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))  # 明确引用子查询的列
             )
 
         if level:

@@ -25,7 +25,7 @@ def is_student(zid: str) -> bool:
 def is_staff(zid: str) -> bool:
     user = db.session.get(Users, zid)
     user_type = user.user_type
-    if user_type == "CSE staff":
+    if user_type == "CSE_staff":
         return True
     else:
         return False
