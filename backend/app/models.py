@@ -1,5 +1,6 @@
 from .extensions import db
 from datetime import datetime
+import enum
 
 
 class Users(db.Model):
@@ -33,6 +34,10 @@ class CSEStaff(db.Model):
     role = db.Column(db.String(128))
     password = db.Column(db.String(128), nullable=False)
 
+
+class UserType(enum.Enum):
+    CSEStaff = "CSE_staff"
+    HDRStudent = "HDR_student"
 
 
 

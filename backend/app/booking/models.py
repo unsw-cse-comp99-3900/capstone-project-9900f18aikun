@@ -1,6 +1,7 @@
 from app.extensions import db
 from datetime import datetime
 import json
+import enum
 
 
 def default_time_slots():
@@ -49,4 +50,17 @@ class Booking(db.Model):
     end_time = db.Column(db.Time, nullable=False)
     booking_status = db.Column(db.String(128), nullable=False)
     is_request = db.Column(db.Boolean, nullable=False)
+
+
+class SpaceType(enum.Enum):
+    meeting_room = "room"
+    hot_desk = "hot_desk"
+
+
+class BookingStatus(enum.Enum):
+    requested = "requested"
+    booked = "booked"
+    cancelled = "cancelled"
+
+
 
