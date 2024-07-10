@@ -17,6 +17,7 @@
   
   .image {
     height: 50px;
+    cursor: pointer;
   }
   
   .group {
@@ -169,4 +170,3 @@
   gap: 5px; /* 按钮之间的间距 */
   margin-left: auto; /* 将按钮组推到最右侧 */
 }
-

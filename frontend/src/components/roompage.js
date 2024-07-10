@@ -14,6 +14,7 @@ const RoomCard = () => {
   useEffect(() => {
     const fetchRoom = async () => {
       const token = localStorage.getItem("token");
+      console.log(token)
       try {
         const response = await fetch("/api/room/room-detail/" + roomid, {
           method: "GET",

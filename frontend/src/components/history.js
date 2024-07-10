@@ -26,7 +26,7 @@ const ReservationHistory = () => {
 
         if (response.ok) {
           const result = await response.json();
-          console.log(result);
+          console.log("history result is", result);
           setHistory(result);
         } else {
           const errorText = await response.text();
@@ -42,8 +42,36 @@ const ReservationHistory = () => {
     fetchHistory();
   }, []);
 
-  const handleCancelClick = (id) => {
-    console.log("Cancel clicked for ID:", id);
+  const cancelHandler = async (bookid) => {
+    // const obj = {
+    //   room_id: roomid,
+    //   date: selectedDate.format("YYYY-MM-DD"),
+    //   time: time,
+    // };
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch("/api/booking/book/" + bookid, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+        },
+        // body: JSON.stringify(obj),
+      });
+
+      if (response.ok) {
+        console.log("successfully deleted");
+        // if no reservation for this day
+      } else {
+        const errorText = await response.text();
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
   };
 
   //   if (loading) {
@@ -79,15 +107,18 @@ const ReservationHistory = () => {
                 <TableCell align="center">
                   {row.start_time} - {row.end_time}
                 </TableCell>
-                <TableCell align="center">{row.room_id}</TableCell>
+                <TableCell align="center">{row.room_name}</TableCell>
                 <TableCell align="center">{row.booking_status}</TableCell>
                 <TableCell
                   align="center"
                   id={row.booking_id}
-                  onClick={() => handleCancelClick(row.booking_id)}
+                  onClick={() => cancelHandler(row.booking_id)}
                   style={{ cursor: "pointer", color: "red" }}
                 >
-                  Cancel
+                  {row.booking_status === "cancelled" ||
+                  row.booking_status === "completed"
+                    ? "Rebook"
+                    : "Cancel"}
                 </TableCell>
               </TableRow>
             ))}
