@@ -306,7 +306,7 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = ({ data, selectedDate, setSelectedDate }) => {
+const Table = ({ data, selectedDate, setSelectedDate, map }) => {
   console.log("room data is", data);
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
@@ -535,9 +535,13 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
               {selectedDate.format("dddd, MMMM D, YYYY")}
             </div>
           </div>
-          <div className="to-map">
-            <ToMap />
-          </div>
+          {map ? (
+            <div className="to-map">
+              <ToMap />
+            </div>
+          ) : (
+            ""
+          )}
         </div>
 
         <div className="legend">
@@ -573,7 +577,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
 
         <div className="table-wrapper">
           <table id="mytable">
-            <thead>
+            <tbody>
               <tr>
                 <th className="select-space">Select Space</th>
                 {times.map((time) => (
@@ -582,7 +586,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                   </th>
                 ))}
               </tr>
-            </thead>
+            </tbody>
             <tbody>
               {reservations.map((item) => {
                 const permission = item.permission;

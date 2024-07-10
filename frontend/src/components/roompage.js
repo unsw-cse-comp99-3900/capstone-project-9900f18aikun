@@ -126,6 +126,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           data={roomData}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
+          map={false}
         />
       )}
     </div>

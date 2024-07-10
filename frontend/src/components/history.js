@@ -26,7 +26,6 @@ const ReservationHistory = () => {
 
         if (response.ok) {
           const result = await response.json();
-          console.log("history result is", result);
           setHistory(result);
         } else {
           const errorText = await response.text();

@@ -14,6 +14,7 @@ import HeaderBar from "./components/HeaderBar";
 import SelectMap from "./components/selectMap";
 import History from "./components/history";
 import RoomInfo from "./components/roompage";
+import Rebook from "./components/rebook";
 
 import "./App.css";
 
@@ -143,10 +144,12 @@ function App() {
                     {isSidebarOpen && <Filter onFilter={handleFilter} />}
                   </div>
                   <div className="content">
+                    <Rebook date={selectedDate}/>
                     <Table
                       data={filteredData}
                       selectedDate={selectedDate}
                       setSelectedDate={setSelectedDate}
+                      map={true}
                     />
                   </div>
                 </div>
