@@ -1,8 +1,5 @@
 .room-card {
-    border: 1px solid #ccc;
     padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
     margin: 0 auto;
     font-family: Arial, sans-serif;
   }
@@ -14,18 +11,24 @@
   }
   
   .room-title {
-    flex: 1;
+    display: flex;
+    align-items: center;
   }
   
   .room-title h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 50px;
   }
   
   .room-subtitle {
-    font-size: 14px;
-    color: #555;
+    font-size: 25px;
+    color: #979797;
   }
+
+  .room-title h1, .room-subtitle {
+    display: inline;
+  }
+
   
   .room-image {
     margin-left: 15px;
@@ -40,7 +43,7 @@
   
   .room-details p {
     margin: 5px 0;
-    font-size: 14px;
+    font-size: 25px;
   }
   
   .room-details p strong {

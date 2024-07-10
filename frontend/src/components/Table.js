@@ -307,6 +307,7 @@ const SelectWindow = ({
 
 // main table
 const Table = ({ data, selectedDate, setSelectedDate }) => {
+  console.log("room data is", data)
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);

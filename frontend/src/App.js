@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes, Navigate, useNavigate, useLocation } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import dayjs from "dayjs";
 import Table from "./components/Table";
 import Filter from "./components/filter";
@@ -12,13 +18,13 @@ import RoomInfo from "./components/roompage";
 import "./App.css";
 
 const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   return isLoggedIn ? children : <Navigate to="/login" />;
 };
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('token') !== null;
+    return localStorage.getItem("token") !== null;
   });
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -36,7 +42,7 @@ function App() {
     try {
       const token = localStorage.getItem("token");
       const formattedDate = selectedDate.format("YYYY-MM-DD");
-      console.log(formattedDate);
+      // console.log(formattedDate);
       const response = await fetch(
         `/api/booking/meetingroom?date=${formattedDate}`,
         {
@@ -50,7 +56,7 @@ function App() {
       const text = await response.text();
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
-      console.log("data is", dataArray);
+      // console.log("data is", dataArray);
       setData(dataArray);
       setFilteredData(dataArray);
     } catch (error) {
@@ -82,7 +88,7 @@ function App() {
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem("isLoggedIn", "true");
     navigate("/dashboard");
   };
 
@@ -176,7 +182,10 @@ function App() {
             isLoggedIn ? (
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
-                <RoomInfo />
+                <RoomInfo
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                />
               </>
             ) : (
               <Navigate to="/login" />
@@ -185,7 +194,9 @@ function App() {
         />
         <Route
           path="*"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />}
+          element={
+            <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
+          }
         />
       </Routes>
     </div>
