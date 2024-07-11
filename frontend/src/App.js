@@ -15,12 +15,23 @@ import SelectMap from "./components/selectMap";
 import History from "./components/history";
 import RoomInfo from "./components/roompage";
 import Rebook from "./components/rebook";
+import AdminPage from "./components/Admin_page";
 
 import "./App.css";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, adminOnly = false }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  return isLoggedIn ? children : <Navigate to="/login" />;
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
+  }
+
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return children;
 };
 
 function App() {
@@ -43,7 +54,6 @@ function App() {
     try {
       const token = localStorage.getItem("token");
       const formattedDate = selectedDate.format("YYYY-MM-DD");
-      // console.log(formattedDate);
       const response = await fetch(
         `/api/booking/meetingroom?date=${formattedDate}`,
         {
@@ -57,7 +67,6 @@ function App() {
       const text = await response.text();
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
-      // console.log("data is", dataArray);
       setData(dataArray);
       setFilteredData(dataArray);
     } catch (error) {
@@ -90,7 +99,8 @@ function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem("isLoggedIn", "true");
-    navigate("/dashboard");
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    navigate(isAdmin ? "/admin" : "/dashboard");
   };
 
   const handleHistory = () => {
@@ -101,6 +111,7 @@ function App() {
     setIsLoggedIn(false);
     localStorage.removeItem("token");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("isAdmin");
     navigate("/login");
   };
 
@@ -111,6 +122,15 @@ function App() {
       setIsLoggedIn(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/login' && !location.state) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
+      setIsLoggedIn(false);
+    }
+  }, [location]);
 
   return (
     <div className="app">
@@ -136,7 +156,7 @@ function App() {
                     className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
                   >
                     <img
-                      src="/On@2x.png" // 替换按钮为图标
+                      src="/On@2x.png"
                       alt="Toggle Sidebar"
                       className="toggle-icon"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -144,7 +164,7 @@ function App() {
                     {isSidebarOpen && <Filter onFilter={handleFilter} />}
                   </div>
                   <div className="content">
-                    <Rebook date={selectedDate}/>
+                    <Rebook date={selectedDate}/> 
                     <Table
                       data={filteredData}
                       selectedDate={selectedDate}
@@ -182,7 +202,7 @@ function App() {
         <Route
           path="/room/*"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <RoomInfo
@@ -190,16 +210,20 @@ function App() {
                   setSelectedDate={setSelectedDate}
                 />
               </>
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminPage />
+            </ProtectedRoute>
           }
         />
         <Route
           path="*"
-          element={
-            <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
-          }
+          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />}
         />
       </Routes>
     </div>
