@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import './adminClassroom.css';
+import './adminClassroom.css'; // 确保 CSS 文件被引入
+import { Table } from '@arco-design/web-react';
 
 function AdminClassroom() {
     const [classroomData, setClassroomData] = useState([]);
@@ -62,7 +63,7 @@ function AdminClassroom() {
         }
 
         setSearchCriteria(criteria);
-        console.log("Search Criteria:", criteria,roomType);
+        console.log("Search Criteria:", criteria, roomType);
         const filtered = classroomData.filter(room => {
             if (criteria.type === 'level') {
                 return room.level === criteria.value && (roomType === 'all' || room.type === roomType);
@@ -73,9 +74,31 @@ function AdminClassroom() {
         });
 
         setFilteredData(filtered);
-        
     };
 
+    //arco table
+    const columns = [
+        {
+            title: 'Room Name',
+            dataIndex: 'name',
+        },
+        {
+            title: 'Building',
+            dataIndex: 'building',
+        },
+        {
+            title: 'Level',
+            dataIndex: 'level',
+        },
+        {
+            title: 'Capacity',
+            dataIndex: 'capacity',
+        },
+        {
+            title: 'Room Type',
+            dataIndex: 'type',
+        },
+    ];
 
     return (
         <div>
@@ -102,18 +125,8 @@ function AdminClassroom() {
                     </button>
                 </div>
             </form>
-            <div>
-            {filteredData.map(room => (
-                    <div key={room.id}>
-                        <h3>{room.name}</h3>
-                        <p>Building: {room.building}</p>
-                        <p>Level: {room.level}</p>
-                        <p>Capacity: {room.capacity}</p>
-                        <p>Type: {room.type}</p>
-                        <p>Permission: {room.permission ? 'Yes' : 'No'}</p>
-                    </div>
-                ))}
-                
+            <div className='class-table'>
+                <Table columns={columns} data={filteredData} pagination={{ pageSize: 5 }} />
             </div>
         </div>
     );

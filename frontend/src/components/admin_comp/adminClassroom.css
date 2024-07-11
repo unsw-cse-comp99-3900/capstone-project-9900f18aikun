@@ -57,3 +57,25 @@ select {
     width: 24px;
     height: 24px;
 }
+
+.class-table{
+    margin: 25px 25px 25px 25px;
+}
+
+
+
+.arco-table {
+    --table-bg: #F7F8FA; /* 修改表格背景颜色 */
+    --table-header-bg: #E5E6EB; /* 修改表头背景颜色 */
+}
+
+.arco-table table {
+    background-color: var(--table-bg);
+}
+
+.arco-table thead {
+    background-color: var(--table-header-bg);
+}
+.arco-table-content-inner{
+    background-color: var(--table-header-bg);
+}
