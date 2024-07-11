@@ -1,12 +1,13 @@
-import React, { useState, useEffect,useRef } from 'react';
-import { DatePicker } from '@arco-design/web-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { DatePicker, ConfigProvider } from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US';
 import "@arco-design/web-react/dist/css/arco.css";
 import dayjs from 'dayjs';
 import './adminStatistics.css';
 import VChart from '@visactor/vchart';
 
 function AdminStatistics() {
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(dayjs().format('YYYY-MM-DD')); // 设置默认日期为当天
     const [apiDate, setApiDate] = useState('');
     const [timeSlots, setTimeSlots] = useState([]);
     const [hourlyCounts, setHourlyCounts] = useState([]);
@@ -103,31 +104,32 @@ function AdminStatistics() {
     };
 
     useEffect(() => {
-        if (date) {
-            fetchData(date);
-        }
-    }, [date]);
+        fetchData(date); // 在组件加载时获取当天的数据
+    }, []);
 
     return (
-        <div>
-            <h1>Statistic report</h1>
-            <div className='pickDate'>
-                <label htmlFor="date-picker">Select date: </label>
-                <DatePicker 
-                    id="date-picker"
-                    style={{ width: 200 }}
-                    onChange={(_, dateValue) => handleDateChange(dateValue)}
-                    format="YYYY-MM-DD"
-                />
-                <p>Selected Date: {date}</p>
-            </div>
-            <div className='plot'>
-                <div className='plot-header'>Real-time Appointment statistic</div>
-                <div className='plot-content'>
-                    <div id="chart" style={{ width: '600px', height: '520px' }}></div>
+        <ConfigProvider locale={enUS}>  {/* 使用 ConfigProvider 设置语言 */}
+            <div>
+                <h1>Statistic report</h1>
+                <div className='pickDate'>
+                    <label htmlFor="date-picker">Select date: </label>
+                    <DatePicker 
+                        id="date-picker"
+                        style={{ width: 200 }}
+                        onChange={(_, dateValue) => handleDateChange(dateValue)}
+                        format="YYYY-MM-DD"
+                        defaultValue={dayjs()}  // 设置默认日期为当天
+                    />
+                    <p>Selected Date: {date}</p>
+                </div>
+                <div className='plot'>
+                    <div className='plot-header'>Real-time Appointment statistic</div>
+                    <div className='plot-content'>
+                        <div id="chart" style={{ width: '600px', height: '520px' }}></div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </ConfigProvider>
     );
 }
 

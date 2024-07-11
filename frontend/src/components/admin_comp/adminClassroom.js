@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './adminClassroom.css'; // 确保 CSS 文件被引入
-import { Table } from '@arco-design/web-react';
+import { Table, ConfigProvider } from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US';
 
 function AdminClassroom() {
     const [classroomData, setClassroomData] = useState([]);
@@ -98,37 +99,48 @@ function AdminClassroom() {
             title: 'Room Type',
             dataIndex: 'type',
         },
+        {
+            title: 'Action',  // 新列的标题
+            dataIndex: 'action',
+            render: () => (
+                <button className="table-button">
+                    <img src="/admin_img/search.png" alt="Search" />
+                </button>
+            )
+        }
     ];
 
     return (
-        <div>
-            <h1>Classroom Management</h1>
-            <form className='search' onSubmit={handleSubmit}>
-                <h2>Search classroom</h2>
-                <div className='search_1'>
-                    <label>Room types:</label>
-                    <select value={roomType} onChange={handleSelectChange}>
-                        <option value="meeting_room">Meeting Room</option>
-                        <option value="hot_desk">Hot Desk</option>
-                        <option value="all">All</option>
-                    </select>
+        <ConfigProvider locale={enUS}>  {/* 使用 ConfigProvider 设置语言 */}
+            <div>
+                <h1>Classroom Management</h1>
+                <form className='search' onSubmit={handleSubmit}>
+                    <h2>Search classroom</h2>
+                    <div className='search_1'>
+                        <label>Room types:</label>
+                        <select value={roomType} onChange={handleSelectChange}>
+                            <option value="meeting_room">Meeting Room</option>
+                            <option value="hot_desk">Hot Desk</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                    <div className="input-group">
+                        <input
+                            type="text"
+                            placeholder="Please input room name or level"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                        />
+                        <button type="submit" className="search-button">
+                            <img src="/admin_img/search.png" alt="Search" />
+                        </button>
+                    </div>
+                </form>
+                <div className='class-table'>
+                    <Table columns={columns} data={filteredData} pagination={{ pageSize: 6 }} />
                 </div>
-                <div className="input-group">
-                    <input
-                        type="text"
-                        placeholder="Please input room name or level"
-                        value={inputValue}
-                        onChange={handleInputChange}
-                    />
-                    <button type="submit" className="search-button">
-                        <img src="/admin_img/search.png" alt="Search" />
-                    </button>
-                </div>
-            </form>
-            <div className='class-table'>
-                <Table columns={columns} data={filteredData} pagination={{ pageSize: 5 }} />
             </div>
-        </div>
+        </ConfigProvider>
     );
 }
 

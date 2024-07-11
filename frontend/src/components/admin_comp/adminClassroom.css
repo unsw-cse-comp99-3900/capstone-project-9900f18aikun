@@ -64,18 +64,45 @@ select {
 
 
 
-.arco-table {
+/* adminClassroom.css */
+div.admin-page .arco-table {
     --table-bg: #F7F8FA; /* 修改表格背景颜色 */
     --table-header-bg: #E5E6EB; /* 修改表头背景颜色 */
 }
 
-.arco-table table {
-    background-color: var(--table-bg);
+/* div.admin-page .arco-table table {
+    background-color: var(--table-bg) !important;
 }
 
-.arco-table thead {
-    background-color: var(--table-header-bg);
+div.admin-page .arco-table thead {
+    background-color: var(--table-header-bg) !important;
+} */
+
+.admin-page .arco-table td {
+    background-color: #F7F8FA !important;  
 }
-.arco-table-content-inner{
-    background-color: var(--table-header-bg);
+
+.admin-page .arco-table td:hover {
+    background-color: #E5E6EB !important;  
+}
+/* adminClassroom.css */
+.admin-page .arco-table thead th {
+    background-color: #E5E6EB !important;  /* 修改表头的背景颜色 */
+}
+/* adminClassroom.css */
+.admin-page .arco-table .table-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px 5px; /* 调整按钮大小 */
+    display: inline-block;
+}
+
+/* 确保按钮在 hover 时不显示黄色背景 */
+.admin-page .arco-table td .table-button:hover {
+    background-color: transparent !important;
+}
+.admin-page .arco-table .table-button img {
+    width: 20px; /* 减小图片的宽度 */
+    height: 20px; /* 减小图片的高度 */
 }
