@@ -33,7 +33,7 @@ const Rebook = () => {
 
         if (response.ok) {
           const result = await response.json();
-          setHistory(result); // Update here to set the entire result
+          setHistory([result[0]]);  // Update here to set the first result item inside an array
           console.log("result is ", result);
         } else {
           const errorText = await response.text();
@@ -61,7 +61,6 @@ const Rebook = () => {
 
   useEffect(() => {
     if (isCalendarVisible === false) {
-      // Log the updated selectedDate when the calendar is hidden
       console.log(selectedDate);
     }
   }, [selectedDate, isCalendarVisible]);
@@ -85,7 +84,7 @@ const Rebook = () => {
       <header>
         <h1>Last Booking:</h1>
       </header>
-      {history.length > 0 ? (
+      {history[0] ? (
         <TableContainer>
           <Table aria-label="simple table">
             <TableBody>
