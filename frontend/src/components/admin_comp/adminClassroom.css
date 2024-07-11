@@ -1,0 +1,59 @@
+.search {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+.search_1 {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Align items vertically in the center */
+}
+
+.search label {
+    display: inline-block; /* Ensure label is inline-block */
+    font-size: 18px;
+    margin-right: 10px; /* Add margin to separate label from select */
+     /* Align label vertically with select */
+}
+
+select {
+    width: 200px;
+    display: inline-block; /* Ensure select is also inline-block */
+    font-size: 16px; /* Adjust font size if necessary */
+    padding: 4px; /* Adjust padding to make the select smaller */
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    vertical-align: middle; /* Align select vertically */
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px; /* Add margin-top for spacing between rows */
+}
+
+.input-group input {
+    flex-grow: 1;
+    padding: 8px;
+    border: none;
+    outline: none;
+    width: 500px;
+    /* margin: 0 20px 0; */
+}
+
+.input-group .search-button {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    width: 30px;
+}
+
+.input-group .search-button img {
+    width: 24px;
+    height: 24px;
+}

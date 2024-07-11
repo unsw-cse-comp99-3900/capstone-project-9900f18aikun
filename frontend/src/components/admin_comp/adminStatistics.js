@@ -57,7 +57,6 @@ function AdminStatistics() {
                 chartContainer.innerHTML = '';
             }
 
-            // 创建新的折线图
             const spec = {
                 type: 'line',
                 data: {
@@ -65,9 +64,27 @@ function AdminStatistics() {
                 },
                 xField: 'time',
                 yField: 'value',
-                width: 800,
+                width: 600,
                 height: 500,
-                autoFit: true
+                autoFit: true,
+                color: '#8D4EDA',  // 确保这是你想要的颜色代码
+                title: {
+                    text: 'Current Total Bookings',  // 添加图表标题
+                    style: {
+                        fontSize: 16,
+                        fontWeight: 'bold'
+                    }
+                },
+                xAxis: {
+                    title: {
+                        text: 'Time'  // 设置X轴标题
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Number of Bookings'  // 设置Y轴标题
+                    }
+                }
             };
 
             chartRef.current = new VChart(spec, { dom: 'chart' });
@@ -107,7 +124,7 @@ function AdminStatistics() {
             <div className='plot'>
                 <div className='plot-header'>Real-time Appointment statistic</div>
                 <div className='plot-content'>
-                    <div id="chart" style={{ width: '800px', height: '400px' }}></div>
+                    <div id="chart" style={{ width: '600px', height: '520px' }}></div>
                 </div>
             </div>
         </div>

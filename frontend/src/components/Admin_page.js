@@ -15,6 +15,13 @@ function AdminPage() {
         setSidebarOpen(!isSidebarOpen);
     };
 
+    // 使用内联样式动态调整顶部栏的 left 和 width 属性
+    const topBarStyle = {
+        left: isSidebarOpen ? '270px' : '0',
+        width: isSidebarOpen ? 'calc(100% - 270px)' : '100%'
+    };
+
+
     useEffect(() => {
         const handlePopState = (event) => {
             // Clear login state
@@ -60,9 +67,9 @@ function AdminPage() {
                     statistics
                 </button>
             </div>
-            <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`}>
+            <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`}style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
-                <button className="admin-right-button">Make bookings</button>
+                {/* <button className="admin-right-button">Make bookings</button> */}
             </div>
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {contentState === 1 && <AdminHome/>}

@@ -5,14 +5,14 @@
 }
 
 .admin-sidebar {
-    background-color: #6a1b9a;
+    background-color:#442675;
     color: white;
     padding: 20px;
-    width: 250px;
-    transition: width 0.1s, left 0.1s;
-    position: fixed;
+    width: 250px; /* Default width */
+    transition: width 0.1s, left 0.1s; /* Smooth transition for width and position */
+    position: fixed; /* Keep sidebar fixed */
     height: 100%;
-    z-index: 2;
+    z-index: 2; 
 }
 
 .admin-sidebar.closed {
@@ -33,10 +33,10 @@
     border: none;
     color: white;
     text-align: left;
-    cursor: pointer;
+    cursor: pointer; /* Change cursor to pointer on hover */
     font-size: 16px;
     transition: background 0.3s;
-    height: 55px;
+    height: 55px; /* Increase the height of each button */
 }
 
 .admin-sidebar button img {
@@ -50,18 +50,21 @@
 }
 
 .admin-top-bar {
-    background-color: #fdd835;
-    color: black;
-    padding: 20px 20px;
-    width: calc(100% - 270px);
-    display: flex;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 270px;
-    transition: left 0.3s;
-    z-index: 1;
-}
+        
+        background-color: #FADC19;
+        padding: 20px 20px;
+        width: calc(100% - 270px); /* Adjust width based on sidebar state */
+        display: flex;
+        align-items: center;
+        /* justify-content: space-between;  */
+        /* This will place the child elements at the space-between */
+        position: fixed; /* Fixed position */
+        top: 0; /* Align to the top */
+        left: 270px; /* Adjust based on sidebar state */
+        transition: left 0.3s; /* Smooth transition for left position */
+        z-index: 1; /* Below the sidebar */
+ }
+
 
 .admin-top-bar.closed {
     left: 0;
@@ -77,6 +80,17 @@
 
 .admin-closebar {
     margin-left: 10px;
+    width: 30px;
+    height: 30px;
+    color: black;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 0 10px; /* Reduce padding to control the size */
+    /* margin-right: auto; */
+     /* Push all other elements to the right */
+
 }
 
 .admin-right-button {
@@ -91,3 +105,4 @@
     transition: margin-left 0.3s;
     margin-left: 270px;
 }
+
