@@ -103,3 +103,12 @@ button:hover {
 .back-button:hover, .next-page-button:hover {
     background-color: #ffc107;
 }
+
+.no-history {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em; /* Slightly increased font size */
+    text-align: center; /* Center text alignment */
+  }
+  

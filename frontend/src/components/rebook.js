@@ -33,7 +33,8 @@ const Rebook = () => {
 
         if (response.ok) {
           const result = await response.json();
-          setHistory([result[0]]);
+          setHistory(result); // Update here to set the entire result
+          console.log("result is ", result);
         } else {
           const errorText = await response.text();
           throw new Error("Server responded with an error: " + errorText);
@@ -84,43 +85,47 @@ const Rebook = () => {
       <header>
         <h1>Last Booking:</h1>
       </header>
-      <TableContainer>
-        <Table aria-label="simple table">
-          <TableBody>
-            {history.map((row) => (
-              <TableRow key={row.booking_id} align="center">
-                <TableCell align="center">
-                  {row.start_time} - {row.end_time}
-                </TableCell>
-                <TableCell align="center">{row.room_name}</TableCell>
-                <TableCell
-                  align="center"
-                  id={row.booking_id}
-                  onClick={(e) => toggleCalendarVisibility(e)}
-                  style={{ cursor: "pointer", color: "red" }}
-                >
-                  {isCalendarVisible ? "Hide Calendar" : "Rebook"}
-                </TableCell>
-                {isCalendarVisible && (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DateCalendar
-                      shouldDisableDate={disableDates}
-                      className="date-calendar-overlay"
-                      onChange={(date) => handleDateChange(date, row.room_id, row.start_time, row.end_time)}
-                      style={{
-                        position: "absolute",
-                        left: `${calendarPosition.x}px`,
-                        top: `${calendarPosition.y}px`,
-                        zIndex: 100,
-                      }}
-                    />
-                  </LocalizationProvider>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {history.length > 0 ? (
+        <TableContainer>
+          <Table aria-label="simple table">
+            <TableBody>
+              {history.map((row) => (
+                <TableRow key={row.booking_id} align="center">
+                  <TableCell align="center">
+                    {row.start_time} - {row.end_time}
+                  </TableCell>
+                  <TableCell align="center">{row.room_name}</TableCell>
+                  <TableCell
+                    align="center"
+                    id={row.booking_id}
+                    onClick={(e) => toggleCalendarVisibility(e)}
+                    style={{ cursor: "pointer", color: "red" }}
+                  >
+                    {isCalendarVisible ? "Hide Calendar" : "Rebook"}
+                  </TableCell>
+                  {isCalendarVisible && (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DateCalendar
+                        shouldDisableDate={disableDates}
+                        className="date-calendar-overlay"
+                        onChange={(date) => handleDateChange(date)}
+                        style={{
+                          position: "absolute",
+                          left: `${calendarPosition.x}px`,
+                          top: `${calendarPosition.y}px`,
+                          zIndex: 100,
+                        }}
+                      />
+                    </LocalizationProvider>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <div className="no-history">No previous reservation history</div>
+      )}
     </div>
   );
 };

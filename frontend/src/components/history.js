@@ -86,44 +86,48 @@ const ReservationHistory = () => {
       <header>
         <h1>Reservation History:</h1>
       </header>
-      <TableContainer>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Date</TableCell>
-              <TableCell align="center">Time</TableCell>
-              <TableCell align="center">Room</TableCell>
-              <TableCell align="center">Booking Status</TableCell>
-              <TableCell align="center">Operation</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {history.map((row) => (
-              <TableRow key={row.booking_id} align="center">
-                <TableCell component="th" scope="row" align="center">
-                  {row.date}
-                </TableCell>
-                <TableCell align="center">
-                  {row.start_time} - {row.end_time}
-                </TableCell>
-                <TableCell align="center">{row.room_name}</TableCell>
-                <TableCell align="center">{row.booking_status}</TableCell>
-                <TableCell
-                  align="center"
-                  id={row.booking_id}
-                  onClick={() => cancelHandler(row.booking_id)}
-                  style={{ cursor: "pointer", color: "red" }}
-                >
-                  {row.booking_status === "cancelled" ||
-                  row.booking_status === "completed"
-                    ? "Rebook"
-                    : "Cancel"}
-                </TableCell>
+      {history.length > 0 ? (
+        <TableContainer>
+          <Table aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">Date</TableCell>
+                <TableCell align="center">Time</TableCell>
+                <TableCell align="center">Room</TableCell>
+                <TableCell align="center">Booking Status</TableCell>
+                <TableCell align="center">Operation</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {history.map((row) => (
+                <TableRow key={row.booking_id} align="center">
+                  <TableCell component="th" scope="row" align="center">
+                    {row.date}
+                  </TableCell>
+                  <TableCell align="center">
+                    {row.start_time} - {row.end_time}
+                  </TableCell>
+                  <TableCell align="center">{row.room_name}</TableCell>
+                  <TableCell align="center">{row.booking_status}</TableCell>
+                  <TableCell
+                    align="center"
+                    id={row.booking_id}
+                    onClick={() => cancelHandler(row.booking_id)}
+                    style={{ cursor: "pointer", color: "red" }}
+                  >
+                    {row.booking_status === "cancelled" ||
+                    row.booking_status === "completed"
+                      ? "Rebook"
+                      : "Cancel"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        <div className="no-history">No previous reservation history</div>
+      )}
     </div>
   );
 };
