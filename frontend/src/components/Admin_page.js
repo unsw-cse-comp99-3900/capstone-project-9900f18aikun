@@ -1,21 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Admin_page.css';
-import AdminHome from './admin_comp/adminHome'; // 导入组件
-import AdminClassroom from './admin_comp/adminClassroom'; // 导入组件
-import AdminAppointment from './admin_comp/adminAppointment'; // 导入组件
+import AdminHome from './admin_comp/adminHome';
+import AdminClassroom from './admin_comp/adminClassroom';
+import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics'; 
 
 function AdminPage() {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
-    const [contentState, setContentState] = useState(1); // 新增 state
+    const [contentState, setContentState] = useState(1);
+    const navigate = useNavigate();
 
     const toggleSidebar = () => {
         setSidebarOpen(!isSidebarOpen);
     };
 
+    useEffect(() => {
+        const handlePopState = (event) => {
+            // Clear login state
+            localStorage.removeItem('token');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('isAdmin');
+            
+            // Navigate to login page
+            navigate('/login');
+        };
+
+        // Add event listener for the popstate event
+        window.addEventListener('popstate', handlePopState);
+
+        // Clean up the event listener when the component unmounts
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [navigate]);
+
     return (
-        <div className="admin-container">
-            <div className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
+        <div className="admin-page">
+            <div className={`admin-sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
                 <h1>Administration</h1>
                 <button onClick={() => setContentState(1)} >
                     <img src="/admin_img/home.png" alt="Home" />
@@ -38,13 +60,11 @@ function AdminPage() {
                     statistics
                 </button>
             </div>
-            <div className={`top-bar ${isSidebarOpen ? '' : 'closed'}`}>
-                <button onClick={toggleSidebar} className='closebar'>☰</button>
-                
-                <button className="right">Make bookings</button>
+            <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`}>
+                <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
+                <button className="admin-right-button">Make bookings</button>
             </div>
-            <div className="content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
-                {/* Content goes here */}
+            <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {contentState === 1 && <AdminHome/>}
                 {contentState === 2 && <AdminClassroom />}
                 {contentState === 3 && <AdminAppointment />}

@@ -8,12 +8,23 @@ import HeaderBar from "./components/HeaderBar";
 import SelectMap from "./components/selectMap";
 import History from "./components/history";
 import RoomInfo from "./components/roompage";
+import AdminPage from "./components/Admin_page";
 
 import "./App.css";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, adminOnly = false }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  return isLoggedIn ? children : <Navigate to="/login" />;
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
+  }
+
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return children;
 };
 
 function App() {
@@ -83,7 +94,8 @@ function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
-    navigate("/dashboard");
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    navigate(isAdmin ? "/admin" : "/dashboard");
   };
 
   const handleHistory = () => {
@@ -94,6 +106,7 @@ function App() {
     setIsLoggedIn(false);
     localStorage.removeItem("token");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("isAdmin");
     navigate("/login");
   };
 
@@ -104,6 +117,16 @@ function App() {
       setIsLoggedIn(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/login' && !location.state) {
+      // If we're at login without any state, assume we need to reset
+      localStorage.removeItem('token');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
+      setIsLoggedIn(false);
+    }
+  }, [location]);
 
   return (
     <div className="app">
@@ -129,7 +152,7 @@ function App() {
                     className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
                   >
                     <img
-                      src="/On@2x.png" // 替换按钮为图标
+                      src="/On@2x.png"
                       alt="Toggle Sidebar"
                       className="toggle-icon"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -173,14 +196,20 @@ function App() {
         <Route
           path="/room/*"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <RoomInfo />
               </>
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminPage />
+            </ProtectedRoute>
           }
         />
         <Route

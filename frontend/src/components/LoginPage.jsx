@@ -75,9 +75,14 @@ const LoginPage = ({ onLogin }) => {
       if (response.ok) {
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('isAdmin', data.is_admin);  // Store admin status
         console.log('Login successful');
         onLogin();
-        navigate('/dashboard');
+        if (data.is_admin) {
+          navigate('/admin');  // Redirect to admin page if is_admin is true
+        } else {
+          navigate('/dashboard');  // Regular user dashboard
+        }
       } else {
         console.log('Login failed:', data);
         setError(data.message || 'Login failed. Please try again.');
