@@ -13,6 +13,7 @@ class Space(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # room or hot_desk
     space_type = db.Column(db.String(128), nullable=False)
+    is_available = db.Column(db.Boolean, nullable=False)
 
 
 class RoomDetail(db.Model):
@@ -24,6 +25,7 @@ class RoomDetail(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     HDR_student_permission = db.Column(db.Boolean, nullable=False)
     CSE_staff_permission = db.Column(db.Boolean, nullable=False)
+
 
 
 class HotDeskDetail(db.Model):
@@ -61,6 +63,7 @@ class BookingStatus(enum.Enum):
     requested = "requested"
     booked = "booked"
     cancelled = "cancelled"
+    signed_in = "signed-in"
 
 
 

@@ -118,7 +118,8 @@ def set_up_space_db():
             continue
 
         space = Space(
-            space_type='room'
+            space_type='room',
+            is_available=True
         )
         db.session.add(space)
         db.session.commit()
@@ -152,7 +153,8 @@ def set_up_space_db():
             continue
 
         space = Space(
-            space_type='hot_desk'
+            space_type='hot_desk',
+            is_available=True
         )
         db.session.add(space)
         db.session.commit()

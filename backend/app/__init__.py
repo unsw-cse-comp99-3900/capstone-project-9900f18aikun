@@ -28,6 +28,9 @@ def create_app():
     from .room.routes import room_ns
     api.add_namespace(room_ns, path='/room')
 
+    from .sign.routes import sign_in
+    api.add_namespace(sign_in, path='/sign_in')
+
     with app.app_context():
         db.create_all()
         set_up_database()

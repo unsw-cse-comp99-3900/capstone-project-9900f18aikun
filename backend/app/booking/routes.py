@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api
-from .models import Booking, RoomDetail, Space, HotDeskDetail
+from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert, verify_jwt, get_room_name, is_student_permit
@@ -151,6 +151,9 @@ class BookSpace(Resource):
 
         if booking.user_id != zid:
             return {'error': 'Unauthorized'}, 401
+
+        if booking.booking_status != BookingStatus.booked.value:
+            return {'error': "You are not in booked status"}, 409
 
         booking.booking_status = 'cancelled'
         db.session.commit()
