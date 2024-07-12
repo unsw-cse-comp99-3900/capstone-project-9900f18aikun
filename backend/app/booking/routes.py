@@ -375,7 +375,10 @@ class ExpressBook(Resource):
             )
 
         if level:
-            query = query.filter(RoomDetail.level == level)
+            if room_type == "meeting_room":
+                query = query.filter(RoomDetail.level == level)
+            else:
+                query = query.filter(HotDeskDetail.level == level)
 
         available_rooms = query.all()
 
