@@ -343,13 +343,6 @@ class ExpressBook(Resource):
         end_time = response_json.get('end_time')
         date = response_json.get('date')
         max_capacity = response_json.get('max_capacity')
-        #
-        # # Print the extracted data
-        # print(f"Level: {level}")
-        # print(f"Start Time: {start_time}")
-        # print(f"End Time: {end_time}")
-        # print(f"date: {date}")
-        # print(f"max capacity: {max_capacity}")
 
         if not start_time or not end_time:
             return {'error': "Sorry, we can't get start time or end time, please try again"}, 400
@@ -497,8 +490,6 @@ class meetingroom_top10(Resource):
             "room_name": room_name,
             'booking_count': booking_count} for room_id, room_name, booking_count in rooms]
         return top_list
-
-
         
     def get_sydney_current_dates(self):
         sydney_tz = pytz.timezone('Australia/Sydney')

@@ -164,7 +164,7 @@ def set_up_space_db():
                 room=row['room'],
                 level=row['level'],
                 number=row['number'],
-                name=f'Room {row["room"]} {row["number"]}',
+                name=f'Room {row["room"]} table {row["number"]}',
                 capacity=1,
                 HDR_student_permission=True,
                 CSE_staff_permission=True,
