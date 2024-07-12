@@ -1,17 +1,7 @@
-from datetime import datetime, timedelta
 from flask_restx import Namespace, Resource, fields
-from flask import request, Flask
 from app.extensions import db, api
 from app.utils import verify_jwt, is_meeting_room
 from app.booking.models import Space, RoomDetail, HotDeskDetail
-from app.models import Users, CSEStaff
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert
-from app.email import schedule_reminder, send_confirm_email_async
-from jwt import exceptions
-from app.booking.models import Booking
-import re
-from apscheduler.schedulers.background import BackgroundScheduler
 
 room_ns = Namespace('room', description='Room operations')
 room_detail_model = room_ns.model('RoomDetail', {
