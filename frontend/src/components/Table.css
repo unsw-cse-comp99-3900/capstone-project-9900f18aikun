@@ -78,14 +78,9 @@ td:not(.reserved):not(.selfreserved) {
   background-color: #fce8a3;
 }
 
-td.selfreserved:hover {
-  background-color: #8346ee;
-}
-
 td:not(.reserved):not(.selfreserved):hover {
   background-color: #fac833;
   cursor: pointer;
-
 }
 
 td.no-permission {
@@ -106,8 +101,9 @@ tbody tr td.room-column {
 }
 
 .room-column {
-  min-width: 80px;
-  max-width: 80px;
+  /* min-width: 50px;
+  max-width: 50px; */
+  width: max-content;
   position: absolute;
   z-index: 2;
 }
@@ -118,7 +114,7 @@ tbody tr td.room-column {
   border: 1px solid #ccc;
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  z-index: 1000;
 }
 
 .button-class {

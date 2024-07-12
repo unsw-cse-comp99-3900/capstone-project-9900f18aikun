@@ -33,7 +33,7 @@ const Rebook = () => {
 
         if (response.ok) {
           const result = await response.json();
-          setHistory([result[0]]);  // Update here to set the first result item inside an array
+          setHistory([result[0]]); // Update here to set the first result item inside an array
           console.log("result is ", result);
         } else {
           const errorText = await response.text();
@@ -54,8 +54,46 @@ const Rebook = () => {
     setCalendarPosition({ x: e.clientX, y: e.clientY });
   };
 
-  const handleDateChange = (date) => {
+  function formatTime(time) {
+    let [hours, minutes] = time.split(":");
+    return `${hours}:${minutes}`;
+  }
+
+  const handleDateChange = async (date) => {
     setSelectedDate(date);
+    // send request to backend
+    const obj = {
+      room_id: history[0].room_id,
+      date: date.format("YYYY-MM-DD"),
+      start_time: formatTime(history[0].start_time),
+      end_time: formatTime(history[0].end_time),
+    };
+    const token = localStorage.getItem("token");
+    console.log("object is ", obj);
+
+    try {
+      const response = await fetch("/api/booking/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(obj),
+      });
+
+      if (response.ok) {
+        console.log("successfully sent");
+        const result = await response.json();
+        console.log(result);
+      } else {
+        const errorText = await response.text();
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
     setIsCalendarVisible(!isCalendarVisible);
   };
 

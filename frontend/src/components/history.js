@@ -26,6 +26,7 @@ const ReservationHistory = () => {
 
         if (response.ok) {
           const result = await response.json();
+          console.log("history result is ", result);
           setHistory(result);
         } else {
           const errorText = await response.text();
@@ -41,45 +42,45 @@ const ReservationHistory = () => {
     fetchHistory();
   }, []);
 
-  const cancelHandler = async (bookid) => {
-    // const obj = {
-    //   room_id: roomid,
-    //   date: selectedDate.format("YYYY-MM-DD"),
-    //   time: time,
-    // };
-    const token = localStorage.getItem("token");
+  const cancelHandler = async (entry, e) => {
+    console.log(e.target.innerText);
+    if (e.target.innerText === "Cancel") {
+      const token = localStorage.getItem("token");
 
-    try {
-      const response = await fetch("/api/booking/book/" + bookid, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
-        },
-        // body: JSON.stringify(obj),
-      });
+      try {
+        const response = await fetch("/api/booking/book/" + entry.booking_id, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+          // body: JSON.stringify(obj),
+        });
 
-      if (response.ok) {
-        console.log("successfully deleted");
-        // if no reservation for this day
-      } else {
-        const errorText = await response.text();
-        console.error("Server responded with an error:", errorText);
-        throw new Error("Something went wrong");
+        if (response.ok) {
+          console.log("successfully deleted");
+          // if no reservation for this day
+        } else {
+          const errorText = await response.text();
+          console.error("Server responded with an error:", errorText);
+          throw new Error("Something went wrong");
+        }
+      } catch (error) {
+        console.error("Error fetching booking data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching booking data:", error);
+    } else if (e.target.innerText === "Rebook") {
+      console.log("row is", entry);
     }
   };
 
-    if (loading) {
-      return <div>Loading...</div>;
-    }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    }
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
   return (
     <div className="reservation-history">
@@ -112,7 +113,7 @@ const ReservationHistory = () => {
                   <TableCell
                     align="center"
                     id={row.booking_id}
-                    onClick={() => cancelHandler(row.booking_id)}
+                    onClick={(e) => cancelHandler(row, e)}
                     style={{ cursor: "pointer", color: "red" }}
                   >
                     {row.booking_status === "cancelled" ||
