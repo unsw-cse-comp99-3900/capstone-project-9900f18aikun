@@ -5,7 +5,7 @@ from app.extensions import db, jwt, microsoft
 from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.email import check_is_staff_email, check_is_student_email, get_staff_zid, get_student_zid
-
+from app.utils import is_admin
 
 auth_ns = Namespace('auth', description='Authentication operations')
 
@@ -41,7 +41,7 @@ class UserLogin(Resource):
             return {'error': 'Invalid zid or password'}, 400
 
         access_token = create_access_token(identity={'zid': user_data.zid})
-        if zid == "z99":
+        if is_admin(zid):
             return {
                 'access_token': access_token,
                 "is_admin": True
@@ -51,6 +51,7 @@ class UserLogin(Resource):
                 'access_token': access_token,
                 "is_admin": False
                 }, 200
+        
 
 
 @auth_ns.route('/auto-login')

@@ -29,6 +29,14 @@ def is_staff(zid: str) -> bool:
         return True
     else:
         return False
+    
+def is_admin(zid: int) -> bool:
+    admin = db.session.get(CSEStaff, zid)
+    if admin is None:
+        return False
+    admin_title = admin.role
+    return admin_title == "Professional"
+
 
 def is_meeting_room(room_id: int) -> bool:
     space = db.session.get(Space, room_id)

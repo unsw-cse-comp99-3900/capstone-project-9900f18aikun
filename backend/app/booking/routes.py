@@ -395,12 +395,19 @@ class ExpressBook(Resource):
 
         return available_room_details, 200
 
-
+#1. 改成当天时间 
+# 2. admin是prof 
+# 3. admin给别人book ed
+# 4.admin block房间 加一列 ed
+# 5. admin给别人取消 ed
+# 6.admin编辑房间信息 ed
+# 7.把request信息返回给admin ziwen
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(date_query)
     @booking_ns.doc(description="Get meeting room usage detail list to report edition")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -416,14 +423,19 @@ class meetingroom_usage(Resource):
             return {"error": str(e)}, 500
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
+        date = request.args.get('date')
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         total_room = self.get_total_room()
-        usage = self.get_booking_list()
-        today = self.get_sydney_current_date()
-
+        usage = self.get_booking_list(date)
+        current_date = datetime.strptime(date, '%Y-%m-%d')
+        temp_date = current_date + timedelta(days=7)
+        end_date = temp_date.strftime('%Y-%m-%d')
         return {
             "total_number": total_room,
-            "today": today,
+            "start_date": date,
+            "end_date": end_date,
             "usage": usage
         }, 200
 
@@ -432,9 +444,9 @@ class meetingroom_usage(Resource):
         desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
         return room_number + desk_number
 
-    def get_booking_list(self):
+    def get_booking_list(self, date):
         usage = []
-        sydney_date = self.get_sydney_current_date()
+        sydney_date = date
         for i in range(7):
             current_date = datetime.strptime(sydney_date, '%Y-%m-%d')
             future_date = current_date + timedelta(days=i)
@@ -458,6 +470,7 @@ class meetingroom_top10(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(date_query)
     @booking_ns.doc(description="Get meeting room top10 list")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -466,21 +479,29 @@ class meetingroom_top10(Resource):
             return jwt_error
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
+        date = request.args.get('date')
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        top_list = self.get_top_list()
+        start_date = date
+        temp_date = datetime.strptime(date, '%Y-%m-%d') + timedelta(days=7)
+        end_date = temp_date.strftime('%Y-%m-%d')
+
+        top_list = self.get_top_list(start_date, end_date)
 
         return {
+            "start_date": date,
+            "end_date": end_date,
             "top_list": top_list
         }, 200
 
-    def get_top_list(self):
-        current_date, date_seven_days_later = self.get_sydney_current_dates()
+    def get_top_list(self, start_date, end_date):
         rooms = db.session.query(
             Booking.room_id,
             Booking.room_name,
             func.count(Booking.id).label('booking_count')
         ).filter(
-            Booking.date.between(current_date, date_seven_days_later)
+            Booking.date.between(start_date, end_date)
         ).group_by(
             Booking.room_id,
             Booking.room_name,
@@ -494,30 +515,3 @@ class meetingroom_top10(Resource):
             'booking_count': booking_count} for room_id, room_name, booking_count in rooms]
         return top_list
         
-    def get_sydney_current_dates(self):
-        sydney_tz = pytz.timezone('Australia/Sydney')
-        current_sydney_time = datetime.now(timezone.utc).astimezone(sydney_tz)
-        current_date = current_sydney_time.strftime('%Y-%m-%d')
-        date_seven_days_later = (current_sydney_time + timedelta(days=7)).strftime('%Y-%m-%d')
-        return current_date, date_seven_days_later
-    
-
-    
-    # {
-    #     "total room": 100,
-    #     "usage": [10, 20,10 ,30,100, 80,70]
-    # }
-
-    # {
-    #     [
-    #         {
-    #             "id":1,
-    #             "times": 30,
-    #             "total time": "20h"
-    #         },
-    #         {
-                
-    #         }
-    #     ]
-    # }
-
