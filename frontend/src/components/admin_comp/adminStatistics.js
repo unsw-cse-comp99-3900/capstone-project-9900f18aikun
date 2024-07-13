@@ -11,12 +11,19 @@ function AdminStatistics() {
     const [apiDate, setApiDate] = useState('');
     const [timeSlots, setTimeSlots] = useState([]);
     const [hourlyCounts, setHourlyCounts] = useState([]);
+    const [usageData, setUsageData] = useState({ total_number: 0, usage: [], start_date: '', end_date: '' });
+    const [topListData, setTopListData] = useState({ start_date: '', end_date: '', top_list: Array(10).fill({ room_id: 'none', room_name: 'none', booking_count: 0 }) });
     const chartRef = useRef(null);
+    const areaChartRef = useRef(null);
+    const barChartRef = useRef(null);
+    const isInitialRender = useRef(true); // 用于标记是否是初次渲染
 
     const handleDateChange = (dateValue) => {
         const formattedDate = dayjs(dateValue).format('YYYY-MM-DD');
         setDate(formattedDate);
         fetchData(formattedDate);
+        fetchUsageData(formattedDate);
+        fetchTopListData(formattedDate);
     };
 
     const fetchData = async (formattedDate) => {
@@ -65,9 +72,9 @@ function AdminStatistics() {
                 },
                 xField: 'time',
                 yField: 'value',
-                width: 600,
-                height: 500,
-                autoFit: true,
+                width: 580,
+                height: 460,
+                autoFit: false,
                 color: '#8D4EDA',  // 确保这是你想要的颜色代码
                 title: {
                     text: 'Current Total Bookings',  // 添加图表标题
@@ -95,6 +102,220 @@ function AdminStatistics() {
         }
     };
 
+    const fetchUsageData = async (formattedDate) => {
+        try {
+            const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-usage?date=${formattedDate}`, {
+                method: "GET",
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setUsageData({
+                total_number: data.total_number,
+                usage: data.usage,
+                start_date: data.start_date,
+                end_date: data.end_date
+            });
+
+            // 在控制台输出usageData
+            // console.log("Usage Data:", data);
+            // 准备面积图数据
+            const areaChartData = prepareAreaChartData(data.usage, data.start_date);
+
+            // 清空面积图容器的内容
+            const areaChartContainer = document.getElementById('area-chart');
+            if (areaChartContainer) {
+                areaChartContainer.innerHTML = '';
+            }
+
+            const areaSpec = {
+                type: 'area',
+                data: {
+                    values: areaChartData
+                },
+                xField: 'time',
+                yField: 'value',
+                width: 580,
+                height: 460,
+                autoFit: false,
+                color: '#8D4EDA',  // 确保这是你想要的颜色代码
+                title: {
+                    text: `Total classroom number: ${data.total_number}`,  // 添加图表标题
+                    style: {
+                        fontSize: 16,
+                        fontWeight: 'bold'
+                    }
+                },
+                xAxis: {
+                    title: {
+                        text: 'Date'  // 设置X轴标题
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Usage'  // 设置Y轴标题
+                    }
+                }
+            };
+
+            areaChartRef.current = new VChart(areaSpec, { dom: 'area-chart' });
+            areaChartRef.current.renderSync();
+        } catch (error) {
+            console.error('Failed to fetch usage data:', error);
+        }
+    };
+
+
+    const fetchTopListData = async (formattedDate) => {
+        try {
+            const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-top10-byCount?date=${formattedDate}`, {
+                method: "GET",
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const topList = data.top_list.concat(Array(10 - data.top_list.length).fill({ room_id: 'none', room_name: 'none', booking_count: 0 }));
+            setTopListData({
+                start_date: data.start_date,
+                end_date: data.end_date,
+                top_list: topList
+            });
+
+            // 在控制台输出topListData
+            console.log("Top List Data:", topList);
+            // 准备条形图数据
+            const barChartData = prepareBarChartData(topList);
+
+            // 清空条形图容器的内容
+            const barChartContainer = document.getElementById('bar-chart');
+            if (barChartContainer) {
+                barChartContainer.innerHTML = '';
+            }
+
+            const barSpec = {
+                type: 'bar',
+                data: [
+                    {
+                        id: 'barData',
+                        values: barChartData
+                    }
+                ],
+                direction: 'horizontal',
+                xField: 'booking_count',
+                yField: 'room_name',
+                seriesField: 'room_name',
+                padding: { right: 50, left: 10 },
+                axes: [
+                    {
+                        orient: 'bottom',
+                        visible: false,
+                        nice: false
+                    },
+                    {
+                        orient: 'left',
+                        maxWidth: 65,
+                        label: {
+                            autoLimit: true
+                        },
+                        domainLine: {
+                            visible: false
+                        },
+                        tick: {
+                            visible: false
+                        }
+                    }
+                ],
+                stackCornerRadius: 0,
+                bar: {
+                    style: {
+                        cornerRadius: [5, 5, 5, 5],
+                        height: 10
+                    }
+                },
+                barBackground: {
+                    visible: true,
+                    style: {
+                        cornerRadius: [5, 5, 5, 5],
+                        height: 10
+                    },
+                    state: {
+                        hover: {
+                            stroke: '#D9D9D9',
+                            lineWidth: 1
+                        }
+                    }
+                },
+                extensionMark: [
+                    {
+                        type: 'text',
+                        dataId: 'barData',
+                        visible: true,
+                        style: {
+                            text: datum => datum.booking_count,
+                            fontSize: 12,
+                            x: (datum, ctx) => {
+                                return ctx.getRegion().getLayoutRect().width + 10;
+                            },
+                            y: (datum, ctx) => {
+                                return ctx.valueToY([datum.room_name]) + ctx.yBandwidth() / 2;
+                            },
+                            textBaseline: 'middle',
+                            textAlign: 'left',
+                            fill: '#595959',
+                            size: 20
+                        }
+                    }
+                ],
+                crosshair: {
+                    yField: {
+                        visible: false
+                    }
+                },
+                tooltip: {
+                    mark: {
+                        title: {
+                            visible: false
+                        }
+                    },
+                    dimension: {
+                        title: {
+                            visible: false
+                        }
+                    },
+                    style: {
+                        shape: {
+                            shapeType: 'circle'
+                        }
+                    }
+                },
+                title: {
+                    text: `${data.start_date} - ${data.end_date}`,  // 添加图表标题
+                    style: {
+                        fontSize: 16,
+                        fontWeight: 'bold'
+                    }
+                }
+            };
+
+            barChartRef.current = new VChart(barSpec, { dom: 'bar-chart' });
+            barChartRef.current.renderSync();
+        } catch (error) {
+            console.error('Failed to fetch top list data:', error);
+        }
+    };
+
+
+
     // 准备图表数据的函数
     const prepareChartData = (hourlyCounts) => {
         return hourlyCounts.map((count, index) => ({
@@ -103,9 +324,31 @@ function AdminStatistics() {
         }));
     };
 
+    // 准备面积图数据的函数
+    const prepareAreaChartData = (usage, startDate) => {
+        const start = dayjs(startDate);
+        return usage.map((value, index) => ({
+            time: start.add(index, 'day').format('YYYY-MM-DD'),  // 从startDate开始的每一天
+            value: value
+        }));
+    };
+
+    // 准备条形图数据的函数
+    const prepareBarChartData = (topList) => {
+        return topList.map((item) => ({
+            room_name: item.room_name,
+            booking_count: item.booking_count
+        }));
+    };
+
     useEffect(() => {
-        fetchData(date); // 在组件加载时获取当天的数据
-    }, []);
+        if (isInitialRender.current) {
+            isInitialRender.current = false;
+            fetchData(date); // 在组件加载时获取当天的数据
+            fetchUsageData(date);
+            fetchTopListData(date);
+        }
+    }, [date]);
 
     return (
         <ConfigProvider locale={enUS}>  {/* 使用 ConfigProvider 设置语言 */}
@@ -123,9 +366,17 @@ function AdminStatistics() {
                     <p>Selected Date: {date}</p>
                 </div>
                 <div className='plot'>
-                    <div className='plot-header'>Real-time Appointment statistic</div>
-                    <div className='plot-content'>
-                        <div id="chart" style={{ width: '600px', height: '520px' }}></div>
+                    <div className='plot-header-1'>Real-time Appointment statistic</div>
+                    <div className='plot-content-1'>
+                        <div id="chart" style={{ width: '590px', height: '480px' }}></div>
+                    </div>
+                    <div className='plot-header-2'>Classroom usage report in 7 days</div>
+                    <div className='plot-content-2'>
+                        <div id="area-chart" style={{ width: '590px', height: '480px' }}></div>
+                    </div>
+                    <div className='plot-header-3'>Top-10 classroom</div>
+                    <div className='plot-content-3'>
+                        <div id="bar-chart" style={{ width: '400px', height: '320px' }}></div>
                     </div>
                 </div>
             </div>

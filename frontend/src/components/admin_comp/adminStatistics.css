@@ -3,7 +3,7 @@
 }
 
 /* adminStatistics.css */
-.plot-header {
+.plot-header-1 {
     background-color: #A083D5; /* 更新为指定的紫色 */
     color: white;
     padding: 15px;
@@ -13,7 +13,7 @@
     border-radius: 10px; /* 添加圆角 */
 }
 
-.plot-content {
+.plot-content-1 {
     padding: 20px;
     background-color: #f4f4f4; /* 浅灰色背景，增加对比 */
     display: flex;
@@ -22,7 +22,55 @@
     border-radius: 10px; /* 添加圆角 */
 }
 
-.plot-content img {
+.plot-content-1 img {
+    max-width: 100%; /* 确保图片不会超出容器宽度 */
+    /* max-height: 100%; */
+    height: auto; /* 保持图片原始比例 */
+}
+
+.plot-header-2 {
+    background-color: #A083D5; /* 更新为指定的紫色 */
+    color: white;
+    padding: 15px;
+    margin-bottom: 5px;
+    font-size: 18px;
+    /* text-align: center; */
+    border-radius: 10px; /* 添加圆角 */
+}
+.plot-content-2 {
+    padding: 20px;
+    background-color: #f4f4f4; /* 浅灰色背景，增加对比 */
+    display: flex;
+    justify-content: space-around; /* 图片间隔均匀 */
+    align-items: center;
+    border-radius: 10px; /* 添加圆角 */
+}
+
+.plot-content-2 img {
+    max-width: 100%; /* 确保图片不会超出容器宽度 */
+    /* max-height: 100%; */
+    height: auto; /* 保持图片原始比例 */
+}
+
+.plot-header-3 {
+    background-color: #A083D5; /* 更新为指定的紫色 */
+    color: white;
+    padding: 15px;
+    margin-bottom: 5px;
+    font-size: 18px;
+    /* text-align: center; */
+    border-radius: 10px; /* 添加圆角 */
+}
+.plot-content-3 {
+    padding: 20px;
+    background-color: #f4f4f4; /* 浅灰色背景，增加对比 */
+    display: flex;
+    justify-content: space-around; /* 图片间隔均匀 */
+    align-items: center;
+    border-radius: 10px; /* 添加圆角 */
+}
+
+.plot-content-3 img {
     max-width: 100%; /* 确保图片不会超出容器宽度 */
     /* max-height: 100%; */
     height: auto; /* 保持图片原始比例 */
