@@ -52,6 +52,7 @@
 .admin-top-bar {
         
         background-color: #FADC19;
+        height: 25px;
         padding: 20px 20px;
         width: calc(100% - 270px); /* Adjust width based on sidebar state */
         display: flex;
@@ -93,8 +94,72 @@
 
 }
 
+.admin-user{
+        margin-left: auto; /* Push the user button to the right */
+        /* width: 30px;
+        height: 30px; */
+        background: none;
+        border: none;
+        cursor: pointer;
+}
+
 .admin-right-button {
     margin-left: auto;
+}
+
+.admin-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #fff;
+    margin-top: 70px;
+    transition: margin-left 0.3s;
+    margin-left: 270px;
+}
+
+
+
+
+.admin-top-bar {
+    background-color: #FADC19;
+    height: 25px;
+    padding: 20px 20px;
+    width: calc(100% - 270px); /* Adjust width based on sidebar state */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensure elements align to the edges */
+    position: fixed; /* Fixed position */
+    top: 0; /* Align to the top */
+    left: 270px; /* Adjust based on sidebar state */
+    transition: left 0.3s; /* Smooth transition for left position */
+    z-index: 1; /* Below the sidebar */
+}
+
+.admin-top-bar.closed {
+    left: 0;
+    width: 100%;
+}
+
+.admin-top-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+
+.admin-user {
+    /* No margin-left needed, justify-content will handle the alignment */
+    margin-right: 50px;
+    width: 50px;
+    height: 50px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.admin-user img{
+    width: 40px;
+    height: 40px;
 }
 
 .admin-content {

@@ -1,7 +1,21 @@
+.class-h1{
+    margin: 10px 0 10px 25px;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:  35px;;
+}
+
 .search {
     display: flex;
     flex-direction: column;
-    margin: 20px;
+    margin: 30px;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.search h2{
+    color: #4E5969;
+    margin-bottom: 5px;
+    font-size:  25px;
+
 }
 
 .search_1 {
@@ -19,6 +33,7 @@
 
 select {
     width: 200px;
+    height: 35px;
     display: inline-block; /* Ensure select is also inline-block */
     font-size: 16px; /* Adjust font size if necessary */
     padding: 4px; /* Adjust padding to make the select smaller */
@@ -29,6 +44,7 @@ select {
 }
 
 .input-group {
+    margin: 0 80px 0 0;
     display: flex;
     align-items: center;
     border: 1px solid #ccc;
@@ -37,11 +53,14 @@ select {
 }
 
 .input-group input {
+    /* width: 300px; */
+    height: 30px;
     flex-grow: 1;
     padding: 8px;
     border: none;
     outline: none;
-    width: 500px;
+    font-size: 15px;
+    /* width: 500px; */
     /* margin: 0 20px 0; */
 }
 
@@ -49,13 +68,14 @@ select {
     background: none;
     border: none;
     padding: 5px 10px;
+    margin-right: 15px;
     cursor: pointer;
-    width: 30px;
+    width: 35px;
 }
 
 .input-group .search-button img {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
 }
 
 .class-table{

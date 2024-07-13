@@ -104,7 +104,7 @@ function AdminClassroom() {
             dataIndex: 'action',
             render: () => (
                 <button className="table-button">
-                    <img src="/admin_img/search.png" alt="Search" />
+                    <img src="/admin_img/edit.png" alt="Search" />
                 </button>
             )
         }
@@ -113,7 +113,7 @@ function AdminClassroom() {
     return (
         <ConfigProvider locale={enUS}>  {/* 使用 ConfigProvider 设置语言 */}
             <div>
-                <h1>Classroom Management</h1>
+                <h1 className='class-h1'>Classroom Management</h1>
                 <form className='search' onSubmit={handleSubmit}>
                     <h2>Search classroom</h2>
                     <div className='search_1'>
@@ -137,7 +137,7 @@ function AdminClassroom() {
                     </div>
                 </form>
                 <div className='class-table'>
-                    <Table columns={columns} data={filteredData} pagination={{ pageSize: 6 }} />
+                    <Table columns={columns} data={filteredData} pagination={{ pageSize: 5 }} />
                 </div>
             </div>
         </ConfigProvider>

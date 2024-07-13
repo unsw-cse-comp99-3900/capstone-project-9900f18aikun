@@ -69,6 +69,9 @@ function AdminPage() {
             </div>
             <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`}style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
+                <button className='admin-user'>
+                    <img src="/admin_img/user.png" alt="User" />
+                </button>
                 {/* <button className="admin-right-button">Make bookings</button> */}
             </div>
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
