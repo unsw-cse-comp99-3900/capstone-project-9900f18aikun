@@ -16,8 +16,10 @@ import History from "./components/history";
 import RoomInfo from "./components/roompage";
 import Rebook from "./components/rebook";
 import AdminPage from "./components/Admin_page";
+import { ChatBox } from "./components/ChatBox";
 
 import "./App.css";
+import "./ChatBoxWrapper.css";
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -226,6 +228,9 @@ function App() {
           element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />}
         />
       </Routes>
+      <div className="chat-box-wrapper">
+        <ChatBox />
+      </div>
     </div>
   );
 }
