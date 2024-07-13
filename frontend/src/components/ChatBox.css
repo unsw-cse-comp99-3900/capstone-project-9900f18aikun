@@ -246,7 +246,7 @@
     width: 60px; 
     height: 60px; 
   }
-/* Add these new styles and modify existing ones */
+
 
 .chat-messages {
     position: absolute;
@@ -307,7 +307,7 @@
     border: none;
     background: transparent;
     outline: none;
-    max-width: 80%; /* Adjust this value to make the input box shorter */
+    max-width: 80%; 
   }
 
   .send-button-container {
@@ -372,7 +372,7 @@
   position: absolute;
   top: -3px;
   left: 0px;
-  right: 610px; /* Adjust this value as needed to leave space for the minus icon */
+  right: 610px; 
 }
 
 .bot-image {
@@ -383,15 +383,15 @@
   float: right;
   top: 37px; 
   margin-left: 35px;
-  /* margin-bottom: 5px; */
+  
 }
 
 .express-book-text {
-    font-size: 36px; /* Adjust size as needed */
+    font-size: 36px;
     font-weight: bold;
     color: #333; /* Adjust color as needed */
-    margin-left: auto; /* This pushes the text to the right */
-    white-space: nowrap; /* Prevents text from wrapping */
+    margin-left: auto; 
+    white-space: nowrap; 
     padding-top: 50px; /* Adjust this value to move the text down */
     position: relative;
     margin-left: 130px;

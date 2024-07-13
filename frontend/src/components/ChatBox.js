@@ -3,7 +3,7 @@ import "./ChatBox.css";
 
 const Component = ({ className }) => (
   <div className={className}>
-    {/* Add the content of your Component here if needed */}
+    {}
   </div>
 );
 
@@ -23,6 +23,18 @@ export const ChatBox = () => {
 
   useEffect(scrollToBottom, [messages]);
 
+  const formatRoomInfo = (rooms) => {
+    if (rooms.length === 0) {
+      return "No rooms available for the specified time and date.";
+    }
+
+    const roomList = rooms.map(room => 
+      `- ${room.name} (Level ${room.level}, Capacity: ${room.capacity})`
+    ).join('\n');
+
+    return `Available rooms for ${rooms[0].date} from ${rooms[0].start_time} to ${rooms[0].end_time}:\n${roomList}`;
+  };
+
   const sendMessage = async () => {
     if (inputMessage.trim() === "") return;
 
@@ -31,21 +43,40 @@ export const ChatBox = () => {
     setInputMessage("");
 
     try {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch('http://s2.gnip.vip:37895/booking/express-book', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           query: inputMessage,
-          room_type: "hot desk"
+          room_type: ""
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      let botResponse;
+
+      if (Array.isArray(data) && data.length > 0) {
+        botResponse = formatRoomInfo(data);
+      } else {
+        botResponse = "I'm sorry, I couldn't find any rooms matching your request.";
+      }
+
       const botMessage = { 
-        text: data.response || "I'm sorry, I couldn't process that request.", 
+        text: botResponse, 
         sender: "bot", 
         timestamp: new Date() 
       };
@@ -53,7 +84,9 @@ export const ChatBox = () => {
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage = { 
-        text: "Sorry, there was an error processing your request.", 
+        text: error.message === 'No authentication token found' 
+          ? "You are not logged in. Please log in to use this feature." 
+          : "Sorry, there was an error processing your request.", 
         sender: "bot", 
         timestamp: new Date() 
       };
