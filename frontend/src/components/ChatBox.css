@@ -389,10 +389,10 @@
 .express-book-text {
     font-size: 36px;
     font-weight: bold;
-    color: #333; /* Adjust color as needed */
+    color: #333; 
     margin-left: auto; 
     white-space: nowrap; 
-    padding-top: 50px; /* Adjust this value to move the text down */
+    padding-top: 50px; 
     position: relative;
     margin-left: 130px;
   }

@@ -15,6 +15,10 @@ export const ChatBox = () => {
 
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
+    if (isOpen) {
+      // Clear messages when closing the chat box
+      setMessages([]);
+    }
   };
 
   const scrollToBottom = () => {
@@ -150,10 +154,6 @@ export const ChatBox = () => {
                 <img className="bot-image" alt="Image" src="/chat_box/image-3.png" />
                 <span className="express-book-text">𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠</span>
               </div>
-              <div className="icon-minus" onClick={toggleChatBox}>
-                <img src="/chat_box/ellipse-1.svg" alt="Ellipse" className="ellipse-image" />
-                <img className="rectangle-4" alt="Rectangle" src="/chat_box/rectangle-1.svg" />
-              </div>
             </div>
           </div>
         </div>
@@ -164,3 +164,5 @@ export const ChatBox = () => {
     </>
   );
 };
+
+export default ChatBox;
