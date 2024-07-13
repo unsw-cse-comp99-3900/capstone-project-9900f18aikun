@@ -7,6 +7,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import ToMap from "./toMap";
+import { Navigate, useNavigate } from "react-router-dom";
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -265,6 +266,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
   // console.log("reservation is", reservations);
   // console.log("selfReservation is", selfReservations);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     setReservations(extractData(data, false));
     setSelfReservations(extractData(data, true));
@@ -354,13 +357,14 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       if (currentTimeIndex !== -1) {
         const table = document.getElementById("mytable");
         const currentTimeCell = table.querySelector(
-          `thead th:nth-child(${currentTimeIndex + 11})`
+          `thead th:nth-child(${currentTimeIndex})`
         );
 
         if (currentTimeCell) {
           currentTimeCell.scrollIntoView({
             behavior: "smooth",
-            block: "center",
+            block: "nearest",
+            inline: "start",
           });
         }
       }
@@ -398,7 +402,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       return;
     }
 
-    const position = { top: event.clientY - 100, left: event.clientX - 290 };
+    const position = { top: event.clientY, left: event.clientX };
     setSelectWindow({
       visible: true,
       time,
@@ -503,6 +507,9 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                     className="room-column"
                     onMouseEnter={() => setHoveredRoom(roomData)}
                     onMouseLeave={() => setHoveredRoom(null)}
+                    onClick={() => {
+                      navigate("/room/" + item.roomid);
+                    }}
                   >
                     {item.room}
                     {hoveredRoom && hoveredRoom.name === item.room && (
