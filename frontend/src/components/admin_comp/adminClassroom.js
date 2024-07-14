@@ -117,7 +117,7 @@ function AdminClassroom() {
             dataIndex: 'action',
             render: () => (
                 <button className="table-button">
-                    <img src="/admin_img/edit.png" alt="Search" />
+                    <img src="/admin_img/edit.png" alt="edit" />
                 </button>
             )
         }

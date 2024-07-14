@@ -5,6 +5,8 @@ import "@arco-design/web-react/dist/css/arco.css";
 import dayjs from 'dayjs';
 import './adminStatistics.css';
 import VChart from '@visactor/vchart';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 function AdminStatistics() {
     const [date, setDate] = useState(dayjs().format('YYYY-MM-DD')); // 设置默认日期为当天
@@ -97,6 +99,41 @@ function AdminStatistics() {
 
             chartRef.current = new VChart(spec, { dom: 'chart' });
             chartRef.current.renderSync();
+
+
+
+            // // 添加事件监听器
+            // chartRef.current.on('animationFinished', () => {
+            //     // 动画完成后增加延时以确保图表渲染稳定
+            //     setTimeout(() => {
+            //         html2canvas(document.querySelector('#chart')).then(canvas => {
+            //             // 处理 canvas 或转换为 PDF
+            //             const imgData = canvas.toDataURL('image/png');
+            //             const pdf = new jsPDF();
+            //             const imgProps = pdf.getImageProperties(imgData);
+            //             const pdfWidth = pdf.internal.pageSize.getWidth();
+            //             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            //             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            //             pdf.save('chart-report.pdf');
+            //         });
+            //     }, 1000); // 延迟1000毫秒
+            // });
+            // 添加事件监听器
+            // chartRef.current.on('animationFinished', () => {
+            //     generateReport();
+            // });
+
+            // 添加事件监听器
+            chartRef.current.on('animationFinished', () => {
+                setTimeout(() => {
+                    html2canvas(document.querySelector('#chart')).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        localStorage.setItem('chartImage', imgData);
+                        // generateReport();
+                    });
+                }, 1000); // 延迟1000毫秒
+            });
+
         } catch (error) {
             console.error('Failed to fetch data:', error);
         }
@@ -165,11 +202,22 @@ function AdminStatistics() {
 
             areaChartRef.current = new VChart(areaSpec, { dom: 'area-chart' });
             areaChartRef.current.renderSync();
+
+            // 添加事件监听器
+            areaChartRef.current.on('animationFinished', () => {
+                setTimeout(() => {
+                    html2canvas(document.querySelector('#area-chart')).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        localStorage.setItem('areaChartImage', imgData);
+                        // generateReport();
+                    });
+                }, 1000); // 延迟1000毫秒
+            });
+
         } catch (error) {
             console.error('Failed to fetch usage data:', error);
         }
     };
-
 
     const fetchTopListData = async (formattedDate) => {
         try {
@@ -223,7 +271,7 @@ function AdminStatistics() {
                     },
                     {
                         orient: 'left',
-                        maxWidth: 65,
+                        maxWidth: 220,
                         label: {
                             autoLimit: true
                         },
@@ -299,7 +347,7 @@ function AdminStatistics() {
                     }
                 },
                 title: {
-                    text: `${data.start_date} - ${data.end_date}`,  // 添加图表标题
+                    text: `Date:  ${data.start_date} - ${data.end_date}`,  // 添加图表标题
                     style: {
                         fontSize: 16,
                         fontWeight: 'bold'
@@ -309,12 +357,22 @@ function AdminStatistics() {
 
             barChartRef.current = new VChart(barSpec, { dom: 'bar-chart' });
             barChartRef.current.renderSync();
+
+            // 添加事件监听器
+            barChartRef.current.on('animationFinished', () => {
+                setTimeout(() => {
+                    html2canvas(document.querySelector('#bar-chart')).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        localStorage.setItem('barChartImage', imgData);
+                        // generateReport();
+                    });
+                }, 1000); // 延迟1000毫秒
+            });
+
         } catch (error) {
             console.error('Failed to fetch top list data:', error);
         }
     };
-
-
 
     // 准备图表数据的函数
     const prepareChartData = (hourlyCounts) => {
@@ -341,6 +399,71 @@ function AdminStatistics() {
         }));
     };
 
+    const generateReport = async (event) => {
+        event.preventDefault(); // Prevent default anchor behavior
+    
+        const chartImage = localStorage.getItem('chartImage');
+        const areaChartImage = localStorage.getItem('areaChartImage');
+        const barChartImage = localStorage.getItem('barChartImage');
+    
+        if (!chartImage || !areaChartImage || !barChartImage) {
+            console.error('One or more charts are not rendered yet.');
+            return;
+        }
+    
+        const pdf = new jsPDF();
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+    
+        // Add report title
+        pdf.setFontSize(22);
+        pdf.setFont("helvetica", "bold");
+        pdf.text('Statistic Report for CSE Booking System', pdfWidth / 2, 15, { align: 'center' });
+    
+        // Add chart image with description
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica", "bold");
+        pdf.text('Real-time Appointment Statistic', pdfWidth / 2, 30, { align: 'center' });
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "normal");
+        pdf.text('This line chart shows the real-time appointment statistics for the day.', 10, 40);
+        pdf.text('The y-axis represents the total number of bookings, and the x-axis represents the time from 0:00 to 24:00.', 10, 50);
+        pdf.text('Each point on the line represents the number of bookings at a specific hour.', 10, 60);
+        const chartImgProps = pdf.getImageProperties(chartImage);
+        const chartPdfHeight = (chartImgProps.height * (pdfWidth - 20)) / chartImgProps.width;
+        pdf.addImage(chartImage, 'PNG', 10, 70, pdfWidth - 20, chartPdfHeight);
+    
+        // Add area chart image with description
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica", "bold");
+        pdf.text('Classroom Usage Report in 7 Days', pdfWidth / 2, 15, { align: 'center' });
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "normal");
+        pdf.text('This area chart shows the classroom usage over the next 7 days.', 10, 25);
+        pdf.text('There are a total of 185 classrooms. The x-axis represents the dates from today to the next 7 days,', 10, 35);
+        pdf.text('and the y-axis represents the number of classrooms booked each day.', 10, 45);
+        pdf.text('The area under the curve represents the total number of classrooms booked on each day.', 10, 55);
+        const areaChartImgProps = pdf.getImageProperties(areaChartImage);
+        const areaChartPdfHeight = (areaChartImgProps.height * (pdfWidth - 20)) / areaChartImgProps.width;
+        pdf.addImage(areaChartImage, 'PNG', 10, 65, pdfWidth - 20, areaChartPdfHeight);
+    
+        // Add bar chart image with description
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica", "bold");
+        pdf.text('Top 10 Classrooms by Booking Frequency', pdfWidth / 2, 15, { align: 'center' });
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "normal");
+        pdf.text('This bar chart shows the top 10 classrooms with the highest booking frequency over the past 7 days.', 10, 25);
+        pdf.text('The x-axis represents the number of bookings, and the y-axis represents the classroom names.', 10, 35);
+        pdf.text('Each bar represents the total number of bookings for a specific classroom.', 10, 45);
+        const barChartImgProps = pdf.getImageProperties(barChartImage);
+        const barChartPdfHeight = (barChartImgProps.height * (pdfWidth - 20)) / barChartImgProps.width;
+        pdf.addImage(barChartImage, 'PNG', 10, 55, pdfWidth - 20, barChartPdfHeight);
+    
+        pdf.save('report.pdf');
+    };
+
     useEffect(() => {
         if (isInitialRender.current) {
             isInitialRender.current = false;
@@ -364,6 +487,7 @@ function AdminStatistics() {
                         defaultValue={dayjs()}  // 设置默认日期为当天
                     />
                     <p>Selected Date: {date}</p>
+                    <a href="#" onClick={generateReport}>Download Report</a>
                 </div>
                 <div className='plot'>
                     <div className='plot-header-1'>Real-time Appointment statistic</div>
@@ -376,7 +500,7 @@ function AdminStatistics() {
                     </div>
                     <div className='plot-header-3'>Top-10 classroom</div>
                     <div className='plot-content-3'>
-                        <div id="bar-chart" style={{ width: '400px', height: '320px' }}></div>
+                        <div id="bar-chart" style={{ width: '600px', height: '480px' }}></div>
                     </div>
                 </div>
             </div>
