@@ -92,9 +92,9 @@ function AdminClassroom() {
         {
             title: 'Room Name',
             dataIndex: 'name',
-            render: (text, entry) => (
-                <td onClick={() => handleCellClick(entry)}>{text}</td>
-            )
+            // render: (text, entry) => (
+            //     <td onClick={() => handleCellClick(entry)}>{text}</td>
+            // )
         },
         {
             title: 'Building',
@@ -115,8 +115,8 @@ function AdminClassroom() {
         {
             title: 'Action',  // 新列的标题
             dataIndex: 'action',
-            render: () => (
-                <button className="table-button">
+            render: (text, entry) => (
+                <button className="table-button" onClick={() => handleCellClick(entry)}>
                     <img src="/admin_img/edit.png" alt="edit" />
                 </button>
             )

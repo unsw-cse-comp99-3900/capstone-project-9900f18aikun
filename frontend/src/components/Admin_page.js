@@ -21,7 +21,6 @@ function AdminPage() {
         width: isSidebarOpen ? 'calc(100% - 270px)' : '100%'
     };
 
-
     useEffect(() => {
         const handlePopState = (event) => {
             // Clear login state
@@ -41,6 +40,21 @@ function AdminPage() {
             window.removeEventListener('popstate', handlePopState);
         };
     }, [navigate]);
+
+    const renderContent = () => {
+        switch (contentState) {
+            case 1:
+                return <AdminHome />;
+            case 2:
+                return <AdminClassroom />;
+            case 3:
+                return <AdminAppointment />;
+            case 4:
+                return <AdminStatistics />;
+            default:
+                return <div>Error: 组件未渲染</div>;
+        }
+    };
 
     return (
         <div className="admin-page">
@@ -67,7 +81,7 @@ function AdminPage() {
                     statistics
                 </button>
             </div>
-            <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`}style={topBarStyle}>
+            <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`} style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
                 <button className='admin-user'>
                     <img src="/admin_img/user.png" alt="User" />
@@ -75,10 +89,7 @@ function AdminPage() {
                 {/* <button className="admin-right-button">Make bookings</button> */}
             </div>
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
-                {contentState === 1 && <AdminHome/>}
-                {contentState === 2 && <AdminClassroom />}
-                {contentState === 3 && <AdminAppointment />}
-                {contentState === 4 && <AdminStatistics />}
+                {renderContent()}
             </div>
         </div>
     );
