@@ -396,4 +396,39 @@
     position: relative;
     margin-left: 130px;
   }
-  
+  .service-image {
+  position: absolute;
+  height: 70px;
+  width: 85px;
+  object-fit: cover;
+  float: right;
+  top: 37px; 
+  margin-left: 35px;
+}
+
+.mode-switch-button {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  margin-left: 10px;
+  position: absolute;
+  right: 0px;
+  top: 100px;
+}
+.message-text button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.message-text button:hover {
+  background-color: #45a049;
+}
