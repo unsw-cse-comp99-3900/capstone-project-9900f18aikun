@@ -3,7 +3,7 @@ import "./ChatBox.css";
 
 const Component = ({ className }) => (
   <div className={className}>
-    {}
+    {}  
   </div>
 );
 
@@ -14,12 +14,16 @@ export const ChatBox = () => {
   const [mode, setMode] = useState('ExpressBook');
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [bookedRoomName, setBookedRoomName] = useState(null);
+  const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
 
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
     if (isOpen) {
       setMessages([]);
+      setStoredQuery("");
+      setBookedRoomName(null);
     }
   };
 
@@ -94,12 +98,11 @@ export const ChatBox = () => {
       if (!token) throw new Error('No authentication token found');
   
       const intRoomId = parseInt(selectedRoom.room_id, 10);
-      console.log("book id",selectedRoom)
+      console.log("book id", selectedRoom)
       if (isNaN(intRoomId)) {
         throw new Error('Invalid room ID');
       }
   
-      // Prepare the booking information in the correct format
       const bookingInfo = {
         room_id: intRoomId,
         date: selectedRoom.date,
@@ -107,7 +110,6 @@ export const ChatBox = () => {
         end_time: selectedRoom.end_time.split(':')[0] + ':00'
       };
   
-      // Print the booking information to the console
       console.log('Booking information being sent to API:', bookingInfo);
   
       const response = await fetch('http://s2.gnip.vip:37895/booking/book', {
@@ -126,7 +128,7 @@ export const ChatBox = () => {
       }
   
       const data = await response.json();
-      console.log('API response:', data);  // Print the API response
+      console.log('API response:', data);
   
       const bookingConfirmation = { 
         text: "Booking successful! Your room has been reserved.", 
@@ -134,6 +136,7 @@ export const ChatBox = () => {
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, bookingConfirmation]);
+      setBookedRoomName(selectedRoom.name);
     } catch (error) {
       console.error("Error booking room:", error);
       const errorMessage = { 
@@ -145,19 +148,40 @@ export const ChatBox = () => {
     }
     setSelectedRoom(null);
   };
+
   const sendMessage = async () => {
     if (inputMessage.trim() === "") return;
 
     const newMessage = { text: inputMessage, sender: "user", timestamp: new Date() };
     setMessages([...messages, newMessage]);
-    setInputMessage("");
+    setStoredQuery(inputMessage); // Store the user's input
 
+    const optionsMessage = {
+      text: "Please select the type of space you'd like to book:",
+      sender: "bot",
+      timestamp: new Date(),
+      options: [
+        { text: "Meeting Room", id: "meeting_room" },
+        { text: "Hot Desk", id: "hot_desk" }
+      ]
+    };
+    setMessages(prev => [...prev, optionsMessage]);
+    setInputMessage("");
+  };
+
+  const handleOptionSelection = async (roomType) => {
     try {
       const token = localStorage.getItem('token');
-
       if (!token) {
         throw new Error('No authentication token found');
       }
+
+      const requestBody = {
+        query: storedQuery, // Use the stored query here
+        room_type: roomType
+      };
+
+      console.log("Sending to server:", JSON.stringify(requestBody, null, 2));
 
       const response = await fetch('http://s2.gnip.vip:37895/booking/express-book', {
         method: 'POST',
@@ -166,11 +190,7 @@ export const ChatBox = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          query: inputMessage,
-          room_type: "",
-          mode: mode
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -234,9 +254,18 @@ export const ChatBox = () => {
                       {msg.text.split('\n').map((line, i) => {
                         if (line.includes('[Select Room]')) {
                           const roomName = line.match(/\(select:(.*?)\)/)[1];
+                          const isThisRoomBooked = roomName === bookedRoomName;
                           return (
-                            <button key={i} onClick={() => handleRoomSelection(roomName)}>
-                              Select Room
+                            <button 
+                              key={i} 
+                              onClick={() => handleRoomSelection(roomName)}
+                              disabled={isThisRoomBooked}
+                              style={{ 
+                                backgroundColor: isThisRoomBooked ? 'grey' : '#4CAF50',
+                                cursor: isThisRoomBooked ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              {isThisRoomBooked ? 'Booked' : 'Select Room'}
                             </button>
                           );
                         } else if (line.includes('[Book Room]')) {
@@ -248,6 +277,15 @@ export const ChatBox = () => {
                         }
                         return <p key={i}>{line}</p>;
                       })}
+                      {msg.options && (
+                        <div className="option-buttons">
+                          {msg.options.map((option, i) => (
+                            <button key={i} onClick={() => handleOptionSelection(option.id)}>
+                              {option.text}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
