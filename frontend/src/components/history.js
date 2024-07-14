@@ -7,10 +7,18 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import dayjs from "dayjs";
+
 const ReservationHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -42,6 +50,16 @@ const ReservationHistory = () => {
     fetchHistory();
   }, []);
 
+  const toggleCalendarVisibility = (e) => {
+    setIsCalendarVisible(!isCalendarVisible);
+    setCalendarPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  function formatTime(time) {
+    let [hours, minutes] = time.split(":");
+    return `${hours}:${minutes}`;
+  }
+
   const cancelHandler = async (entry, e) => {
     console.log(e.target.innerText);
     if (e.target.innerText === "Cancel") {
@@ -70,8 +88,53 @@ const ReservationHistory = () => {
         console.error("Error fetching booking data:", error);
       }
     } else if (e.target.innerText === "Rebook") {
-      console.log("row is", entry);
+      toggleCalendarVisibility(e);
     }
+  };
+
+  const handleDateChange = async (entry, date) => {
+    console.log(entry)
+    setSelectedDate(date);
+    // send request to backend
+    const obj = {
+      room_id: entry.room_id,
+      date: date.format("YYYY-MM-DD"),
+      start_time: formatTime(entry.start_time),
+      end_time: formatTime(entry.end_time),
+    };
+    const token = localStorage.getItem("token");
+    console.log("object is ", obj);
+
+    try {
+      const response = await fetch("/api/booking/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(obj),
+      });
+
+      if (response.ok) {
+        console.log("successfully sent");
+        const result = await response.json();
+        console.log(result);
+      } else {
+        const errorText = await response.text();
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
+    setIsCalendarVisible(!isCalendarVisible);
+  };
+
+  const disableDates = (date) => {
+    const today = dayjs();
+    const sevenDaysFromNow = today.add(7, "day");
+    return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
   if (loading) {
@@ -121,6 +184,21 @@ const ReservationHistory = () => {
                       ? "Rebook"
                       : "Cancel"}
                   </TableCell>
+                  {isCalendarVisible && (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DateCalendar
+                        shouldDisableDate={disableDates}
+                        className="date-calendar-overlay"
+                        onChange={(date) => handleDateChange(row, date)}
+                        style={{
+                          position: "absolute",
+                          left: `${calendarPosition.x}px`,
+                          top: `${calendarPosition.y}px`,
+                          zIndex: 100,
+                        }}
+                      />
+                    </LocalizationProvider>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

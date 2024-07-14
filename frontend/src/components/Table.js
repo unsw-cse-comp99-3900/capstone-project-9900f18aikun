@@ -136,6 +136,7 @@ const SelectWindow = ({
       end_time: endTime,
     };
     const token = localStorage.getItem("token");
+    console.log("token is", token)
     // console.log("object is", obj);
 
     try {
@@ -248,6 +249,7 @@ const SelectWindow = ({
 
 // main table
 const Table = ({ data, selectedDate, setSelectedDate }) => {
+  console.log("data is ", data)
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
