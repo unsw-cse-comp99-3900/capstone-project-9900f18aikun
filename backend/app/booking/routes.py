@@ -17,6 +17,7 @@ from datetime import datetime
 import json
 from sqlalchemy import func
 import pytz
+import random
 
 
 scheduler = BackgroundScheduler()
@@ -337,9 +338,7 @@ class ExpressBook(Resource):
         try:
             response = model.generate_content(prompt)
             response_json = json.loads(response.text)
-            print(response_json)
         except Exception as e:
-            print("Error generating content:", str(e))
             return {'error':  str(e)}, 500
 
         level = response_json.get('level')
@@ -354,6 +353,9 @@ class ExpressBook(Resource):
             max_capacity = 1
         if not date:
             date = today
+
+        if room_type == "hot_desk" and max_capacity > 1:
+            return {'error': "Sorry, the max capacity of hot desk is 1."}, 400
 
         booked_rooms_subquery = db.session.query(Booking.room_id).filter(
             Booking.date == date,
@@ -396,6 +398,12 @@ class ExpressBook(Resource):
              "end_time": end_time}
             for room in available_rooms
         ]
+
+        if len(available_room_details) > 5:
+            available_room_details = random.sample(available_room_details, 5)
+
+        if len(available_room_details) == 0:
+            return {'error': "Sorry, we couldn't find a location that meets your needs."}, 400
 
         return available_room_details, 200
 
