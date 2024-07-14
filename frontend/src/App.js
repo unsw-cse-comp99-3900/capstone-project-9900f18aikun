@@ -17,6 +17,7 @@ import RoomInfo from "./components/roompage";
 import Rebook from "./components/rebook";
 import AdminPage from "./components/Admin_page";
 import { ChatBox } from "./components/ChatBox";
+import AdminRoomPage from "./components/admin_comp/adminRoompage";
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
@@ -126,10 +127,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (location.pathname === '/login' && !location.state) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
+    if (location.pathname === "/login" && !location.state) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("isAdmin");
       setIsLoggedIn(false);
     }
   }, [location]);
@@ -166,7 +167,7 @@ function App() {
                     {isSidebarOpen && <Filter onFilter={handleFilter} />}
                   </div>
                   <div className="content">
-                    <Rebook date={selectedDate}/> 
+                    <Rebook date={selectedDate} />
                     <Table
                       data={filteredData}
                       selectedDate={selectedDate}
@@ -224,8 +225,24 @@ function App() {
           }
         />
         <Route
+          path="/room/admin/*"
+          element={
+            <ProtectedRoute>
+              <>
+                <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
+                <AdminRoomPage
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                />
+              </>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="*"
-          element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />}
+          element={
+            <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
+          }
         />
       </Routes>
       <div className="chat-box-wrapper">

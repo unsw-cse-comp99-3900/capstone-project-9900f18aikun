@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './adminClassroom.css'; // 确保 CSS 文件被引入
 import { Table, ConfigProvider } from '@arco-design/web-react';
 import enUS from '@arco-design/web-react/es/locale/en-US';
+import { useNavigate } from "react-router-dom";
+
 
 function AdminClassroom() {
     const [classroomData, setClassroomData] = useState([]);
@@ -9,6 +11,8 @@ function AdminClassroom() {
     const [inputValue, setInputValue] = useState('');
     const [searchCriteria, setSearchCriteria] = useState({ type: '', value: '' });
     const [filteredData, setFilteredData] = useState([]);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,11 +81,20 @@ function AdminClassroom() {
         setFilteredData(filtered);
     };
 
+    const handleCellClick = (entry) => {
+        // Custom logic for cell click
+        console.log(`Clicked on :`, entry);
+        navigate("/room/admin/" + entry.id);
+    };
+
     //arco table
     const columns = [
         {
             title: 'Room Name',
             dataIndex: 'name',
+            render: (text, entry) => (
+                <td onClick={() => handleCellClick(entry)}>{text}</td>
+            )
         },
         {
             title: 'Building',
