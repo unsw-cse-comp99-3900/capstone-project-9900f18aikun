@@ -337,6 +337,7 @@ class ExpressBook(Resource):
         try:
             response = model.generate_content(prompt)
             response_json = json.loads(response.text)
+            print(response_json)
         except Exception as e:
             print("Error generating content:", str(e))
             return {'error':  str(e)}, 500
