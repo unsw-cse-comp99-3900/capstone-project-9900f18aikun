@@ -44,6 +44,11 @@ function AdminPage() {
         };
     }, [navigate]);
 
+    //跳转到页面顶部
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [contentState]); // 添加依赖项 contentState
+
     const renderContent = () => {
         switch (contentState) {
             case 1:
