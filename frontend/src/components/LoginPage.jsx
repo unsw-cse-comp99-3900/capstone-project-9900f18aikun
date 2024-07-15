@@ -25,6 +25,25 @@ const LoginPage = ({ onLogin }) => {
     }
   }, [location]);
 
+  const handleSuccessfulLogin = (data) => {
+    localStorage.setItem('token', data.access_token);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('isAdmin', data.is_admin);
+    console.log('Login successful');
+    onLogin();
+    
+    const fromQr = location.state?.fromQr;
+    const qrCode = localStorage.getItem('qrCode');
+    
+    if (fromQr && qrCode) {
+      navigate('/qr-check-in');
+    } else if (data.is_admin) {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   const handleAutoLogin = async (token) => {
     try {
       const response = await fetch('http://s2.gnip.vip:37895/auth/auto-login', {
@@ -35,11 +54,8 @@ const LoginPage = ({ onLogin }) => {
       });
 
       if (response.ok) {
-        localStorage.setItem('token', token);
-        localStorage.setItem('isLoggedIn', 'true');
-        console.log('Auto-login successful');
-        onLogin();
-        navigate('/dashboard');
+        const data = await response.json();
+        handleSuccessfulLogin(data);
       } else {
         console.log('Auto-login failed, token may be invalid');
         setError('Auto-login failed. Please try again.');
@@ -73,16 +89,7 @@ const LoginPage = ({ onLogin }) => {
       const data = await response.json();
       
       if (response.ok) {
-        localStorage.setItem('token', data.access_token);
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('isAdmin', data.is_admin);  // Store admin status
-        console.log('Login successful');
-        onLogin();
-        if (data.is_admin) {
-          navigate('/admin');  // Redirect to admin page if is_admin is true
-        } else {
-          navigate('/dashboard');  // Regular user dashboard
-        }
+        handleSuccessfulLogin(data);
       } else {
         console.log('Login failed:', data);
         setError(data.message || 'Login failed. Please try again.');

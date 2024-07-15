@@ -5,6 +5,7 @@ import {
   Navigate,
   useNavigate,
   useLocation,
+  useParams,
 } from "react-router-dom";
 import dayjs from "dayjs";
 import Table from "./components/Table";
@@ -18,6 +19,7 @@ import Rebook from "./components/rebook";
 import AdminPage from "./components/Admin_page";
 import { ChatBox } from "./components/ChatBox";
 import AdminRoomPage from "./components/admin_comp/adminRoompage";
+import QrCodeCheckIn from "./components/QrCodeCheckIn";
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
@@ -52,7 +54,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const navigate = useNavigate();
   const location = useLocation();
-  const [change, setChange] = useState(false)
+  const [change, setChange] = useState(false);
 
   const fetchBookingData = async () => {
     try {
@@ -103,8 +105,13 @@ function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem("isLoggedIn", "true");
-    const isAdmin = localStorage.getItem("isAdmin") === "true";
-    navigate(isAdmin ? "/admin" : "/dashboard");
+    const qrCode = localStorage.getItem("qrCode");
+    if (qrCode) {
+      navigate('/qr-check-in');
+    } else {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      navigate(isAdmin ? "/admin" : "/dashboard");
+    }
   };
 
   const handleHistory = () => {
@@ -116,6 +123,7 @@ function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("isAdmin");
+    localStorage.removeItem("qrCode");
     navigate("/login");
   };
 
@@ -132,9 +140,19 @@ function App() {
       localStorage.removeItem("token");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("isAdmin");
+      localStorage.removeItem("qrCode");
       setIsLoggedIn(false);
     }
   }, [location]);
+
+  const handleQrCodeScan = (qrCode) => {
+    localStorage.setItem('qrCode', qrCode);
+    if (!isLoggedIn) {
+      navigate('/login', { state: { fromQr: true } });
+    } else {
+      navigate('/qr-check-in');
+    }
+  };
 
   return (
     <div className="app">
@@ -147,6 +165,12 @@ function App() {
             ) : (
               <Navigate to="/dashboard" replace />
             )
+          }
+        />
+        <Route
+          path="/QR/:id"
+          element={
+            <QrCodeRedirect onQrCodeScan={handleQrCodeScan} />
           }
         />
         <Route
@@ -242,6 +266,14 @@ function App() {
           }
         />
         <Route
+          path="/qr-check-in"
+          element={
+            <ProtectedRoute>
+              <QrCodeCheckIn />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="*"
           element={
             <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
@@ -257,5 +289,22 @@ function App() {
     </div>
   );
 }
+
+const QrCodeRedirect = ({ onQrCodeScan }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+  useEffect(() => {
+    localStorage.setItem('qrCode', id);
+    if (isLoggedIn) {
+      navigate('/qr-check-in');
+    } else {
+      navigate('/login', { state: { fromQr: true } });
+    }
+  }, [id, isLoggedIn, navigate]);
+
+  return null;
+};
 
 export default App;

@@ -1,0 +1,78 @@
+.QR-code-check-in {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.QR-code-check-in .div {
+  background-color: #ffffff;
+  height: 1024px;
+  position: relative;
+  width: 1440px;
+}
+
+.QR-code-check-in .overlap-group {
+  height: 123px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 1440px;
+  object-fit: cover;
+}
+
+.QR-code-check-in .image {
+  height: 81px;
+  left: 27px;
+  object-fit: cover;
+  position: absolute;
+  top: 21px;
+  width: 76px;
+}
+
+.QR-code-check-in .overlap {
+  background-color: #ffdc00;
+  border-radius: 30px;
+  height: 183px;
+  left: 384px;
+  position: absolute;
+  top: 254px;
+  width: 672px;
+}
+
+.QR-code-check-in .text-wrapper {
+  color: #000000;
+  font-family: "Inter", Helvetica;
+  font-size: 60px;
+  font-weight: 400;
+  left: 78px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  
+  width: 516px;
+}
+
+.QR-code-check-in .div-wrapper {
+  background-color: #ffdc00;
+  border-radius: 30px;
+  height: 183px;
+  left: 384px;
+  position: absolute;
+  top: 576px;
+  width: 672px;
+}
+
+.QR-code-check-in .text-wrapper-2 {
+  color: #000000;
+  font-family: "Inter", Helvetica;
+  font-size: 60px;
+  font-weight: 400;
+  left: 78px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 52px;
+  width: 490px;
+}
