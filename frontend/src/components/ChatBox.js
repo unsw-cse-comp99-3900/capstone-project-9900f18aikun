@@ -17,7 +17,7 @@ export const ChatBox = () => {
   const [bookedRooms, setBookedRooms] = useState(new Set());
   const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
-
+  const [selectedOption, setSelectedOption] = useState(null);
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
   };
@@ -27,6 +27,7 @@ export const ChatBox = () => {
     setStoredQuery("");
     setBookedRooms(new Set());
     setSelectedRoom(null);
+    setSelectedOption(null);
   };
 
   const toggleMode = () => {
@@ -191,8 +192,16 @@ export const ChatBox = () => {
       sender: "bot",
       timestamp: new Date(),
       options: [
-        { text: "Meeting Room", id: "meeting_room" },
-        { text: "Hot Desk", id: "hot_desk" }
+        { 
+          text: selectedOption === "meeting_room" ? "Meeting Room Chosen!" : "Meeting Room", 
+          id: "meeting_room", 
+          disabled: selectedOption === "meeting_room"
+        },
+        { 
+          text: selectedOption === "hot_desk" ? "Hot Desk Chosen!" : "Hot Desk", 
+          id: "hot_desk", 
+          disabled: selectedOption === "hot_desk"
+        }
       ]
     };
     setMessages(prev => [...prev, optionsMessage]);
@@ -200,6 +209,24 @@ export const ChatBox = () => {
   };
 
   const handleOptionSelection = async (roomType) => {
+    if (selectedOption === roomType) return; // Prevent selecting the same option again
+    setSelectedOption(roomType);
+
+    // Update the messages to reflect the new selection
+    setMessages(prev => prev.map(msg => {
+      if (msg.options) {
+        return {
+          ...msg,
+          options: msg.options.map(option => ({
+            ...option,
+            text: option.id === roomType ? `${option.text} Chosen!` : option.text,
+            disabled: option.id === roomType || option.id === selectedOption
+          }))
+        };
+      }
+      return msg;
+    }));
+  
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -329,14 +356,22 @@ export const ChatBox = () => {
                         return <p key={i}>{line}</p>;
                       })}
                       {msg.options && (
-                        <div className="option-buttons">
-                          {msg.options.map((option, i) => (
-                            <button key={i} onClick={() => handleOptionSelection(option.id)}>
-                              {option.text}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+  <div className="option-buttons">
+    {msg.options.map((option, i) => (
+      <button 
+        key={i} 
+        onClick={() => handleOptionSelection(option.id)}
+        disabled={option.disabled}
+        style={{ 
+          backgroundColor: option.disabled ? 'grey' : '#4CAF50',
+          cursor: option.disabled ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {option.text}
+      </button>
+    ))}
+  </div>
+)}
                     </div>
                   </div>
                 ))}
