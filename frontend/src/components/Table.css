@@ -311,3 +311,8 @@ td.time-column.disabled {
   background-color: #ffcccc;
   cursor: not-allowed; 
 }
+
+td.time-column.disabled:hover {
+  background-color: #ffcccc;
+  cursor: not-allowed; 
+}

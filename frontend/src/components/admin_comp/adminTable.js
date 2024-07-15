@@ -405,7 +405,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
               className="legend-color"
               style={{ backgroundColor: "#b9b9b9" }}
             ></div>
-            <div className="legend-text">Reserved By Others</div>
+            <div className="legend-text">Reserved</div>
           </div>
           <div className="legend-item">
             <div

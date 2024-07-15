@@ -425,6 +425,25 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     const sevenDaysFromNow = today.add(7, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
+  const [pastTimes, setPastTimes] = useState([]);
+
+  useEffect(() => {
+    const calculatePastTimes = async () => {
+      const currentTime = await getSydneyTime();
+      const past = times.filter((time) => {
+        const [timeHours, timeMinutes] = time.split(":").map(Number);
+        return (
+          currentTime.getHours() > timeHours ||
+          (currentTime.getHours() === timeHours &&
+            currentTime.getMinutes() >= timeMinutes + 15)
+        );
+      });
+      console.log("currenttime is ", currentTime.getHours(), "past is ", past);
+      setPastTimes(past);
+    };
+
+    calculatePastTimes();
+  }, [times]);
 
   return (
     <div>
@@ -458,6 +477,13 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         </div>
 
         <div className="legend">
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#ffcccc" }}
+            ></div>
+            <div className="legend-text">Disabled Public Use</div>
+          </div>
           <div className="legend-item">
             <div
               className="legend-color"
@@ -526,6 +552,11 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                     </td>
 
                     {times.map((time) => {
+                      let isPast = false;
+                      const today = dayjs().format("YYYY-MM-DD");
+                      if (selectedDate.format("YYYY-MM-DD") === today) {
+                        isPast = pastTimes.includes(time);
+                      }
                       return (
                         <td
                           key={time}
@@ -551,8 +582,9 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                                     slot.timeslot.some((t) => t === time)
                                 )
                             );
-
-                            if (isSelfReserved) {
+                            if (isPast) {
+                              return "disabled";
+                            } else if (isSelfReserved) {
                               return "selfreserved";
                             } else if (isReserved) {
                               return "reserved";
@@ -564,7 +596,9 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
                           })()}`}
                           onClick={(event) => {
                             event.stopPropagation();
-                            clickHandler(item.room, time, event, item.roomid);
+                            if (!isPast) {
+                              clickHandler(item.room, time, event, item.roomid);
+                            }
                           }}
                         ></td>
                       );
