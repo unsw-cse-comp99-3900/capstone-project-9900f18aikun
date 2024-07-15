@@ -14,17 +14,19 @@ export const ChatBox = () => {
   const [mode, setMode] = useState('ExpressBook');
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [bookedRoomName, setBookedRoomName] = useState(null);
+  const [bookedRooms, setBookedRooms] = useState(new Set());
   const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
 
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
-    if (isOpen) {
-      setMessages([]);
-      setStoredQuery("");
-      setBookedRoomName(null);
-    }
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    setStoredQuery("");
+    setBookedRooms(new Set());
+    setSelectedRoom(null);
   };
 
   const toggleMode = () => {
@@ -60,7 +62,10 @@ export const ChatBox = () => {
       
       levelRooms.forEach((room) => {
         formattedResponse += `  • ${room.name} (Capacity: ${room.capacity})\n`;
-        formattedResponse += `    [Select Room](select:${room.name})\n`;
+        const isBooked = bookedRooms.has(room.name);
+        formattedResponse += isBooked ? 
+          `    [Booked](booked:${room.name})\n` :
+          `    [Select Room](select:${room.name})\n`;
       });
 
       formattedResponse += '\n';
@@ -70,7 +75,13 @@ export const ChatBox = () => {
   };
 
   const handleRoomSelection = (roomName) => {
-    const selected = messages[messages.length - 1].rooms.find(room => room.name === roomName);
+    const lastMessageWithRooms = [...messages].reverse().find(msg => msg.rooms && Array.isArray(msg.rooms));
+    if (!lastMessageWithRooms) {
+      console.error("No message with rooms found");
+      return;
+    }
+
+    const selected = lastMessageWithRooms.rooms.find(room => room.name === roomName);
     if (selected) {
       setSelectedRoom(selected);
       const confirmationMessage = {
@@ -85,6 +96,8 @@ export const ChatBox = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, confirmationMessage]);
+    } else {
+      console.error(`Room ${roomName} not found`);
     }
   };
 
@@ -136,7 +149,18 @@ export const ChatBox = () => {
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, bookingConfirmation]);
-      setBookedRoomName(selectedRoom.name);
+      setBookedRooms(prev => new Set(prev).add(selectedRoom.name));
+      
+      // Update the messages to change the "Book Room" button to "Booked"
+      setMessages(prev => prev.map(msg => {
+        if (msg.text.includes(`[Book Room](book:${selectedRoom.id})`)) {
+          return {
+            ...msg,
+            text: msg.text.replace(`[Book Room](book:${selectedRoom.id})`, '[Booked](booked:${selectedRoom.id})')
+          };
+        }
+        return msg;
+      }));
     } catch (error) {
       console.error("Error booking room:", error);
       const errorMessage = { 
@@ -152,9 +176,15 @@ export const ChatBox = () => {
   const sendMessage = async () => {
     if (inputMessage.trim() === "") return;
 
+    if (inputMessage.toLowerCase() === "clear") {
+      clearChat();
+      setInputMessage("");
+      return;
+    }
+
     const newMessage = { text: inputMessage, sender: "user", timestamp: new Date() };
     setMessages([...messages, newMessage]);
-    setStoredQuery(inputMessage); // Store the user's input
+    setStoredQuery(inputMessage);
 
     const optionsMessage = {
       text: "Please select the type of space you'd like to book:",
@@ -177,7 +207,7 @@ export const ChatBox = () => {
       }
 
       const requestBody = {
-        query: storedQuery, // Use the stored query here
+        query: storedQuery,
         room_type: roomType
       };
 
@@ -254,7 +284,7 @@ export const ChatBox = () => {
                       {msg.text.split('\n').map((line, i) => {
                         if (line.includes('[Select Room]')) {
                           const roomName = line.match(/\(select:(.*?)\)/)[1];
-                          const isThisRoomBooked = roomName === bookedRoomName;
+                          const isThisRoomBooked = bookedRooms.has(roomName);
                           return (
                             <button 
                               key={i} 
@@ -269,9 +299,30 @@ export const ChatBox = () => {
                             </button>
                           );
                         } else if (line.includes('[Book Room]')) {
+                          const roomId = line.match(/\(book:(.*?)\)/)[1];
                           return (
-                            <button key={i} onClick={handleBookRoom}>
+                            <button 
+                              key={i} 
+                              onClick={handleBookRoom}
+                              style={{ 
+                                backgroundColor: '#4CAF50',
+                                cursor: 'pointer'
+                              }}
+                            >
                               Book Room
+                            </button>
+                          );
+                        } else if (line.includes('[Booked]')) {
+                          return (
+                            <button 
+                              key={i} 
+                              disabled
+                              style={{ 
+                                backgroundColor: 'grey',
+                                cursor: 'not-allowed'
+                              }}
+                            >
+                              Booked
                             </button>
                           );
                         }
@@ -325,6 +376,7 @@ export const ChatBox = () => {
                   {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
                 </span>
               </div>
+              <button onClick={clearChat} className="clear-button">Clear Chat</button>
             </div>
           </div>
         </div>
