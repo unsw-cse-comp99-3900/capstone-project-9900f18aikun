@@ -17,7 +17,7 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
     const newMessage = { text: inputMessage, sender: "user", timestamp: new Date() };
     setMessages(prev => [...prev, newMessage]);
 
-    // Simulate a response from customer service
+   
     setTimeout(() => {
       const botResponse = { 
         text: "Thank you for your message. A customer service representative will respond to you shortly.", 

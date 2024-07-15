@@ -183,39 +183,115 @@ export const ChatBox = ({ change, setChange }) => {
 
   const sendMessage = async () => {
     if (inputMessage.trim() === "") return;
-
+  
     if (inputMessage.toLowerCase() === "clear") {
       clearChat();
       setInputMessage("");
       return;
     }
-
+  
     const newMessage = { text: inputMessage, sender: "user", timestamp: new Date() };
-    if (mode === 'ExpressBook') {
-      setExpressBookMessages(prev => [...prev, newMessage]);
-    } else {
-      setCustomerServiceMessages(prev => [...prev, newMessage]);
-    }
+    setExpressBookMessages(prev => [...prev, newMessage]);
     setStoredQuery(inputMessage);
-
-    const optionsMessage = {
-      text: "Please select the type of space you'd like to book:",
-      sender: "bot",
-      timestamp: new Date(),
-      options: [
-        { 
-          text: selectedOption === "meeting_room" ? "Meeting Room Chosen!" : "Meeting Room", 
-          id: "meeting_room", 
-          disabled: selectedOption === "meeting_room"
+  
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+  
+      const requestBody = {
+        query: inputMessage,
+        room_type: "any" // ask for room type after confirming validity
+      };
+  
+      console.log("Sending to server:", JSON.stringify(requestBody, null, 2));
+  
+      const response = await fetch('http://s2.gnip.vip:37895/booking/express-book', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        { 
-          text: selectedOption === "hot_desk" ? "Hot Desk Chosen!" : "Hot Desk", 
-          id: "hot_desk", 
-          disabled: selectedOption === "hot_desk"
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`);
+      }
+  
+      const data = await response.json();
+  
+      if (Array.isArray(data) && data.length > 0) {
+        // Valid response
+        const optionsMessage = {
+          text: "Please select the type of space you'd like to book:",
+          sender: "bot",
+          timestamp: new Date(),
+          options: [
+            { 
+              text: selectedOption === "meeting_room" ? "Meeting Room Chosen!" : "Meeting Room", 
+              id: "meeting_room", 
+              disabled: selectedOption === "meeting_room"
+            },
+            { 
+              text: selectedOption === "hot_desk" ? "Hot Desk Chosen!" : "Hot Desk", 
+              id: "hot_desk", 
+              disabled: selectedOption === "hot_desk"
+            }
+          ]
+        };
+        setExpressBookMessages(prev => [...prev, optionsMessage]);
+      } else if (data.error) {
+        // Invalid response
+        const errorMessage = {
+          text: `${data.error}!`,
+          sender: "bot",
+          timestamp: new Date()
+        };
+        setExpressBookMessages(prev => [...prev, errorMessage]);
+      } else {
+        // Unexpected response format
+        throw new Error('Unexpected response format from server');
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      let errorMessage;
+      
+      if (error.message.includes('HTTP error!')) {
+        try {
+          const errorJson = JSON.parse(error.message.split('message:')[1]);
+          errorMessage = { 
+            text: `${errorJson.error}!`, // Add exclamation mark here
+            sender: "bot", 
+            timestamp: new Date() 
+          };
+        } catch (parseError) {
+          errorMessage = { 
+            text: "Sorry, there was an error processing your request. Please try again.", 
+            sender: "bot", 
+            timestamp: new Date() 
+          };
         }
-      ]
-    };
-    setExpressBookMessages(prev => [...prev, optionsMessage]);
+      } else if (error.message === 'No authentication token found') {
+        errorMessage = { 
+          text: "You are not logged in. Please log in to use this feature.", 
+          sender: "bot", 
+          timestamp: new Date() 
+        };
+      } else {
+        errorMessage = { 
+          text: "Sorry, there was an error processing your request. Please try again.", 
+          sender: "bot", 
+          timestamp: new Date() 
+        };
+      }
+      
+      setExpressBookMessages(prev => [...prev, errorMessage]);
+    }
+  
     setInputMessage("");
   };
 
