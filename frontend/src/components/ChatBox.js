@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import CustomerService from './CustomerService';
 import "./ChatBox.css";
 
 const Component = ({ className }) => (
@@ -9,7 +10,8 @@ const Component = ({ className }) => (
 
 export const ChatBox = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [expressBookMessages, setExpressBookMessages] = useState([]);
+  const [customerServiceMessages, setCustomerServiceMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [mode, setMode] = useState('ExpressBook');
   const [refreshKey, setRefreshKey] = useState(0);
@@ -18,12 +20,17 @@ export const ChatBox = () => {
   const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
   const [selectedOption, setSelectedOption] = useState(null);
+
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
   };
 
   const clearChat = () => {
-    setMessages([]);
+    if (mode === 'ExpressBook') {
+      setExpressBookMessages([]);
+    } else {
+      setCustomerServiceMessages([]);
+    }
     setStoredQuery("");
     setBookedRooms(new Set());
     setSelectedRoom(null);
@@ -39,8 +46,7 @@ export const ChatBox = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [messages]);
-
+  useEffect(scrollToBottom, [expressBookMessages, customerServiceMessages]);
   const formatRoomInfo = (rooms) => {
     if (rooms.length === 0) {
       return "No rooms available for the specified time and date.";
@@ -76,12 +82,12 @@ export const ChatBox = () => {
   };
 
   const handleRoomSelection = (roomName) => {
-    const lastMessageWithRooms = [...messages].reverse().find(msg => msg.rooms && Array.isArray(msg.rooms));
+    const lastMessageWithRooms = [...expressBookMessages].reverse().find(msg => msg.rooms && Array.isArray(msg.rooms));
     if (!lastMessageWithRooms) {
       console.error("No message with rooms found");
       return;
     }
-
+  
     const selected = lastMessageWithRooms.rooms.find(room => room.name === roomName);
     if (selected) {
       setSelectedRoom(selected);
@@ -92,11 +98,11 @@ export const ChatBox = () => {
               `• Capacity: ${selected.capacity}\n` +
               `• Date: ${selected.date}\n` +
               `• Time: ${selected.start_time} - ${selected.end_time}\n\n` +
-              `[Book Room](book:${selected.id})`,
+              `[Book Room](book:${selected.room_id})`,
         sender: "bot",
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, confirmationMessage]);
+      setExpressBookMessages(prev => [...prev, confirmationMessage]);
     } else {
       console.error(`Room ${roomName} not found`);
     }
@@ -149,15 +155,15 @@ export const ChatBox = () => {
         sender: "bot", 
         timestamp: new Date() 
       };
-      setMessages(prev => [...prev, bookingConfirmation]);
+      setExpressBookMessages(prev => [...prev, bookingConfirmation]);
       setBookedRooms(prev => new Set(prev).add(selectedRoom.name));
       
       // Update the messages to change the "Book Room" button to "Booked"
-      setMessages(prev => prev.map(msg => {
-        if (msg.text.includes(`[Book Room](book:${selectedRoom.id})`)) {
+      setExpressBookMessages(prev => prev.map(msg => {
+        if (msg.text.includes(`[Book Room](book:${selectedRoom.room_id})`)) {
           return {
             ...msg,
-            text: msg.text.replace(`[Book Room](book:${selectedRoom.id})`, '[Booked](booked:${selectedRoom.id})')
+            text: msg.text.replace(`[Book Room](book:${selectedRoom.room_id})`, `[Booked](booked:${selectedRoom.room_id})`)
           };
         }
         return msg;
@@ -169,7 +175,7 @@ export const ChatBox = () => {
         sender: "bot", 
         timestamp: new Date() 
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setExpressBookMessages(prev => [...prev, errorMessage]);
     }
     setSelectedRoom(null);
   };
@@ -184,7 +190,11 @@ export const ChatBox = () => {
     }
 
     const newMessage = { text: inputMessage, sender: "user", timestamp: new Date() };
-    setMessages([...messages, newMessage]);
+    if (mode === 'ExpressBook') {
+      setExpressBookMessages(prev => [...prev, newMessage]);
+    } else {
+      setCustomerServiceMessages(prev => [...prev, newMessage]);
+    }
     setStoredQuery(inputMessage);
 
     const optionsMessage = {
@@ -204,7 +214,7 @@ export const ChatBox = () => {
         }
       ]
     };
-    setMessages(prev => [...prev, optionsMessage]);
+    setExpressBookMessages(prev => [...prev, optionsMessage]);
     setInputMessage("");
   };
 
@@ -213,7 +223,7 @@ export const ChatBox = () => {
     setSelectedOption(roomType);
 
     // Update the messages to reflect the new selection
-    setMessages(prev => prev.map(msg => {
+    setExpressBookMessages(prev => prev.map(msg => {
       if (msg.options) {
         return {
           ...msg,
@@ -269,7 +279,7 @@ export const ChatBox = () => {
         timestamp: new Date(),
         rooms: data
       };
-      setMessages(prev => [...prev, botMessage]);
+      setExpressBookMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage = { 
@@ -279,7 +289,7 @@ export const ChatBox = () => {
         sender: "bot", 
         timestamp: new Date() 
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setExpressBookMessages(prev => [...prev, errorMessage]);
     }
   };
 
@@ -301,99 +311,109 @@ export const ChatBox = () => {
           <div className="chat-box">
             <div className="overlap-group">
               <img className="rectangle" alt="Rectangle" src="/chat_box/rectangle-6.svg" />
-              <div className="chat-messages">
-                {messages.map((msg, index) => (
-                  <div key={index} className={`message ${msg.sender}`}>
-                    <div className="message-timestamp">
-                      {formatDateTime(msg.timestamp)}
-                    </div>
-                    <div className="message-text">
-                      {msg.text.split('\n').map((line, i) => {
-                        if (line.includes('[Select Room]')) {
-                          const roomName = line.match(/\(select:(.*?)\)/)[1];
-                          const isThisRoomBooked = bookedRooms.has(roomName);
-                          return (
-                            <button 
-                              key={i} 
-                              onClick={() => handleRoomSelection(roomName)}
-                              disabled={isThisRoomBooked}
-                              style={{ 
-                                backgroundColor: isThisRoomBooked ? 'grey' : '#4CAF50',
-                                cursor: isThisRoomBooked ? 'not-allowed' : 'pointer'
-                              }}
-                            >
-                              {isThisRoomBooked ? 'Booked' : 'Select Room'}
-                            </button>
-                          );
-                        } else if (line.includes('[Book Room]')) {
-                          const roomId = line.match(/\(book:(.*?)\)/)[1];
-                          return (
-                            <button 
-                              key={i} 
-                              onClick={handleBookRoom}
-                              style={{ 
-                                backgroundColor: '#4CAF50',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              Book Room
-                            </button>
-                          );
-                        } else if (line.includes('[Booked]')) {
-                          return (
-                            <button 
-                              key={i} 
-                              disabled
-                              style={{ 
-                                backgroundColor: 'grey',
-                                cursor: 'not-allowed'
-                              }}
-                            >
-                              Booked
-                            </button>
-                          );
-                        }
-                        return <p key={i}>{line}</p>;
-                      })}
-                      {msg.options && (
-  <div className="option-buttons">
-    {msg.options.map((option, i) => (
-      <button 
-        key={i} 
-        onClick={() => handleOptionSelection(option.id)}
-        disabled={option.disabled}
-        style={{ 
-          backgroundColor: option.disabled ? 'grey' : '#4CAF50',
-          cursor: option.disabled ? 'not-allowed' : 'pointer'
-        }}
-      >
-        {option.text}
-      </button>
-    ))}
-  </div>
-)}
+              {mode === 'ExpressBook' ? (
+                <>
+                  <div className="chat-messages">
+                    {expressBookMessages.map((msg, index) => (
+                      <div key={index} className={`message ${msg.sender}`}>
+                        <div className="message-timestamp">
+                          {formatDateTime(msg.timestamp)}
+                        </div>
+                        <div className="message-text">
+                          {msg.text.split('\n').map((line, i) => {
+                            if (line.includes('[Select Room]')) {
+                              const roomName = line.match(/\(select:(.*?)\)/)[1];
+                              const isThisRoomBooked = bookedRooms.has(roomName);
+                              return (
+                                <button 
+                                  key={i} 
+                                  onClick={() => handleRoomSelection(roomName)}
+                                  disabled={isThisRoomBooked}
+                                  style={{ 
+                                    backgroundColor: isThisRoomBooked ? 'grey' : '#4CAF50',
+                                    cursor: isThisRoomBooked ? 'not-allowed' : 'pointer'
+                                  }}
+                                >
+                                  {isThisRoomBooked ? 'Booked' : 'Select Room'}
+                                </button>
+                              );
+                            } else if (line.includes('[Book Room]')) {
+                              const roomId = line.match(/\(book:(.*?)\)/)[1];
+                              return (
+                                <button 
+                                  key={i} 
+                                  onClick={handleBookRoom}
+                                  style={{ 
+                                    backgroundColor: '#4CAF50',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Book Room
+                                </button>
+                              );
+                            } else if (line.includes('[Booked]')) {
+                              return (
+                                <button 
+                                  key={i} 
+                                  disabled
+                                  style={{ 
+                                    backgroundColor: 'grey',
+                                    cursor: 'not-allowed'
+                                  }}
+                                >
+                                  Booked
+                                </button>
+                              );
+                            }
+                            return <p key={i}>{line}</p>;
+                          })}
+                          {msg.options && (
+                            <div className="option-buttons">
+                              {msg.options.map((option, i) => (
+                                <button 
+                                  key={i} 
+                                  onClick={() => handleOptionSelection(option.id)}
+                                  disabled={option.disabled}
+                                  style={{ 
+                                    backgroundColor: option.disabled ? 'grey' : '#4CAF50',
+                                    cursor: option.disabled ? 'not-allowed' : 'pointer'
+                                  }}
+                                >
+                                  {option.text}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                  <div className="chat-input">
+                    <input
+                      type="text"
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      placeholder="Type your message here..."
+                    />
+                    <div className="send-button-container">
+                      <img 
+                        className="vector send-button" 
+                        alt="Send" 
+                        src="/chat_box/vector.svg" 
+                        onClick={sendMessage}
+                      />
                     </div>
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-              <div className="chat-input">
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="Type your message here..."
+                </>
+              ) : (
+                <CustomerService 
+                  messages={customerServiceMessages} 
+                  setMessages={setCustomerServiceMessages}
+                  toggleMode={toggleMode} 
                 />
-                <div className="send-button-container">
-                  <img 
-                    className="vector send-button" 
-                    alt="Send" 
-                    src="/chat_box/vector.svg" 
-                    onClick={sendMessage}
-                  />
-                </div>
-              </div>
+              )}
               <Component className="component-1" />
               <img className="rectangle-3" alt="Rectangle" src="/chat_box/rectangle-7.png" />
               <div className="icon-minus" onClick={toggleChatBox}>
