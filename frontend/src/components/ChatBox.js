@@ -508,7 +508,7 @@ export const ChatBox = ({ change, setChange }) => {
                   {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
                 </span>
               </div>
-              <button onClick={clearChat} className="clear-button">Clear Chat</button>
+              {/* <button onClick={clearChat} className="clear-button">Clear Chat</button> */}
             </div>
           </div>
         </div>

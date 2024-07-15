@@ -24,13 +24,13 @@
     align-items: center;
   }
   
-  /* .chat-box .overlap-group {
+  .chat-box .overlap-group {
     height: 1060px;
     left: -5px;
     position: relative;
     top: -1px;
     width: 958px;
-  } */
+  } 
   
   .chat-box .rectangle {
     height: 1060px;
@@ -232,8 +232,8 @@
 
 .chat-toggle-button {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 23px;
+    right: 77px;
     padding: 0;
     background: none;
     border: none;

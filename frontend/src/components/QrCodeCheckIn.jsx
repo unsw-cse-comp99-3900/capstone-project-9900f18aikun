@@ -1,36 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './QrCodeCheckIn.css';
 
 const QrCodeCheckIn = () => {
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [qrCode, setQrCode] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedQrCode = localStorage.getItem('qrCode');
-    if (storedQrCode) {
-      setQrCode(storedQrCode);
+    if (!storedQrCode) {
+      navigate('/dashboard', { replace: true });
     } else {
-      // If there's no QR code, redirect to dashboard
-      navigate('/dashboard');
+      setQrCode(storedQrCode);
     }
+
+    // Prevent going back
+    window.history.pushState(null, document.title, window.location.href);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [navigate]);
 
-  const handleCheckIn = () => {
-    
-    setIsCheckedIn(true);
-    alert(`You have successfully checked in with QR code: ${qrCode}`);
-    // Clear the QR code from storage after check-in
-    localStorage.removeItem('qrCode');
+  const handlePopState = () => {
+    window.history.pushState(null, document.title, window.location.href);
+  };
 
+  const handleCheckIn = async () => {
+    if (!qrCode) {
+      alert("No QR code available. Please scan a QR code first.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://s2.gnip.vip:37895/sign_in/sign-in/${qrCode}`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.data === "You have signed in") {
+        alert("You're checked in!");
+        localStorage.removeItem('qrCode');
+        navigate('/dashboard', { replace: true });
+      } else {
+        alert(response.data.message || "Unexpected response from server");
+      }
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("An error occurred during check-in. Please try again.");
+      }
+    }
   };
 
   const handleGoToRoomPage = () => {
-    // Extract the room ID from the QR code
-    const roomId = qrCode;
-    // Navigate to the room page with the extracted room ID
-    navigate(`/room/${roomId}`);
+    navigate(`/room/${qrCode}`);
   };
 
   return (
@@ -43,9 +76,7 @@ const QrCodeCheckIn = () => {
         />
         <img className="image" alt="" src="/img/image-159.png" />
         <div className="overlap" onClick={handleCheckIn}>
-          <p className="text-wrapper">
-            {isCheckedIn ? "You're checked in!" : "I want to sign in"}
-          </p>
+          <p className="text-wrapper">I want to sign in</p>
         </div>
         <div className="div-wrapper" onClick={handleGoToRoomPage}>
           <div className="text-wrapper-2">I want to book</div>
