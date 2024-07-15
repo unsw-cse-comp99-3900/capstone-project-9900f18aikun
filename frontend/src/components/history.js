@@ -19,6 +19,8 @@ const ReservationHistory = () => {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
+  const [change, setChange] = useState(false);
+  const [obj, setObj] = useState({});
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -48,7 +50,7 @@ const ReservationHistory = () => {
     };
 
     fetchHistory();
-  }, []);
+  }, [change]);
 
   const toggleCalendarVisibility = (e) => {
     setIsCalendarVisible(!isCalendarVisible);
@@ -77,7 +79,7 @@ const ReservationHistory = () => {
         });
 
         if (response.ok) {
-          console.log("successfully deleted");
+          setChange(!change);
           // if no reservation for this day
         } else {
           const errorText = await response.text();
@@ -89,21 +91,26 @@ const ReservationHistory = () => {
       }
     } else if (e.target.innerText === "Rebook") {
       toggleCalendarVisibility(e);
+      setObj({
+        room_id: entry.room_id,
+        start_time: formatTime(entry.start_time),
+        end_time: formatTime(entry.end_time),
+      });
+    } else if (e.target.innerText === "Hide Calendar") {
+      toggleCalendarVisibility(e);
     }
   };
 
-  const handleDateChange = async (entry, date) => {
-    console.log(entry)
+  const handleDateChange = async (date) => {
     setSelectedDate(date);
     // send request to backend
-    const obj = {
-      room_id: entry.room_id,
+    const object = {
+      room_id: obj.room_id,
       date: date.format("YYYY-MM-DD"),
-      start_time: formatTime(entry.start_time),
-      end_time: formatTime(entry.end_time),
+      start_time: formatTime(obj.start_time),
+      end_time: formatTime(obj.end_time),
     };
     const token = localStorage.getItem("token");
-    console.log("object is ", obj);
 
     try {
       const response = await fetch("/api/booking/book", {
@@ -113,13 +120,13 @@ const ReservationHistory = () => {
           Accept: "application/json",
           Authorization: "Bearer " + token,
         },
-        body: JSON.stringify(obj),
+        body: JSON.stringify(object),
       });
 
       if (response.ok) {
         console.log("successfully sent");
         const result = await response.json();
-        console.log(result);
+        setChange(!change);
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -181,24 +188,11 @@ const ReservationHistory = () => {
                   >
                     {row.booking_status === "cancelled" ||
                     row.booking_status === "completed"
-                      ? "Rebook"
+                      ? isCalendarVisible
+                        ? "Hide Calendar"
+                        : "Rebook"
                       : "Cancel"}
                   </TableCell>
-                  {isCalendarVisible && (
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DateCalendar
-                        shouldDisableDate={disableDates}
-                        className="date-calendar-overlay"
-                        onChange={(date) => handleDateChange(row, date)}
-                        style={{
-                          position: "absolute",
-                          left: `${calendarPosition.x}px`,
-                          top: `${calendarPosition.y}px`,
-                          zIndex: 100,
-                        }}
-                      />
-                    </LocalizationProvider>
-                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -206,6 +200,21 @@ const ReservationHistory = () => {
         </TableContainer>
       ) : (
         <div className="no-history">No previous reservation history</div>
+      )}
+      {isCalendarVisible && (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateCalendar
+            shouldDisableDate={disableDates}
+            className="date-calendar-overlay"
+            onChange={(date) => handleDateChange(date)}
+            style={{
+              position: "absolute",
+              left: `${calendarPosition.x}px`,
+              top: `${calendarPosition.y}px`,
+              zIndex: 100,
+            }}
+          />
+        </LocalizationProvider>
       )}
     </div>
   );

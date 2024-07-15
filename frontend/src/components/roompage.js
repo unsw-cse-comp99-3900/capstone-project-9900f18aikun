@@ -12,6 +12,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [loadingRoom, setLoadingRoom] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState(null);
+  const [change, setChange] = useState(false);
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -72,7 +73,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
     fetchBookingData();
     fetchRoom();
-  }, [roomid, selectedDate]);
+  }, [roomid, selectedDate, change]);
 
   useEffect(() => {
     if (room && data.length) {
@@ -127,6 +128,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           map={false}
+          change={change}
+          setChange={setChange}
         />
       )}
     </div>

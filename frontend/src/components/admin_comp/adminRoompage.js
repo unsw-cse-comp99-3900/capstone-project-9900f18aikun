@@ -14,6 +14,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedRoom, setEditedRoom] = useState({});
+  const [change, setChange] = useState(false)
+
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -38,6 +40,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         const bookingData = await response.json();
         const dataArray = Object.values(bookingData);
         setData(dataArray);
+        console.log("this is ok")
       } catch (error) {
         console.error("Error fetching booking data:", error);
         setError(error);
@@ -75,7 +78,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
     fetchBookingData();
     fetchRoom();
-  }, [roomid, selectedDate]);
+  }, [roomid, selectedDate, change]);
 
   useEffect(() => {
     if (room && data.length) {
@@ -247,6 +250,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           map={false}
+          change={change}
+          setChange={setChange}
         />
       )}
     </div>
