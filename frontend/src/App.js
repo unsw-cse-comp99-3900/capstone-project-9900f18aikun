@@ -98,7 +98,7 @@ function App() {
 
   useEffect(() => {
     handleFilter(filters);
-  }, [filters, data]);
+  }, [filters, data, change]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
