@@ -8,6 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
 from authlib.integrations.flask_client import OAuth
 from app.config import Config
+from flask_socketio import SocketIO
 
 authorizations = {
     'Bearer Auth': {
@@ -22,8 +23,10 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 app = Flask(__name__)
+socketio = SocketIO()
 api = Api(authorizations=authorizations, security='Bearer Auth', version='1.0', title='UNSW CSE booking system',
           description='An api helping you book space in j17 and k17')
+
 sydney_tz = timezone('Australia/Sydney')
 scheduler = BackgroundScheduler(timezone=sydney_tz)
 app.secret_key = 'random'
