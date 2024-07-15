@@ -51,6 +51,8 @@ const SelectWindow = ({
   position,
   close,
   selectedDate,
+  change,
+  setChange
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [zID, setZID] = useState("");
@@ -86,7 +88,7 @@ const SelectWindow = ({
   const dropdownTime = gettimeList(time, 8);
 
   // confirm selection function
-  const confirmHandler = async () => {
+  const confirmHandler = async (change, setChange) => {
     const newTimes = gettimeList(time, selectedIdx);
 
     // getting end time
@@ -139,6 +141,7 @@ const SelectWindow = ({
     // }
 
     close();
+    setChange(!change)
   };
 
   const handleZIDChange = (e) => {
@@ -192,7 +195,7 @@ const SelectWindow = ({
         <br />
         <div className="button-class">
           <Button
-            onClick={confirmHandler}
+            onClick={() => {confirmHandler(change, setChange)}}
             disabled={zIDError || zID.length === 0}
           >
             Confirm
@@ -205,7 +208,7 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = ({ data, selectedDate, setSelectedDate }) => {
+const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   const [reservations, setReservations] = useState([]);
   const [times, setTimes] = useState([]);
   const [pastTimes, setPastTimes] = useState([]);
@@ -216,9 +219,12 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     roomid: "",
     position: { top: 0, left: 0 },
     permission: "",
+    change: change,
+    setChange: setChange,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [hoveredRoom, setHoveredRoom] = useState(null);
+
 
   useEffect(() => {
     setReservations(extractData(data, false));
@@ -355,6 +361,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       room,
       roomid,
       position,
+      change,
+      setChange,
     });
   };
 
@@ -509,6 +517,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         time={selectWindow.time}
         selectedDate={selectedDate}
         reservations={reservations}
+        change={change}
+        setChange={setChange}
       />
     </div>
   );

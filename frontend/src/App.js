@@ -52,6 +52,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const navigate = useNavigate();
   const location = useLocation();
+  const [change, setChange] = useState(false)
 
   const fetchBookingData = async () => {
     try {
@@ -93,7 +94,7 @@ function App() {
     if (isLoggedIn) {
       fetchBookingData();
     }
-  }, [selectedDate, isLoggedIn]);
+  }, [selectedDate, isLoggedIn, change]);
 
   useEffect(() => {
     handleFilter(filters);
@@ -173,6 +174,8 @@ function App() {
                       selectedDate={selectedDate}
                       setSelectedDate={setSelectedDate}
                       map={true}
+                      change={change}
+                      setChange={setChange}
                     />
                   </div>
                 </div>
@@ -246,7 +249,10 @@ function App() {
         />
       </Routes>
       <div className="chat-box-wrapper">
-        <ChatBox />
+        <ChatBox 
+        change={change}
+        setChange={setChange}
+        />
       </div>
     </div>
   );

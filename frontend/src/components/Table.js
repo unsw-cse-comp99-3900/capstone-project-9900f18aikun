@@ -55,6 +55,8 @@ const SelectWindow = ({
   selectedDate,
   reservations,
   permission,
+  change,
+  setChange,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [limit, setLimit] = useState(false);
@@ -136,7 +138,6 @@ const SelectWindow = ({
       end_time: endTime,
     };
     const token = localStorage.getItem("token");
-    console.log("token is", token);
     // console.log("object is", obj);
 
     try {
@@ -153,31 +154,32 @@ const SelectWindow = ({
       if (response.ok) {
         console.log("successfully sent");
         const result = await response.json();
-        console.log(result);
-        // reservation
-        // if already has reservation for this day
-        const existing = self.find((reservation) => reservation.room === room);
-        if (existing) {
-          const existingDate = existing.time.find(
-            (date) => date.date === selectedDate.format("DD/MM/YYYY")
-          );
-          if (existingDate) {
-            existingDate.timeslot.push(...newTimes);
-          } else {
-            existing.time.push({
-              date: selectedDate.format("DD/MM/YYYY"),
-              timeslot: newTimes,
-            });
-          }
-          // if no reservation for this day
-        } else {
-          self.push({
-            room,
-            time: [
-              { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
-            ],
-          });
-        }
+        setChange(!change);
+        console.log(obj)
+      //   // reservation
+      //   // if already has reservation for this day
+      //   const existing = self.find((reservation) => reservation.room === room);
+      //   if (existing) {
+      //     const existingDate = existing.time.find(
+      //       (date) => date.date === selectedDate.format("DD/MM/YYYY")
+      //     );
+      //     if (existingDate) {
+      //       existingDate.timeslot.push(...newTimes);
+      //     } else {
+      //       existing.time.push({
+      //         date: selectedDate.format("DD/MM/YYYY"),
+      //         timeslot: newTimes,
+      //       });
+      //     }
+      //     // if no reservation for this day
+      //   } else {
+      //     self.push({
+      //       room,
+      //       time: [
+      //         { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
+      //       ],
+      //     });
+      //   }
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -248,7 +250,7 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = ({ data, selectedDate, setSelectedDate }) => {
+const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   console.log("data is ", data);
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
@@ -261,6 +263,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     position: { top: 0, left: 0 },
     self: selfReservations,
     permission: "",
+    change: change,
+    setChange: setChange,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   // const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -413,6 +417,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       position,
       self: selfReservations,
       permission: permissionClass, // Set the permission class
+      change: change,
+      setChange: setChange,
     });
   };
 
@@ -438,7 +444,6 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
             currentTime.getMinutes() >= timeMinutes + 15)
         );
       });
-      console.log("currenttime is ", currentTime.getHours(), "past is ", past);
       setPastTimes(past);
     };
 
@@ -621,6 +626,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         selectedDate={selectedDate}
         reservations={reservations}
         permission={selectWindow.permission}
+        change={change}
+        setChange={setChange}
       />
     </div>
   );

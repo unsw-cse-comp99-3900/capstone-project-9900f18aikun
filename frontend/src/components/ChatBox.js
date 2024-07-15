@@ -7,7 +7,7 @@ const Component = ({ className }) => (
   </div>
 );
 
-export const ChatBox = () => {
+export const ChatBox = ({ change, setChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -151,6 +151,7 @@ export const ChatBox = () => {
       };
       setMessages(prev => [...prev, bookingConfirmation]);
       setBookedRooms(prev => new Set(prev).add(selectedRoom.name));
+      setChange(!change)
       
       // Update the messages to change the "Book Room" button to "Booked"
       setMessages(prev => prev.map(msg => {
