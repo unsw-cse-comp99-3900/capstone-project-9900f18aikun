@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../roompage.css";
-import Table from "../Table";
+import AdminTable from "./adminTable";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -242,7 +242,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       </div>
 
       {roomData && (
-        <Table
+        <AdminTable
           data={roomData}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}

@@ -87,6 +87,10 @@ function AdminClassroom() {
         navigate("/room/admin/" + entry.id);
     };
 
+    const handleUsage = (entry) => {
+        console.log(`Clicked on :`, entry);
+    }
+
     //arco table
     const columns = [
         {
@@ -118,6 +122,15 @@ function AdminClassroom() {
             render: (text, entry) => (
                 <button className="table-button" onClick={() => handleCellClick(entry)}>
                     <img src="/admin_img/edit.png" alt="edit" />
+                </button>
+            )
+        },
+        {
+            title: 'Usage',
+            dataIndex: 'usage',
+            render: (text, entry) => (
+                <button onClick={() => handleUsage(entry)}>
+                    Disable
                 </button>
             )
         }

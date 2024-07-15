@@ -301,3 +301,13 @@ tbody tr td.room-column {
 #mytable thead th.select-space {
   z-index: 5;
 }
+
+.singletable-wrapper {
+  overflow-x: scroll;
+  max-width: 780px;
+}
+
+td.time-column.disabled {
+  background-color: #ffcccc;
+  cursor: not-allowed; 
+}
