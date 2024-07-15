@@ -117,7 +117,7 @@ function AdminClassroom() {
             dataIndex: 'type',
         },
         {
-            title: 'Action',  // 新列的标题
+            title: 'Edit',  // 新列的标题
             dataIndex: 'action',
             render: (text, entry) => (
                 <button className="table-button" onClick={() => handleCellClick(entry)}>
@@ -126,11 +126,11 @@ function AdminClassroom() {
             )
         },
         {
-            title: 'Usage',
+            title: 'Disable',
             dataIndex: 'usage',
             render: (text, entry) => (
-                <button onClick={() => handleUsage(entry)}>
-                    Disable
+                <button className="table-button-2" onClick={() => handleUsage(entry)}>
+                    <img src="/admin_img/Cancel.png" alt="disable" />
                 </button>
             )
         }

@@ -171,3 +171,33 @@
     margin-left: 270px;
 }
 
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* 设置下拉菜单位于按钮的正下方 */
+    right: 0; /* 右对齐到按钮 */
+    background-color: white; /* 背景颜色 */
+    border: 1px solid #ccc; /* 边框 */
+    border-radius: 5px; /* 圆角 */
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2); /* 阴影效果 */
+    z-index: 1000; /* 确保下拉菜单在其他内容之上 */
+    width: 100px;
+    margin-right: 40px;
+}
+
+.dropdown-menu button {
+    font-size: 15px;
+    color: #6B7785;
+    display: block; /* 使按钮占满整个宽度 */
+    width: 100%;
+    padding: 10px; /* 填充 */
+    text-align: center; /* 文本中间对齐 */
+    border: none; /* 无边框 */
+    background: none; /* 无背景 */
+    outline: none; /* 去除焦点轮廓 */
+    cursor: pointer; /* 鼠标指针 */
+}
+
+.dropdown-menu button:hover {
+    background-color: #f1f1f1; /* 鼠标悬停背景色 */
+}

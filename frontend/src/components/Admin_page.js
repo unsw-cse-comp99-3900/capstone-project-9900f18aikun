@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import './Admin_page.css';
 import AdminHome from './admin_comp/adminHome';
 import AdminClassroom from './admin_comp/adminClassroom';
 import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics'; 
 
+
 function AdminPage() {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [contentState, setContentState] = useState(1);
+    const [showDropdown, setShowDropdown] = useState(false); // 新增状态管理下拉菜单的显示
     const navigate = useNavigate();
 
     const toggleSidebar = () => {
@@ -56,6 +59,16 @@ function AdminPage() {
         }
     };
 
+
+    const handleLogout = () => {
+        // 清除登录状态
+        localStorage.removeItem('token');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        // 导航到登录页面
+        navigate('/login');
+    };
+
     return (
         <div className="admin-page">
             <div className={`admin-sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
@@ -83,10 +96,14 @@ function AdminPage() {
             </div>
             <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`} style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
-                <button className='admin-user'>
+                <button className='admin-user' onClick={() => setShowDropdown(!showDropdown)}>
                     <img src="/admin_img/user.png" alt="User" />
                 </button>
-                {/* <button className="admin-right-button">Make bookings</button> */}
+                {showDropdown && (
+                    <div className="dropdown-menu">
+                        <button onClick={handleLogout}>Logout</button>
+                    </div>
+                )}
             </div>
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {renderContent()}

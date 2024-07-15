@@ -126,3 +126,20 @@ div.admin-page .arco-table thead {
     width: 20px; /* 减小图片的宽度 */
     height: 20px; /* 减小图片的高度 */
 }
+
+.table-button-2{
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px 5px; /* 调整按钮大小 */
+    display: inline-block;
+}
+
+.admin-page .arco-table td .table-button-2:hover {
+    background-color: transparent !important;
+}
+
+.admin-page .arco-table .table-button-2 img {
+    width: 20px; /* 减小图片的宽度 */
+    height: 20px; /* 减小图片的高度 */
+}
