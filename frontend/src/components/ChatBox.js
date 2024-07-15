@@ -260,6 +260,7 @@ export const ChatBox = ({ change, setChange }) => {
 
       if (Array.isArray(data) && data.length > 0) {
         botResponse = formatRoomInfo(data);
+        setChange(!change)
       } else {
         botResponse = "I'm sorry, I couldn't find any rooms matching your request.";
       }
