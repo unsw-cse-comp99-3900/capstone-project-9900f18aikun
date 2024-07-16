@@ -155,6 +155,8 @@ function App() {
     }
   };
 
+  const token = localStorage.getItem("token"); // 获取 token
+
   return (
     <div className="app">
       <Routes>
@@ -248,7 +250,7 @@ function App() {
           path="/admin"
           element={
             <ProtectedRoute adminOnly={true}>
-              <AdminPage />
+              <AdminPage token={token} />
             </ProtectedRoute>
           }
         />
