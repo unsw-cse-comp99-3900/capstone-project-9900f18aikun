@@ -56,7 +56,6 @@ const SelectWindow = ({
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [zID, setZID] = useState("");
-  const [zIDError, setZIDError] = useState(false);
 
   if (!visible) return null;
   const style = {
@@ -103,6 +102,7 @@ const SelectWindow = ({
 
     // send request to backend
     const obj = {
+      user_id: zID,
       room_id: roomid,
       date: selectedDate.format("YYYY-MM-DD"),
       start_time: newTimes[0],
@@ -110,35 +110,34 @@ const SelectWindow = ({
     };
     const token = localStorage.getItem("token");
 
-    console.log({
-      obj,
-      zID,
-    });
+    // console.log({
+    //   obj,
+    //   zID,
+    // });
 
-    // try {
-    //   const response = await fetch("/api/booking/book", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Accept: "application/json",
-    //       Authorization: "Bearer " + token,
-    //     },
-    //     body: JSON.stringify(obj),
-    //   });
+    try {
+      const response = await fetch("/api/booking/admin_book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify(obj),
+      });
 
-    //   if (response.ok) {
-    //     console.log("successfully sent");
-    //     const result = await response.json();
-    //     console.log(result);
-
-    //   } else {
-    //     const errorText = await response.text();
-    //     console.error("Server responded with an error:", errorText);
-    //     throw new Error("Something went wrong");
-    //   }
-    // } catch (error) {
-    //   console.error("Error fetching booking data:", error);
-    // }
+      if (response.ok) {
+        console.log("successfully sent");
+        const result = await response.json();
+        console.log(result);
+      } else {
+        const errorText = await response.text();
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
 
     close();
     setChange(!change);
@@ -147,7 +146,6 @@ const SelectWindow = ({
   const handleZIDChange = (e) => {
     const value = e.target.value;
     setZID(value);
-    setZIDError(!/^z\d{7}$/.test(value));
   };
 
   return (
@@ -186,11 +184,6 @@ const SelectWindow = ({
             maxLength={8}
             title="zID must start with 'z' followed by 7 digits"
           />
-          {zIDError && (
-            <span style={{ color: "red", marginLeft: "10px" }}>
-              zID must start with 'z' followed by 7 digits
-            </span>
-          )}
         </div>
         <br />
         <div className="button-class">
@@ -198,7 +191,7 @@ const SelectWindow = ({
             onClick={() => {
               confirmHandler(change, setChange);
             }}
-            disabled={zIDError || zID.length === 0}
+            disabled={zID.length === 0}
           >
             Confirm
           </Button>
