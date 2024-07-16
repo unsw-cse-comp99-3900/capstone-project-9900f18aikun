@@ -5,6 +5,8 @@
 
 -------------------auth-login-------------------
 
+# this is test
+
 echo "Testing GET /auth/auto-login" > $result_file
 json=$(curl -X 'POST' \
   'http://s2.gnip.vip:37895/auth/login' \
