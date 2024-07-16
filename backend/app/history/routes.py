@@ -38,6 +38,7 @@ class BookingHistory(Resource):
                        "room_id": booking.room_id,
                        "room_name": booking.room_name,
                        "user_id": booking.user_id,
+                       "user_name": get_user_name(booking.user_id),
                        "date": booking.date.isoformat() if booking.date else None,
                        "start_time": booking.start_time.isoformat() if booking.start_time else None,
                        "end_time": booking.end_time.isoformat() if booking.end_time else None,

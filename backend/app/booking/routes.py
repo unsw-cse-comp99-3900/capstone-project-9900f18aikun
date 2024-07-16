@@ -431,7 +431,6 @@ class ExpressBook(Resource):
 # 6.admin编辑房间信息 ed
 # 7.把request信息返回给admin ziwen
 # 8.express booking改成is_available jackson
-# 9.
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -516,7 +515,7 @@ class block_room(Resource):
             return {"message": "Room ID is required"}, 400
         
         if is_block(roomid):
-            return {"message": f"Room {roomid} is already blocked"}
+            return {"message": f"Room {roomid} is already blocked"}, 200
         
         space = Space.query.get(roomid)
         if space:
@@ -524,6 +523,43 @@ class block_room(Resource):
             db.session.commit()
             return {
                 "message": f"{user_zid} set room {roomid} unavailable"
+            }, 200
+        else:
+            return {
+                "error": "invalid roomid"
+            }, 400
+        
+@booking_ns.route('/unblock-room')
+class unblock_room(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(roomid_query)
+    @booking_ns.doc(description="admin block room")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 400
+        roomid = int(request.args.get('roomid'))
+        if not roomid:
+            return {"message": "Room ID is required"}, 400
+        
+        if not is_block(roomid):
+            return {"message": f"Room {roomid} is already available"}, 200
+        
+        space = Space.query.get(roomid)
+        if space:
+            space.is_available = True
+            db.session.commit()
+            return {
+                "message": f"{user_zid} set room {roomid} available"
             }, 200
         else:
             return {
