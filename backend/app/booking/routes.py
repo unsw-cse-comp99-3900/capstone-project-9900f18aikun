@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import is_admin, is_block, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
+from app.utils import check_valid_room, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -422,12 +422,14 @@ class ExpressBook(Resource):
 
 #1. 改成当天时间 1 ------
 # 2. admin是prof 1-------
-# 3. admin给别人book ed
+# 3. admin给别人book ed 如果占着就强行取消
 # 4.admin block房间 加一列 ed --------
 # 5. admin给别人取消 ed
 # 6.admin编辑房间信息 ed
 # 7.把request信息返回给admin ziwen
-# 8.express booking改成is_available jackson
+# 8.express booking改成is_available jackson --------
+# 9. 返回文字版报告
+# 10. 超时15min自动取消 只用改canceled
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -566,8 +568,10 @@ class unblock_room(Resource):
 
 roomid_edit = booking_ns.parser()
 roomid_edit.add_argument('roomid', type=int, required=True, default=1, help='Room ID to edit')
-roomid_edit.add_argument('capacity', type=int, required=True, help='New capacity of the room')
-roomid_edit.add_argument('level', type=int, required=True, help='New level of the room')
+roomid_edit.add_argument('name', type=str, required=True, help='New name of the room', default="G01")
+roomid_edit.add_argument('building', type=str, required=True, help='New level of the room', default="K17")
+roomid_edit.add_argument('capacity', type=int, required=True, help='New capacity of the room', default=1)
+roomid_edit.add_argument('level', type=str, required=True, help='New level of the room', default="G")
 
 @booking_ns.route('/edit-room')
 class edit_room(Resource):
@@ -589,16 +593,43 @@ class edit_room(Resource):
             }, 400
         args = roomid_edit.parse_args()
         roomid = args['roomid']
-        capacity = args.get('capacity')
-        level = args.get('level')
+        if not check_valid_room(roomid):
+            return {
+                "error": f"invalid roomid {roomid}"
+            }, 400
+        self.set_room(args)
+        return self.show_room(args), 200
+    
+    def set_room(self, args):
+        roomid = args["roomid"]
+        if is_meeting_room(roomid):
+            room = RoomDetail.query.get(roomid)
+            room.name = args["name"]
+            room.building = args["building"]
+            room.capacity = args["capacity"]
+            room.level = args["level"]
+            db.session.commit()
+        else:
+            room = HotDeskDetail.query.get(roomid)
+            room.name = args["name"]
+            room.building = args["building"]
+            room.capacity = args["capacity"]
+            room.level = args["level"]
+            db.session.commit()
+    def show_room(self, args):
+        roomid = args["roomid"]
+        if is_meeting_room(roomid):
+            detail = RoomDetail.query.get(roomid)
+        else:
+            detail = HotDeskDetail.query.get(roomid)
         return {
-            "roomid": roomid,
-            "capacity": capacity,
-            "level": level
-        }, 200
-
-
-
+            "id": detail.id,
+            "name": detail.name,
+            "building": detail.building,
+            "capacity": detail.capacity,
+            "level": detail.level,
+            "is_available": is_room_available(roomid)
+        }
 
 
 @booking_ns.route('/meetingroom-top10-byCount')

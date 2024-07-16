@@ -105,5 +105,7 @@ def verify_jwt():
         return {"error": str(e)}, 500
     return None
 
-
+def check_valid_room(roomid: int ) -> bool:
+    room = Space.query.get(roomid)
+    return room != None
 
