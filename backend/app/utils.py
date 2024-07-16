@@ -24,6 +24,11 @@ def is_student(zid: str) -> bool:
         return True
     else:
         return False
+    
+# check zid is HDR student or not
+def is_room_available(roomid: int) -> bool:
+    space = db.session.get(Space, roomid)
+    return space.is_available
 
 
 # check zid is CSE staff or not

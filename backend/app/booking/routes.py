@@ -4,8 +4,9 @@ from flask import request, Flask
 from app.extensions import db, api
 from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
+from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert, verify_jwt, get_room_name, is_student_permit
+from app.utils import is_admin, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -88,8 +89,13 @@ class BookSpace(Resource):
             )
         ).all()
 
+        if not is_room_available(room_id):
+            return {'error': f"room {room_id} is unavailavle"}, 400
+
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 400
+        
+
 
         user = db.session.get(Users, zid)
         if not user:
@@ -165,6 +171,9 @@ class BookSpace(Resource):
 date_query = booking_ns.parser()
 date_query.add_argument('date', type=str, required=True, help='Date to request')
 
+roomid_query = booking_ns.parser()
+roomid_query.add_argument('roomid', type=int, required=True, help='roomid to block')
+
 
 # TODO! permission
 # Apis about meeting room
@@ -219,6 +228,7 @@ class MeetingRoom(Resource):
         else:
             details = HotDeskDetail.query.all()
         for detail in details:
+            is_available = is_room_available(detail.id)
             output[detail.id] = {
                 "id": detail.id,
                 "name": detail.name,
@@ -227,7 +237,8 @@ class MeetingRoom(Resource):
                 "capacity": detail.capacity,
                 "type": book_type,
                 "permission": self.check_permission(detail, user_type),
-                "time_table": [[] for _ in range(48)]
+                "time_table": [[] for _ in range(48)],
+                "is_available": is_available
             }
         return output
 
@@ -409,13 +420,14 @@ class ExpressBook(Resource):
 
         return available_room_details, 200
 
-#1. 改成当天时间 
-# 2. admin是prof 
+#1. 改成当天时间 1 ------
+# 2. admin是prof 1-------
 # 3. admin给别人book ed
-# 4.admin block房间 加一列 ed
+# 4.admin block房间 加一列 ed --------
 # 5. admin给别人取消 ed
 # 6.admin编辑房间信息 ed
 # 7.把request信息返回给admin ziwen
+# 8.express booking改成is_available jackson
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -477,7 +489,40 @@ class meetingroom_usage(Resource):
         formatted_date = sydney_time.strftime('%Y-%m-%d')
         return formatted_date
 
-        
+@booking_ns.route('/block-room')
+class block_room(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(roomid_query)
+    @booking_ns.doc(description="admin block room")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 400
+        roomid = int(request.args.get('roomid'))
+        if not roomid:
+            return {"message": "Room ID is required"}, 400
+        space = Space.query.get(roomid)
+        if space:
+            space.is_available = False
+            db.session.commit()
+            return {
+                "message": f"{user_zid} set room {roomid} unavailable"
+            }, 200
+        else:
+            return {
+                "error": "invalid roomid"
+            }, 400
+
+
 
 @booking_ns.route('/meetingroom-top10-byCount')
 class meetingroom_top10(Resource):
