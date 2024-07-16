@@ -18,6 +18,7 @@ function AdminClassroom() {
     const fetchData = async () => {
       const today = new Date();
       const formattedDate = today.toISOString().split("T")[0]; // 获取当天日期并格式化为 YYYY-MM-DD
+      const token = localStorage.getItem("token");
 
       const response = await fetch(
         `http://s2.gnip.vip:37895/booking/meetingroom?date=${formattedDate}`,
@@ -25,8 +26,7 @@ function AdminClassroom() {
           method: "GET",
           headers: {
             accept: "application/json",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc",
+            Authorization: "Bearer " + token,
           },
         }
       );
