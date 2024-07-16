@@ -90,12 +90,10 @@ class BookSpace(Resource):
         ).all()
 
         if not is_room_available(room_id):
-            return {'error': f"room {room_id} is unavailavle"}, 400
+            return {'error': f"room {room_id} is unavailable"}, 400
 
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 400
-        
-
 
         user = db.session.get(Users, zid)
         if not user:
@@ -385,12 +383,12 @@ class ExpressBook(Resource):
         if room_type == "meeting_room":
             query = db.session.query(RoomDetail).filter(
                 RoomDetail.capacity >= max_capacity,
-                RoomDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))  # 明确引用子查询的列
+                RoomDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))
             )
         else:
             query = db.session.query(HotDeskDetail).filter(
                 HotDeskDetail.capacity >= max_capacity,
-                HotDeskDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))  # 明确引用子查询的列
+                HotDeskDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))
             )
 
         if level:
@@ -401,7 +399,7 @@ class ExpressBook(Resource):
 
         available_rooms = query.all()
 
-        available_room_details = [
+        unfiltered_available_room_details = [
             {"room_id": room.id,
              "name": room.name,
              "level": room.level,
@@ -411,6 +409,11 @@ class ExpressBook(Resource):
              "end_time": end_time}
             for room in available_rooms
         ]
+        available_room_details = []
+        for room in unfiltered_available_room_details:
+            if is_room_available(room["room_id"]):
+                available_room_details.append(room)
+
 
         if len(available_room_details) > 5:
             available_room_details = random.sample(available_room_details, 5)
