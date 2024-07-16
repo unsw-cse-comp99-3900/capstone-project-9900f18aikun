@@ -294,7 +294,7 @@
     left: 30px;
     right: 30px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     background-color: #eff6fcde;
     border-radius: 25px;
     padding: 10px;
@@ -309,14 +309,25 @@
     outline: none;
     max-width: 80%; 
   }
-
+  .chat-input textarea {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 35px;
+    border: none;
+    background: transparent;
+    outline: none;
+    resize: none;
+    max-height: 150px;
+    overflow-y: auto;
+  }
   .send-button-container {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    margin-left: 10px; /* Adds some space between the input and the button */
+    margin-left: 10px;
+    align-self: flex-end;
   }
   
   .vector.send-button {

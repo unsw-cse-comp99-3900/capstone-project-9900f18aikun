@@ -20,6 +20,7 @@ export const ChatBox = ({ change, setChange }) => {
   const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
   const [optionSelected, setOptionSelected] = useState(false);
+  const textAreaRef = useRef(null);
 
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
@@ -47,6 +48,19 @@ export const ChatBox = ({ change, setChange }) => {
   };
 
   useEffect(scrollToBottom, [expressBookMessages, customerServiceMessages]);
+
+  const adjustTextAreaHeight = () => {
+    const textArea = textAreaRef.current;
+    if (textArea) {
+      textArea.style.height = 'auto';
+      textArea.style.height = textArea.scrollHeight + 'px';
+    }
+  };
+
+  useEffect(() => {
+    adjustTextAreaHeight();
+  }, [inputMessage]);
+
   const formatRoomInfo = (rooms) => {
     if (rooms.length === 0) {
       return "No rooms available for the specified time and date.";
@@ -468,12 +482,18 @@ export const ChatBox = ({ change, setChange }) => {
                     <div ref={messagesEndRef} />
                   </div>
                   <div className="chat-input">
-                    <input
-                      type="text"
+                    <textarea
+                      ref={textAreaRef}
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
                       placeholder="Type your message here..."
+                      rows="1"
                     />
                     <div className="send-button-container">
                       <img 
