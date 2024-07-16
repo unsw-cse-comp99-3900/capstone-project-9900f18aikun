@@ -165,7 +165,7 @@ export const ChatBox = ({ change, setChange }) => {
       console.log('API response:', data);
   
       const bookingConfirmation = { 
-        text: "Booking successful! Your room has been reserved.", 
+        text: "Booking successful! Your room has been reserved 😀.", 
         sender: "bot", 
         timestamp: new Date() 
       };
