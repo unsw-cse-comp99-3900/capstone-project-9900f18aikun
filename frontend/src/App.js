@@ -53,6 +53,7 @@ function App() {
 
       if (response.ok) {
         const data = await response.json();
+        // console.log("is_admin:", data.is_admin); 
         if (data.is_admin) {
           localStorage.setItem("isAdmin", "true");
         } else {
