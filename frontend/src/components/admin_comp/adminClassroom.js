@@ -97,7 +97,7 @@ function AdminClassroom() {
     navigate("/room/admin/" + entry.id);
   };
 
-  const handleUsage = (entry) => {
+  const handleUsage = async (entry) => {
     console.log(`Clicked on :`, entry);
     try {
       const token = localStorage.getItem("token");
@@ -124,13 +124,14 @@ function AdminClassroom() {
 
   const handleEnable = async (entry) => {
     console.log(`Clicked on enable :`, entry);
-  }
+  };
 
   //arco table
   const columns = [
     {
       title: "Room Name",
       dataIndex: "name",
+      key: "name",
       // render: (text, entry) => (
       //     <td onClick={() => handleCellClick(entry)}>{text}</td>
       // )
@@ -138,22 +139,27 @@ function AdminClassroom() {
     {
       title: "Building",
       dataIndex: "building",
+      key: "building",
     },
     {
       title: "Level",
       dataIndex: "level",
+      key: "level",
     },
     {
       title: "Capacity",
       dataIndex: "capacity",
+      key: "capacity",
     },
     {
       title: "Room Type",
       dataIndex: "type",
+      key: "type",
     },
     {
       title: "Edit", // 新列的标题
       dataIndex: "action",
+      key: "edit",
       render: (text, entry) => (
         <button className="table-button" onClick={() => handleCellClick(entry)}>
           <img src="/admin_img/edit.png" alt="edit" />
@@ -163,17 +169,20 @@ function AdminClassroom() {
     {
       title: "Disable",
       dataIndex: "usage",
-            render: (text, entry) => (
-              entry.is_available ? (
-                <button className="table-button-2" onClick={() => handleUsage(entry)}>
-                  <img src="/admin_img/Check.png" alt="disable" />
-                </button>
-              ) : (
-                <button className="table-button-2" onClick={() => handleEnable(entry)}>
-                  <img src="/admin_img/Cancel.png" alt="enable" />
-                </button>
-              )
-            ),
+      key: "disable",
+      render: (text, entry) =>
+        entry.is_available ? (
+          <button className="table-button-2" onClick={() => handleUsage(entry)}>
+            <img src="/admin_img/Check.png" alt="disable" />
+          </button>
+        ) : (
+          <button
+            className="table-button-2"
+            onClick={() => handleEnable(entry)}
+          >
+            <img src="/admin_img/Cancel.png" alt="enable" />
+          </button>
+        ),
     },
   ];
 
@@ -208,7 +217,7 @@ function AdminClassroom() {
         <div className="class-table">
           <Table
             columns={columns}
-            data={filteredData}
+            data={filteredData.map((item) => ({ ...item, key: item.id }))}
             pagination={{ pageSize: 5 }}
           />
         </div>
