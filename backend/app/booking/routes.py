@@ -27,10 +27,10 @@ booking_ns = Namespace('booking', description='Booking operations')
 
 # booking room model
 booking_model = booking_ns.model('Booking request', {
-    'room_id': fields.Integer(required=True, description='The room id'),
-    'date': fields.Date(required=True, description='Date of the booking'),
-    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)'),
-    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)')
+    'room_id': fields.Integer(required=True, description='The room id', default=1),
+    'date': fields.Date(required=True, description='Date of the booking', default="2024-07-16"),
+    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)', default="12:00"),
+    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00")
 })
 
 
@@ -569,23 +569,24 @@ class unblock_room(Resource):
                 "error": "invalid roomid"
             }, 400
         
-
-roomid_edit = booking_ns.parser()
-roomid_edit.add_argument('roomid', type=int, required=True, default=1, help='Room ID to edit')
-roomid_edit.add_argument('name', type=str, required=True, help='New name of the room', default="G01")
-roomid_edit.add_argument('building', type=str, required=True, help='New level of the room', default="K17")
-roomid_edit.add_argument('capacity', type=int, required=True, help='New capacity of the room', default=1)
-roomid_edit.add_argument('level', type=str, required=True, help='New level of the room', default="G")
+roomid_edit_model = booking_ns.model('roomid_edit_model', {
+    'room_id': fields.Integer(required=True, description='edit room id', default=1),
+    'name': fields.String(description='New name of the room', default="G01"),
+    'building': fields.String(description='New level of the room', default="K17"),
+    'capacity': fields.Integer(description='New capacity of the room', default=1),
+    'level': fields.String(description='New level of the room', default="G"),
+})
 
 @booking_ns.route('/edit-room')
 class edit_room(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
-    @booking_ns.expect(roomid_edit)
+    @booking_ns.expect(roomid_edit_model)
     @booking_ns.doc(description="admin block room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
-    def get(self):
+    def put(self):
+        args = request.json
         jwt_error = verify_jwt()
         if jwt_error:
             return jwt_error
@@ -595,8 +596,7 @@ class edit_room(Resource):
             return {
                 "error": f"user {user_zid} is not admin"
             }, 400
-        args = roomid_edit.parse_args()
-        roomid = args['roomid']
+        roomid = args['room_id']
         if not check_valid_room(roomid):
             return {
                 "error": f"invalid roomid {roomid}"
@@ -605,7 +605,7 @@ class edit_room(Resource):
         return self.show_room(args), 200
     
     def set_room(self, args):
-        roomid = args["roomid"]
+        roomid = args["room_id"]
         if is_meeting_room(roomid):
             room = RoomDetail.query.get(roomid)
             room.name = args["name"]
@@ -621,7 +621,7 @@ class edit_room(Resource):
             room.level = args["level"]
             db.session.commit()
     def show_room(self, args):
-        roomid = args["roomid"]
+        roomid = args["room_id"]
         if is_meeting_room(roomid):
             detail = RoomDetail.query.get(roomid)
         else:
@@ -729,3 +729,45 @@ class show_request(Resource):
             }   
             res.append(temp)
         return res
+
+request_model = booking_ns.model('request handling', {
+    'booking_id': fields.Integer(required=True, description='The booking id', default=1),
+    'confirmed': fields.Boolean(description='Confirmed status', default=True)
+})
+
+@booking_ns.route('/handle-request')
+class handle_request(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(request_model)
+    @booking_ns.doc(description="handle request for admin")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def post(self):
+        data = request.json
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 400
+        booking_id = data['booking_id']
+        confirmed = data['confirmed']
+        if confirmed:
+            my_request = Booking.query.get(booking_id)
+            my_request.booking_status = "booked"
+            db.session.commit()
+            return {
+                "message": f"admin {user_zid} set booking id {booking_id} as booked"
+            }, 200
+        else:
+            my_request = Booking.query.get(booking_id)
+            my_request.booking_status = "cancelled"
+            db.session.commit()
+            return {
+                "message": f"admin {user_zid} set booking id {booking_id} as cancelled"
+            }, 200
+        
