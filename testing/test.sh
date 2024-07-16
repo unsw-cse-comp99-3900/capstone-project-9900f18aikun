@@ -1,13 +1,13 @@
 #!/bin/dash
+
 ------------------------------------------------
 ###############      Login       ###############
 ------------------------------------------------
 
 -------------------auth-login-------------------
 
-# this is test
 
-echo "Testing GET /auth/auto-login" > $result_file
+echo "Testing GET /auth/auto-login" >>result.txt
 json=$(curl -X 'POST' \
   'http://s2.gnip.vip:37895/auth/login' \
   -H 'accept: application/json' \
@@ -169,8 +169,6 @@ echo $token
 echo $json >>result.txt
 
 
-
-
 ----------------------------------------------------------
 ####################    Booking       ####################
 ----------------------------------------------------------
@@ -230,6 +228,7 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/book' \
   "start_time": "12:00",
   "end_time": "02:00"
 }'>> result.txt 
+
 
 #5. Booking - 预定时间超过8小时
 curl -X POST 'http://s2.gnip.vip:37895/booking/book' \
@@ -323,12 +322,14 @@ curl -X DELETE 'http://s2.gnip.vip:37895/booking/book/' \
   -H 'Content-Type: application/json' \
   -o result.txt
 
+
 #3. Booking_id - 没有预定的id
 curl -X DELETE 'http://s2.gnip.vip:37895/booking/book/4' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
   -H 'Content-Type: application/json' \
   -o result.txt
+
 
 ---------------------express-book-----------------------
 
@@ -341,7 +342,27 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   -H 'Content-Type: application/json' \
   -d '{
   "query": "2024-7-16,13:00-14:00",
-  "room_type": "meeting room"
+  "room_type": "meeting_room"
+}'>> result.txt 
+
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "2024-7-16,13:00-14:00",
+  "room_type": "host_desk "
+}'>> result.txt 
+
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want a booking a room at 2am to 6am for 20 people",
+  "room_type": "meeting_room"
 }'>> result.txt 
 
 #2. express-book - 缺少日期的预定信息
@@ -354,6 +375,18 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   "room_type": "meeting room"
 }'>> result.txt 
 
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want booking a desk in this afternoon",
+  "room_type": "hot_desk "
+}'>> result.txt 
+#(400)"error": "Sorry, we can't get start time or end time, please try again"
+
+
 #3. express-book - 缺少时间的预定信息
 curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   -H 'accept: application/json' \
@@ -361,10 +394,12 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   -H 'Content-Type: application/json' \
   -d '{
   "query": "2024-7-16",
-  "room_type": "meeting room"
+  "room_type": "meeting_room"
 }'>> result.txt 
+#(400){"error": "Sorry, we can't get start time or end time, please try again"}
 
-#3. express-book - 缺少房间类型的预定信息
+
+#4. express-book - 缺少房间类型的预定信息
 curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
@@ -373,8 +408,20 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   "query": "2024-7-16,13:00-14:00",
   "room_type": " "
 }'>> result.txt 
+#(200)[{"room_id": 60, "name": "Room 301 table 12", "level": "3", "capacity": 1, "date": "2024-07-16", "start_time": "13:00", "end_time": "14:00"}, {"room_id": 50, "name": "Room 301 table 2", "level": "3", "capacity": 1, "date": "2024-07-16", "start_time": "13:00", "end_time": "14:00"}, {"room_id": 64, "name": "Room 301 table 16", "level": "3", "capacity": 1, "date": "2024-07-16", "start_time": "13:00", "end_time": "14:00"}, {"room_id": 179, "name": "Room 510 table 12", "level": "5", "capacity": 1, "date": "2024-07-16", "start_time": "13:00", "end_time": "14:00"}, {"room_id": 86, "name":
 
-#4. express-book - 过期的预定信息
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want booking a hotdesk  at 2024-07-16 2pm - 3pm",
+  "room_type": " "
+}'>> result.txt 
+#(200)[{"room_id": 19, "name": "Room 201 table 5", "level": "2", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 41, "name": "Room 201 table 27", "level": "2", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 117, "name": "Room 412 table 9", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 99, "name": "Room 401 table 29", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 93, "name": "Room 401 table 23", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}]
+
+#5. express-book - 过期的预定信息
 curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
@@ -383,9 +430,9 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   "query": "2024-5-16,13:00-14:00",
   "room_type": "meeting room"
 }'>> result.txt 
+#{"error": "Sorry, we couldn't find a location that meets your needs."}
 
-
-#5. express-book - 不正确的格式的预定信息
+#6. express-book - 不正确的的预定信息
 curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
@@ -394,6 +441,59 @@ curl -X POST 'http://s2.gnip.vip:37895/booking/express-book' \
   "query": "2024-7-16,1hour",
   "room_type": "meeting room"
 }'>> result.txt 
+#{"error": "Sorry, we couldn't find a location that meets your needs."}
+
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want a booking a desk at 2am to 6am for 2people",
+  "room_type": "hot_desk"
+}'>> result.txt 
+#{"error": "Sorry, the max capacity of hot desk is 1."}
+
+
+#7. express-book - 没有适合的room_type
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want booking a meeting room for 200 people at 2pm - 3pm",
+  "room_type": "meeting_room"
+}'>> result.txt 
+#（400）"error": "Sorry, we couldn't find a location that meets your needs."
+
+
+#8. express-book - room_type和需求类型不一致
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want booking a hotdesk  at 2024-07-16 2pm - 3pm",
+  "room_type": "meeting_room "
+}'>> result.txt 
+#（200）[{"room_id": 135, "name": "Room 501 table 11", "level": "5", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 27, "name": "Room 201 table 13", "level": "2", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 131, "name": "Room 501 table 7", "level": "5", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 113, "name": "Room 412 table 5", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 125, "name": "Room 501 table 1", "level": "5", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}]
+
+curl -X 'POST' \
+  'http://s2.gnip.vip:37895/booking/express-book' \
+  -H 'accept: application/json' \
+  -H "Authorization: Bearer $token" \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "I want booking a meeting room  at 2024-07-16 2pm - 3pm",
+  "room_type": "hot_dest "
+}'>> result.txt 
+#(200)[{"room_id": 48, "name": "Room 201 table 34", "level": "2", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 121, "name": "Room 412 table 13", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 122, "name": "Room 412 table 14", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 85, "name": "Room 401 table 15", "level": "4", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}, {"room_id": 140, "name": "Room 501 table 16", "level": "5", "capacity": 1, "date": "2024-07-16", "start_time": "14:00", "end_time": "15:00"}]
+
+
+
+
 
 
 -----------------------meeting_room---------------------
@@ -406,11 +506,13 @@ curl -X 'GET'\
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
 
+
 #2. meeting_room - 没有日期
 curl -X 'GET'\
  'http://s2.gnip.vip:37895/booking/meetingroom' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
+
 
 #3. meeting_room - 无效的日期
 curl -X 'GET'\
@@ -424,7 +526,6 @@ curl -X 'GET'\
  'http://s2.gnip.vip:37895/booking/meetingroom?date=2024-07-01' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
-
 
 
 ------------------/meeting_room_report------------------
@@ -443,6 +544,7 @@ curl -X 'GET'\
   'http://s2.gnip.vip:37895/booking/meetingroom-report' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
+
 
 #3. meeting_room_report - 无效的日期
 curl -X 'GET'\
@@ -476,6 +578,7 @@ curl -X 'GET' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
 
+
 #3. meeting_room_top10_bycount - 过去的日期
 curl -X 'GET' \
   'http://s2.gnip.vip:37895/booking/meetingroom-top10-byCount?date=2024-07-01' \
@@ -489,12 +592,12 @@ curl -X 'GET' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
 
+
 #5. meeting_room_top10_bycount -  没有完整的日期
 curl -X 'GET' \
   'http://s2.gnip.vip:37895/booking/meetingroom-top10-byCount?date=2024-07' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
-
 
 
 ------------------meetingroom_usage--------------------
@@ -514,17 +617,20 @@ curl -X 'GET' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
 
+
 #3. meetingroom_usage - 没有时间
 curl -X 'GET' \
   'http://s2.gnip.vip:37895/booking/meetingroom-usage' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
 
+
 #4. meetingroom_usage - 没有完整的日期
 curl -X 'GET' \
   'http://s2.gnip.vip:37895/booking/meetingroom-usage?date=2024-07' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
+
 
 #4. meetingroom_usage - 过去的日期
 curl -X 'GET' \
@@ -586,7 +692,6 @@ curl -X 'GET' \
   -H "Authorization: Bearer $token" \>> result.txt 
 
 
-
 #2. room-detail - 无效的 room_id
 curl -X 'GET' \
   'http://s2.gnip.vip:37895/room/room-detail/999' \
@@ -620,6 +725,7 @@ curl -X 'GET' \
   'http://s2.gnip.vip:37895/sign_in/sign-in/2' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \>> result.txt 
+
 
 #2. sign in - 无效的room_id
 curl -X 'GET' \

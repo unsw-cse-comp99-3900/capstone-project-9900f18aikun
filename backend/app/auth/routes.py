@@ -10,8 +10,8 @@ from app.utils import is_admin
 auth_ns = Namespace('auth', description='Authentication operations')
 
 user_model = auth_ns.model('User', {
-    'zid': fields.String(required=True, description='The user zid'),
-    'password': fields.String(required=True, description='The user password')
+    'zid': fields.String(required=True, description='The user zid', default="z2"),
+    'password': fields.String(required=True, description='The user password', default="b")
 })
 
 
