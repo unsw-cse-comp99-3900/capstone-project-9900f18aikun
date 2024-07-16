@@ -57,6 +57,9 @@ def is_meeting_room(room_id: int) -> bool:
     else:
         return False
 
+def is_block(room_id: int) -> bool:
+    space = db.session.get(Space, room_id)
+    return not space.is_available
 
 def is_student_permit(room_id: int) -> bool:
     if is_meeting_room(room_id):

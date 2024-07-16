@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import is_admin, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
+from app.utils import is_admin, is_block, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -511,6 +511,10 @@ class block_room(Resource):
         roomid = int(request.args.get('roomid'))
         if not roomid:
             return {"message": "Room ID is required"}, 400
+        
+        if is_block(roomid):
+            return {"message": f"Room {roomid} is already blocked"}
+        
         space = Space.query.get(roomid)
         if space:
             space.is_available = False
@@ -524,37 +528,38 @@ class block_room(Resource):
             }, 400
         
 
-# roomid_edit = booking_ns.parser()
-# roomid_edit.add_argument('roomid', type=int, required=True, help='Room ID to edit')
-# roomid_edit.add_argument('capacity', type=int, required=False, help='New capacity of the room')
-# roomid_edit.add_argument('level', type=int, required=False, help='New level of the room')
+roomid_edit = booking_ns.parser()
+roomid_edit.add_argument('roomid', type=int, required=True, default=1, help='Room ID to edit')
+roomid_edit.add_argument('capacity', type=int, required=True, help='New capacity of the room')
+roomid_edit.add_argument('level', type=int, required=True, help='New level of the room')
 
-# @booking_ns.route('/edit-room')
-# class edit_room(Resource):
-#     # Get the
-#     @booking_ns.response(200, "success")
-#     @booking_ns.response(400, "Bad request")
-#     @booking_ns.expect(roomid_query)
-#     @booking_ns.doc(description="admin block room")
-#     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
-#     def get(self):
-#         jwt_error = verify_jwt()
-#         if jwt_error:
-#             return jwt_error
-#         current_user = get_jwt_identity()
-#         user_zid = current_user['zid']
-#         if not is_admin(user_zid):
-#             return {
-#                 "error": f"user {user_zid} is not admin"
-#             }, 400
-#         args = roomid_edit.parse_args()
-#         roomid = args['roomid']
-#         capacity = args.get('capacity')
-#         level = args.get('level')
-#         return {
-#             "roomid": roomid
-
-#         }, 200
+@booking_ns.route('/edit-room')
+class edit_room(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(roomid_edit)
+    @booking_ns.doc(description="admin block room")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 400
+        args = roomid_edit.parse_args()
+        roomid = args['roomid']
+        capacity = args.get('capacity')
+        level = args.get('level')
+        return {
+            "roomid": roomid,
+            "capacity": capacity,
+            "level": level
+        }, 200
 
 
 

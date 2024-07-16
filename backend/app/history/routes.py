@@ -11,7 +11,7 @@ from app.booking.models import Booking
 from app.utils import verify_jwt
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
-from app.utils import is_admin
+from app.utils import is_admin, get_user_name
 
 history_ns = Namespace('history', description='History operations')
 
@@ -78,16 +78,19 @@ class alluser_booking_history(Resource):
             Booking.date == date,
             Booking.booking_status != 'deleted',
         ).order_by(Booking.start_time.desc()).all()
+        
         if bookings:
             result = [{"booking_id": booking.id,
                        "room_id": booking.room_id,
                        "room_name": booking.room_name,
                        "user_id": booking.user_id,
+                       "user_name": get_user_name(booking.user_id),
                        "date": booking.date.isoformat() if booking.date else None,
                        "start_time": booking.start_time.isoformat() if booking.start_time else None,
                        "end_time": booking.end_time.isoformat() if booking.end_time else None,
                        "booking_status": booking.booking_status,
-                       "is_request": booking.is_request} for booking in bookings]
+                       "is_request": booking.is_request
+                       } for booking in bookings]
         else:
             result = []
 
