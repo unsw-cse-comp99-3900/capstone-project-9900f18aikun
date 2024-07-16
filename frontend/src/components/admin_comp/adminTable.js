@@ -52,7 +52,7 @@ const SelectWindow = ({
   close,
   selectedDate,
   change,
-  setChange
+  setChange,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [zID, setZID] = useState("");
@@ -141,7 +141,7 @@ const SelectWindow = ({
     // }
 
     close();
-    setChange(!change)
+    setChange(!change);
   };
 
   const handleZIDChange = (e) => {
@@ -195,7 +195,9 @@ const SelectWindow = ({
         <br />
         <div className="button-class">
           <Button
-            onClick={() => {confirmHandler(change, setChange)}}
+            onClick={() => {
+              confirmHandler(change, setChange);
+            }}
             disabled={zIDError || zID.length === 0}
           >
             Confirm
@@ -225,7 +227,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [hoveredRoom, setHoveredRoom] = useState(null);
 
-
   useEffect(() => {
     setReservations(extractData(data, false));
   }, [data]);
@@ -235,6 +236,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
       room: item.name,
       roomid: item.id,
       permission: item.permission,
+      is_available: item.is_available,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
@@ -354,6 +356,11 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
 
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
+    const target = event.target;
+
+    if (target.classList.contains("disabled")) {
+      return;
+    }
     const position = { top: event.clientY, left: event.clientX };
     setSelectWindow({
       visible: true,
@@ -484,7 +491,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
                                     slot.timeslot.some((t) => t === time)
                                 )
                             );
-                            if (isPast) {
+                            if (isPast || !item.is_available) {
                               return "disabled";
                             } else if (isReserved) {
                               return "reserved";

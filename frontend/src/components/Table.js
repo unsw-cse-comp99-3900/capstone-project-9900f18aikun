@@ -226,6 +226,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
       room: item.name,
       roomid: item.id,
       permission: item.permission,
+      is_available: item.is_available,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
@@ -331,6 +332,15 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
 
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
+    const target = event.target;
+
+    if (
+      target.classList.contains("reserved") ||
+      target.classList.contains("selfreserved") ||
+      target.classList.contains("disabled")
+    ) {
+      return;
+    }
     const className = event.currentTarget.className;
     console.log("classname is ", className);
     let permissionClass = "";
@@ -343,14 +353,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
       permissionClass = false;
     } else {
       permissionClass = true;
-    }
-    const target = event.target;
-
-    if (
-      target.classList.contains("reserved") ||
-      target.classList.contains("selfreserved")
-    ) {
-      return;
     }
 
     const position = { top: event.clientY, left: event.clientX };
@@ -532,7 +534,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
                                     slot.timeslot.some((t) => t === time)
                                 )
                             );
-                            if (isPast) {
+                            if (isPast || !item.is_available) {
                               return "disabled";
                             } else if (isSelfReserved) {
                               return "selfreserved";
