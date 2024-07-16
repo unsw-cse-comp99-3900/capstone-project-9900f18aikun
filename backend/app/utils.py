@@ -3,6 +3,7 @@ from app.booking.models import RoomDetail, Space, HotDeskDetail
 from app.models import CSEStaff, HDRStudent, Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from jwt import exceptions
+from datetime import datetime, timedelta
 # convert time HH:MM to index for every half hour
 
 
@@ -104,6 +105,17 @@ def verify_jwt():
     except Exception as e:
         return {"error": str(e)}, 500
     return None
+
+
+def calculate_time_difference(date, start_time_str, end_time_str):
+    datetime_format = "%Y-%m-%d %H:%M:%S"
+    try:
+        start_datetime = datetime.strptime(f"{date} {start_time_str}", datetime_format)
+        end_datetime = datetime.strptime(f"{date} {end_time_str}", datetime_format)
+        return end_datetime - start_datetime
+    except ValueError as e:
+        return None, str(e)
+
 
 
 

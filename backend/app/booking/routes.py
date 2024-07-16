@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import is_admin, is_block, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
+from app.utils import is_admin, is_block, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, calculate_time_difference
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -94,6 +94,25 @@ class BookSpace(Resource):
 
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 400
+
+        # check the total book time
+        user_books = Booking.query.filter(
+            and_(
+                Booking.user_id == zid,
+                Booking.date == date,
+                Booking.booking_status != BookingStatus.cancelled.value,
+                Booking.booking_status != BookingStatus.requested.value
+            )
+        )
+
+        total_duration = timedelta()
+        for booking in user_books:
+            total_duration += calculate_time_difference(date, booking.start_time, booking.end_time)
+        # add this book time
+        total_duration += calculate_time_difference(date, start_time + ":00", end_time + ":00")
+
+        if total_duration > timedelta(hours=1000):
+            return {'error': 'Total booking time exceeds 8 hours, no further bookings allowed.'}, 400
 
         user = db.session.get(Users, zid)
         if not user:
