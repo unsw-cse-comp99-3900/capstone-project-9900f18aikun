@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_room, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, calculate_time_difference
+from app.utils import check_valid_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -97,25 +97,6 @@ class BookSpace(Resource):
 
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 400
-
-        # check the total book time
-        user_books = Booking.query.filter(
-            and_(
-                Booking.user_id == zid,
-                Booking.date == date,
-                Booking.booking_status != BookingStatus.cancelled.value,
-                Booking.booking_status != BookingStatus.requested.value
-            )
-        )
-
-        total_duration = timedelta()
-        for booking in user_books:
-            total_duration += calculate_time_difference(date, booking.start_time, booking.end_time)
-        # add this book time
-        total_duration += calculate_time_difference(date, start_time + ":00", end_time + ":00")
-
-        if total_duration > timedelta(hours=1000):
-            return {'error': 'Total booking time exceeds 8 hours, no further bookings allowed.'}, 400
 
         user = db.session.get(Users, zid)
         if not user:
@@ -296,7 +277,7 @@ date_query = booking_ns.parser()
 date_query.add_argument('date', type=str, required=True, help='Date to request')
 
 roomid_query = booking_ns.parser()
-roomid_query.add_argument('roomid', type=int, required=True, help='roomid to block')
+roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
 
 
 # TODO! permission
@@ -551,14 +532,15 @@ class ExpressBook(Resource):
 
 #1. 改成当天时间 1 ------
 # 2. admin是prof 1-------
-# 3. admin给别人book ed 如果占着就强行取消
+# 3. admin给别人book ed 如果占着就强行取消 ????????gei jackson
 # 4.admin block房间 加一列 ed --------
-# 5. admin给别人取消 ed
-# 6.admin编辑房间信息 ed
+# 5. admin给别人取消 ed ??????? gei jackson
+# 6.admin编辑房间信息 ed  ----------
 # 7.把request信息返回给admin ziwen
 # 8.express booking改成is_available jackson --------
 # 9. 返回文字版报告
 # 10. 超时15min自动取消 只用改canceled
+# 11. 举报发给admin ed
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -663,7 +645,7 @@ class unblock_room(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.expect(roomid_query)
-    @booking_ns.doc(description="admin block room")
+    @booking_ns.doc(description="admin unblock room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
         jwt_error = verify_jwt()
@@ -810,4 +792,47 @@ class meetingroom_top10(Resource):
             "room_name": room_name,
             'booking_count': booking_count} for room_id, room_name, booking_count in rooms]
         return top_list
-        
+
+
+@booking_ns.route('/show-request')
+class show_request(Resource):
+    # Get the
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.expect(date_query)
+    @booking_ns.doc(description="show request for admin")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 400
+        return {
+            "requests": self.get_request()
+        }, 200
+    
+    def get_request(self):
+        res = []
+        requests = Booking.query.filter(
+                    Booking.is_request == True,
+                ).all()
+        for request in requests:
+            temp = {
+                "booking_id": request.id,
+                "room_id": request.room_id,
+                "room_name": request.room_name,
+                "user_id": request.user_id,
+                "user_name":get_user_name(request.user_id),
+                "date": request.date.isoformat(),
+                "start_time": request.start_time.isoformat(),
+                "end_time": request.end_time.isoformat(),
+                "booking_status": request.booking_status,
+                "is_request": request.is_request
+            }   
+            res.append(temp)
+        return res
