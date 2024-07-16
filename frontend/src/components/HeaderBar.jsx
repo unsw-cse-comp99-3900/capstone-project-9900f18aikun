@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import "./HeaderBar.css";
 import { useNavigate } from "react-router-dom";
 
-const verifyID = async () => {
+const verifyID = async (SetIsAdmin) => {
   try {
     const token = localStorage.getItem("token");
     const response = await fetch(`/api/admin/check_admin`, {
@@ -17,14 +17,16 @@ const verifyID = async () => {
       throw new Error("Failed to fetch booking data");
     } else if (response.ok) {
       const result = await response.json();
+      SetIsAdmin(result.is_admin)
     }
   } catch (error) {
     console.error("Error fetching booking data:", error);
   }
 };
 const HeaderBar = ({ onLogout, onHistory }) => {
+  const [isAdmin, SetIsAdmin] = useState(false)
   const navigate = useNavigate();
-  const is_admin = verifyID();
+  verifyID(SetIsAdmin);
   return (
     <div className="header-bar">
       <div className="overlap">
@@ -33,7 +35,7 @@ const HeaderBar = ({ onLogout, onHistory }) => {
           alt="UNSW Logo"
           src="/img/image-164.png"
           onClick={() => {
-            if (is_admin) {
+            if (isAdmin) {
               navigate("/admin");
             } else {
               navigate("/dashboard");
@@ -50,7 +52,7 @@ const HeaderBar = ({ onLogout, onHistory }) => {
         </button> */}
         {/* <div className="text-wrapper-2">History</div> */}
         <div className="button-group">
-          {!is_admin && (
+          {!isAdmin && (
             <button className="history-button" onClick={onHistory}>
               History
             </button>

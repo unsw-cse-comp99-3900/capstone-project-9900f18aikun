@@ -73,7 +73,6 @@ function App() {
       return null;
     }
   });
-  console.log("isloggedin is ", isLoggedIn);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
