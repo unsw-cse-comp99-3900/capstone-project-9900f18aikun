@@ -45,7 +45,6 @@ class BookSpace(Resource):
     @booking_ns.doc(description="Book a space")
     @booking_ns.expect(booking_model)
     @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
-    @jwt_required()
     def post(self):
         jwt_error = verify_jwt()
         if jwt_error:
