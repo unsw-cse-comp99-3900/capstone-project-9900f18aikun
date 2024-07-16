@@ -34,6 +34,7 @@ function AdminClassroom() {
       const formattedData = Object.values(data).map((item) => ({
         id: item.id,
         name: item.name,
+        is_available: item.is_available,
         building: item.building,
         level: item.level,
         capacity: item.capacity,
@@ -98,7 +99,32 @@ function AdminClassroom() {
 
   const handleUsage = (entry) => {
     console.log(`Clicked on :`, entry);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `/api/booking/block-room?roomid=` + entry.id,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch booking data");
+      }
+
+      console.log("this is ok");
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
   };
+
+  const handleEnable = async (entry) => {
+    console.log(`Clicked on enable :`, entry);
+  }
 
   //arco table
   const columns = [
@@ -137,11 +163,17 @@ function AdminClassroom() {
     {
       title: "Disable",
       dataIndex: "usage",
-      render: (text, entry) => (
-        <button className="table-button-2" onClick={() => handleUsage(entry)}>
-          <img src="/admin_img/Cancel.png" alt="disable" />
-        </button>
-      ),
+            render: (text, entry) => (
+              entry.is_available ? (
+                <button className="table-button-2" onClick={() => handleUsage(entry)}>
+                  <img src="/admin_img/Check.png" alt="disable" />
+                </button>
+              ) : (
+                <button className="table-button-2" onClick={() => handleEnable(entry)}>
+                  <img src="/admin_img/Cancel.png" alt="enable" />
+                </button>
+              )
+            ),
     },
   ];
 
