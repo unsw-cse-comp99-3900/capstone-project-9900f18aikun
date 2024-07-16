@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./roompage.css";
 import Table from "./Table";
+import { Button, Input } from "@arco-design/web-react";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -13,6 +14,19 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [change, setChange] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportText, setReportText] = useState("");
+
+  const handleReportClick = () => {
+    setIsReporting(!isReporting);
+  };
+
+  const handleSubmit = () => {
+    // Handle the report submission logic here
+    console.log("Report submitted:", reportText);
+    setIsReporting(false);
+    setReportText("");
+  };
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -99,12 +113,34 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       <div className="room-card">
         <div className="room-details">
           <div className="room-title">
-            <h1>{room.room_detail.name}</h1>&nbsp;&nbsp;&nbsp;
-            <span className="room-subtitle">
-              ({room.room_detail.building}: Level {room.room_detail.level}) Max.
-              capacity: {room.room_detail.capacity}
-            </span>
+            <h1>{room.room_detail.name}</h1>
+            <Button
+              type="primary"
+              status={isReporting ? "default" : "danger"}
+              className="report-button"
+              onClick={handleReportClick}
+            >
+              {isReporting ? "Cancel" : "Report"}
+            </Button>
           </div>
+          <span className="room-subtitle">
+            ({room.room_detail.building}: Level {room.room_detail.level}) Max.
+            capacity: {room.room_detail.capacity}
+          </span>
+
+          {isReporting && (
+            <div>
+              <Input
+                placeholder="Enter report details"
+                value={reportText}
+                onChange={(e) => setReportText(e.target.value)}
+              />
+              <Button type="primary" onClick={handleSubmit}>
+                Submit
+              </Button>
+            </div>
+          )}
+
           <br />
           <br />
           <br />

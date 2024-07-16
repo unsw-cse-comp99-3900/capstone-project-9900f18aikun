@@ -14,8 +14,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedRoom, setEditedRoom] = useState({});
-  const [change, setChange] = useState(false)
-
+  const [change, setChange] = useState(false);
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -40,7 +39,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         const bookingData = await response.json();
         const dataArray = Object.values(bookingData);
         setData(dataArray);
-        console.log("this is ok")
+        console.log("this is ok");
       } catch (error) {
         console.error("Error fetching booking data:", error);
         setError(error);
@@ -66,6 +65,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         }
 
         const result = await response.json();
+        console.log(result);
         setRoom(result.message);
         setEditedRoom(result.message);
       } catch (error) {
@@ -115,7 +115,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     setIsEditing(false);
     // try {
     //   const token = localStorage.getItem("token");
-    //   const response = await fetch(`/api/room/update/${roomid}`, {
+    //   const response = await fetch(`/api/booking/edit-room/${roomid}`, {
     //     method: "PUT",
     //     headers: {
     //       "Content-Type": "application/json",
@@ -154,15 +154,16 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       <div className="room-card">
         <div className="room-details">
           <div className="room-title">
-            <h1>{room.room_detail.name}</h1>&nbsp;&nbsp;&nbsp;
-            <span className="room-subtitle">
-              ({room.room_detail.building}: Level {room.room_detail.level}) Max.
-              capacity: {room.room_detail.capacity}
-            </span>
+            <h1>{room.room_detail.name}</h1>
+
             <button onClick={handleEditClick} className="edit-button">
               {isEditing ? "Cancel" : "Edit"}
             </button>
           </div>
+          <span className="room-subtitle">
+            ({room.room_detail.building}: Level {room.room_detail.level}) Max.
+            capacity: {room.room_detail.capacity}
+          </span>
           <br />
           <br />
           <br />
