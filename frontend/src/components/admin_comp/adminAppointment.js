@@ -91,6 +91,8 @@ function AdminAppointment({ token }) {
                 title: 'Notification',
                 content: 'You have approved the booking request.',
             });
+            // 更新 requestData 状态，移除已处理的请求
+            setRequestData((prevData) => prevData.filter(item => item.booking_id !== entry.booking_id));
         } catch (error) {
             console.error('Error approving request:', error);
         }
@@ -118,6 +120,8 @@ function AdminAppointment({ token }) {
                 title: 'Notification',
                 content: 'You have rejected the booking request.',
             });
+            // 更新 requestData 状态，移除已处理的请求
+            setRequestData((prevData) => prevData.filter(item => item.booking_id !== entry.booking_id));
         } catch (error) {
             console.error('Error rejecting request:', error);
         }
