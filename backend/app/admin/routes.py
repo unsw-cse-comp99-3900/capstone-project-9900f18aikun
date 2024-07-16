@@ -29,6 +29,6 @@ class CheckAdmin(Resource):
         try:
             whether_admin = is_admin(user_zid)
         except:
-            return {'error': "can't get admin"}, 400
+            return {'error': "can't get admin"}, 403
         return {"is_admin": whether_admin} , 200
 
