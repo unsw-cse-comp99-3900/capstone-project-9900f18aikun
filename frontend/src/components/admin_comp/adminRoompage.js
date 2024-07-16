@@ -113,28 +113,37 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsEditing(false);
-    // try {
-    //   const token = localStorage.getItem("token");
-    //   const response = await fetch(`/api/booking/edit-room/${roomid}`, {
-    //     method: "PUT",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: "Bearer " + token,
-    //     },
-    //     body: JSON.stringify(editedRoom),
-    //   });
+    // console.log(editedRoom.roomdetial);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`/api/booking/edit-room`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify({
+          room_id: roomid,
+          name: editedRoom.room_detail.name,
+          building: editedRoom.room_detail.building,
+          capacity: editedRoom.room_detail.capacity,
+          level: editedRoom.room_detail.level,
+        }),
+      });
 
-    //   if (!response.ok) {
-    //     throw new Error("Failed to update room data");
-    //   }
+      if (!response.ok) {
+        throw new Error("Failed to update room data");
+      } else if (response.ok) {
+        setChange(!change);
+      }
 
-    //   const updatedRoom = await response.json();
-    //   setRoom(updatedRoom.message);
-    //   setIsEditing(false);
-    // } catch (error) {
-    //   console.error("Error updating room data:", error);
-    //   setError(error);
-    // }
+      const updatedRoom = await response.json();
+      setRoom(updatedRoom.message);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating room data:", error);
+      setError(error);
+    }
   };
 
   if (loadingRoom || loadingData) {
@@ -146,7 +155,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   }
 
   if (!room) {
-    return <div>No room data available</div>;
+    return <div>Loading room data...</div>;
   }
 
   return (

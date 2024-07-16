@@ -10,6 +10,7 @@ function AdminClassroom() {
   const [inputValue, setInputValue] = useState("");
   const [searchCriteria, setSearchCriteria] = useState({ type: "", value: "" });
   const [filteredData, setFilteredData] = useState([]);
+  const [change, setChange] = useState(true);
 
   const navigate = useNavigate();
 
@@ -49,7 +50,11 @@ function AdminClassroom() {
     };
 
     fetchData();
-  }, []);
+  }, [change]);
+
+  useEffect(() => {
+    filter();
+  }, [classroomData]);
 
   const handleSelectChange = (event) => {
     setRoomType(event.target.value);
@@ -59,8 +64,7 @@ function AdminClassroom() {
     setInputValue(event.target.value);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const filter = () => {
     let criteria = { type: "", value: "" };
 
     if (["1", "2", "3", "4", "5"].includes(inputValue)) {
@@ -91,13 +95,18 @@ function AdminClassroom() {
     setFilteredData(filtered);
   };
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    filter();
+  };
+
   const handleCellClick = (entry) => {
     // Custom logic for cell click
     console.log(`Clicked on :`, entry);
     navigate("/room/admin/" + entry.id);
   };
 
-  const handleUsage = async (entry) => {
+  const handleDisable = async (entry) => {
     console.log(`Clicked on :`, entry);
     try {
       const token = localStorage.getItem("token");
@@ -114,6 +123,8 @@ function AdminClassroom() {
 
       if (!response.ok) {
         throw new Error("Failed to fetch booking data");
+      } else if (response.ok) {
+        setChange(!change);
       }
 
       console.log("this is ok");
@@ -124,6 +135,29 @@ function AdminClassroom() {
 
   const handleEnable = async (entry) => {
     console.log(`Clicked on enable :`, entry);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `/api/booking/unblock-room?roomid=` + entry.id,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch booking data");
+      } else if (response.ok) {
+        setChange(!change);
+      }
+
+      console.log("this is ok");
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
   };
 
   //arco table
@@ -172,7 +206,10 @@ function AdminClassroom() {
       key: "disable",
       render: (text, entry) =>
         entry.is_available ? (
-          <button className="table-button-2" onClick={() => handleUsage(entry)}>
+          <button
+            className="table-button-2"
+            onClick={() => handleDisable(entry)}
+          >
             <img src="/admin_img/Check.png" alt="disable" />
           </button>
         ) : (
