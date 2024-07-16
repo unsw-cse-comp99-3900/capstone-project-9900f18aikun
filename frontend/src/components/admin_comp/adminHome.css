@@ -1,0 +1,15 @@
+.button-container {
+    display: flex;
+    justify-content: space-around; /* 保持按钮之间均匀分布 */
+    margin: 15px 40px; /* 上下保持10px, 左右保持40px的边距 */
+}
+
+.button-style {
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:  20px;
+    min-width: 80px;
+    /* width: 150px; */
+    height: 70px; /* 增加按钮的高度 */
+    color: #A9AEB8;
+    margin: 0 25px; /* 每个按钮左右间隔20px */
+}
