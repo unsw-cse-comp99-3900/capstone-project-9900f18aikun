@@ -428,6 +428,7 @@ class ExpressBook(Resource):
 # 6.admin编辑房间信息 ed
 # 7.把request信息返回给admin ziwen
 # 8.express booking改成is_available jackson
+# 9.
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -521,6 +522,41 @@ class block_room(Resource):
             return {
                 "error": "invalid roomid"
             }, 400
+        
+
+# roomid_edit = booking_ns.parser()
+# roomid_edit.add_argument('roomid', type=int, required=True, help='Room ID to edit')
+# roomid_edit.add_argument('capacity', type=int, required=False, help='New capacity of the room')
+# roomid_edit.add_argument('level', type=int, required=False, help='New level of the room')
+
+# @booking_ns.route('/edit-room')
+# class edit_room(Resource):
+#     # Get the
+#     @booking_ns.response(200, "success")
+#     @booking_ns.response(400, "Bad request")
+#     @booking_ns.expect(roomid_query)
+#     @booking_ns.doc(description="admin block room")
+#     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+#     def get(self):
+#         jwt_error = verify_jwt()
+#         if jwt_error:
+#             return jwt_error
+#         current_user = get_jwt_identity()
+#         user_zid = current_user['zid']
+#         if not is_admin(user_zid):
+#             return {
+#                 "error": f"user {user_zid} is not admin"
+#             }, 400
+#         args = roomid_edit.parse_args()
+#         roomid = args['roomid']
+#         capacity = args.get('capacity')
+#         level = args.get('level')
+#         return {
+#             "roomid": roomid
+
+#         }, 200
+
+
 
 
 
