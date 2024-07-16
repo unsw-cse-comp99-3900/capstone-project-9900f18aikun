@@ -7,7 +7,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import ToMap from "./toMap";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -59,7 +59,6 @@ const SelectWindow = ({
   setChange,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [limit, setLimit] = useState(false);
   if (!visible) return null;
   const style = {
     top: position.top,
@@ -106,20 +105,6 @@ const SelectWindow = ({
   const confirmHandler = async () => {
     const newTimes = gettimeList(time, selectedIdx, reserved);
 
-    // Total booked hours calculation
-    const totalBooked = self.reduce((total, reservation) => {
-      reservation.time.forEach((slot) => {
-        if (slot.date === selectedDate.format("DD/MM/YYYY")) {
-          total += slot.timeslot.length;
-        }
-      });
-      return total;
-    }, 0);
-    if (totalBooked + newTimes.length > 16) {
-      setLimit(true);
-      return;
-    }
-
     // getting end time
     const [hour, minute] = newTimes[newTimes.length - 1].split(":").map(Number);
     let endTime = new Date();
@@ -153,33 +138,8 @@ const SelectWindow = ({
 
       if (response.ok) {
         console.log("successfully sent");
-        const result = await response.json();
+        await response.json();
         setChange(!change);
-        console.log(obj)
-      //   // reservation
-      //   // if already has reservation for this day
-      //   const existing = self.find((reservation) => reservation.room === room);
-      //   if (existing) {
-      //     const existingDate = existing.time.find(
-      //       (date) => date.date === selectedDate.format("DD/MM/YYYY")
-      //     );
-      //     if (existingDate) {
-      //       existingDate.timeslot.push(...newTimes);
-      //     } else {
-      //       existing.time.push({
-      //         date: selectedDate.format("DD/MM/YYYY"),
-      //         timeslot: newTimes,
-      //       });
-      //     }
-      //     // if no reservation for this day
-      //   } else {
-      //     self.push({
-      //       room,
-      //       time: [
-      //         { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
-      //       ],
-      //     });
-      //   }
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -194,57 +154,39 @@ const SelectWindow = ({
 
   return (
     <div className="select-window" style={style}>
-      {limit ? (
-        <div style={{ style }}>
-          <p>
-            Booking limit exceeded for the day. You cannot book more than 8
-            hours for one day.
-          </p>
-          <Button
-            onClick={() => {
-              setLimit(false);
-              setSelectedIdx(1);
-              close();
-            }}
+      <>
+        <div>
+          <strong>{room}</strong>: {time} until...
+          <select
+            id="dropdown"
+            onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
           >
-            Close
-          </Button>
+            {dropdownTime.map((time, idx) => {
+              const [hour, minute] = time.split(":").map(Number);
+              let endTime = new Date();
+              endTime.setHours(hour, minute + 30, 0, 0);
+              endTime = endTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              });
+              return (
+                <option key={idx} value={idx}>
+                  {endTime}
+                </option>
+              );
+            })}
+            ;
+          </select>
         </div>
-      ) : (
-        <>
-          <div>
-            <strong>{room}</strong>: {time} until...
-            <select
-              id="dropdown"
-              onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
-            >
-              {dropdownTime.map((time, idx) => {
-                const [hour, minute] = time.split(":").map(Number);
-                let endTime = new Date();
-                endTime.setHours(hour, minute + 30, 0, 0);
-                endTime = endTime.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                });
-                return (
-                  <option key={idx} value={idx}>
-                    {endTime}
-                  </option>
-                );
-              })}
-              ;
-            </select>
-          </div>
-          <br />
-          <div className="button-class">
-            <Button onClick={confirmHandler}>
-              {permission ? "Confirm" : "Request"}
-            </Button>
-            <Button onClick={close}>Close</Button>
-          </div>
-        </>
-      )}
+        <br />
+        <div className="button-class">
+          <Button onClick={confirmHandler}>
+            {permission ? "Confirm" : "Request"}
+          </Button>
+          <Button onClick={close}>Close</Button>
+        </div>
+      </>
     </div>
   );
 };
@@ -294,6 +236,9 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   };
 
   const extractTime = (timeTable, self) => {
+    if (!timeTable) {
+      return [];
+    }
     const timeslots = [];
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {

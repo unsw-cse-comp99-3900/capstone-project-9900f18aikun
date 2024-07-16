@@ -187,7 +187,7 @@ const ReservationHistory = () => {
                     style={{ cursor: "pointer", color: "red" }}
                   >
                     {row.booking_status === "cancelled" ||
-                    row.booking_status === "completed"
+                    row.booking_status === "signed-in"
                       ? isCalendarVisible
                         ? "Hide Calendar"
                         : "Rebook"
