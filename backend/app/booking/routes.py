@@ -47,6 +47,9 @@ class BookSpace(Resource):
     @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
     @jwt_required()
     def post(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
         data = request.json
         current_user = get_jwt_identity()
         zid = current_user['zid']
@@ -153,6 +156,110 @@ class BookSpace(Resource):
                            f"date: {date}\n"
                            f"statu: {statu}\n"
                 }, 200
+
+
+# booking room model
+admin_booking_model = booking_ns.model('admin booking request', {
+    'user_id': fields.String(required=True, description='Start time of the booking (HH:MM)'),
+    'room_id': fields.Integer(required=True, description='The room id'),
+    'date': fields.Date(required=True, description='Date of the booking'),
+    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)'),
+    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)')
+})
+
+
+# Apis about booking
+@booking_ns.route('/admin_book')
+class AdminBook(Resource):
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.doc(description="Admin book function")
+    @booking_ns.expect(admin_booking_model)
+    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @jwt_required()
+    def post(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        data = request.json
+        current_user = get_jwt_identity()
+        admin_id = current_user['zid']
+        if not is_admin(admin_id):
+            return {'error': "Sorry, you don't have admin permit"}, 403
+
+        room_id = data['room_id']
+        start_time = data['start_time']
+        end_time = data['end_time']
+        date = data['date']
+        user_id = data['user_id']
+
+        if not isinstance(data['room_id'], int):
+            return {'error': 'room id must be integer'}, 400
+
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
+
+        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', start_time) or not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', end_time):
+            return {'error': 'time must be in HH:MM format'}, 400
+
+        if start_time > end_time:
+            return {'error': 'Start time must earlier than end time'}, 400
+
+        if start_time == end_time:
+            return {'error': 'Start time and end time are same'}, 400
+        try:
+            room_name = get_room_name(room_id)
+        except:
+            return {'error': 'Invalid room id'}, 400
+
+        conflict_bookings = Booking.query.filter(
+            Booking.date == date,
+            Booking.room_id == room_id,
+            Booking.booking_status != "requested",
+            Booking.booking_status != "cancelled",
+            or_(
+                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
+                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
+                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
+                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
+            )
+        ).all()
+
+        if not is_room_available(room_id):
+            return {'error': f"room {room_id} is unavailable"}, 400
+
+        for conflict_booking in conflict_bookings:
+            conflict_booking.booking_status = "cancelled"
+        db.session.commit()
+
+        user = db.session.get(Users, user_id)
+        if not user:
+            return {'error': 'Invalid zid'}, 400
+        user_type = user.user_type
+        is_request = False
+        status = 'booked'
+
+        new_booking = Booking(
+            room_id=room_id,
+            room_name=room_name,
+            user_id=user_id,
+            start_time=start_time,
+            end_time=end_time,
+            date=date,
+            booking_status=status,
+            is_request=is_request
+        )
+        statu = new_booking.booking_status
+        db.session.add(new_booking)
+        db.session.commit()
+
+        send_confirm_email_async(user_id, room_id, date, start_time, end_time)
+        schedule_reminder(user_id, room_id, start_time, date, end_time)
+        dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+        reminder_time = dt_start_time - timedelta(hours=1)
+
+        return {'message': f"Booking confirmed"}, 200
 
 
 @booking_ns.route('/book/<int:booking_id>')
