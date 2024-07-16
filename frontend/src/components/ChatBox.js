@@ -19,7 +19,7 @@ export const ChatBox = ({ change, setChange }) => {
   const [bookedRooms, setBookedRooms] = useState(new Set());
   const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [optionSelected, setOptionSelected] = useState(false);
 
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
@@ -34,7 +34,7 @@ export const ChatBox = ({ change, setChange }) => {
     setStoredQuery("");
     setBookedRooms(new Set());
     setSelectedRoom(null);
-    setSelectedOption(null);
+    setOptionSelected(false);
   };
 
   const toggleMode = () => {
@@ -232,14 +232,14 @@ export const ChatBox = ({ change, setChange }) => {
           timestamp: new Date(),
           options: [
             { 
-              text: selectedOption === "meeting_room" ? "Meeting Room Chosen!" : "Meeting Room", 
+              text: "Meeting Room", 
               id: "meeting_room", 
-              disabled: selectedOption === "meeting_room"
+              disabled: optionSelected
             },
             { 
-              text: selectedOption === "hot_desk" ? "Hot Desk Chosen!" : "Hot Desk", 
+              text: "Hot Desk", 
               id: "hot_desk", 
-              disabled: selectedOption === "hot_desk"
+              disabled: optionSelected
             }
           ]
         };
@@ -294,25 +294,26 @@ export const ChatBox = ({ change, setChange }) => {
   
     setInputMessage("");
   };
-
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
   const handleOptionSelection = async (roomType) => {
-    if (selectedOption === roomType) return; // Prevent selecting the same option again
-    setSelectedOption(roomType);
+    if (optionSelected) return; // Prevent selecting any option if one has already been chosen
+    setOptionSelected(true);
+    setSelectedOptionId(roomType);
 
-    // Update the messages to reflect the new selection
-    setExpressBookMessages(prev => prev.map(msg => {
-      if (msg.options) {
-        return {
-          ...msg,
-          options: msg.options.map(option => ({
-            ...option,
-            text: option.id === roomType ? `${option.text} Chosen!` : option.text,
-            disabled: option.id === roomType || option.id === selectedOption
-          }))
-        };
-      }
-      return msg;
-    }));
+   // Update the messages to reflect the new selection
+  setExpressBookMessages(prev => prev.map(msg => {
+    if (msg.options) {
+      return {
+        ...msg,
+        options: msg.options.map(option => ({
+          ...option,
+          text: option.id === roomType ? `${option.text} Chosen!` : option.text,
+          disabled: true // Disable all options after selection
+        }))
+      };
+    }
+    return msg;
+  }));
   
     try {
       const token = localStorage.getItem('token');
@@ -508,7 +509,6 @@ export const ChatBox = ({ change, setChange }) => {
                   {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
                 </span>
               </div>
-              {/* <button onClick={clearChat} className="clear-button">Clear Chat</button> */}
             </div>
           </div>
         </div>
