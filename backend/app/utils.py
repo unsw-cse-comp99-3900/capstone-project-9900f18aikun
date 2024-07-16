@@ -125,7 +125,7 @@ def check_valid_room(roomid: int ) -> bool:
 
 
 def get_room_image(room_id: int):
-    image_directory = 'static/images'
+    image_directory = 'app/static/images'
     file_name = f'{room_id}.jpg'
     if is_meeting_room(room_id):
         image_path = os.path.join(image_directory, file_name)
