@@ -5,7 +5,7 @@ from app.extensions import db, api
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import start_end_time_convert
-from app.email import schedule_reminder, send_confirm_email_async
+from app.email import get_email, schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from app.booking.models import Booking
 from app.utils import verify_jwt
@@ -39,6 +39,7 @@ class BookingHistory(Resource):
                        "room_name": booking.room_name,
                        "user_id": booking.user_id,
                        "user_name": get_user_name(booking.user_id),
+                       "user_email": get_email(booking.user_id),
                        "date": booking.date.isoformat() if booking.date else None,
                        "start_time": booking.start_time.isoformat() if booking.start_time else None,
                        "end_time": booking.end_time.isoformat() if booking.end_time else None,
@@ -86,6 +87,7 @@ class alluser_booking_history(Resource):
                        "room_name": booking.room_name,
                        "user_id": booking.user_id,
                        "user_name": get_user_name(booking.user_id),
+                       "user_email": get_email(booking.user_id),
                        "date": booking.date.isoformat() if booking.date else None,
                        "start_time": booking.start_time.isoformat() if booking.start_time else None,
                        "end_time": booking.end_time.isoformat() if booking.end_time else None,

@@ -532,11 +532,11 @@ class ExpressBook(Resource):
 
 #1. 改成当天时间 1 ------
 # 2. admin是prof 1-------
-# 3. admin给别人book ed 如果占着就强行取消 ????????gei jackson
+# 3. admin给别人book ed 如果占着就强行取消 ----------
 # 4.admin block房间 加一列 ed --------
-# 5. admin给别人取消 ed ??????? gei jackson
+# 5. admin给别人取消 ed -----------
 # 6.admin编辑房间信息 ed  ----------
-# 7.把request信息返回给admin ziwen
+# 7.把request信息返回给admin ziwen -----------
 # 8.express booking改成is_available jackson --------
 # 9. 返回文字版报告
 # 10. 超时15min自动取消 只用改canceled
@@ -690,7 +690,7 @@ class edit_room(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.expect(roomid_edit_model)
-    @booking_ns.doc(description="admin block room")
+    @booking_ns.doc(description="admin edit room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def put(self):
         args = request.json
