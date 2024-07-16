@@ -24,6 +24,9 @@ function AdminAppointment() {
                 />
                 <p>Selected Date: {date.format('YYYY-MM-DD')}</p>
             </div>
+            <div className='class-table'>
+                
+            </div>
         </div>
     );
 }
