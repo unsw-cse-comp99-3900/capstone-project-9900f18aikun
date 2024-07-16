@@ -22,7 +22,7 @@ authorizations = {
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 socketio = SocketIO()
 api = Api(authorizations=authorizations, security='Bearer Auth', version='1.0', title='UNSW CSE booking system',
           description='An api helping you book space in j17 and k17')

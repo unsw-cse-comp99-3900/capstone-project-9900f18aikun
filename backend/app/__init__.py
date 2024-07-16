@@ -12,6 +12,7 @@ def create_app():
     # in docker the web a faster than db just wait for db to set up
     time.sleep(3)
 
+
     db.init_app(app)
     migrate.init_app(app, db)
     api.init_app(app)

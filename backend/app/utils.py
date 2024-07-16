@@ -4,6 +4,7 @@ from app.models import CSEStaff, HDRStudent, Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from jwt import exceptions
 from datetime import datetime, timedelta
+import os
 # convert time HH:MM to index for every half hour
 
 
@@ -25,7 +26,8 @@ def is_student(zid: str) -> bool:
         return True
     else:
         return False
-    
+
+
 # check zid is HDR student or not
 def is_room_available(roomid: int) -> bool:
     space = db.session.get(Space, roomid)
@@ -116,10 +118,24 @@ def calculate_time_difference(date, start_time_str, end_time_str):
     except ValueError as e:
         return None, str(e)
 
+
 def check_valid_room(roomid: int ) -> bool:
     room = Space.query.get(roomid)
     return room != None
 
-# def get_room_image(room_id):
-#
+
+def get_room_image(room_id: int):
+    image_directory = 'static/images'
+    file_name = f'{room_id}.jpg'
+    if is_meeting_room(room_id):
+        image_path = os.path.join(image_directory, file_name)
+        if os.path.exists(image_path):
+            return file_name
+        else:
+            return "no_image.jpg"
+    else:
+        return "hotdesk.jpg"
+
+
+
 
