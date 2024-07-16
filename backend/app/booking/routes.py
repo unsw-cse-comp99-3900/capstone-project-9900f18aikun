@@ -798,7 +798,6 @@ class show_request(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
-    @booking_ns.expect(date_query)
     @booking_ns.doc(description="show request for admin")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -817,8 +816,12 @@ class show_request(Resource):
     
     def get_request(self):
         res = []
+        sydney_tz = pytz.timezone('Australia/Sydney')
+        sydney_time = datetime.now(timezone.utc).astimezone(sydney_tz)
+        formatted_date = sydney_time.strftime('%Y-%m-%d')
         requests = Booking.query.filter(
-                    Booking.is_request == True,
+                    Booking.booking_status == "requested",
+                    Booking.date >= formatted_date
                 ).all()
         for request in requests:
             temp = {
@@ -865,6 +868,7 @@ class handle_request(Resource):
         if confirmed:
             my_request = Booking.query.get(booking_id)
             my_request.booking_status = "booked"
+            my_request.is_request = False
             db.session.commit()
             return {
                 "message": f"admin {user_zid} set booking id {booking_id} as booked"
