@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DatePicker, Table, ConfigProvider } from '@arco-design/web-react';
+import { DatePicker, Table, ConfigProvider, Notification  } from '@arco-design/web-react';
 import dayjs from 'dayjs';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import './adminAppointment.css';
@@ -63,6 +63,66 @@ function AdminAppointment({ token }) {
         return time.slice(0, 5); // 只取前5个字符，即 "HH:MM"
     };
 
+    const calculateBookingHour = (startTime, endTime) => {
+        const start = dayjs(startTime, 'HH:mm');
+        const end = dayjs(endTime, 'HH:mm');
+        return end.diff(start, 'hour', true); // 计算小时数
+    };
+
+    const handleApprove = async (entry) => {
+        
+        try {
+            const response = await fetch('http://s2.gnip.vip:37895/booking/handle-request', {
+                method: 'POST',
+                headers: {
+                    accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    booking_id: entry.booking_id,
+                    confirmed: true,
+                }),
+            });
+            const data = await response.json();
+            console.log(data.message);
+            Notification.success({
+                closable: false,
+                title: 'Notification',
+                content: 'You have approved the booking request.',
+            });
+        } catch (error) {
+            console.error('Error approving request:', error);
+        }
+    };
+
+    const handleReject = async (entry) => {
+        
+        try {
+            const response = await fetch('http://s2.gnip.vip:37895/booking/handle-request', {
+                method: 'POST',
+                headers: {
+                    accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    booking_id: entry.booking_id,
+                    confirmed: false,
+                }),
+            });
+            const data = await response.json();
+            console.log(data.message);
+            Notification.success({
+                closable: false,
+                title: 'Notification',
+                content: 'You have rejected the booking request.',
+            });
+        } catch (error) {
+            console.error('Error rejecting request:', error);
+        }
+    };
+
     const columns = [
         {
             title: 'User Name',
@@ -84,6 +144,11 @@ function AdminAppointment({ token }) {
             dataIndex: 'booking_time',
             key: 'booking_time',
             render: (_, record) => `${formatTime(record.start_time)} - ${formatTime(record.end_time)}`,
+        },
+        {
+            title: 'Booking Hour (h)',
+            key: 'booking_hour',
+            render: (_, record) => calculateBookingHour(record.start_time, record.end_time),
         },
         {
             title: 'Booking Status',
@@ -119,6 +184,29 @@ function AdminAppointment({ token }) {
         dataIndex: 'booking_time',
         key: 'booking_time',
         render: (_, record) => `${formatTime(record.start_time)} - ${formatTime(record.end_time)}`,
+    },
+    {
+        title: 'Booking Hour (h)',
+        key: 'booking_hour',
+        render: (_, record) => calculateBookingHour(record.start_time, record.end_time),
+    },
+    {
+        title: 'Confirm Request',
+        key: 'confirm_request',
+        render: (_, entry) => (
+            <button className="table-button" onClick={() => handleApprove(entry)}>
+                <img src="/admin_img/Check.png" alt="approve" />
+            </button>
+        ),
+    },
+    {
+        title: 'Reject Request',
+        key: 'reject_request',
+        render: (_, entry) => (
+            <button className="table-button" onClick={() => handleReject(entry)}>
+                <img src="/admin_img/Dell.png" alt="delete" />
+            </button>
+        ),
     },
     ] ;
 
