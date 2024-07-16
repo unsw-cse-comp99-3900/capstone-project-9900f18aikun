@@ -1,72 +1,74 @@
-import './LoginPage.css';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import "./LoginPage.css";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LoginPage = ({ onLogin }) => {
   const [showLoginForm, setShowLoginForm] = useState(false);
-  const [zid, setZid] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [zid, setZid] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const accessToken = queryParams.get('access_token');
-    const loginFailed = queryParams.get('false');
+    const accessToken = queryParams.get("access_token");
+    const loginFailed = queryParams.get("false");
 
     if (accessToken) {
-      handleAutoLogin(accessToken);
+      // handleAutoLogin(accessToken);
     } else if (loginFailed) {
-      setError('Outlook login failed. Please try again.');
+      setError("Outlook login failed. Please try again.");
     } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem("token");
+      localStorage.removeItem("isLoggedIn");
     }
   }, [location]);
 
   const handleSuccessfulLogin = (data) => {
-    localStorage.setItem('token', data.access_token);
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('isAdmin', data.is_admin);
-    console.log('Login successful');
+    console.log("this data is ", data);
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("isAdmin", data.is_admin);
+    console.log("Login successful");
     onLogin();
-    
+
     const fromQr = location.state?.fromQr;
-    const qrCode = localStorage.getItem('qrCode');
-    
+    const qrCode = localStorage.getItem("qrCode");
+
     if (fromQr && qrCode) {
-      navigate('/qr-check-in');
+      navigate("/qr-check-in");
     } else if (data.is_admin) {
-      navigate('/admin');
+      navigate("/admin");
     } else {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   };
 
   const handleAutoLogin = async (token) => {
     try {
-      const response = await fetch('http://s2.gnip.vip:37895/auth/auto-login', {
-        method: 'GET',
+      const response = await fetch("http://s2.gnip.vip:37895/auth/auto-login", {
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log("testing");
         handleSuccessfulLogin(data);
       } else {
-        console.log('Auto-login failed, token may be invalid');
-        setError('Auto-login failed. Please try again.');
-        localStorage.removeItem('token');
-        localStorage.removeItem('isLoggedIn');
+        console.log("Auto-login failed, token may be invalid");
+        setError("Auto-login failed. Please try again.");
+        localStorage.removeItem("token");
+        localStorage.removeItem("isLoggedIn");
       }
     } catch (error) {
-      console.error('Auto-login error:', error);
-      setError('Network error. Please try again.');
-      localStorage.removeItem('token');
-      localStorage.removeItem('isLoggedIn');
+      console.error("Auto-login error:", error);
+      setError("Network error. Please try again.");
+      localStorage.removeItem("token");
+      localStorage.removeItem("isLoggedIn");
     }
   };
 
@@ -76,32 +78,32 @@ const LoginPage = ({ onLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
-      const response = await fetch('http://s2.gnip.vip:37895/auth/login', {
-        method: 'POST',
+      const response = await fetch("http://s2.gnip.vip:37895/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ zid, password }),
       });
-  
+
       const data = await response.json();
-      
+
       if (response.ok) {
         handleSuccessfulLogin(data);
       } else {
-        console.log('Login failed:', data);
-        setError(data.message || 'Login failed. Please try again.');
+        console.log("Login failed:", data);
+        setError(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setError('Network error. Please try again later.');
+      console.error("Login error:", error);
+      setError("Network error. Please try again later.");
     }
   };
 
   const handleOutlookLogin = () => {
-    window.location.href = 'http://localhost:5001/auth/outlook-login';
+    window.location.href = "http://localhost:5001/auth/outlook-login";
   };
 
   const handleForgotPassword = () => {
@@ -136,20 +138,40 @@ const LoginPage = ({ onLogin }) => {
               />
               <div className="button-group">
                 <button type="submit">Submit</button>
-                <button type="button" onClick={() => setShowLoginForm(false)} className="back-button">Back</button>
+                <button
+                  type="button"
+                  onClick={() => setShowLoginForm(false)}
+                  className="back-button"
+                >
+                  Back
+                </button>
               </div>
               {error && <div className="error-message">{error}</div>}
             </form>
           ) : (
             <>
               <img className="img" alt="Rectangle" src="/img/rectangle-7.png" />
-              <img className="rectangle-2" alt="Rectangle" src="/img/rectangle-7.png" />
-              <img className="office-logos" alt="Office logos" src="/img/office-logos.svg" />
-              <p className="p" onClick={handleZIDLogin}>Agree and sign on with zID</p>
-              <div className="text-wrapper-2" onClick={handleOutlookLogin}>Sign on with outlook</div>
+              <img
+                className="rectangle-2"
+                alt="Rectangle"
+                src="/img/rectangle-7.png"
+              />
+              <img
+                className="office-logos"
+                alt="Office logos"
+                src="/img/office-logos.svg"
+              />
+              <p className="p" onClick={handleZIDLogin}>
+                Agree and sign on with zID
+              </p>
+              <div className="text-wrapper-2" onClick={handleOutlookLogin}>
+                Sign on with outlook
+              </div>
             </>
           )}
-          <div className="text-wrapper-3" onClick={handleForgotPassword}>Forgot password</div>
+          <div className="text-wrapper-3" onClick={handleForgotPassword}>
+            Forgot password
+          </div>
           <div className="text-wrapper-4">K17 room booking system</div>
         </div>
       </div>

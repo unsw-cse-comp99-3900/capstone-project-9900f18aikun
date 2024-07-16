@@ -41,9 +41,38 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 };
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem("token") !== null;
+  const [isLoggedIn, setIsLoggedIn] = useState(async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://s2.gnip.vip:37895/auth/auto-login", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.is_admin) {
+          localStorage.setItem("isAdmin", "true");
+        } else {
+          localStorage.setItem("isAdmin", "false");
+        }
+        return localStorage.getItem("token");
+      } else {
+        console.log("Auto-login failed, token may be invalid");
+        localStorage.removeItem("token");
+        localStorage.removeItem("isLoggedIn");
+        return null;
+      }
+    } catch (error) {
+      console.error("Auto-login error:", error);
+      localStorage.removeItem("token");
+      localStorage.removeItem("isLoggedIn");
+      return null;
+    }
   });
+  console.log("isloggedin is ", isLoggedIn);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -108,7 +137,7 @@ function App() {
     localStorage.setItem("isLoggedIn", "true");
     const qrCode = localStorage.getItem("qrCode");
     if (qrCode) {
-      navigate('/qr-check-in');
+      navigate("/qr-check-in");
     } else {
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       navigate(isAdmin ? "/admin" : "/dashboard");
@@ -147,11 +176,11 @@ function App() {
   }, [location]);
 
   const handleQrCodeScan = (qrCode) => {
-    localStorage.setItem('qrCode', qrCode);
+    localStorage.setItem("qrCode", qrCode);
     if (!isLoggedIn) {
-      navigate('/login', { state: { fromQr: true } });
+      navigate("/login", { state: { fromQr: true } });
     } else {
-      navigate('/qr-check-in');
+      navigate("/qr-check-in");
     }
   };
 
@@ -170,9 +199,7 @@ function App() {
         />
         <Route
           path="/QR/:id"
-          element={
-            <QrCodeRedirect onQrCodeScan={handleQrCodeScan} />
-          }
+          element={<QrCodeRedirect onQrCodeScan={handleQrCodeScan} />}
         />
         <Route
           path="/dashboard"
@@ -282,10 +309,7 @@ function App() {
         />
       </Routes>
       <div className="chat-box-wrapper">
-        <ChatBox 
-        change={change}
-        setChange={setChange}
-        />
+        <ChatBox change={change} setChange={setChange} />
       </div>
     </div>
   );
@@ -297,11 +321,11 @@ const QrCodeRedirect = ({ onQrCodeScan }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
   useEffect(() => {
-    localStorage.setItem('qrCode', id);
+    localStorage.setItem("qrCode", id);
     if (isLoggedIn) {
-      navigate('/qr-check-in');
+      navigate("/qr-check-in");
     } else {
-      navigate('/login', { state: { fromQr: true } });
+      navigate("/login", { state: { fromQr: true } });
     }
   }, [id, isLoggedIn, navigate]);
 
