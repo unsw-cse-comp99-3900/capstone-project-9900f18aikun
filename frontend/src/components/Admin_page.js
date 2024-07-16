@@ -14,12 +14,13 @@ import MessageModal from './admin_comp/adminMessage'; // 引入模态组件
 import '@arco-design/web-react/dist/css/arco.css';
 
 
-function AdminPage() {
+function AdminPage({token}) {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [contentState, setContentState] = useState(1);
     const [showDropdown, setShowDropdown] = useState(false); // 新增状态管理下拉菜单的显示
     const [showMessageModal, setShowMessageModal] = useState(false); // 状态message模态显示
     const navigate = useNavigate();
+    // console.log('token is :',token)
 
     const toggleSidebar = () => {
         setSidebarOpen(!isSidebarOpen);
@@ -63,7 +64,7 @@ function AdminPage() {
             case 2:
                 return <AdminClassroom />;
             case 3:
-                return <AdminAppointment />;
+                return <AdminAppointment token={token} />;
             case 4:
                 return <AdminStatistics />;
             default:
