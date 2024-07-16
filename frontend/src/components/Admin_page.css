@@ -149,7 +149,7 @@
 
 .admin-user {
     /* No margin-left needed, justify-content will handle the alignment */
-    margin-right: 50px;
+    margin-right: 40px;
     width: 50px;
     height: 50px;
     background: none;
@@ -182,7 +182,7 @@
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2); /* 阴影效果 */
     z-index: 1000; /* 确保下拉菜单在其他内容之上 */
     width: 100px;
-    margin-right: 40px;
+    margin-right: 35px;
 }
 
 .dropdown-menu button {
@@ -200,4 +200,20 @@
 
 .dropdown-menu button:hover {
     background-color: #f1f1f1; /* 鼠标悬停背景色 */
+}
+
+/* 邮件按钮样式 */
+.admin-message {
+    /* No margin-left needed, justify-content will handle the alignment */
+    margin:0 0 0 5px;
+    width: 50px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.admin-message img{
+    width: 40px;
+    height: 40px;
 }

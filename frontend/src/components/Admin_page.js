@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+//Arco message
+import { Badge } from '@arco-design/web-react';
+// import { IconClockCircle } from '@arco-design/web-react/icon';
 
 import './Admin_page.css';
 import AdminHome from './admin_comp/adminHome';
 import AdminClassroom from './admin_comp/adminClassroom';
 import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics'; 
+import MessageModal from './admin_comp/adminMessage'; // 引入模态组件
+
+import '@arco-design/web-react/dist/css/arco.css';
 
 
 function AdminPage() {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [contentState, setContentState] = useState(1);
     const [showDropdown, setShowDropdown] = useState(false); // 新增状态管理下拉菜单的显示
+    const [showMessageModal, setShowMessageModal] = useState(false); // 状态message模态显示
     const navigate = useNavigate();
 
     const toggleSidebar = () => {
@@ -101,6 +108,13 @@ function AdminPage() {
             </div>
             <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`} style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
+                
+                <Badge count={15}>
+                    <button className='admin-message' onClick={() => setShowMessageModal(true)}>
+                        <img src="/admin_img/Message.png" alt="Message" />
+                    </button>
+                </Badge>
+
                 <button className='admin-user' onClick={() => setShowDropdown(!showDropdown)}>
                     <img src="/admin_img/user.png" alt="User" />
                 </button>
@@ -113,6 +127,7 @@ function AdminPage() {
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {renderContent()}
             </div>
+            {showMessageModal && <MessageModal onClose={() => setShowMessageModal(false)} />}
         </div>
     );
 }

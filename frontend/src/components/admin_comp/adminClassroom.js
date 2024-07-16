@@ -70,31 +70,25 @@ function AdminClassroom() {
       criteria = { type: "name", value: inputValue };
     }
 
-    setSearchCriteria(criteria);
-    console.log("Search Criteria:", criteria, roomType);
-    const filtered = classroomData.filter((room) => {
-      if (criteria.type === "level") {
-        return (
-          room.level === criteria.value &&
-          (roomType === "all" || room.type === roomType)
-        );
-      } else if (criteria.type === "name") {
-        return (
-          room.name.toLowerCase().includes(criteria.value.toLowerCase()) &&
-          (roomType === "all" || room.type === roomType)
-        );
-      }
-      return false;
-    });
+        setSearchCriteria(criteria);
+        console.log("Search Criteria:", criteria, roomType);
+        const filtered = classroomData.filter(room => {
+            if (criteria.type === 'level') {
+                return room.level === criteria.value && (roomType === 'all' || room.type === roomType);
+            } else if (criteria.type === 'name') {
+                return room.name.toLowerCase().includes(criteria.value.toLowerCase()) && (roomType === 'all' || room.type === roomType);
+            }
+            return false;
+        });
 
-    setFilteredData(filtered);
-  };
+        setFilteredData(filtered);
+    };
 
-  const handleCellClick = (entry) => {
-    // Custom logic for cell click
-    console.log(`Clicked on :`, entry);
-    navigate("/room/admin/" + entry.id);
-  };
+    const handleCellClick = (entry) => {
+        // Custom logic for cell click
+        console.log(`Clicked on :`, entry);
+        navigate("/room/admin/" + entry.id);
+    };
 
   const handleUsage = async (entry) => {
     console.log(`Clicked on :`, entry);
@@ -126,6 +120,7 @@ function AdminClassroom() {
     {
       title: "Room Name",
       dataIndex: "name",
+            key: 'name'
       // render: (text, entry) => (
       //     <td onClick={() => handleCellClick(entry)}>{text}</td>
       // )
@@ -133,22 +128,28 @@ function AdminClassroom() {
     {
       title: "Building",
       dataIndex: "building",
+            key: 'building',
+            
     },
     {
       title: "Level",
       dataIndex: "level",
+            key: 'level',
     },
     {
       title: "Capacity",
       dataIndex: "capacity",
+            key: 'capacity',
     },
     {
       title: "Room Type",
       dataIndex: "type",
+            key: 'type',
     },
     {
       title: "Edit", // 新列的标题
       dataIndex: "action",
+            key: 'edit',
       render: (text, entry) => (
         <button className="table-button" onClick={() => handleCellClick(entry)}>
           <img src="/admin_img/edit.png" alt="edit" />
@@ -158,6 +159,7 @@ function AdminClassroom() {
     {
       title: "Disable",
       dataIndex: "usage",
+            key: 'disable',
       render: (text, entry) => (
         <button className="table-button-2" onClick={() => handleUsage(entry)}>
           <img src="/admin_img/Cancel.png" alt="disable" />
@@ -166,44 +168,38 @@ function AdminClassroom() {
     },
   ];
 
-  return (
-    <ConfigProvider locale={enUS}>
-      {" "}
-      {/* 使用 ConfigProvider 设置语言 */}
-      <div>
-        <h1 className="class-h1">Classroom Management</h1>
-        <form className="search" onSubmit={handleSubmit}>
-          <h2>Search classroom</h2>
-          <div className="search_1">
-            <label>Room types:</label>
-            <select value={roomType} onChange={handleSelectChange}>
-              <option value="meeting_room">Meeting Room</option>
-              <option value="hot_desk">Hot Desk</option>
-              <option value="all">All</option>
-            </select>
-          </div>
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Please input room name or level"
-              value={inputValue}
-              onChange={handleInputChange}
-            />
-            <button type="submit" className="search-button">
-              <img src="/admin_img/search.png" alt="Search" />
-            </button>
-          </div>
-        </form>
-        <div className="class-table">
-          <Table
-            columns={columns}
-            data={filteredData}
-            pagination={{ pageSize: 5 }}
-          />
-        </div>
-      </div>
-    </ConfigProvider>
-  );
+    return (
+        <ConfigProvider locale={enUS}>  {/* 使用 ConfigProvider 设置语言 */}
+            <div>
+                <h1 className='class-h1'>Classroom Management</h1>
+                <form className='search' onSubmit={handleSubmit}>
+                    <h2>Search classroom</h2>
+                    <div className='search_1'>
+                        <label>Room types:</label>
+                        <select value={roomType} onChange={handleSelectChange}>
+                            <option value="meeting_room">Meeting Room</option>
+                            <option value="hot_desk">Hot Desk</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                    <div className="input-group">
+                        <input
+                            type="text"
+                            placeholder="Please input room name or level"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                        />
+                        <button type="submit" className="search-button">
+                            <img src="/admin_img/search.png" alt="Search" />
+                        </button>
+                    </div>
+                </form>
+                <div className='class-table'>
+                <Table columns={columns} data={filteredData.map(item => ({ ...item, key: item.id }))} pagination={{ pageSize: 5 }} />
+                </div>
+            </div>
+        </ConfigProvider>
+    );
 }
 
 export default AdminClassroom;

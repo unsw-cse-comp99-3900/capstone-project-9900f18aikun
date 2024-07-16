@@ -23,6 +23,7 @@ import QrCodeCheckIn from "./components/QrCodeCheckIn";
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
+// import '@arco-design/web-react/dist/css/arco.css';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
