@@ -135,18 +135,9 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
           placeholder="Type your message here..."
           disabled={!isConnected}
         />
-        {/* <button onClick={sendMessage} disabled={!isConnected}>Send</button> */}
+      
       </div>
-      <div className="connection-status">
-        Status: {isConnected ? 'Connected' : 'Disconnected'}
-        {connectionError && <div className="error-message">{connectionError}</div>}
-      </div>
-      <div className="debug-info">
-        <p>Socket.IO ID: {socketRef.current ? socketRef.current.id : 'Not connected'}</p>
-      </div>
-      <button onClick={toggleMode} className="mode-switch-button">
-        Switch to ExpressBook
-      </button>
+        
     </div>
   );
 };

@@ -254,6 +254,9 @@ function App() {
                     />
                   </div>
                 </div>
+                <div className="chat-box-wrapper">
+                  <ChatBox change={change} setChange={setChange} />
+                </div>
               </>
             </ProtectedRoute>
           }
@@ -330,10 +333,7 @@ function App() {
             <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
           }
         />
-     </Routes>
-      <div className="chat-box-wrapper">
-        <ChatBox change={change} setChange={setChange} />
-      </div>
+      </Routes>
     </div>
   );
 }
