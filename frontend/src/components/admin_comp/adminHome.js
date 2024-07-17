@@ -16,8 +16,10 @@ function AdminHome() {
                             <Button
                                 className="button-style" // 应用按钮样式
                                 style={{
-                                    background: color, // 保留背景颜色的内联样式
-                                }}
+                                    background: color, 
+                                    height: '60px', // 确保高度样式被应用// 保留背景颜色的内联样式
+                                    
+                             }}
                             >
                                 {buttonLabels[index]}
                             </Button>

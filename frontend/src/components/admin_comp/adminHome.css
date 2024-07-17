@@ -6,7 +6,8 @@
 
 .button-style {
     min-width: 150px;
-    height: 100px; /* 增加按钮的高度 */
+    height: 500px; /* 增加按钮的高度 */
     color: #fff;
+    font-size: 25px;
     margin: 0 20px; /* 每个按钮左右间隔20px */
 }
