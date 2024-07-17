@@ -15,6 +15,8 @@ const LoginPage = ({ onLogin }) => {
     const accessToken = queryParams.get("access_token");
     const loginFailed = queryParams.get("false");
 
+    console.log("LoginPage: accessToken =", accessToken, "loginFailed =", loginFailed);
+
     if (accessToken) {
       // handleAutoLogin(accessToken);
     } else if (loginFailed) {
@@ -26,59 +28,38 @@ const LoginPage = ({ onLogin }) => {
   }, [location]);
 
   const handleSuccessfulLogin = (data) => {
-    console.log("this data is ", data);
+    console.log("Login successful. Data:", data);
     localStorage.setItem("token", data.access_token);
     localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("isAdmin", data.is_admin);
-    console.log("Login successful");
-    onLogin();
+    localStorage.setItem("isAdmin", data.is_admin.toString());
+    onLogin(data.access_token, data.is_admin);
 
     const fromQr = location.state?.fromQr;
     const qrCode = localStorage.getItem("qrCode");
 
+    console.log("fromQr =", fromQr, "qrCode =", qrCode);
+
     if (fromQr && qrCode) {
+      console.log("Navigating to QR check-in");
       navigate("/qr-check-in");
     } else if (data.is_admin) {
+      console.log("Navigating to admin page");
       navigate("/admin");
     } else {
+      console.log("Navigating to dashboard");
       navigate("/dashboard");
     }
   };
 
-  const handleAutoLogin = async (token) => {
-    try {
-      const response = await fetch("http://s2.gnip.vip:37895/auth/auto-login", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("testing");
-        handleSuccessfulLogin(data);
-      } else {
-        console.log("Auto-login failed, token may be invalid");
-        setError("Auto-login failed. Please try again.");
-        localStorage.removeItem("token");
-        localStorage.removeItem("isLoggedIn");
-      }
-    } catch (error) {
-      console.error("Auto-login error:", error);
-      setError("Network error. Please try again.");
-      localStorage.removeItem("token");
-      localStorage.removeItem("isLoggedIn");
-    }
-  };
-
   const handleZIDLogin = () => {
+    console.log("Showing ZID login form");
     setShowLoginForm(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    console.log("Attempting login with ZID:", zid);
     try {
       const response = await fetch("http://s2.gnip.vip:37895/auth/login", {
         method: "POST",
@@ -91,6 +72,7 @@ const LoginPage = ({ onLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
+        console.log("Login successful");
         handleSuccessfulLogin(data);
       } else {
         console.log("Login failed:", data);
@@ -103,10 +85,12 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleOutlookLogin = () => {
+    console.log("Initiating Outlook login");
     window.location.href = "http://localhost:5001/auth/outlook-login";
   };
 
   const handleForgotPassword = () => {
+    console.log("Navigating to forgot password page");
     window.location.href = "https://iam.unsw.edu.au/home";
   };
 

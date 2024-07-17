@@ -23,7 +23,6 @@ import QrCodeCheckIn from "./components/QrCodeCheckIn";
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
-// import '@arco-design/web-react/dist/css/arco.css';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -41,38 +40,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 };
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(async () => {
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch("http://s2.gnip.vip:37895/auth/auto-login", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // console.log("is_admin:", data.is_admin); 
-        if (data.is_admin) {
-          localStorage.setItem("isAdmin", "true");
-        } else {
-          localStorage.setItem("isAdmin", "false");
-        }
-        return localStorage.getItem("token");
-      } else {
-        console.log("Auto-login failed, token may be invalid");
-        localStorage.removeItem("token");
-        localStorage.removeItem("isLoggedIn");
-        return null;
-      }
-    } catch (error) {
-      console.error("Auto-login error:", error);
-      localStorage.removeItem("token");
-      localStorage.removeItem("isLoggedIn");
-      return null;
-    }
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -85,6 +53,58 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [change, setChange] = useState(false);
+
+  useEffect(() => {
+    const autoLogin = async () => {
+      const token = localStorage.getItem("token");
+      console.log("Attempting auto-login with token:", token);
+      if (token) {
+        try {
+          const response = await fetch("http://s2.gnip.vip:37895/auth/auto-login", {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          console.log("Auto-login response status:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("Auto-login response data:", data);
+            if (data.message === "User verified") {
+              console.log("Auto-login successful");
+              setIsLoggedIn(true);
+              localStorage.setItem("isLoggedIn", "true");
+              localStorage.setItem("isAdmin", data.is_admin.toString());
+            } else {
+              console.log("Auto-login failed: User not verified");
+              handleAutoLoginFailure();
+            }
+          } else {
+            console.log("Auto-login failed: Response not OK");
+            handleAutoLoginFailure();
+          }
+        } catch (error) {
+          console.error("Auto-login error:", error);
+          handleAutoLoginFailure();
+        }
+      } else {
+        console.log("No token found for auto-login");
+      }
+    };
+
+    autoLogin();
+  }, []);
+
+  const handleAutoLoginFailure = () => {
+    console.log("Handling auto-login failure");
+    setIsLoggedIn(false);
+    localStorage.removeItem("token");
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("isAdmin");
+  };
 
   const fetchBookingData = async () => {
     try {
@@ -132,14 +152,18 @@ function App() {
     handleFilter(filters);
   }, [filters, data, change]);
 
-  const handleLogin = () => {
+  const handleLogin = (token, isAdmin) => {
+    console.log("Handling login with token:", token, "isAdmin:", isAdmin);
     setIsLoggedIn(true);
     localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("token", token);
+    localStorage.setItem("isAdmin", isAdmin.toString());
     const qrCode = localStorage.getItem("qrCode");
     if (qrCode) {
+      console.log("Navigating to QR check-in");
       navigate("/qr-check-in");
     } else {
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      console.log("Navigating to", isAdmin ? "admin" : "dashboard");
       navigate(isAdmin ? "/admin" : "/dashboard");
     }
   };
@@ -149,6 +173,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    console.log("Handling logout");
     setIsLoggedIn(false);
     localStorage.removeItem("token");
     localStorage.removeItem("isLoggedIn");
@@ -158,15 +183,8 @@ function App() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const loggedIn = localStorage.getItem("isLoggedIn");
-    if (token && loggedIn) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
-  useEffect(() => {
     if (location.pathname === "/login" && !location.state) {
+      console.log("Clearing login state");
       localStorage.removeItem("token");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("isAdmin");
@@ -176,15 +194,18 @@ function App() {
   }, [location]);
 
   const handleQrCodeScan = (qrCode) => {
+    console.log("Handling QR code scan:", qrCode);
     localStorage.setItem("qrCode", qrCode);
     if (!isLoggedIn) {
+      console.log("Not logged in, navigating to login page");
       navigate("/login", { state: { fromQr: true } });
     } else {
+      console.log("Logged in, navigating to QR check-in");
       navigate("/qr-check-in");
     }
   };
 
-  const token = localStorage.getItem("token"); // 获取 token
+  const token = localStorage.getItem("token");
 
   return (
     <div className="app">
@@ -193,7 +214,7 @@ function App() {
           path="/login"
           element={
             !isLoggedIn ? (
-              <LoginPage onLogin={handleLogin} />
+              <LoginPage onLogin={(token, isAdmin) => handleLogin(token, isAdmin)} />
             ) : (
               <Navigate to="/dashboard" replace />
             )
@@ -309,7 +330,7 @@ function App() {
             <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
           }
         />
-      </Routes>
+     </Routes>
       <div className="chat-box-wrapper">
         <ChatBox change={change} setChange={setChange} />
       </div>
@@ -323,10 +344,13 @@ const QrCodeRedirect = ({ onQrCodeScan }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
   useEffect(() => {
+    console.log("QR Code Redirect: id =", id, "isLoggedIn =", isLoggedIn);
     localStorage.setItem("qrCode", id);
     if (isLoggedIn) {
+      console.log("Navigating to QR check-in");
       navigate("/qr-check-in");
     } else {
+      console.log("Navigating to login page");
       navigate("/login", { state: { fromQr: true } });
     }
   }, [id, isLoggedIn, navigate]);
