@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./adminClassroom.css"; // 确保 CSS 文件被引入
 import { Table, ConfigProvider } from "@arco-design/web-react";
 import enUS from "@arco-design/web-react/es/locale/en-US";
@@ -11,6 +11,7 @@ function AdminClassroom() {
   const [searchCriteria, setSearchCriteria] = useState({ type: "", value: "" });
   const [filteredData, setFilteredData] = useState([]);
   const [change, setChange] = useState(true);
+  const isInitialMount = useRef(true);
 
   const navigate = useNavigate();
 
@@ -49,12 +50,15 @@ function AdminClassroom() {
       setClassroomData(formattedData);
     };
 
-    fetchData();
+    if (isInitialMount.current) {
+      console.log("initial render", isInitialMount.current)
+      isInitialMount.current = false;
+    } else  {
+      console.log("1")
+      fetchData();
+      filter();
+    }
   }, [change]);
-
-  useEffect(() => {
-    filter();
-  }, [classroomData]);
 
   const handleSelectChange = (event) => {
     setRoomType(event.target.value);
@@ -98,6 +102,7 @@ function AdminClassroom() {
   const handleSubmit = (event) => {
     event.preventDefault();
     filter();
+    setChange(!change)
   };
 
   const handleCellClick = (entry) => {
