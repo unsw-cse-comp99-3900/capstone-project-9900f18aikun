@@ -11,7 +11,7 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');      
-    const socketURL = "ws://s2.gnip.vip:37895"; // Change to wss:// for production
+    const socketURL = "ws://s2.gnip.vip:37895";
     
     console.log("Attempting to connect to:", socketURL);
 
@@ -53,23 +53,9 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
       console.log('Attempting reconnection:', attemptNumber);
     });
 
-    // Attempt a plain WebSocket connection for debugging
-    const ws = new WebSocket(`${socketURL}?token=${token}`);
-    ws.onopen = () => console.log('Plain WebSocket Connected');
-    ws.onerror = (error) => {
-      console.error('Plain WebSocket Error:', error);
-      console.log('WebSocket readyState:', ws.readyState);
-    };
-    ws.onclose = (event) => {
-      console.log('WebSocket Closed:', event.code, event.reason);
-    };
-
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
-      }
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
       }
     };
   }, [setMessages]);
@@ -135,9 +121,9 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
           placeholder="Type your message here..."
           disabled={!isConnected}
         />
-      
+        <button onClick={sendMessage} disabled={!isConnected}>Send</button>
       </div>
-        
+      {connectionError && <div className="error-message">{connectionError}</div>}
     </div>
   );
 };

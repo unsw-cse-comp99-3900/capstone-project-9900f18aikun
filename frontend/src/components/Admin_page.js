@@ -1,32 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-//Arco message
 import { Badge } from '@arco-design/web-react';
-// import { IconClockCircle } from '@arco-design/web-react/icon';
-
 import './Admin_page.css';
 import AdminHome from './admin_comp/adminHome';
 import AdminClassroom from './admin_comp/adminClassroom';
 import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics'; 
-import MessageModal from './admin_comp/adminMessage'; // 引入模态组件
+import AdminChatbox from './AdminChatbox'; // Import the AdminChatbox component
 
 import '@arco-design/web-react/dist/css/arco.css';
-
 
 function AdminPage({token}) {
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [contentState, setContentState] = useState(1);
-    const [showDropdown, setShowDropdown] = useState(false); // 新增状态管理下拉菜单的显示
-    const [showMessageModal, setShowMessageModal] = useState(false); // 状态message模态显示
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [showChatbox, setShowChatbox] = useState(false);
     const navigate = useNavigate();
-    // console.log('token is :',token)
 
     const toggleSidebar = () => {
         setSidebarOpen(!isSidebarOpen);
     };
 
-    // 使用内联样式动态调整顶部栏的 left 和 width 属性
     const topBarStyle = {
         left: isSidebarOpen ? '270px' : '0',
         width: isSidebarOpen ? 'calc(100% - 270px)' : '100%'
@@ -34,28 +28,22 @@ function AdminPage({token}) {
 
     useEffect(() => {
         const handlePopState = (event) => {
-            // Clear login state
             localStorage.removeItem('token');
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('isAdmin');
-            
-            // Navigate to login page
             navigate('/login');
         };
 
-        // Add event listener for the popstate event
         window.addEventListener('popstate', handlePopState);
 
-        // Clean up the event listener when the component unmounts
         return () => {
             window.removeEventListener('popstate', handlePopState);
         };
     }, [navigate]);
 
-    //跳转到页面顶部
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [contentState]); // 添加依赖项 contentState
+    }, [contentState]);
 
     const renderContent = () => {
         switch (contentState) {
@@ -72,13 +60,10 @@ function AdminPage({token}) {
         }
     };
 
-
     const handleLogout = () => {
-        // 清除登录状态
         localStorage.removeItem('token');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
-        // 导航到登录页面
         navigate('/login');
     };
 
@@ -111,7 +96,7 @@ function AdminPage({token}) {
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
                 
                 <Badge count={15}>
-                    <button className='admin-message' onClick={() => setShowMessageModal(true)}>
+                    <button className='admin-message' onClick={() => setShowChatbox(!showChatbox)}>
                         <img src="/admin_img/Message.png" alt="Message" />
                     </button>
                 </Badge>
@@ -128,7 +113,7 @@ function AdminPage({token}) {
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {renderContent()}
             </div>
-            {showMessageModal && <MessageModal onClose={() => setShowMessageModal(false)} />}
+            {showChatbox && <AdminChatbox onClose={() => setShowChatbox(false)} />}
         </div>
     );
 }

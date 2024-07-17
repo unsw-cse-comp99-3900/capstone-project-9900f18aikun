@@ -41,6 +41,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filters, setFilters] = useState({
@@ -92,7 +93,9 @@ function App() {
         }
       } else {
         console.log("No token found for auto-login");
+        setIsLoggedIn(false);
       }
+      setIsLoading(false);
     };
 
     autoLogin();
@@ -206,6 +209,10 @@ function App() {
   };
 
   const token = localStorage.getItem("token");
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or any loading indicator you prefer
+  }
 
   return (
     <div className="app">
