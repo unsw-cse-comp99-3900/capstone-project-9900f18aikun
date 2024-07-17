@@ -173,11 +173,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             ({room.room_detail.building}: Level {room.room_detail.level}) Max.
             capacity: {room.room_detail.capacity}
           </span>
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
+          <div className="room-image">
+            <img src={room.room_detail.image_url} alt="Room" />
+          </div>
           {isEditing ? (
             <form onSubmit={handleSubmit}>
               <div>

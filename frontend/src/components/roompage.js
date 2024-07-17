@@ -141,11 +141,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             </div>
           )}
 
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
+          <div className="room-image">
+            <img src={room.room_detail.image_url} alt="Room" />
+          </div>
           <p>
             <strong>Type:</strong>{" "}
             {room.room_type === "room" ? "Meeting Room" : "Hot Desk"}
