@@ -58,6 +58,7 @@ function App() {
   useEffect(() => {
     const autoLogin = async () => {
       const token = localStorage.getItem("token");
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
       console.log("Attempting auto-login with token:", token);
       if (token) {
         try {
@@ -78,7 +79,7 @@ function App() {
               console.log("Auto-login successful");
               setIsLoggedIn(true);
               localStorage.setItem("isLoggedIn", "true");
-              localStorage.setItem("isAdmin", data.is_admin.toString());
+              // Don't navigate here, let the routing handle it
             } else {
               console.log("Auto-login failed: User not verified");
               handleAutoLoginFailure();
@@ -305,7 +306,7 @@ function App() {
           }
         />
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <ProtectedRoute adminOnly={true}>
               <AdminPage token={token} />
