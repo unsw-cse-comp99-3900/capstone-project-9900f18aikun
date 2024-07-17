@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./ChatBox.css";
 
-export const CustomerService = ({ messages, setMessages, toggleMode }) => {
+export const CustomerService = ({ toggleMode }) => {
   const [inputMessage, setInputMessage] = useState("");
+  const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
   const socketRef = useRef(null);
@@ -36,7 +37,7 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
 
     socketRef.current.on('chat message', (data) => {
       console.log('Received message:', data);
-      setMessages(prev => [...prev, { text: data.msg, sender: "admin", timestamp: new Date() }]);
+      setMessages(prev => [...prev, { text: data.msg, sender: "admin", timestamp: new Date(data.timestamp) }]);
     });
 
     socketRef.current.on('connect_error', (error) => {
@@ -58,13 +59,14 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
         socketRef.current.disconnect();
       }
     };
-  }, [setMessages]);
+  }, []);
 
   const sendMessage = () => {
     if (inputMessage.trim() === "" || !socketRef.current) return;
 
     const messageData = {
-      msg: inputMessage
+      msg: inputMessage,
+      timestamp: new Date()
     };
 
     console.log('Sending message:', messageData);
@@ -121,7 +123,12 @@ export const CustomerService = ({ messages, setMessages, toggleMode }) => {
           placeholder="Type your message here..."
           disabled={!isConnected}
         />
-        <button onClick={sendMessage} disabled={!isConnected}>Send</button>
+        <img
+          className="vector"
+          alt="Send"
+          src={process.env.PUBLIC_URL + "/chat_box/vector.svg"}
+          onClick={sendMessage}
+        />
       </div>
       {connectionError && <div className="error-message">{connectionError}</div>}
     </div>

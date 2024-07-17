@@ -1,10 +1,37 @@
 import React, { useState, useRef, useEffect } from "react";
+import io from "socket.io-client";
 import "./AdminChatbox.css";
 
 const AdminChatbox = ({ onClose }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const socketURL = "ws://s2.gnip.vip:37895";
+    
+    socketRef.current = io(socketURL, {
+      query: { token },
+      transports: ['websocket', 'polling'],
+    });
+
+    socketRef.current.on('connect', () => {
+      console.log('Admin Socket Connected');
+    });
+
+    socketRef.current.on('chat message', (data) => {
+      console.log('Admin received message:', data);
+      setMessages(prev => [...prev, { text: data.msg, sender: "user", timestamp: new Date(data.timestamp) }]);
+    });
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
 
   const formatDateTime = (date) => {
     return date.toLocaleString('en-US', {
@@ -22,14 +49,23 @@ const AdminChatbox = ({ onClose }) => {
   };
 
   const handleSendMessage = () => {
-    if (message.trim() !== "") {
-      const timestamp = formatDateTime(new Date());
-      setMessages([...messages, { text: message, sender: "admin", timestamp }]);
+    if (message.trim() !== "" && socketRef.current) {
+      const timestamp = new Date();
+      const messageData = {
+        msg: message,
+        timestamp: timestamp
+      };
+
+      socketRef.current.emit('chat message', messageData, (acknowledgement) => {
+        if (acknowledgement) {
+          console.log('Admin message acknowledged:', acknowledgement);
+        } else {
+          console.warn('Admin message not acknowledged');
+        }
+      });
+
+      setMessages(prev => [...prev, { text: message, sender: "admin", timestamp }]);
       setMessage("");
-      setTimeout(() => {
-        const responseTimestamp = formatDateTime(new Date());
-        setMessages(prevMessages => [...prevMessages, { text: "This is a sample response.", sender: "user", timestamp: responseTimestamp }]);
-      }, 1000);
     }
   };
 
@@ -68,7 +104,7 @@ const AdminChatbox = ({ onClose }) => {
             style={{backgroundImage: `url(${process.env.PUBLIC_URL}/admin_chatbox_img/rectangle-7.png)`}}
           >
             <div className="frame">
-              <div className="text-wrapper-2">z456</div>
+              <div className="text-wrapper-2">Admin Chat</div>
             </div>
             <div 
               className="icon-minus"
@@ -82,7 +118,7 @@ const AdminChatbox = ({ onClose }) => {
           <div className="chat-content">
             {messages.map((msg, index) => (
               <div key={index} className={`message ${msg.sender}`}>
-                <div className="message-timestamp">{msg.timestamp}</div>
+                <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
                 <div className="message-text">{msg.text}</div>
               </div>
             ))}
@@ -90,7 +126,7 @@ const AdminChatbox = ({ onClose }) => {
           </div>
         </div>
         <div className="messages-list">
-          {/* You can add a list of messages or contacts here if needed */}
+          {}
         </div>
       </div>
     </div>
