@@ -472,3 +472,12 @@
   display: flex;
   flex-direction: column;
 }
+.message.user {
+  align-self: flex-end;
+  /* other styles for user messages */
+}
+
+.message.bot {
+  align-self: flex-start;
+  /* other styles for received messages */
+}

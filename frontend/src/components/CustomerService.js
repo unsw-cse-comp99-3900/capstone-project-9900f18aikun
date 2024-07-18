@@ -32,19 +32,22 @@ export const CustomerService = () => {
     };
 
     const onChatMessage = (data) => {
-      console.log('Received message data:', JSON.stringify(data, null, 2)); // Print out received data
+      console.log('Received message data:', JSON.stringify(data, null, 2));
 
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
-        setMessages(prev => [...prev, {
-          id: message_id,
-          text: message,
-          timestamp: timestamp,
-          isUser: user_id === localStorage.getItem('user_id'),
-          userName: user_name,
-          userId: user_id,
-          chatId: chat_id
-        }]);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: message_id,
+            text: message,
+            timestamp: timestamp,
+            isUser: user_id === localStorage.getItem('user_id'),
+            userName: user_name,
+            userId: user_id,
+            chatId: chat_id
+          }
+        ]);
       } else {
         console.error('Unexpected message format:', data);
       }
@@ -64,7 +67,7 @@ export const CustomerService = () => {
   }, []);
 
   const sendMessage = () => {
-    if (inputMessage.trim() === "") return;
+    if (inputMessage.trim() === "" || !isConnected) return;
 
     const messageData = {
       msg: inputMessage
@@ -72,23 +75,13 @@ export const CustomerService = () => {
 
     console.log('Sending message:', JSON.stringify(messageData, null, 2));
 
-    // Add message to state immediately for better UX, although it may not be acknowledged by the server
-    setMessages(prev => [...prev, {
-      id: Date.now(), // Temporary ID until server acknowledges
-      text: inputMessage,
-      timestamp: new Date().toISOString(),
-      isUser: true,
-      userName: user_name,
-      userId: user_id,
-      chatId: user_id
-    }]);
-
-    // Emit the simple message format
+    // Emit the message
     socket.emit('send_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Message acknowledged by server');
       } else {
         console.warn('Message not acknowledged by server');
+        // Optionally, you can handle failed messages here
       }
     });
 
@@ -121,10 +114,10 @@ export const CustomerService = () => {
       </div>
       <div className="chat-messages">
         {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.isUser ? 'user' : 'bot'}`}>
+          <div key={msg.id || index} className={`message ${msg.isUser ? 'user' : 'bot'}`}>
             <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
             <div className="message-text">
-              {msg.isUser ? `You (${msg.userId}): ${msg.text}` : `${msg.userName} (${msg.userId}): ${msg.text}`}
+              {msg.isUser ? `You: ${msg.text}` : `${msg.userName}: ${msg.text}`}
             </div>
           </div>
         ))}
@@ -138,7 +131,7 @@ export const CustomerService = () => {
           onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           placeholder="Type your message here..."
         />
-        <button onClick={sendMessage} disabled={!isConnected}>Send</button>
+       
       </div>
     </div>
   );
