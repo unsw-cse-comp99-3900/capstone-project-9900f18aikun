@@ -32,7 +32,7 @@ class BookingHistory(Resource):
         bookings = Booking.query.filter(
             Booking.user_id == user_zid,
             Booking.booking_status != 'deleted',
-        ).order_by(Booking.start_time.desc()).all()
+        ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
         if bookings:
             result = get_booking_result(bookings)
         else:
@@ -69,7 +69,7 @@ class alluser_booking_history(Resource):
         bookings = Booking.query.filter(
             Booking.date == date,
             Booking.booking_status != 'deleted',
-        ).order_by(Booking.start_time.desc()).all()
+        ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
         
         if bookings:
             result = get_booking_result(bookings)
@@ -102,7 +102,7 @@ class CertainBookingHistory(Resource):
         print(user_zid)
         bookings = Booking.query.filter(
             Booking.user_id == user_zid,
-        ).order_by(Booking.start_time.desc()).all()
+        ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
 
         if bookings:
             result = get_booking_result(bookings)
