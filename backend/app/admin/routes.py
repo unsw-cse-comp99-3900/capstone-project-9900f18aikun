@@ -4,7 +4,7 @@ from flask import request, Flask
 from app.extensions import db, api
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert
+from app.utils import get_total_room, is_valid_date, start_end_time_convert
 from app.email import get_email, schedule_reminder, send_confirm_email_async, send_report_email_async
 from jwt import exceptions
 from app.booking.models import Booking
@@ -61,3 +61,71 @@ class report(Resource):
             "to_zid": f"{to_zid}",
             "to_name": f"{to_name}"
         }, 200
+
+date_query = admin_ns.parser()
+date_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-18")
+
+@admin_ns.route("/get-usage-report-txt")
+class get_usage_report_txt(Resource):
+    @admin_ns.doc(description="admin get text usage report")
+    @admin_ns.response(200, "Success")
+    @admin_ns.response(400, "Bad request")
+    @admin_ns.expect(date_query)
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        
+        date = request.args.get('date')
+
+        if not is_valid_date(date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
+        
+        top_room, room_times = self.most_booked_room(date)
+        top_user, user_times = self.most_booked_user_name(date)
+        if user_times > 0 :
+            user_name = get_user_name(top_user)
+        else:
+            user_name = "No user"
+        
+        res = f"""The total number of rooms, including hot desks and meeting rooms, is {get_total_room()}. \
+On {date}, there were {self.get_booking_count_by_date(date)} reservations made, covering {self.get_booking_room_count_by_date(date)} different rooms, booked by {self.get_booking_user_count_by_date(date)} users.\
+The most frequently booked room was {top_room}, which had {room_times} reservations on that day. \
+The user with the most bookings was {user_name}({top_user}), who made {user_times} reservations."""
+        return {
+            "msg":res
+        }, 200
+        
+    def get_booking_count_by_date(self, date) -> int:
+        return Booking.query.filter(Booking.date == date).count()
+    
+    def get_booking_room_count_by_date(self, date) -> int:
+        return Booking.query.with_entities(Booking.room_id).filter(Booking.date == date).distinct().count()
+
+    def get_booking_user_count_by_date(self, date) -> int:
+        return Booking.query.with_entities(Booking.user_id).filter(Booking.date == date).distinct().count()
+
+    def most_booked_room(self, date):
+        most_booked_room_name = Booking.query \
+    .with_entities(Booking.room_id, Booking.room_name, db.func.count(Booking.room_id).label('count')) \
+    .filter(Booking.date == date) \
+    .group_by(Booking.room_id, Booking.room_name) \
+    .order_by(db.desc('count')) \
+    .first()
+        if most_booked_room_name:
+            return (most_booked_room_name.room_name, most_booked_room_name.count)
+        else:
+            return ("No room", 0)
+        
+    def most_booked_user_name(self, date):
+        most_booked_user_name = Booking.query \
+    .with_entities(Booking.user_id, db.func.count(Booking.user_id).label('count')) \
+    .filter(Booking.date == date) \
+    .group_by(Booking.user_id) \
+    .order_by(db.desc('count')) \
+    .first()
+        if most_booked_user_name:
+            return (most_booked_user_name.user_id, most_booked_user_name.count)
+        else:
+            return ("_", 0)

@@ -5,6 +5,8 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from jwt import exceptions
 from datetime import datetime, timedelta
 import os
+import re
+from sqlalchemy import func
 # convert time HH:MM to index for every half hour
 
 
@@ -136,6 +138,14 @@ def get_room_image(room_id: int):
     else:
         return "hotdesk.jpg"
 
+def is_valid_date(date: str) -> bool:
+    if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        return False
+    else:
+        return True
 
-
-
+# get total number of rooms
+def get_total_room() -> int:
+    room_number = db.session.query(func.count(RoomDetail.id)).scalar()
+    desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
+    return room_number + desk_number

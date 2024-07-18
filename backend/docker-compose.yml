@@ -11,6 +11,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://bookadmin:qweasdzxc9@db:5432/bookingsystem
       - JWT_SECRET_KEY=87654321
+      - TZ=Australia/Sydney
     volumes:
       - ./data:/app/data
       - /etc/localtime:/etc/localtime:ro
@@ -21,7 +22,7 @@ services:
       POSTGRES_USER: bookadmin
       POSTGRES_PASSWORD: qweasdzxc9
       POSTGRES_DB: bookingsystem
-      TZ: Australia/Sydney
+      TZ: Australia/Sydney 
     ports:
       - "5433:5432"
     volumes:

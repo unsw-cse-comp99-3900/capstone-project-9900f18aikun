@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
+from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -123,19 +123,28 @@ class BookSpace(Resource):
         statu = new_booking.booking_status
         db.session.add(new_booking)
         db.session.commit()
-
+        bookingid = new_booking.id
         send_confirm_email_async(zid, room_id, date, start_time, end_time)
         schedule_reminder(zid, room_id, start_time, date, end_time)
         dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
-        reminder_time = dt_start_time - timedelta(hours=1)
+        check_time = dt_start_time + timedelta(minutes=1)
+        scheduler.add_job(self.schedule_check_sign_in, 'date', run_date=check_time, args=[bookingid])
 
         return {'message': f"Booking confirmed\n"
                            f"room id: {room_id}\n"
                            f"start time: {start_time}\n"
                            f"end time: {end_time}\n"
                            f"date: {date}\n"
-                           f"statu: {statu}\n"
+                           f"status: {statu}\n"
+                           f"checktime: {check_time}"
+                           f"bookingid:{bookingid}"
                 }, 200
+    
+    def schedule_check_sign_in(self, bookingid):
+        booking = Booking.query.get(bookingid)
+        if booking.booking_status == "booked" or booking.booking_status == "requested":
+            booking.booking_status = "cancelled"
+            db.session.commit()
 
 
 # booking room model
@@ -565,7 +574,7 @@ class meetingroom_usage(Resource):
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        total_room = self.get_total_room()
+        total_room = get_total_room()
         usage = self.get_booking_list(date)
         current_date = datetime.strptime(date, '%Y-%m-%d')
         temp_date = current_date + timedelta(days=7)
@@ -576,11 +585,6 @@ class meetingroom_usage(Resource):
             "end_date": end_date,
             "usage": usage
         }, 200
-
-    def get_total_room(self):
-        room_number = db.session.query(func.count(RoomDetail.id)).scalar()
-        desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
-        return room_number + desk_number
 
     def get_booking_list(self, date):
         usage = []
