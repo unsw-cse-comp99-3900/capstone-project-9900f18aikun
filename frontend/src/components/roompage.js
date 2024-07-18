@@ -21,11 +21,42 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     setIsReporting(!isReporting);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Handle the report submission logic here
     console.log("Report submitted:", reportText);
-    setIsReporting(false);
-    setReportText("");
+    const obj = {
+      message: reportText
+    };
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `/api/admin/report`,
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(obj),
+        }
+      );
+
+      if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error("Server responded with an error: " + errorText);
+      } else {
+        const res = await response.text();
+        console.log(res)
+        setIsReporting(false);
+        setReportText("");
+      }
+
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoadingData(false);
+    }
   };
 
   useEffect(() => {
@@ -130,7 +161,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
           {isReporting && (
             <div>
-              <Input
+              <input
                 placeholder="Enter report details"
                 value={reportText}
                 onChange={(e) => setReportText(e.target.value)}
