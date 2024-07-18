@@ -34,7 +34,6 @@ const Rebook = () => {
         if (response.ok) {
           const result = await response.json();
           setHistory([result[0]]); // Update here to set the first result item inside an array
-          console.log("result is ", result);
         } else {
           const errorText = await response.text();
           throw new Error("Server responded with an error: " + errorText);
@@ -69,7 +68,6 @@ const Rebook = () => {
       end_time: formatTime(history[0].end_time),
     };
     const token = localStorage.getItem("token");
-    console.log("object is ", obj);
 
     try {
       const response = await fetch("/api/booking/book", {
@@ -83,9 +81,7 @@ const Rebook = () => {
       });
 
       if (response.ok) {
-        console.log("successfully sent");
         const result = await response.json();
-        console.log(result);
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -96,12 +92,6 @@ const Rebook = () => {
     }
     setIsCalendarVisible(!isCalendarVisible);
   };
-
-  useEffect(() => {
-    if (isCalendarVisible === false) {
-      console.log(selectedDate);
-    }
-  }, [selectedDate, isCalendarVisible]);
 
   const disableDates = (date) => {
     const today = dayjs();

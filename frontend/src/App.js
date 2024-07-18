@@ -24,18 +24,29 @@ import QrCodeCheckIn from "./components/QrCodeCheckIn";
 import "./App.css";
 import "./ChatBoxWrapper.css";
 
-const ProtectedRoute = ({ children, adminOnly = false }) => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
-
+const ProtectedRoute = ({
+  children,
+  adminOnly = false,
+  userOnly = false,
+  isAdmin,
+  isLoggedIn,
+}) => {
+  console.log("admin only is ", adminOnly);
+  console.log("user only is ", userOnly);
+  console.log("is admin ", isAdmin);
   if (!isLoggedIn) {
     return <Navigate to="/login" />;
   }
 
   if (adminOnly && !isAdmin) {
+    console.log("1");
     return <Navigate to="/dashboard" />;
   }
 
+  if (userOnly && isAdmin) {
+    console.log("2");
+    return <Navigate to="/admin" />;
+  }
   return children;
 };
 
@@ -54,47 +65,40 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [change, setChange] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const autoLogin = async () => {
       const token = localStorage.getItem("token");
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-      console.log("Attempting auto-login with token:", token);
       if (token) {
         try {
-          const response = await fetch("http://s2.gnip.vip:37895/auth/auto-login", {
-            method: "GET",
-            headers: {
-              accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          console.log("Auto-login response status:", response.status);
+          const response = await fetch(
+            "http://s2.gnip.vip:37895/auth/auto-login",
+            {
+              method: "GET",
+              headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
           if (response.ok) {
             const data = await response.json();
-            console.log("Auto-login response data:", data);
-            if (data.message === "User verified") {
-              console.log("Auto-login successful");
-              setIsLoggedIn(true);
-              localStorage.setItem("isLoggedIn", "true");
-              // Don't navigate here, let the routing handle it
-            } else {
-              console.log("Auto-login failed: User not verified");
+            if (data.message !== "User verified") {
               handleAutoLoginFailure();
+            } else {
+              setIsLoggedIn(true);
+              if (data.is_admin) {
+                setIsAdmin(true);
+              }
             }
           } else {
-            console.log("Auto-login failed: Response not OK");
             handleAutoLoginFailure();
           }
         } catch (error) {
-          console.error("Auto-login error:", error);
           handleAutoLoginFailure();
         }
-      } else {
-        console.log("No token found for auto-login");
-        setIsLoggedIn(false);
       }
       setIsLoading(false);
     };
@@ -103,11 +107,8 @@ function App() {
   }, []);
 
   const handleAutoLoginFailure = () => {
-    console.log("Handling auto-login failure");
-    setIsLoggedIn(false);
     localStorage.removeItem("token");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("isAdmin");
+    setIsLoggedIn(false);
   };
 
   const fetchBookingData = async () => {
@@ -128,7 +129,6 @@ function App() {
       const bookingData = JSON.parse(text);
       const dataArray = Object.values(bookingData);
       setData(dataArray);
-      setFilteredData(dataArray);
     } catch (error) {
       console.error("Error fetching booking data:", error);
     }
@@ -153,22 +153,24 @@ function App() {
   }, [selectedDate, isLoggedIn, change]);
 
   useEffect(() => {
-    handleFilter(filters);
-  }, [filters, data, change]);
+    if (isLoggedIn) {
+      handleFilter(filters);
+    }
+  }, [data]);
 
-  const handleLogin = (token, isAdmin) => {
-    console.log("Handling login with token:", token, "isAdmin:", isAdmin);
+  const handleLogin = (admin) => {
     setIsLoggedIn(true);
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("token", token);
-    localStorage.setItem("isAdmin", isAdmin.toString());
+    setIsAdmin(admin);
     const qrCode = localStorage.getItem("qrCode");
     if (qrCode) {
       console.log("Navigating to QR check-in");
       navigate("/qr-check-in");
     } else {
-      console.log("Navigating to", isAdmin ? "admin" : "dashboard");
-      navigate(isAdmin ? "/admin" : "/dashboard");
+      if (admin) {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     }
   };
 
@@ -177,21 +179,15 @@ function App() {
   };
 
   const handleLogout = () => {
-    console.log("Handling logout");
     setIsLoggedIn(false);
     localStorage.removeItem("token");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("isAdmin");
     localStorage.removeItem("qrCode");
     navigate("/login");
   };
 
   useEffect(() => {
     if (location.pathname === "/login" && !location.state) {
-      console.log("Clearing login state");
       localStorage.removeItem("token");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("isAdmin");
       localStorage.removeItem("qrCode");
       setIsLoggedIn(false);
     }
@@ -222,7 +218,7 @@ function App() {
           path="/login"
           element={
             !isLoggedIn ? (
-              <LoginPage onLogin={(token, isAdmin) => handleLogin(token, isAdmin)} />
+              <LoginPage onLogin={(admin) => handleLogin(admin)} />
             ) : (
               <Navigate to="/dashboard" replace />
             )
@@ -235,7 +231,11 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+              userOnly={true}
+              isAdmin={isAdmin}
+            >
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <div className="main-content">
@@ -272,7 +272,7 @@ function App() {
         <Route
           path="/select-map"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <SelectMap />
@@ -283,7 +283,11 @@ function App() {
         <Route
           path="/history"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+              userOnly={true}
+              isAdmin={isAdmin}
+            >
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <History />
@@ -294,7 +298,11 @@ function App() {
         <Route
           path="/room/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+              userOnly={true}
+              isAdmin={isAdmin}
+            >
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <RoomInfo
@@ -308,7 +316,11 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute adminOnly={true}>
+            <ProtectedRoute
+              adminOnly={true}
+              isAdmin={isAdmin}
+              isLoggedIn={isLoggedIn}
+            >
               <AdminPage token={token} />
             </ProtectedRoute>
           }
@@ -316,7 +328,11 @@ function App() {
         <Route
           path="/room/admin/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              isLoggedIn={isLoggedIn}
+              adminOnly={true}
+              isAdmin={isAdmin}
+            >
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
                 <AdminRoomPage
@@ -330,7 +346,7 @@ function App() {
         <Route
           path="/qr-check-in"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
               <QrCodeCheckIn />
             </ProtectedRoute>
           }
@@ -338,7 +354,15 @@ function App() {
         <Route
           path="*"
           element={
-            <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
+            isLoggedIn ? (
+              isAdmin ? (
+                <Navigate to="/admin" replace />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
       </Routes>

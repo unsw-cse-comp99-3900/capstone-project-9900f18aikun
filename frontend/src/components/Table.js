@@ -123,7 +123,6 @@ const SelectWindow = ({
       end_time: endTime,
     };
     const token = localStorage.getItem("token");
-    // console.log("object is", obj);
 
     try {
       const response = await fetch("/api/booking/book", {
@@ -137,7 +136,6 @@ const SelectWindow = ({
       });
 
       if (response.ok) {
-        console.log("successfully sent");
         await response.json();
         setChange(!change);
       } else {
@@ -193,7 +191,6 @@ const SelectWindow = ({
 
 // main table
 const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
-  console.log("data is ", data);
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
@@ -211,8 +208,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   // const [selectedDate, setSelectedDate] = useState(dayjs());
   const [hoveredRoom, setHoveredRoom] = useState(null);
-  // console.log("reservation is", reservations);
-  // console.log("selfReservation is", selfReservations);
 
   const navigate = useNavigate();
 
@@ -342,7 +337,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
       return;
     }
     const className = event.currentTarget.className;
-    console.log("classname is ", className);
     let permissionClass = "";
 
     if (className.includes("reserved")) {
