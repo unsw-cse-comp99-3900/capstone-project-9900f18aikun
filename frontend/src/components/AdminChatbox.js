@@ -8,9 +8,9 @@ const AdminChatbox = ({ onClose }) => {
   const [activeUsers, setActiveUsers] = useState(new Map());
   const [selectedUser, setSelectedUser] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
+  const [adminId, setAdminId] = useState(null);
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
-  const user_id = localStorage.getItem('user_id');
 
   const connectSocket = () => {
     const token = localStorage.getItem('token');
@@ -45,20 +45,35 @@ const AdminChatbox = ({ onClose }) => {
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
         
-        setActiveUsers(prev => new Map(prev).set(user_id, { userName: user_name, chatId: chat_id }));
+        // Set adminId if it's not set yet
+        if (!adminId) {
+          setAdminId(user_id);
+        }
+
+        const isAdminMessage = user_id === adminId;
+
+        if (!isAdminMessage) {
+          setActiveUsers(prev => new Map(prev).set(user_id, { userName: user_name, chatId: chat_id }));
+          setSelectedUser(prevSelected => prevSelected || user_id);
+        }
+
         const newMessage = { 
           id: message_id,
           text: message, 
-          sender: "user", 
+          sender: isAdminMessage ? "admin" : "user", 
           timestamp: new Date(timestamp),
           userId: user_id,
           userName: user_name,
           chatId: chat_id
         };
-        setMessageHistories(prev => ({
-          ...prev,
-          [user_id]: [...(prev[user_id] || []), newMessage]
-        }));
+
+        setMessageHistories(prev => {
+          const targetUserId = isAdminMessage ? selectedUser : user_id;
+          return {
+            ...prev,
+            [targetUserId]: [...(prev[targetUserId] || []), newMessage]
+          };
+        });
       } else {
         console.warn('Received data in unexpected format:', data);
       }
@@ -127,20 +142,23 @@ const AdminChatbox = ({ onClose }) => {
 
     console.log('Admin sending message:', messageData);
     
+    // Immediately add the message to the chat
+    const newMessage = { 
+      text: message, 
+      sender: "admin", 
+      timestamp: new Date(), 
+      userId: adminId,
+      userName: "Admin"
+    };
+    setMessageHistories(prev => ({
+      ...prev,
+      [selectedUser]: [...(prev[selectedUser] || []), newMessage]
+    }));
+
+    // Then send it to the server
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Admin message acknowledged:', acknowledgement);
-        const newMessage = { 
-          text: message, 
-          sender: "admin", 
-          timestamp: new Date(), 
-          userId: selectedUser,
-          userName: "Admin"
-        };
-        setMessageHistories(prev => ({
-          ...prev,
-          [selectedUser]: [...(prev[selectedUser] || []), newMessage]
-        }));
       } else {
         console.warn('Admin message not acknowledged');
       }
@@ -165,9 +183,7 @@ const AdminChatbox = ({ onClose }) => {
 
   return (
     <div className="admin-chatbox">
-      <div className={`connection-status ${connectionStatus}`}>
-        Status: {connectionStatus}
-      </div>
+
       <div className="chatbox-container">
         <div className="message-box">
           <div 
@@ -194,7 +210,7 @@ const AdminChatbox = ({ onClose }) => {
                   <div className="message-text">
                     {msg.sender === "user" 
                       ? `${msg.userName} (${msg.userId}): ${msg.text}` 
-                      : `Admin to ${msg.userId}: ${msg.text}`}
+                      : `Admin (${adminId}): ${msg.text}`}
                   </div>
                 </div>
               ))

@@ -458,3 +458,17 @@
 .mode-switch-button:hover {
   background-color: #45a049;
 }
+.message.received {
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.message.sent {
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+}
