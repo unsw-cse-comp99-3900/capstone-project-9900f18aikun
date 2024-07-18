@@ -36,12 +36,10 @@ const ProtectedRoute = ({
   }
 
   if (adminOnly && !isAdmin) {
-    console.log("1");
     return <Navigate to="/dashboard" />;
   }
 
   if (userOnly && isAdmin) {
-    console.log("2");
     return <Navigate to="/admin" />;
   }
   return children;
