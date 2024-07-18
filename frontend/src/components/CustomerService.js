@@ -90,13 +90,13 @@ export const CustomerService = () => {
 
   const sendMessage = async () => {
     if (inputMessage.trim() === "") return;
-
+  
     await ensureConnection();
-
+  
     const messageData = {
       msg: inputMessage
     };
-
+  
     console.log('Sending message:', messageData);
     console.log('Socket connected:', socket.connected);
     
@@ -105,7 +105,7 @@ export const CustomerService = () => {
     
     let acknowledged = false;
     
-    socket.emit('chat message', messageData, (acknowledgement) => {
+    socket.emit('send_message', messageData, (acknowledgement) => {
       acknowledged = true;
       console.log('Message acknowledgement received:', acknowledgement);
       if (acknowledgement) {
@@ -121,8 +121,9 @@ export const CustomerService = () => {
         setConnectionError("Message failed to send. Please try again.");
       }
     });
-
+  
     setInputMessage("");
+  
 
     setTimeout(() => {
       if (!acknowledged) {

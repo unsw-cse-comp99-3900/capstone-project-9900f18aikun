@@ -14,14 +14,14 @@ const AdminChatbox = ({ onClose, userID }) => {
     
     socketRef.current = io(socketURL, {
       query: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     });
 
     socketRef.current.on('connect', () => {
       console.log('Admin Socket Connected');
     });
 
-    socketRef.current.on('chat message', (data) => {
+    socketRef.current.on('send_message', (data) => {
       console.log('Admin received message:', data);
       setMessages(prev => [...prev, { text: data.msg, sender: "user", timestamp: new Date() }]);
     });
@@ -63,7 +63,7 @@ const AdminChatbox = ({ onClose, userID }) => {
         user_id: userID
       };
 
-      socketRef.current.emit('chat message', messageData, (acknowledgement) => {
+      socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
         if (acknowledgement) {
           console.log('Admin message acknowledged:', acknowledgement);
         } else {
@@ -131,10 +131,9 @@ const AdminChatbox = ({ onClose, userID }) => {
             ))}
             <div ref={messagesEndRef} />
           </div>
-
         </div>
         <div className="messages-list">
-          {}
+          {/* You can add a list of active chats here if needed */}
         </div>
       </div>
     </div>
