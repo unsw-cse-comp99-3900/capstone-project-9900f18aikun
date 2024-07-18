@@ -64,6 +64,7 @@ class BookingStatus(enum.Enum):
     booked = "booked"
     cancelled = "cancelled"
     signed_in = "signed-in"
+    deleted = "deleted"
 
 
 

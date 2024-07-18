@@ -18,7 +18,7 @@ history_ns = Namespace('history', description='History operations')
 
 @history_ns.route('/booking-history')
 class BookingHistory(Resource):
-    @history_ns.doc(description="Get certain user's booking history, need jwt token")
+    @history_ns.doc(description="Get current user's booking history, need jwt token")
     @history_ns.response(200, "Success")
     @history_ns.response(400, "Bad request")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -34,17 +34,7 @@ class BookingHistory(Resource):
             Booking.booking_status != 'deleted',
         ).order_by(Booking.start_time.desc()).all()
         if bookings:
-            result = [{"booking_id": booking.id,
-                       "room_id": booking.room_id,
-                       "room_name": booking.room_name,
-                       "user_id": booking.user_id,
-                       "user_name": get_user_name(booking.user_id),
-                       "user_email": get_email(booking.user_id),
-                       "date": booking.date.isoformat() if booking.date else None,
-                       "start_time": booking.start_time.isoformat() if booking.start_time else None,
-                       "end_time": booking.end_time.isoformat() if booking.end_time else None,
-                       "booking_status": booking.booking_status,
-                       "is_request": booking.is_request} for booking in bookings]
+            result = get_booking_result(bookings)
         else:
             result = []
 
@@ -82,7 +72,47 @@ class alluser_booking_history(Resource):
         ).order_by(Booking.start_time.desc()).all()
         
         if bookings:
-            result = [{"booking_id": booking.id,
+            result = get_booking_result(bookings)
+        else:
+            result = []
+
+        return result, 200
+
+
+user_zid = history_ns.parser()
+user_zid.add_argument('user_zid', type=str, required=True, help='user zid')
+@history_ns.route('/certain-booking-history')
+class CertainBookingHistory(Resource):
+    @history_ns.doc(description="Get certain user's booking history, need jwt token")
+    @history_ns.response(200, "Success")
+    @history_ns.response(400, "Bad request")
+    @history_ns.expect(user_zid)
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        admin = get_jwt_identity()
+        admin_id = admin['zid']
+        if not is_admin(admin_id):
+            return {
+                "error": f"Your account {admin_id} is not admin"
+            }, 400
+        user_zid = request.args.get('user_zid')
+        print(user_zid)
+        bookings = Booking.query.filter(
+            Booking.user_id == user_zid,
+        ).order_by(Booking.start_time.desc()).all()
+
+        if bookings:
+            result = get_booking_result(bookings)
+        else:
+            result = []
+
+        return result, 200
+
+def get_booking_result(bookings):
+    return [{"booking_id": booking.id,
                        "room_id": booking.room_id,
                        "room_name": booking.room_name,
                        "user_id": booking.user_id,
@@ -92,9 +122,4 @@ class alluser_booking_history(Resource):
                        "start_time": booking.start_time.isoformat() if booking.start_time else None,
                        "end_time": booking.end_time.isoformat() if booking.end_time else None,
                        "booking_status": booking.booking_status,
-                       "is_request": booking.is_request
-                       } for booking in bookings]
-        else:
-            result = []
-
-        return result, 200
+                       "is_request": booking.is_request} for booking in bookings]
