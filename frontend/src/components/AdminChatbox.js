@@ -131,6 +131,10 @@ const AdminChatbox = ({ onClose, userID }) => {
             ))}
             <div ref={messagesEndRef} />
           </div>
+
+        </div>
+        <div className="messages-list">
+          {}
         </div>
       </div>
     </div>
