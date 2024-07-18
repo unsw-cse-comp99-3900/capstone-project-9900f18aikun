@@ -539,7 +539,7 @@ class ExpressBook(Resource):
 # 8.express booking改成is_available jackson --------
 # 9. 返回文字版报告
 # 10. 超时15min自动取消 只用改canceled
-# 11. 举报发给admin ed
+# 11. 举报发给admin ed   ---------
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -630,6 +630,7 @@ class block_room(Resource):
         if space:
             space.is_available = False
             db.session.commit()
+            self.clean_booking(roomid)
             return {
                 "message": f"{user_zid} set room {roomid} unavailable"
             }, 200
@@ -637,6 +638,15 @@ class block_room(Resource):
             return {
                 "error": "invalid roomid"
             }, 400
+    
+    def clean_booking(self, roomid):
+        bookings = Booking.query.filter(
+                    Booking.room_id == roomid,
+                ).all()
+        for booking in bookings:
+            booking.booking_status = "cancelled"
+        db.session.commit()
+
         
 @booking_ns.route('/unblock-room')
 class unblock_room(Resource):

@@ -136,7 +136,7 @@ def send_report_email(from_id, from_name, to_addr, to_name, msg):
     message = f"""
     Hi {to_name},
 
-    Got a report at our system. Details of the booking are as follows:
+    Got a report at our system. Details of the report are as follows:
 
     - reporter: {from_name}({from_id})
     - message: {msg}
