@@ -6,6 +6,7 @@ import AdminHome from './admin_comp/adminHome';
 import AdminClassroom from './admin_comp/adminClassroom';
 import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics'; 
+import AdminUser from './admin_comp/adminUser';
 import AdminChatbox from './AdminChatbox'; // Import the AdminChatbox component
 
 import '@arco-design/web-react/dist/css/arco.css';
@@ -55,6 +56,8 @@ function AdminPage({token}) {
                 return <AdminAppointment token={token} />;
             case 4:
                 return <AdminStatistics />;
+            case 5:
+                return <AdminUser />; // Add case for AdminUser
             default:
                 return <div>Error: 组件未渲染</div>;
         }
@@ -75,9 +78,9 @@ function AdminPage({token}) {
                     <img src="/admin_img/home.png" alt="Home" />
                     Home page
                 </button>
-                <button>
-                    <img src="/admin_img/student.png" alt="Student Management" />
-                    Student management
+                <button onClick={() => setContentState(5)}>
+                    <img src="/admin_img/student.png" alt="User Management" />
+                    User management
                 </button>
                 <button onClick={() => setContentState(2)}>
                     <img src="/admin_img/classroom.png" alt="Classroom Management" />
