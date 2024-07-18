@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './adminUser.css'; // 确保引入了 CSS 样式
-import { Table } from '@arco-design/web-react';
+
+import { Table, ConfigProvider } from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US'; // 导入英文语言包
 
 function AdminUser() {
     const [userZid, setUserZid] = useState(''); 
@@ -84,6 +86,7 @@ function AdminUser() {
     ];
 
     return (
+        <ConfigProvider locale={enUS}>
         <div className='admin-User'>
             <h1>User Management</h1>
             <form className="search" onSubmit={handleSubmit}>
@@ -110,6 +113,7 @@ function AdminUser() {
                 />
             </div>
         </div>
+        </ConfigProvider>
     );
 }
 
