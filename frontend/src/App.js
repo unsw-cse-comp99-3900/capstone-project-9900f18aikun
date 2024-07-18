@@ -31,9 +31,6 @@ const ProtectedRoute = ({
   isAdmin,
   isLoggedIn,
 }) => {
-  console.log("admin only is ", adminOnly);
-  console.log("user only is ", userOnly);
-  console.log("is admin ", isAdmin);
   if (!isLoggedIn) {
     return <Navigate to="/login" />;
   }
