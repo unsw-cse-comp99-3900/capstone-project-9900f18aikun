@@ -48,11 +48,7 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.arco-table {
-    border: 1px solid #ddd; /* 添加表格边框 */
-    border-radius: 8px; /* 圆角表格 */
-    overflow: hidden; /* 隐藏溢出内容 */
-}
+
 
 .arco-table thead th {
     background-color: #f5f5f5; /* 修改表头背景颜色 */
