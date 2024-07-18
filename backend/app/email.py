@@ -57,6 +57,8 @@ def send_confirm_email_async(zid, room_id, date, start_time, end_time):
     thread1 = Thread(target=send_confirm_email, args=(user_name, room_name, date, start_time, end_time, to_addr))
     thread1.start()
 
+
+
 # send email
 def send_reminder_email(user_name, room_name, date, start_time, end_time, to_addr):
     subject = "Reminder of K17 Room Booking"
@@ -117,3 +119,46 @@ def get_student_zid(email):
 def get_staff_zid(email):
     staff = db.session.query(CSEStaff).filter_by(email=email).first()
     return staff.zid
+
+# send report email 
+def send_report_email_async(from_id, to_zid, msg):
+    from_name = get_user_name(from_id)
+    to_addr = get_email(to_zid)
+    to_name = get_user_name(to_zid)
+    thread1 = Thread(target=send_report_email, args=(from_id, from_name, to_addr, to_name, msg))
+    thread1.start()
+
+
+
+# send email
+def send_report_email(from_id, from_name, to_addr, to_name, msg):
+    subject = "Report of K17 Room Booking System"
+    message = f"""
+    Hi {to_name},
+
+    Got a report at our system. Details of the report are as follows:
+
+    - reporter: {from_name}({from_id})
+    - message: {msg}
+
+    Please have a check.
+
+    Best regards,
+
+    K17 Room Booking System
+    """
+    
+    from_addr = "wangweiyi6191@outlook.com"
+    smtp_server = 'smtp.office365.com'
+    smtp_port = 587
+    password = "wangfei20006161"
+
+    msg = MIMEText(message)
+    msg['From'] = from_addr
+    msg['To'] = to_addr
+    msg['Subject'] = subject
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(from_addr, password)
+        server.sendmail(from_addr, to_addr, msg.as_string())
