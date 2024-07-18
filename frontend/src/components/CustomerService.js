@@ -17,6 +17,8 @@ export const CustomerService = () => {
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
+  const user_id = localStorage.getItem('user_id') || 'default_user_id';
+  const user_name = localStorage.getItem('user_name') || 'Default User';
 
   useEffect(() => {
     const onConnect = () => {
@@ -30,23 +32,22 @@ export const CustomerService = () => {
     };
 
     const onChatMessage = (data) => {
-      console.log('Received message data:', JSON.stringify(data, null, 2));
-      
-      let messageData;
-      if (Array.isArray(data) && data.length > 0 && data[0].message) {
-        messageData = data[0].message;
-      } else if (typeof data === 'object' && data.message) {
-        messageData = data.message;
+      console.log('Received message data:', JSON.stringify(data, null, 2)); // Print out received data
+
+      if (data.message) {
+        const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
+        setMessages(prev => [...prev, {
+          id: message_id,
+          text: message,
+          timestamp: timestamp,
+          isUser: user_id === localStorage.getItem('user_id'),
+          userName: user_name,
+          userId: user_id,
+          chatId: chat_id
+        }]);
       } else {
         console.error('Unexpected message format:', data);
-        return;
       }
-
-      setMessages(prev => [...prev, {
-        text: messageData.message || 'No message content',
-        timestamp: messageData.timestamp || new Date().toISOString(),
-        isUser: false
-      }]);
     };
 
     socket.on('connect', onConnect);
@@ -64,24 +65,33 @@ export const CustomerService = () => {
 
   const sendMessage = () => {
     if (inputMessage.trim() === "") return;
-    
+
     const messageData = {
       msg: inputMessage
     };
-    
+
+    console.log('Sending message:', JSON.stringify(messageData, null, 2));
+
+    // Add message to state immediately for better UX, although it may not be acknowledged by the server
+    setMessages(prev => [...prev, {
+      id: Date.now(), // Temporary ID until server acknowledges
+      text: inputMessage,
+      timestamp: new Date().toISOString(),
+      isUser: true,
+      userName: user_name,
+      userId: user_id,
+      chatId: user_id
+    }]);
+
+    // Emit the simple message format
     socket.emit('send_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
-        console.log('Message sent successfully');
-        setMessages(prev => [...prev, {
-          text: inputMessage,
-          timestamp: new Date().toISOString(),
-          isUser: true
-        }]);
+        console.log('Message acknowledged by server');
       } else {
-        console.warn('Message not acknowledged');
+        console.warn('Message not acknowledged by server');
       }
     });
-  
+
     setInputMessage("");
   };
 
@@ -113,7 +123,9 @@ export const CustomerService = () => {
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.isUser ? 'user' : 'bot'}`}>
             <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-            <div className="message-text">{msg.text}</div>
+            <div className="message-text">
+              {msg.isUser ? `You (${msg.userId}): ${msg.text}` : `${msg.userName} (${msg.userId}): ${msg.text}`}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
