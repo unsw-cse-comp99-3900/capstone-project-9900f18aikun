@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
-from app.extensions import db, api
+from app.extensions import db, api, scheduler, app
 from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
@@ -20,8 +20,6 @@ from sqlalchemy import func
 import pytz
 import random
 
-
-scheduler = BackgroundScheduler()
 
 booking_ns = Namespace('booking', description='Booking operations')
 
@@ -127,7 +125,7 @@ class BookSpace(Resource):
         send_confirm_email_async(zid, room_id, date, start_time, end_time)
         schedule_reminder(zid, room_id, start_time, date, end_time)
         dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
-        check_time = dt_start_time + timedelta(minutes=1)
+        check_time = dt_start_time + timedelta(minutes=15)
         scheduler.add_job(self.schedule_check_sign_in, 'date', run_date=check_time, args=[bookingid])
 
         return {'message': f"Booking confirmed\n"
@@ -141,10 +139,12 @@ class BookSpace(Resource):
                 }, 200
     
     def schedule_check_sign_in(self, bookingid):
-        booking = Booking.query.get(bookingid)
-        if booking.booking_status == "booked" or booking.booking_status == "requested":
-            booking.booking_status = "cancelled"
-            db.session.commit()
+        from app.extensions import db, app
+        with app.app_context():  # 推入 Flask 应用上下文
+            booking = Booking.query.get(bookingid)
+            if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
+                booking.booking_status = "cancelled"
+                db.session.commit()
 
 
 # booking room model
