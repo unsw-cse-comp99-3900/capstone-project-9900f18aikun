@@ -46,8 +46,6 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           const errorText = await response.text();
           throw new Error("Server responded with an error: " + errorText);
       } else {
-        const res = await response.text();
-        console.log(res)
         setIsReporting(false);
         setReportText("");
       }
