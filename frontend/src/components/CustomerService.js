@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./ChatBox.css";
 
-export const CustomerService = ({ toggleMode }) => {
+export const CustomerService = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -37,7 +37,7 @@ export const CustomerService = ({ toggleMode }) => {
 
     socketRef.current.on('chat message', (data) => {
       console.log('Received message:', data);
-      setMessages(prev => [...prev, { text: data.msg, sender: "admin", timestamp: new Date(data.timestamp) }]);
+      setMessages(prev => [...prev, { text: data.msg, sender: "admin", timestamp: new Date() }]);
     });
 
     socketRef.current.on('connect_error', (error) => {
@@ -65,8 +65,7 @@ export const CustomerService = ({ toggleMode }) => {
     if (inputMessage.trim() === "" || !socketRef.current) return;
 
     const messageData = {
-      msg: inputMessage,
-      timestamp: new Date()
+      msg: inputMessage
     };
 
     console.log('Sending message:', messageData);

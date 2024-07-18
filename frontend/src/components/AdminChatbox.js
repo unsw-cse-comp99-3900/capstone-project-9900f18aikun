@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import io from "socket.io-client";
 import "./AdminChatbox.css";
 
-const AdminChatbox = ({ onClose }) => {
+const AdminChatbox = ({ onClose, userID }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -23,7 +23,15 @@ const AdminChatbox = ({ onClose }) => {
 
     socketRef.current.on('chat message', (data) => {
       console.log('Admin received message:', data);
-      setMessages(prev => [...prev, { text: data.msg, sender: "user", timestamp: new Date(data.timestamp) }]);
+      setMessages(prev => [...prev, { text: data.msg, sender: "user", timestamp: new Date() }]);
+    });
+
+    socketRef.current.on('error', (error) => {
+      console.error('Socket error:', error);
+    });
+
+    socketRef.current.on('disconnect', (reason) => {
+      console.log('Disconnected:', reason);
     });
 
     return () => {
@@ -50,10 +58,9 @@ const AdminChatbox = ({ onClose }) => {
 
   const handleSendMessage = () => {
     if (message.trim() !== "" && socketRef.current) {
-      const timestamp = new Date();
       const messageData = {
         msg: message,
-        timestamp: timestamp
+        user_id: userID
       };
 
       socketRef.current.emit('chat message', messageData, (acknowledgement) => {
@@ -64,7 +71,7 @@ const AdminChatbox = ({ onClose }) => {
         }
       });
 
-      setMessages(prev => [...prev, { text: message, sender: "admin", timestamp }]);
+      setMessages(prev => [...prev, { text: message, sender: "admin", timestamp: new Date() }]);
       setMessage("");
     }
   };
@@ -124,9 +131,6 @@ const AdminChatbox = ({ onClose }) => {
             ))}
             <div ref={messagesEndRef} />
           </div>
-        </div>
-        <div className="messages-list">
-          {}
         </div>
       </div>
     </div>
