@@ -12,27 +12,17 @@ const LoginPage = ({ onLogin }) => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const accessToken = queryParams.get("access_token");
     const loginFailed = queryParams.get("false");
 
-    console.log("LoginPage: accessToken =", accessToken, "loginFailed =", loginFailed);
-
-    if (accessToken) {
-      // handleAutoLogin(accessToken);
-    } else if (loginFailed) {
+    if (loginFailed) {
       setError("Outlook login failed. Please try again.");
-    } else {
-      localStorage.removeItem("token");
-      localStorage.removeItem("isLoggedIn");
     }
   }, [location]);
 
   const handleSuccessfulLogin = (data) => {
-    console.log("Login successful. Data:", data);
     localStorage.setItem("token", data.access_token);
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("isAdmin", data.is_admin.toString());
-    onLogin(data.access_token, data.is_admin);
+    console.log("handle success data is ", data)
+    onLogin(data.is_admin);
 
     const fromQr = location.state?.fromQr;
     const qrCode = localStorage.getItem("qrCode");
@@ -40,26 +30,17 @@ const LoginPage = ({ onLogin }) => {
     console.log("fromQr =", fromQr, "qrCode =", qrCode);
 
     if (fromQr && qrCode) {
-      console.log("Navigating to QR check-in");
       navigate("/qr-check-in");
-    } else if (data.is_admin) {
-      console.log("Navigating to admin page");
-      navigate("/admin");
-    } else {
-      console.log("Navigating to dashboard");
-      navigate("/dashboard");
     }
   };
 
   const handleZIDLogin = () => {
-    console.log("Showing ZID login form");
     setShowLoginForm(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    console.log("Attempting login with ZID:", zid);
     try {
       const response = await fetch("http://s2.gnip.vip:37895/auth/login", {
         method: "POST",
@@ -75,22 +56,19 @@ const LoginPage = ({ onLogin }) => {
         console.log("Login successful");
         handleSuccessfulLogin(data);
       } else {
-        console.log("Login failed:", data);
         setError(data.message || "Login failed. Please try again.");
+        localStorage.removeItem("token");
       }
     } catch (error) {
-      console.error("Login error:", error);
       setError("Network error. Please try again later.");
     }
   };
 
   const handleOutlookLogin = () => {
-    console.log("Initiating Outlook login");
     window.location.href = "http://localhost:5001/auth/outlook-login";
   };
 
   const handleForgotPassword = () => {
-    console.log("Navigating to forgot password page");
     window.location.href = "https://iam.unsw.edu.au/home";
   };
 
