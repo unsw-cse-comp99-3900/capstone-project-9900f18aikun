@@ -36,13 +36,15 @@ export const CustomerService = () => {
 
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
+        const isUserMessage = user_id === localStorage.getItem('user_id');
+        
         setMessages(prev => [
           ...prev,
           {
             id: message_id,
             text: message,
             timestamp: timestamp,
-            isUser: user_id === localStorage.getItem('user_id'),
+            isUser: isUserMessage,
             userName: user_name,
             userId: user_id,
             chatId: chat_id
@@ -81,7 +83,6 @@ export const CustomerService = () => {
         console.log('Message acknowledged by server');
       } else {
         console.warn('Message not acknowledged by server');
-        // Optionally, you can handle failed messages here
       }
     });
 
@@ -131,7 +132,7 @@ export const CustomerService = () => {
           onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           placeholder="Type your message here..."
         />
-       
+        {/* <button onClick={sendMessage} disabled={!isConnected}>Send</button> */}
       </div>
     </div>
   );
