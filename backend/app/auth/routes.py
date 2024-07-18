@@ -68,7 +68,7 @@ class AutoLogin(Resource):
             current_user = get_jwt_identity()
             user_data = db.session.get(Users, current_user['zid'])
             if user_data:
-                if user_data.zid == "z99":
+                if is_admin(user_data.zid):
                     return {
                         'zid': user_data.zid, 
                         'message': 'User verified',
