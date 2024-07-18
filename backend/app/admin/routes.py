@@ -52,7 +52,7 @@ class report(Resource):
         msg = request.json["message"]
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
-        to_zid = "z1"
+        to_zid = "z5"
         to_name = get_user_name(to_zid)
         send_report_email_async(user_zid, to_zid, msg)
         return {

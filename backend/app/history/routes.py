@@ -80,7 +80,7 @@ class alluser_booking_history(Resource):
 
 
 user_zid = history_ns.parser()
-user_zid.add_argument('user_zid', type=str, required=True, help='user zid')
+user_zid.add_argument('user_zid', type=str, required=True, help='user zid', default="z1")
 @history_ns.route('/certain-booking-history')
 class CertainBookingHistory(Resource):
     @history_ns.doc(description="Get other user's booking history, need jwt token")
