@@ -149,11 +149,11 @@ class BookSpace(Resource):
 
 # booking room model
 admin_booking_model = booking_ns.model('admin booking request', {
-    'user_id': fields.String(required=True, description='Start time of the booking (HH:MM)'),
-    'room_id': fields.Integer(required=True, description='The room id'),
-    'date': fields.Date(required=True, description='Date of the booking'),
-    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)'),
-    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)')
+    'user_id': fields.String(required=True, description='Start time of the booking (HH:MM)', default="z1"),
+    'room_id': fields.Integer(required=True, description='The room id', default=1),
+    'date': fields.Date(required=True, description='Date of the booking', default="2024-07-19"),
+    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)', default="12:00"),
+    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00")
 })
 
 
@@ -162,6 +162,7 @@ admin_booking_model = booking_ns.model('admin booking request', {
 class AdminBook(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(403, "Forbidden")
     @booking_ns.doc(description="Admin book function")
     @booking_ns.expect(admin_booking_model)
     @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -282,7 +283,7 @@ class BookSpace(Resource):
 
 
 date_query = booking_ns.parser()
-date_query.add_argument('date', type=str, required=True, help='Date to request')
+date_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-19")
 
 roomid_query = booking_ns.parser()
 roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
@@ -610,6 +611,7 @@ class block_room(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(403, "Forbidden")
     @booking_ns.expect(roomid_query)
     @booking_ns.doc(description="admin block room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -622,7 +624,7 @@ class block_room(Resource):
         if not is_admin(user_zid):
             return {
                 "error": f"user {user_zid} is not admin"
-            }, 400
+            }, 403
         roomid = int(request.args.get('roomid'))
         if not roomid:
             return {"message": "Room ID is required"}, 400
@@ -657,6 +659,7 @@ class unblock_room(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(403, "Forbidden")
     @booking_ns.expect(roomid_query)
     @booking_ns.doc(description="admin unblock room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -669,7 +672,7 @@ class unblock_room(Resource):
         if not is_admin(user_zid):
             return {
                 "error": f"user {user_zid} is not admin"
-            }, 400
+            }, 403
         roomid = int(request.args.get('roomid'))
         if not roomid:
             return {"message": "Room ID is required"}, 400
@@ -702,6 +705,7 @@ class edit_room(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(403, "Forbidden")
     @booking_ns.expect(roomid_edit_model)
     @booking_ns.doc(description="admin edit room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -715,7 +719,7 @@ class edit_room(Resource):
         if not is_admin(user_zid):
             return {
                 "error": f"user {user_zid} is not admin"
-            }, 400
+            }, 403
         roomid = args['room_id']
         if not check_valid_room(roomid):
             return {
@@ -812,6 +816,7 @@ class show_request(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(403, "Forbidden")
     @booking_ns.doc(description="show request for admin")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -823,7 +828,7 @@ class show_request(Resource):
         if not is_admin(user_zid):
             return {
                 "error": f"user {user_zid} is not admin"
-            }, 400
+            }, 403
         return {
             "requests": self.get_request()
         }, 200
@@ -863,6 +868,7 @@ class handle_request(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(403, "Forbidden")
     @booking_ns.expect(request_model)
     @booking_ns.doc(description="handle request for admin")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -876,7 +882,7 @@ class handle_request(Resource):
         if not is_admin(user_zid):
             return {
                 "error": f"user {user_zid} is not admin"
-            }, 400
+            }, 403
         booking_id = data['booking_id']
         confirmed = data['confirmed']
         if confirmed:

@@ -20,6 +20,7 @@ class CheckAdmin(Resource):
     @admin_ns.doc(description="Check user whether is admin")
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(403, "Forbidden")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
         jwt_error = verify_jwt()
@@ -43,6 +44,7 @@ class report(Resource):
     @admin_ns.doc(description="send report to admin")
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(403, "Forbidden")
     @admin_ns.expect(report_model)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def post(self):
@@ -52,6 +54,10 @@ class report(Resource):
         msg = request.json["message"]
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 403
         to_zid = "z5"
         to_name = get_user_name(to_zid)
         send_report_email_async(user_zid, to_zid, msg)
@@ -70,6 +76,7 @@ class get_usage_report_txt(Resource):
     @admin_ns.doc(description="admin get text usage report")
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(403, "Forbidden")
     @admin_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -78,10 +85,14 @@ class get_usage_report_txt(Resource):
             return jwt_error
         
         date = request.args.get('date')
-
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
         if not is_valid_date(date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
-        
+        if not is_admin(user_zid):
+            return {
+                "error": f"user {user_zid} is not admin"
+            }, 403
         top_room, room_times = self.most_booked_room(date)
         top_user, user_times = self.most_booked_user_name(date)
         if user_times > 0 :
