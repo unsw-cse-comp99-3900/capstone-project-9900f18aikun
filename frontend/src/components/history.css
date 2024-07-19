@@ -1,10 +1,11 @@
 .reservation-history {
     font-family: Arial, sans-serif;
-    width: 50vw;
+    width: 65vw;
     margin: auto;
     background-color: #f7f7f7;
     padding: 20px;
     border-radius: 8px;
+
 }
 
 header {
@@ -14,7 +15,7 @@ header {
 
 header h1 {
     font-size: 24px;
-    color: #333;
+    color: #4E5969;
 }
 
 ul {
@@ -112,10 +113,32 @@ button:hover {
     text-align: center; /* Center text alignment */
   }
 
+  /* loading */
 .loading-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh; /* Full viewport height */
   }
-  
+
+.history-table .arco-table td {
+    background-color: #F7F8FA !important;  
+}
+
+.history-table .arco-table td:hover {
+    background-color: #E5E6EB !important;  
+}
+
+.history-table .arco-table thead th {
+    background-color: #E5E6EB !important;  /* 修改表头的背景颜色 */
+}
+
+
+
+.history-table.arco-table thead th {
+    background-color: #f5f5f5; /* 修改表头背景颜色 */
+    font-weight: bold; /* 加粗表头文字 */
+}
+
+.history-table .arco-table tbody tr:hover {
+    background-color: #f9f9f9; /* 悬停时修改行背景颜色 */}

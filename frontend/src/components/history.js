@@ -10,7 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { Spin, Space } from '@arco-design/web-react';
+import {  Spin, Space, Table as ArcoTable } from '@arco-design/web-react';
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
 
@@ -150,6 +150,56 @@ const ReservationHistory = () => {
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
+
+  const columns = [
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      align: 'center',
+    },
+    {
+      title: 'Time',
+      key: 'time',
+      align: 'center',
+      render: (_, record) => `${record.start_time} - ${record.end_time}`,
+    },
+    {
+      title: 'Room',
+      dataIndex: 'room_name',
+      key: 'room_name',
+      align: 'center',
+    },
+    {
+      title: 'Booking Status',
+      dataIndex: 'booking_status',
+      key: 'booking_status',
+      align: 'center',
+    },
+    {
+      title: 'Operation',
+      key: 'operation',
+      align: 'center',
+      render: (_, record) => {
+        const isRebook = record.booking_status === "cancelled" || record.booking_status === "signed-in";
+        const text = isRebook ? (isCalendarVisible ? "Hide Calendar" : "Rebook") : "Cancel";
+        const color = text === "Cancel" ? "red" : "green";
+  
+        return (
+          <span
+            id={record.booking_id}
+            onClick={(e) => cancelHandler(record, e)}
+            style={{ cursor: "pointer", color }}
+          >
+            {text}
+          </span>
+        );
+      },
+    },
+  ];
+
+
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -170,46 +220,15 @@ const ReservationHistory = () => {
         <h1>Reservation History:</h1>
       </header>
       {history.length > 0 ? (
-        <TableContainer>
-          <Table aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell align="center">Date</TableCell>
-                <TableCell align="center">Time</TableCell>
-                <TableCell align="center">Room</TableCell>
-                <TableCell align="center">Booking Status</TableCell>
-                <TableCell align="center">Operation</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {history.map((row) => (
-                <TableRow key={row.booking_id} align="center">
-                  <TableCell component="th" scope="row" align="center">
-                    {row.date}
-                  </TableCell>
-                  <TableCell align="center">
-                    {row.start_time} - {row.end_time}
-                  </TableCell>
-                  <TableCell align="center">{row.room_name}</TableCell>
-                  <TableCell align="center">{row.booking_status}</TableCell>
-                  <TableCell
-                    align="center"
-                    id={row.booking_id}
-                    onClick={(e) => cancelHandler(row, e)}
-                    style={{ cursor: "pointer", color: "red" }}
-                  >
-                    {row.booking_status === "cancelled" ||
-                    row.booking_status === "signed-in"
-                      ? isCalendarVisible
-                        ? "Hide Calendar"
-                        : "Rebook"
-                      : "Cancel"}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <div className="history-table">
+          <ArcoTable
+          columns={columns}
+          data={history}
+          rowKey="booking_id"
+          pagination={6}
+        />
+        </div>
+
       ) : (
         <div className="no-history">No previous reservation history</div>
       )}
