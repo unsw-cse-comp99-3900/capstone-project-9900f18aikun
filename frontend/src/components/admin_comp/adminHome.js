@@ -118,7 +118,7 @@ function AdminHome() {
             <div className='home-content'>
                 <h1>Welcome !</h1>
                 <div className="button-container"> 
-                    {['#FCE996', '#C396ED', '#BEDAFF'].map((color, index) => (
+                    {['#FADC6D', '#C396ED', '#BEDAFF'].map((color, index) => (
                     <Tooltip 
                         key={color} 
                         color={color} 
@@ -149,7 +149,7 @@ function AdminHome() {
                         columns={columns}
                         data={bookingData}
                         rowKey="booking_id"
-                        pagination={false} // 不需要分页
+                        pagination={{ pageSize: 5 }} // 不需要分页
                     />
                     {/* <p>Total bookings today: {totalBookings}</p> 显示当天内所有预订的数量 */}
                 </div>
