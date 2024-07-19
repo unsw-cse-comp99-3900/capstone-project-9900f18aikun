@@ -104,3 +104,9 @@ body {
   cursor: pointer;
   margin-bottom: 15px;
 }
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+}

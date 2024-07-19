@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import "./Table.css";
+import "../Table.css";
 import axios from "axios";
 import { Button } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
-import ToMap from "./toMap";
-import { useNavigate } from "react-router-dom";
+import ToMap from "../toMap";
+
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -27,7 +27,6 @@ const getSydneyTime = async () => {
 // get time for table column
 const getTime = async (selectedDate) => {
   const times = [];
-
   const date = new Date(selectedDate.format("YYYY-MM-DD"));
   date.setHours(0, 0, 0, 0);
   for (let i = 0; i < 48; i++) {
@@ -51,31 +50,21 @@ const SelectWindow = ({
   roomid,
   position,
   close,
-  self,
   selectedDate,
-  reservations,
-  permission,
   change,
   setChange,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [zID, setZID] = useState("");
+
   if (!visible) return null;
   const style = {
     top: position.top,
     left: position.left,
   };
 
-  // already reserved time
-  const reserved = [...reservations, ...self]
-    .filter((reservation) => reservation.room === room)
-    .flatMap((reservation) =>
-      reservation.time
-        .filter((slot) => slot.date === selectedDate.format("DD/MM/YYYY"))
-        .flatMap((slot) => slot.timeslot)
-    );
-
   // get next x hours
-  const gettimeList = (time, idx, reserved) => {
+  const gettimeList = (time, idx) => {
     const times = [];
     const [hour, minute] = time.split(":").map(Number);
     const baseTime = new Date();
@@ -88,10 +77,6 @@ const SelectWindow = ({
         hour12: false,
       });
 
-      // stop if meets a already reserved spot
-      if (reserved.includes(time)) {
-        break;
-      }
       times.push(time);
       baseTime.setMinutes(baseTime.getMinutes() + 30);
     }
@@ -99,11 +84,11 @@ const SelectWindow = ({
     return times;
   };
 
-  const dropdownTime = gettimeList(time, 8, reserved);
+  const dropdownTime = gettimeList(time, 8);
 
   // confirm selection function
-  const confirmHandler = async () => {
-    const newTimes = gettimeList(time, selectedIdx, reserved);
+  const confirmHandler = async (change, setChange) => {
+    const newTimes = gettimeList(time, selectedIdx);
 
     // getting end time
     const [hour, minute] = newTimes[newTimes.length - 1].split(":").map(Number);
@@ -117,6 +102,7 @@ const SelectWindow = ({
 
     // send request to backend
     const obj = {
+      user_id: zID,
       room_id: roomid,
       date: selectedDate.format("YYYY-MM-DD"),
       start_time: newTimes[0],
@@ -124,8 +110,13 @@ const SelectWindow = ({
     };
     const token = localStorage.getItem("token");
 
+    // console.log({
+    //   obj,
+    //   zID,
+    // });
+
     try {
-      const response = await fetch("/api/booking/book", {
+      const response = await fetch("/api/booking/admin_book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,8 +127,9 @@ const SelectWindow = ({
       });
 
       if (response.ok) {
-        await response.json();
-        setChange(!change);
+        console.log("successfully sent");
+        const result = await response.json();
+        console.log(result);
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -148,6 +140,12 @@ const SelectWindow = ({
     }
 
     close();
+    setChange(!change);
+  };
+
+  const handleZIDChange = (e) => {
+    const value = e.target.value;
+    setZID(value);
   };
 
   return (
@@ -174,13 +172,28 @@ const SelectWindow = ({
                 </option>
               );
             })}
-            ;
           </select>
+        </div>
+        <div>
+          <label htmlFor="zid-input">for zID:</label>
+          <input
+            type="text"
+            id="zid-input"
+            value={zID}
+            onChange={handleZIDChange}
+            maxLength={8}
+            title="zID must start with 'z' followed by 7 digits"
+          />
         </div>
         <br />
         <div className="button-class">
-          <Button onClick={confirmHandler}>
-            {permission ? "Confirm" : "Request"}
+          <Button
+            onClick={() => {
+              confirmHandler(change, setChange);
+            }}
+            disabled={zID.length === 0}
+          >
+            Confirm
           </Button>
           <Button onClick={close}>Close</Button>
         </div>
@@ -192,28 +205,23 @@ const SelectWindow = ({
 // main table
 const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   const [reservations, setReservations] = useState([]);
-  const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
+  const [pastTimes, setPastTimes] = useState([]);
   const [selectWindow, setSelectWindow] = useState({
     visible: false,
     time: "",
     room: "",
     roomid: "",
     position: { top: 0, left: 0 },
-    self: selfReservations,
     permission: "",
     change: change,
     setChange: setChange,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-  // const [selectedDate, setSelectedDate] = useState(dayjs());
   const [hoveredRoom, setHoveredRoom] = useState(null);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     setReservations(extractData(data, false));
-    setSelfReservations(extractData(data, true));
   }, [data]);
 
   const extractData = (data, self) => {
@@ -232,9 +240,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   };
 
   const extractTime = (timeTable, self) => {
-    if (!timeTable) {
-      return [];
-    }
     const timeslots = [];
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
@@ -276,7 +281,24 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
     return () => clearInterval(timer);
   }, [selectedDate]);
 
-  // Scroll to the current time slot when times are updated
+  useEffect(() => {
+    const calculatePastTimes = async () => {
+      const currentTime = await getSydneyTime();
+      const past = times.filter((time) => {
+        const [timeHours, timeMinutes] = time.split(":").map(Number);
+        return (
+          currentTime.getHours() > timeHours ||
+          (currentTime.getHours() === timeHours &&
+            currentTime.getMinutes() >= timeMinutes + 15)
+        );
+      });
+      console.log("currenttime is ", currentTime.getHours(), "past is ", past);
+      setPastTimes(past);
+    };
+
+    calculatePastTimes();
+  }, [times]);
+
   useEffect(() => {
     const scrollToCurrentTime = async () => {
       const currentTime = await getSydneyTime();
@@ -329,26 +351,9 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   const clickHandler = (room, time, event, roomid) => {
     const target = event.target;
 
-    if (
-      target.classList.contains("reserved") ||
-      target.classList.contains("selfreserved") ||
-      target.classList.contains("disabled")
-    ) {
+    if (target.classList.contains("disabled")) {
       return;
     }
-    const className = event.currentTarget.className;
-    let permissionClass = "";
-
-    if (className.includes("reserved")) {
-      permissionClass = false;
-    } else if (className.includes("selfreserved")) {
-      permissionClass = false;
-    } else if (className.includes("no-permission")) {
-      permissionClass = false;
-    } else {
-      permissionClass = true;
-    }
-
     const position = { top: event.clientY, left: event.clientX };
     setSelectWindow({
       visible: true,
@@ -356,10 +361,8 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
       room,
       roomid,
       position,
-      self: selfReservations,
-      permission: permissionClass, // Set the permission class
-      change: change,
-      setChange: setChange,
+      change,
+      setChange,
     });
   };
 
@@ -372,24 +375,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
     const sevenDaysFromNow = today.add(7, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
-  const [pastTimes, setPastTimes] = useState([]);
-
-  useEffect(() => {
-    const calculatePastTimes = async () => {
-      const currentTime = await getSydneyTime();
-      const past = times.filter((time) => {
-        const [timeHours, timeMinutes] = time.split(":").map(Number);
-        return (
-          currentTime.getHours() > timeHours ||
-          (currentTime.getHours() === timeHours &&
-            currentTime.getMinutes() >= timeMinutes + 15)
-        );
-      });
-      setPastTimes(past);
-    };
-
-    calculatePastTimes();
-  }, [times]);
 
   return (
     <div>
@@ -426,23 +411,16 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
           <div className="legend-item">
             <div
               className="legend-color"
+              style={{ backgroundColor: "#b9b9b9" }}
+            ></div>
+            <div className="legend-text">Reserved</div>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
               style={{ backgroundColor: "#ffcccc" }}
             ></div>
             <div className="legend-text">Disabled Public Use</div>
-          </div>
-          <div className="legend-item">
-            <div
-              className="legend-color"
-              style={{ backgroundColor: "#b9b9b9" }}
-            ></div>
-            <div className="legend-text">Reserved By Others</div>
-          </div>
-          <div className="legend-item">
-            <div
-              className="legend-color"
-              style={{ backgroundColor: "#4c2d83" }}
-            ></div>
-            <div className="legend-text">Self-Reserved</div>
           </div>
           <div className="legend-item">
             <div
@@ -451,16 +429,9 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
             ></div>
             <div className="legend-text">Available</div>
           </div>
-          <div className="legend-item">
-            <div
-              className="legend-color"
-              style={{ backgroundColor: "rgb(221, 216, 169)" }}
-            ></div>
-            <div className="legend-text">Booking Request Required</div>
-          </div>
         </div>
 
-        <div className="table-wrapper">
+        <div className="singletable-wrapper">
           <table id="mytable">
             <thead>
               <tr>
@@ -474,7 +445,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
             </thead>
             <tbody>
               {reservations.map((item) => {
-                const permission = item.permission;
                 const roomData = data.find((d) => d.name === item.room);
                 return (
                   <tr key={item.room} id={item.roomid}>
@@ -482,9 +452,6 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
                       className="room-column"
                       onMouseEnter={() => setHoveredRoom(roomData)}
                       onMouseLeave={() => setHoveredRoom(null)}
-                      onClick={() => {
-                        navigate("/room/" + item.roomid);
-                      }}
                     >
                       {item.room}
                       {hoveredRoom && hoveredRoom.name === item.room && (
@@ -517,30 +484,15 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
                                     slot.timeslot.some((t) => t === time)
                                 )
                             );
-
-                            const isSelfReserved = selfReservations.some(
-                              (reservation) =>
-                                reservation.room === item.room &&
-                                reservation.time.some(
-                                  (slot) =>
-                                    slot.date ===
-                                      selectedDate.format("DD/MM/YYYY") &&
-                                    slot.timeslot.some((t) => t === time)
-                                )
-                            );
                             if (isPast || !item.is_available) {
                               return "disabled";
-                            } else if (isSelfReserved) {
-                              return "selfreserved";
                             } else if (isReserved) {
                               return "reserved";
-                            } else if (permission) {
-                              return "permission";
                             } else {
-                              return "no-permission";
+                              return "";
                             }
                           })()}`}
-                          onClick={(event) => {
+                          onClick={async (event) => {
                             event.stopPropagation();
                             if (!isPast) {
                               clickHandler(item.room, time, event, item.roomid);
@@ -563,10 +515,8 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
         position={selectWindow.position}
         close={hideSelectWindow}
         time={selectWindow.time}
-        self={selectWindow.self}
         selectedDate={selectedDate}
         reservations={reservations}
-        permission={selectWindow.permission}
         change={change}
         setChange={setChange}
       />
