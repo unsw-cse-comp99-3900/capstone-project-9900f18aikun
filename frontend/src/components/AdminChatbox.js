@@ -4,11 +4,21 @@ import "./AdminChatbox.css";
 
 const AdminChatbox = ({ onClose }) => {
   const [message, setMessage] = useState("");
-  const [messageHistories, setMessageHistories] = useState({});
-  const [activeUsers, setActiveUsers] = useState(new Map());
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [messageHistories, setMessageHistories] = useState(() => {
+    const savedHistories = localStorage.getItem('chatHistories');
+    return savedHistories ? JSON.parse(savedHistories) : {};
+  });
+  const [activeUsers, setActiveUsers] = useState(() => {
+    const savedUsers = localStorage.getItem('activeUsers');
+    return savedUsers ? new Map(JSON.parse(savedUsers)) : new Map();
+  });
+  const [selectedUser, setSelectedUser] = useState(() => {
+    return localStorage.getItem('selectedUser') || null;
+  });
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
-  const [adminId, setAdminId] = useState(null);
+  const [adminId, setAdminId] = useState(() => {
+    return localStorage.getItem('adminId') || null;
+  });
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
 
@@ -48,13 +58,22 @@ const AdminChatbox = ({ onClose }) => {
         // Set adminId if it's not set yet
         if (!adminId) {
           setAdminId(user_id);
+          localStorage.setItem('adminId', user_id);
         }
 
-        const isAdminMessage = user_id === adminId;
+        const isAdminMessage = chat_id !== user_id;
 
         if (!isAdminMessage) {
-          setActiveUsers(prev => new Map(prev).set(user_id, { userName: user_name, chatId: chat_id }));
-          setSelectedUser(prevSelected => prevSelected || user_id);
+          setActiveUsers(prev => {
+            const newMap = new Map(prev).set(user_id, { userName: user_name, chatId: chat_id });
+            localStorage.setItem('activeUsers', JSON.stringify(Array.from(newMap.entries())));
+            return newMap;
+          });
+          setSelectedUser(prevSelected => {
+            const newSelected = prevSelected || user_id;
+            localStorage.setItem('selectedUser', newSelected);
+            return newSelected;
+          });
         }
 
         const newMessage = { 
@@ -68,11 +87,12 @@ const AdminChatbox = ({ onClose }) => {
         };
 
         setMessageHistories(prev => {
-          const targetUserId = isAdminMessage ? selectedUser : user_id;
-          return {
+          const updatedHistories = {
             ...prev,
-            [targetUserId]: [...(prev[targetUserId] || []), newMessage]
+            [user_id]: [...(prev[user_id] || []), newMessage]
           };
+          localStorage.setItem('chatHistories', JSON.stringify(updatedHistories));
+          return updatedHistories;
         });
       } else {
         console.warn('Received data in unexpected format:', data);
@@ -123,7 +143,7 @@ const AdminChatbox = ({ onClose }) => {
   }, []);
 
   const formatDateTime = (date) => {
-    return date.toLocaleString('en-US', {
+    return new Date(date).toLocaleString('en-US', {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
@@ -150,10 +170,14 @@ const AdminChatbox = ({ onClose }) => {
       userId: adminId,
       userName: "Admin"
     };
-    setMessageHistories(prev => ({
-      ...prev,
-      [selectedUser]: [...(prev[selectedUser] || []), newMessage]
-    }));
+    setMessageHistories(prev => {
+      const updatedHistories = {
+        ...prev,
+        [selectedUser]: [...(prev[selectedUser] || []), newMessage]
+      };
+      localStorage.setItem('chatHistories', JSON.stringify(updatedHistories));
+      return updatedHistories;
+    });
 
     // Then send it to the server
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
@@ -175,6 +199,7 @@ const AdminChatbox = ({ onClose }) => {
 
   const handleUserSelect = (userId) => {
     setSelectedUser(userId);
+    localStorage.setItem('selectedUser', userId);
   };
 
   useEffect(() => {
@@ -183,7 +208,6 @@ const AdminChatbox = ({ onClose }) => {
 
   return (
     <div className="admin-chatbox">
-
       <div className="chatbox-container">
         <div className="message-box">
           <div 
@@ -256,4 +280,4 @@ const AdminChatbox = ({ onClose }) => {
   );
 };
 
-export default AdminChatbox;
+export default AdminChatbox;  
