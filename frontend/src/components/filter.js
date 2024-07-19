@@ -29,7 +29,7 @@ function Filter({ onFilter }) {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Level:</label>
-          <select name="level" value={filters.level} onChange={handleFilterChange}>
+          <select className='filter-select' name="level" value={filters.level} onChange={handleFilterChange}>
             <option value="">All</option>
             <option value="LG">LG</option>
             <option value="G">G</option>
@@ -42,7 +42,7 @@ function Filter({ onFilter }) {
         </div>
         <div className="form-group">
           <label>Capacity:</label>
-          <select name="capacity" value={filters.capacity} onChange={handleFilterChange}>
+          <select className='filter-select' name="capacity" value={filters.capacity} onChange={handleFilterChange}>
             <option value="">All</option>
             <option value="3">3+</option>
             <option value="5">5+</option>
@@ -54,13 +54,13 @@ function Filter({ onFilter }) {
         </div>
         <div className="form-group">
           <label>Category:</label>
-          <select name="category" value={filters.category} onChange={handleFilterChange}>
+          <select name="category" value={filters.category} onChange={handleFilterChange} className='filter-select'>
             <option value="all">All</option> {/* 添加 'all' 选项 */}
             <option value="meeting_room">Meeting Room</option>
             <option value="hot_desk">Hot Desk</option>
           </select>
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit" className='filter-button'>Submit</button>
       </form>
     </div>
   );
