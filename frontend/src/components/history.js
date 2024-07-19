@@ -10,6 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { Spin, Space } from '@arco-design/web-react';
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
 
@@ -150,7 +151,13 @@ const ReservationHistory = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container">
+        <Space size={40}>
+          <Spin size={40} />
+        </Space>
+      </div>
+    );
   }
 
   if (error) {

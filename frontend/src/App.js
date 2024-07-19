@@ -20,6 +20,8 @@ import AdminPage from "./components/Admin_page";
 import { ChatBox } from "./components/ChatBox";
 import AdminRoomPage from "./components/admin_comp/adminRoompage";
 import QrCodeCheckIn from "./components/QrCodeCheckIn";
+//loading
+import { Spin, Space } from '@arco-design/web-react';
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
@@ -203,7 +205,13 @@ function App() {
   const token = localStorage.getItem("token");
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or any loading indicator you prefer
+    return (
+      <div className="loading-container">
+        <Space size={40}>
+          <Spin size={40} />
+        </Space>
+      </div>
+    ); // Or any loading indicator you prefer
   }
 
   return (

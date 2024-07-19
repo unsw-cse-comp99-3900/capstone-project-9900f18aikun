@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../roompage.css";
 import AdminTable from "./adminTable";
+import { Spin, Space } from '@arco-design/web-react';
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -15,6 +16,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedRoom, setEditedRoom] = useState({});
   const [change, setChange] = useState(false);
+  
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -147,7 +149,13 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   };
 
   if (loadingRoom || loadingData) {
-    return <div>Loading...</div>;
+    return(
+      <div className="loading-container">
+        <Space size={40}>
+          <Spin size={40} />
+        </Space>
+      </div>
+    );
   }
 
   if (error) {

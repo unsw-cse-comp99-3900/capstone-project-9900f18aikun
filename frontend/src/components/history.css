@@ -111,4 +111,11 @@ button:hover {
     font-size: 1.5em; /* Slightly increased font size */
     text-align: center; /* Center text alignment */
   }
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+  }
   
