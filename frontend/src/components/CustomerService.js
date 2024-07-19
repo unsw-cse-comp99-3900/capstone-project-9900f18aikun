@@ -15,12 +15,6 @@ const CustomerService = () => {
     const token = localStorage.getItem('token');
     currentTokenRef.current = token;
 
-    // Load messages for the current token
-    const storedMessages = localStorage.getItem(`customerServiceMessages_${token}`);
-    if (storedMessages) {
-      setMessages(JSON.parse(storedMessages));
-    }
-
     const socketURL = "ws://s2.gnip.vip:37895";
 
     socketRef.current = io(socketURL, {
@@ -41,84 +35,62 @@ const CustomerService = () => {
       setIsConnected(false);
     };
 
-    const onChatMessage = (data) => {
-      console.log('Received message data:', JSON.stringify(data, null, 2));
-
+    const onMessage = (data) => {
+      console.log('Received message:', data);
       if (data.message) {
-        const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
-        console.log("data.message", data.message);
-        const isFromCurrentUser = user_id === chat_id;
+        const newMessage = {
+          id: data.message.message_id,
+          text: data.message.message,
+          timestamp: data.message.timestamp,
+          isFromCurrentUser: data.message.user_id === currentTokenRef.current,
+          userName: data.message.user_name,
+          userId: data.message.user_id,
+          chatId: data.message.chat_id
+        };
+        setMessages(prev => [...prev, newMessage]);
+      }
+    };
 
-        if (!isFromCurrentUser) {
-          const newMessage = {
-            id: message_id,
-            text: message,
-            timestamp: timestamp,
-            isFromCurrentUser: false,
-            userName: user_name,
-            userId: user_id,
-            chatId: chat_id
-          };
-          setMessages(prev => {
-            const updatedMessages = [...prev, newMessage];
-            localStorage.setItem(`customerServiceMessages_${token}`, JSON.stringify(updatedMessages));
-            return updatedMessages;
-          });
-        }
-      } else {
-        console.error('Unexpected message format:', data);
+    const onUserChatHistory = (history) => {
+      console.log('Received chat history:', history);
+      if (history && Array.isArray(history.messages)) {
+        const formattedHistory = history.messages.map(msg => ({
+          id: msg.message_id,
+          text: msg.message,
+          timestamp: msg.timestamp,
+          isFromCurrentUser: msg.user_id === msg.chat_id,
+          userName: msg.user_name,
+          userId: msg.user_id,
+          chatId: msg.chat_id
+        }));
+        setMessages(formattedHistory);
       }
     };
 
     socketRef.current.on('connect', onConnect);
     socketRef.current.on('disconnect', onDisconnect);
-    socketRef.current.on('message', onChatMessage);
-    socketRef.current.on('chat message', onChatMessage);
+    socketRef.current.on('message', onMessage);
+    socketRef.current.on('user_chat_history', onUserChatHistory);
 
     return () => {
       if (socketRef.current) {
         socketRef.current.off('connect', onConnect);
         socketRef.current.off('disconnect', onDisconnect);
-        socketRef.current.off('message', onChatMessage);
-        socketRef.current.off('chat message', onChatMessage);
+        socketRef.current.off('message', onMessage);
+        socketRef.current.off('user_chat_history', onUserChatHistory);
         socketRef.current.disconnect();
       }
     };
   }, []);
 
   const sendMessage = () => {
-    if (inputMessage.trim() === "") return;
-
-    if (inputMessage.toLowerCase() === "clear") {
-      clearMessages();
-      setInputMessage("");
-      return;
-    }
-
-    if (!isConnected || !socketRef.current) return;
+    if (inputMessage.trim() === "" || !isConnected || !socketRef.current) return;
 
     const messageData = {
       msg: inputMessage,
-      user_id: currentTokenRef.current // Use token for user_id
     };
 
-    console.log('Sending message:', JSON.stringify(messageData, null, 2));
-
-    const newMessage = {
-      id: Date.now(),
-      text: inputMessage,
-      timestamp: new Date().toISOString(),
-      isFromCurrentUser: true,
-      userName: 'You',
-      userId: currentTokenRef.current,
-      chatId: currentTokenRef.current
-    };
-
-    setMessages(prev => {
-      const updatedMessages = [...prev, newMessage];
-      localStorage.setItem(`customerServiceMessages_${currentTokenRef.current}`, JSON.stringify(updatedMessages));
-      return updatedMessages;
-    });
+    console.log('Sending message:', messageData);
 
     socketRef.current.emit('send_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
@@ -129,11 +101,6 @@ const CustomerService = () => {
     });
 
     setInputMessage("");
-  };
-
-  const clearMessages = () => {
-    setMessages([]);
-    localStorage.removeItem(`customerServiceMessages_${currentTokenRef.current}`);
   };
 
   const scrollToBottom = () => {

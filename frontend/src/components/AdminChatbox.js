@@ -4,21 +4,12 @@ import "./AdminChatbox.css";
 
 const AdminChatbox = ({ onClose }) => {
   const [message, setMessage] = useState("");
-  const [messageHistories, setMessageHistories] = useState(() => {
-    const savedHistories = localStorage.getItem('chatHistories');
-    return savedHistories ? JSON.parse(savedHistories) : {};
-  });
-  const [activeUsers, setActiveUsers] = useState(() => {
-    const savedUsers = localStorage.getItem('activeUsers');
-    return savedUsers ? new Map(JSON.parse(savedUsers)) : new Map();
-  });
-  const [selectedUser, setSelectedUser] = useState(() => {
-    return localStorage.getItem('selectedUser') || null;
-  });
+  const [messageHistories, setMessageHistories] = useState({});
+  const [activeUsers, setActiveUsers] = useState(new Map());
+  const [selectedUser, setSelectedUser] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
-  const [adminId, setAdminId] = useState(() => {
-    return localStorage.getItem('adminId') || null;
-  });
+  const [adminId, setAdminId] = useState(null);
+  const [newMessageUsers, setNewMessageUsers] = useState(new Set());
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
 
@@ -43,6 +34,7 @@ const AdminChatbox = ({ onClose }) => {
       setConnectionStatus("connected");
       
       socketRef.current.emit('test_connection', { message: 'Hello from admin' });
+      socketRef.current.emit('get_admin_chat_history');
     });
 
     socketRef.current.on('connect_error', (error) => {
@@ -55,25 +47,25 @@ const AdminChatbox = ({ onClose }) => {
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
         
-        // Set adminId if it's not set yet
         if (!adminId) {
           setAdminId(user_id);
-          localStorage.setItem('adminId', user_id);
         }
 
         const isAdminMessage = chat_id !== user_id;
 
         if (!isAdminMessage) {
           setActiveUsers(prev => {
-            const newMap = new Map(prev).set(user_id, { userName: user_name, chatId: chat_id });
-            localStorage.setItem('activeUsers', JSON.stringify(Array.from(newMap.entries())));
+            const newMap = new Map(prev);
+            newMap.set(user_id, { 
+              ...newMap.get(user_id), 
+              userName: user_name, 
+              chatId: chat_id,
+              lastMessageTime: timestamp
+            });
             return newMap;
           });
-          setSelectedUser(prevSelected => {
-            const newSelected = prevSelected || user_id;
-            localStorage.setItem('selectedUser', newSelected);
-            return newSelected;
-          });
+          setSelectedUser(prevSelected => prevSelected || user_id);
+          setNewMessageUsers(prev => new Set(prev).add(user_id));
         }
 
         const newMessage = { 
@@ -86,17 +78,49 @@ const AdminChatbox = ({ onClose }) => {
           chatId: chat_id
         };
 
-        setMessageHistories(prev => {
-          const updatedHistories = {
-            ...prev,
-            [user_id]: [...(prev[user_id] || []), newMessage]
-          };
-          localStorage.setItem('chatHistories', JSON.stringify(updatedHistories));
-          return updatedHistories;
-        });
+        setMessageHistories(prev => ({
+          ...prev,
+          [user_id]: [...(prev[user_id] || []), newMessage]
+        }));
       } else {
         console.warn('Received data in unexpected format:', data);
       }
+    });
+
+    socketRef.current.on('admin_chat_history', (data) => {
+      console.log('Received admin chat history:', data);
+      const newMessageHistories = {};
+      const newActiveUsers = new Map();
+
+      if (data && data.chat && Array.isArray(data.chat)) {
+        data.chat.forEach(chat => {
+          const userId = chat.chat_id;
+          newActiveUsers.set(userId, { 
+            userName: chat.name, 
+            chatId: userId,
+            lastMessageTime: chat.last_message_time,
+            isHandled: chat.is_handled,
+            isViewed: chat.is_viewed
+          });
+          
+          const messages = Array.isArray(chat.messages) ? chat.messages.map(msg => ({
+            id: msg.message_id,
+            text: msg.message,
+            sender: msg.user_id === userId ? "user" : "admin",
+            timestamp: new Date(msg.timestamp),
+            userId: msg.user_id,
+            userName: msg.user_name
+          })) : [];
+
+          newMessageHistories[userId] = messages;
+        });
+      } else {
+        console.error('Unexpected data structure for admin_chat_history:', data);
+      }
+
+      setMessageHistories(newMessageHistories);
+      setActiveUsers(newActiveUsers);
+      setSelectedUser(prevSelected => prevSelected || (newActiveUsers.size > 0 ? newActiveUsers.keys().next().value : null));
     });
 
     socketRef.current.on('error', (error) => {
@@ -162,7 +186,6 @@ const AdminChatbox = ({ onClose }) => {
 
     console.log('Admin sending message:', messageData);
     
-    // Immediately add the message to the chat
     const newMessage = { 
       text: message, 
       sender: "admin", 
@@ -170,16 +193,11 @@ const AdminChatbox = ({ onClose }) => {
       userId: adminId,
       userName: "Admin"
     };
-    setMessageHistories(prev => {
-      const updatedHistories = {
-        ...prev,
-        [selectedUser]: [...(prev[selectedUser] || []), newMessage]
-      };
-      localStorage.setItem('chatHistories', JSON.stringify(updatedHistories));
-      return updatedHistories;
-    });
+    setMessageHistories(prev => ({
+      ...prev,
+      [selectedUser]: [...(prev[selectedUser] || []), newMessage]
+    }));
 
-    // Then send it to the server
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Admin message acknowledged:', acknowledgement);
@@ -199,7 +217,11 @@ const AdminChatbox = ({ onClose }) => {
 
   const handleUserSelect = (userId) => {
     setSelectedUser(userId);
-    localStorage.setItem('selectedUser', userId);
+    setNewMessageUsers(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(userId);
+      return newSet;
+    });
   };
 
   useEffect(() => {
@@ -268,10 +290,15 @@ const AdminChatbox = ({ onClose }) => {
           {Array.from(activeUsers.entries()).map(([userId, userInfo]) => (
             <div 
               key={userId} 
-              className={`user-item ${selectedUser === userId ? 'selected' : ''}`}
+              className={`user-item ${selectedUser === userId ? 'selected' : ''} ${newMessageUsers.has(userId) ? 'new-message' : ''}`}
               onClick={() => handleUserSelect(userId)}
             >
               {userInfo.userName} ({userId})
+              {newMessageUsers.has(userId) && <span className="new-message-prompt">New</span>}
+              <br />
+              Last message: {formatDateTime(userInfo.lastMessageTime)}
+              <br />
+              Handled: {userInfo.isHandled ? 'Yes' : 'No'}, Viewed: {userInfo.isViewed ? 'Yes' : 'No'}
             </div>
           ))}
         </div>
@@ -280,4 +307,4 @@ const AdminChatbox = ({ onClose }) => {
   );
 };
 
-export default AdminChatbox;  
+export default AdminChatbox;
