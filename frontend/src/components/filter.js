@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Slider } from '@arco-design/web-react';
 import './filter.css'; 
 
 function Filter({ onFilter }) {
@@ -9,13 +10,18 @@ function Filter({ onFilter }) {
   });
 
   const handleFilterChange = (e) => {
-    
     const { name, value } = e.target;
     setFilters({
       ...filters,
       [name]: name === 'capacity' ? parseInt(value) || '' : value
     });
-    // console.log(filters.category)
+  };
+
+  const handleSliderChange = (value) => {
+    setFilters({
+      ...filters,
+      capacity: value
+    });
   };
 
   const handleSubmit = (e) => {
@@ -25,7 +31,7 @@ function Filter({ onFilter }) {
 
   return (
     <div>
-      <h2 className="filter-title">FILTER SPACES</h2>
+      <h2 className="filter-title">ROOM FILTER</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Level:</label>
@@ -42,15 +48,19 @@ function Filter({ onFilter }) {
         </div>
         <div className="form-group">
           <label>Capacity:</label>
-          <select className='filter-select' name="capacity" value={filters.capacity} onChange={handleFilterChange}>
-            <option value="">All</option>
-            <option value="3">3+</option>
-            <option value="5">5+</option>
-            <option value="10">10+</option>
-            <option value="20">20+</option>
-            <option value="50">50+</option>
-            <option value="100">100+</option>
-          </select>
+          <Slider
+            defaultValue={0}
+            max={100}
+            value={filters.capacity}
+            onChange={handleSliderChange}
+            showInput={{
+              style: {
+                backgroundColor: '#6a4f9c', // This attempts to set the background color
+                color: 'white',
+              }
+            }}
+            style={{ width: '100%' }}
+          />
         </div>
         <div className="form-group">
           <label>Category:</label>
