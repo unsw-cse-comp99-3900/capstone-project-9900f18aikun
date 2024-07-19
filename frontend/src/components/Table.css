@@ -75,16 +75,16 @@ td.selfreserved {
 }
 
 td:not(.reserved):not(.selfreserved) {
-  background-color: #fce8a3;
+  background-color: #FDF4BF;
 }
 
 td:not(.reserved):not(.selfreserved):hover {
-  background-color: #fac833;
+  background-color: #fbe78f;
   cursor: pointer;
 }
 
 td.no-permission {
-  background-color: rgb(221, 216, 169) !important;
+  background-color: #ded6ab !important;
 }
 
 thead tr th:first-child,
@@ -294,7 +294,7 @@ tbody tr td.room-column {
   position: -webkit-sticky; /* For Safari */
   position: sticky;
   top: 0;
-  background-color: #4b2e83;
+  background-color: #8567aa;
   z-index: 1; /* Ensure the header stays above other content */
 }
 
@@ -308,11 +308,11 @@ tbody tr td.room-column {
 }
 
 td.time-column.disabled {
-  background-color: #ffcccc;
+  background-color: #e8c1bb;
   cursor: not-allowed; 
 }
 
 td.time-column.disabled:hover {
-  background-color: #ffcccc;
+  background-color: #dbaea7;
   cursor: not-allowed; 
 }

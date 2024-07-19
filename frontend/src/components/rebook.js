@@ -10,6 +10,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
+import { Table as ArcoTable } from '@arco-design/web-react';
 
 const Rebook = () => {
   const [history, setHistory] = useState([]);
@@ -107,52 +108,49 @@ const Rebook = () => {
     return <div>Error: {error.message}</div>;
   }
 
+  const columns = [
+    {
+      title: 'Time',
+      dataIndex: 'time',
+      key: 'time',
+      align: 'center',
+      render: (_, record) => `${record.start_time} - ${record.end_time}`,
+    },
+    {
+      title: 'Room Name',
+      dataIndex: 'room_name',
+      key: 'room_name',
+      align: 'center',
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      align: 'center',
+      render: (_, record) => (
+        <span
+          id={record.booking_id}
+          onClick={(e) => toggleCalendarVisibility(e)}
+          style={{ cursor: "pointer", color: "red" }}
+        >
+          {isCalendarVisible ? "Hide Calendar" : "Rebook"}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <div className="reservation-history">
       <header>
         <h1>Last Booking:</h1>
       </header>
-      {history[0] ? (
-        <TableContainer>
-          <Table aria-label="simple table">
-            <TableBody>
-              {history.map((row) => (
-                <TableRow key={row.booking_id} align="center">
-                  <TableCell align="center">
-                    {row.start_time} - {row.end_time}
-                  </TableCell>
-                  <TableCell align="center">{row.room_name}</TableCell>
-                  <TableCell
-                    align="center"
-                    id={row.booking_id}
-                    onClick={(e) => toggleCalendarVisibility(e)}
-                    style={{ cursor: "pointer", color: "red" }}
-                  >
-                    {isCalendarVisible ? "Hide Calendar" : "Rebook"}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      ) : (
-        <div className="no-history">No previous reservation history</div>
-      )}
-      {isCalendarVisible && (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateCalendar
-            shouldDisableDate={disableDates}
-            className="date-calendar-overlay"
-            onChange={(date) => handleDateChange(date)}
-            style={{
-              position: "absolute",
-              left: `${calendarPosition.x}px`,
-              top: `${calendarPosition.y}px`,
-              zIndex: 100,
-            }}
-          />
-        </LocalizationProvider>
-      )}
+      <div>
+      <ArcoTable
+        columns={columns}
+        data={history}
+        rowKey="booking_id"
+        pagination={false} 
+      />
+    </div>
     </div>
   );
 };
