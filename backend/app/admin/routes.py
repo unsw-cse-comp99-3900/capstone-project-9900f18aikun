@@ -45,7 +45,6 @@ class report(Resource):
     @admin_ns.doc(description="send report to admin")
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
-    @admin_ns.response(403, "Forbidden")
     @admin_ns.expect(report_model)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def post(self):
@@ -55,10 +54,10 @@ class report(Resource):
         msg = request.json["message"]
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
-        if not is_admin(user_zid):
+        if is_admin(user_zid):
             return {
-                "error": f"user {user_zid} is not admin"
-            }, 403
+                "error": f"user {user_zid} is admin"
+            }, 400
         to_zid = "z5"
         to_name = get_user_name(to_zid)
         send_report_email_async(user_zid, to_zid, msg)

@@ -1,6 +1,6 @@
 from app.extensions import db
 from app.booking.models import RoomDetail, Space, HotDeskDetail
-from app.comment.models import Comment
+from app.comment.models import Comment, Like
 from app.models import CSEStaff, HDRStudent, Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from jwt import exceptions
@@ -168,3 +168,6 @@ def get_time():
 def who_made_comment(comment_id: int ) -> str:
     comment = Comment.query.get(comment_id)
     return comment.user_id
+
+def get_like_count(comment_id: int ) -> int:
+    return Like.query.filter_by(comment_id=comment_id).count()

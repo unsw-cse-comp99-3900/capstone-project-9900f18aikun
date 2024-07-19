@@ -3,10 +3,10 @@ from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api, scheduler, app
 from app.models import Users, CSEStaff
-from .models import Comment
+from .models import Comment, Like
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_comment, check_valid_room, get_date, get_time, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, who_made_comment
+from app.utils import check_valid_comment, check_valid_room, get_date, get_like_count, get_time, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, who_made_comment
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -25,6 +25,8 @@ comment_ns = Namespace('comment', description='Comment operations')
 make_comment_model = comment_ns.model('Make comment', {
     'room_id': fields.Integer(required=True, description='The room id', default=1),
     'comment': fields.String(required=True, description='comment', default="WOW! Nice room!"),
+    'comment_to_id': fields.Integer(required=True, description='If it is an original, set =0. Else get comment_to_id', default=0),
+
 })
 
 @comment_ns.route('/make-comment')
@@ -44,6 +46,7 @@ class make_comment(Resource):
 
         room_id = request.json["room_id"]
         comment = request.json["comment"]
+        comment_to_id = request.json["comment_to_id"]
 
         if not check_valid_room(room_id):
             return {
@@ -58,7 +61,8 @@ class make_comment(Resource):
             content = comment,
             is_edited = False,
             edit_date = get_date(),
-            edit_time = get_time()
+            edit_time = get_time(),
+            comment_to_id = comment_to_id
         )
 
         db.session.add(new_comment)
@@ -80,7 +84,8 @@ class make_comment(Resource):
                 "content": comment.content,
                 "is_edited": comment.is_edited,
                 "edit_date": comment.edit_date.isoformat(), 
-                "edit_time": comment.edit_time.isoformat()
+                "edit_time": comment.edit_time.isoformat(),
+                "comment_to_id": comment.comment_to_id
                 })
         return res
 
@@ -176,7 +181,10 @@ class get_comment(Resource):
                 "content": comment.content,
                 "is_edited": comment.is_edited,
                 "edit_date": comment.edit_date.isoformat(), 
-                "edit_time": comment.edit_time.isoformat()})
+                "edit_time": comment.edit_time.isoformat(),
+                "like_count": get_like_count(comment.id),
+                "comment_to_id": comment.comment_to_id
+                })
         return res
 
 edit_comment_model = comment_ns.model('Edit comment', {
@@ -237,5 +245,73 @@ class edit_comment(Resource):
             "content": comment.content,
             "is_edited": comment.is_edited,
             "edit_date": comment.edit_date.isoformat(), 
-            "edit_time": comment.edit_time.isoformat()
+            "edit_time": comment.edit_time.isoformat(),
+            "like_count": get_like_count(comment.id),
+            "comment_to_id": comment.comment_to_id
         }
+    
+like_comment_model = comment_ns.model('Like comment', {
+    'comment_id': fields.Integer(required=True, description='The comment id', default=1),
+})
+
+@comment_ns.route('/like-comment')
+class like_comment(Resource):
+    # Get the
+    @comment_ns.response(200, "success")
+    @comment_ns.response(400, "Bad request")
+    @comment_ns.response(403, "Forbidden")
+    @comment_ns.expect(like_comment_model)
+    @comment_ns.doc(description="like comment")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def put(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        comment_id = request.json["comment_id"]
+
+        if not check_valid_comment(comment_id):
+            return {
+                "error": f"invalid comment {comment_id}"
+            }, 400
+        
+        if self.check_double_like(comment_id, user_zid):
+            return {
+                "error": f"user {user_zid} has already liked commentid {comment_id}"
+            }, 400
+        
+        new_like = Like(
+            comment_id = comment_id,
+            who_like_id = user_zid,
+            like_who_id = who_made_comment(comment_id),
+            date = get_date(),
+            time = get_time(),
+        )
+
+        db.session.add(new_like)
+        db.session.commit()
+
+        return {
+            "message": f"successfully like comment {comment_id}",
+            "like_list": self.show_like(),
+            "like_count": get_like_count(comment_id)
+        }, 200
+
+    def show_like(self):
+        likes = Like.query.all()
+        res = []
+        for like in likes:
+            res.append({"id": like.id,
+                "comment_id": like.comment_id,
+                "who_like_id": like.who_like_id,
+                "like_who_id": like.like_who_id,
+                "date": like.date.isoformat(),
+                "time": like.time.isoformat(),
+                })
+        return res
+    
+    def check_double_like(self, comment_id, user_zid) -> bool:
+        like = Like.query.filter_by(comment_id = comment_id, who_like_id = user_zid).first()
+        return like != None
