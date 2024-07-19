@@ -130,21 +130,6 @@ const Rebook = () => {
                   >
                     {isCalendarVisible ? "Hide Calendar" : "Rebook"}
                   </TableCell>
-                  {isCalendarVisible && (
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DateCalendar
-                        shouldDisableDate={disableDates}
-                        className="date-calendar-overlay"
-                        onChange={(date) => handleDateChange(date)}
-                        style={{
-                          position: "absolute",
-                          left: `${calendarPosition.x}px`,
-                          top: `${calendarPosition.y}px`,
-                          zIndex: 100,
-                        }}
-                      />
-                    </LocalizationProvider>
-                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -152,6 +137,21 @@ const Rebook = () => {
         </TableContainer>
       ) : (
         <div className="no-history">No previous reservation history</div>
+      )}
+      {isCalendarVisible && (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateCalendar
+            shouldDisableDate={disableDates}
+            className="date-calendar-overlay"
+            onChange={(date) => handleDateChange(date)}
+            style={{
+              position: "absolute",
+              left: `${calendarPosition.x}px`,
+              top: `${calendarPosition.y}px`,
+              zIndex: 100,
+            }}
+          />
+        </LocalizationProvider>
       )}
     </div>
   );

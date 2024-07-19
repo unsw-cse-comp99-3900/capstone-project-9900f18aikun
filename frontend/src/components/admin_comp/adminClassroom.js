@@ -11,7 +11,7 @@ function AdminClassroom() {
   const [searchCriteria, setSearchCriteria] = useState({ type: "", value: "" });
   const [filteredData, setFilteredData] = useState([]);
   const [change, setChange] = useState(true);
-  const isInitialMount = useRef(true);
+  // const isInitialMount = useRef(true);
 
   const navigate = useNavigate();
 
@@ -49,11 +49,13 @@ function AdminClassroom() {
       setClassroomData(formattedData);
     };
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      fetchData();
-    }
+    // if (isInitialMount.current) {
+    //   isInitialMount.current = false;
+    // } else {
+    //   fetchData();
+    // }
+
+    fetchData();
   }, [change]);
 
   useEffect(() => {
