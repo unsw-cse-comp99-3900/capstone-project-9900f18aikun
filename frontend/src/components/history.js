@@ -11,6 +11,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
+import ErrorBox from "./errorBox";
 
 const ReservationHistory = () => {
   const [history, setHistory] = useState([]);
@@ -21,6 +22,7 @@ const ReservationHistory = () => {
   const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
   const [change, setChange] = useState(false);
   const [obj, setObj] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -40,6 +42,7 @@ const ReservationHistory = () => {
           setHistory(result);
         } else {
           const errorText = await response.text();
+          setErrorMessage(errorText);
           throw new Error("Server responded with an error: " + errorText);
         }
       } catch (error) {
@@ -83,6 +86,7 @@ const ReservationHistory = () => {
           // if no reservation for this day
         } else {
           const errorText = await response.text();
+          setErrorMessage(errorText);
           console.error("Server responded with an error:", errorText);
           throw new Error("Something went wrong");
         }
@@ -129,6 +133,7 @@ const ReservationHistory = () => {
         setChange(!change);
       } else {
         const errorText = await response.text();
+        setErrorMessage(errorText);
         console.error("Server responded with an error:", errorText);
         throw new Error("Something went wrong");
       }
@@ -215,6 +220,9 @@ const ReservationHistory = () => {
             }}
           />
         </LocalizationProvider>
+      )}
+      {errorMessage && (
+        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
       )}
     </div>
   );
