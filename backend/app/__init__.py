@@ -37,6 +37,9 @@ def create_app():
     from .admin.routes import admin_ns
     api.add_namespace(admin_ns, path='/admin')
 
+    from .comment.routes import comment_ns
+    api.add_namespace(comment_ns, path='/comment')
+
     from app.chat.routes import handle_connect, handle_disconnect, handle_send_message, handle_join, handle_leave
 
     socketio.on_event('connect', handle_connect)

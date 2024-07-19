@@ -4,10 +4,11 @@ from flask import request, Flask
 from app.extensions import db, api
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import get_total_room, is_valid_date, start_end_time_convert
+from app.utils import check_valid_comment, get_total_room, is_valid_date, start_end_time_convert
 from app.email import get_email, schedule_reminder, send_confirm_email_async, send_report_email_async
 from jwt import exceptions
 from app.booking.models import Booking
+from app.comment.models import Comment
 from app.utils import verify_jwt, is_admin
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -140,3 +141,39 @@ The user with the most bookings was {user_name}({top_user}), who made {user_time
             return (most_booked_user_name.user_id, most_booked_user_name.count)
         else:
             return ("_", 0)
+
+delete_comment_model = admin_ns.model('admin Delete comment', {
+    'comment_id': fields.Integer(required=True, description='The comment id', default=1),
+})
+
+@admin_ns.route('/delete-comment')
+class delete_test(Resource):
+    # Get the
+    @admin_ns.response(200, "success")
+    @admin_ns.response(400, "Bad request")
+    @admin_ns.response(403, "Forbidden")
+    @admin_ns.expect(delete_comment_model)
+    @admin_ns.doc(description="admin delete comment")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def delete(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        comment_id = request.json["comment_id"]
+
+        if not check_valid_comment(comment_id):
+            return {
+                "error": f"invalid comment_id {comment_id}"
+            }, 400
+        
+        comment = Comment.query.filter_by(id=comment_id).first()
+
+        db.session.delete(comment)
+        db.session.commit()
+
+        return {
+            "message": f"admin({user_zid}) delete Comment {comment_id} successfully."
+        }, 200
