@@ -55,7 +55,10 @@ class make_comment(Resource):
             user_id = user_zid,
             date = get_date(),
             time = get_time(),
-            content = comment
+            content = comment,
+            is_edited = False,
+            edit_date = get_date(),
+            edit_time = get_time()
         )
 
         db.session.add(new_comment)
@@ -74,7 +77,11 @@ class make_comment(Resource):
                 "user_name": get_user_name(comment.user_id),
                 "date": comment.date.isoformat(),
                 "time": comment.time.isoformat(),
-                "content": comment.content})
+                "content": comment.content,
+                "is_edited": comment.is_edited,
+                "edit_date": comment.edit_date.isoformat(), 
+                "edit_time": comment.edit_time.isoformat()
+                })
         return res
 
 delete_comment_model = comment_ns.model('Delete comment', {
@@ -166,7 +173,10 @@ class get_comment(Resource):
                 "user_name": get_user_name(comment.user_id),
                 "date": comment.date.isoformat(),
                 "time": comment.time.isoformat(),
-                "content": comment.content})
+                "content": comment.content,
+                "is_edited": comment.is_edited,
+                "edit_date": comment.edit_date.isoformat(), 
+                "edit_time": comment.edit_time.isoformat()})
         return res
 
 edit_comment_model = comment_ns.model('Edit comment', {
@@ -212,6 +222,9 @@ class edit_comment(Resource):
         comment = Comment.query.filter_by(id=comment_id).first()
         previous_content = comment.content
         comment.content = content
+        comment.is_edited = True
+        comment.edit_date = get_date()
+        comment.edit_time = get_time()
         db.session.commit()
         return {
             "id": comment.id,
@@ -221,5 +234,8 @@ class edit_comment(Resource):
             "date": comment.date.isoformat(),
             "time": comment.time.isoformat(),
             "previous_content": previous_content,
-            "content": comment.content
+            "content": comment.content,
+            "is_edited": comment.is_edited,
+            "edit_date": comment.edit_date.isoformat(), 
+            "edit_time": comment.edit_time.isoformat()
         }

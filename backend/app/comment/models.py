@@ -12,3 +12,10 @@ class Comment(db.Model):
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     content = db.Column(db.String(128), nullable=False)
+
+    # set default=False 
+    is_edited = db.Column(db.Boolean, nullable=False) 
+    # set default=date
+    edit_date = db.Column(db.Date, nullable=False)
+    # set default=time
+    edit_time = db.Column(db.Time, nullable=False)

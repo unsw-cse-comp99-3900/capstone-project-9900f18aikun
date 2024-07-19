@@ -177,3 +177,56 @@ class delete_test(Resource):
         return {
             "message": f"admin({user_zid}) delete Comment {comment_id} successfully."
         }, 200
+    
+edit_comment_model = admin_ns.model('Edit comment', {
+    'comment_id': fields.Integer(required=True, description='The comment id', default=1),
+    'comment': fields.String(required=True, description='comment', default="AHHHH! Great room."),
+})
+
+@admin_ns.route('/edit-comment')
+class edit_comment(Resource):
+    # Get the
+    @admin_ns.response(200, "success")
+    @admin_ns.response(400, "Bad request")
+    @admin_ns.response(403, "Forbidden")
+    @admin_ns.expect(edit_comment_model)
+    @admin_ns.doc(description="edit comment")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def post(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        comment_id = request.json["comment_id"]
+        comment = request.json["comment"]
+
+        if not check_valid_comment(comment_id):
+            return {
+                "error": f"invalid comment {comment_id}"
+            }, 400
+        
+        return {
+            "message": f"successfully edit comment {comment_id}",
+            "comment": self.edit_comment(comment_id, comment)
+        }, 200
+
+    def edit_comment(self, comment_id, content):
+        comment = Comment.query.filter_by(id=comment_id).first()
+        previous_content = comment.content
+        comment.content = content
+        db.session.commit()
+        return {
+            "id": comment.id,
+            "room_id": comment.room_id,
+            "user_id": comment.user_id,
+            "user_name": get_user_name(comment.user_id),
+            "date": comment.date.isoformat(),
+            "time": comment.time.isoformat(),
+            "previous_content": previous_content,
+            "content": comment.content,
+            "is_edited": comment.is_edited,
+            "edit_date": comment.edit_date.isoformat(), 
+            "edit_time": comment.edit_time.isoformat()
+        }
