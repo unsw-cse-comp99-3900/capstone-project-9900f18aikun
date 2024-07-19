@@ -2,25 +2,25 @@ import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./ChatBox.css";
 
-const token = localStorage.getItem('token');
-const socketURL = "ws://s2.gnip.vip:37895";
-const socket = io(socketURL, {
-  query: { token },
-  transports: ['websocket'],
-  timeout: 10000,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 3000,
-});
-
-export const CustomerService = () => {
+const CustomerService = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
-  const user_id = localStorage.getItem('user_id') || 'default_user_id';
-  const user_name = localStorage.getItem('user_name') || 'Default User';
+  const socketRef = useRef(null);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const socketURL = "ws://s2.gnip.vip:37895";
+
+    socketRef.current = io(socketURL, {
+      query: { token },
+      transports: ['websocket'],
+      timeout: 10000,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 3000,
+    });
+
     const onConnect = () => {
       console.log('Socket.IO Connected');
       setIsConnected(true);
@@ -55,21 +55,24 @@ export const CustomerService = () => {
       }
     };
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('message', onChatMessage);
-    socket.on('chat message', onChatMessage);
+    socketRef.current.on('connect', onConnect);
+    socketRef.current.on('disconnect', onDisconnect);
+    socketRef.current.on('message', onChatMessage);
+    socketRef.current.on('chat message', onChatMessage);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('message', onChatMessage);
-      socket.off('chat message', onChatMessage);
+      if (socketRef.current) {
+        socketRef.current.off('connect', onConnect);
+        socketRef.current.off('disconnect', onDisconnect);
+        socketRef.current.off('message', onChatMessage);
+        socketRef.current.off('chat message', onChatMessage);
+        socketRef.current.disconnect();
+      }
     };
   }, []);
 
   const sendMessage = () => {
-    if (inputMessage.trim() === "" || !isConnected) return;
+    if (inputMessage.trim() === "" || !isConnected || !socketRef.current) return;
 
     const messageData = {
       msg: inputMessage
@@ -77,8 +80,7 @@ export const CustomerService = () => {
 
     console.log('Sending message:', JSON.stringify(messageData, null, 2));
 
-    // Emit the message
-    socket.emit('send_message', messageData, (acknowledgement) => {
+    socketRef.current.emit('send_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Message acknowledged by server');
       } else {
@@ -108,6 +110,13 @@ export const CustomerService = () => {
     });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
   return (
     <div className="customer-service">
       <div className="connection-status">
@@ -129,10 +138,9 @@ export const CustomerService = () => {
           type="text"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+          onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
         />
-        {/* <button onClick={sendMessage} disabled={!isConnected}>Send</button> */}
       </div>
     </div>
   );
