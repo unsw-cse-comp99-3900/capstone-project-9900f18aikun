@@ -170,3 +170,33 @@
   gap: 5px; /* 按钮之间的间距 */
   margin-left: auto; /* 将按钮组推到最右侧 */
 }
+
+/* Additional styles for Dropdown Button */
+.header-bar .arco-btn {
+  background-color: transparent; /* Ensure the button has no background */
+  border: none; /* Remove border */
+  padding: 0; /* Remove padding */
+  height: 40px; /* Adjust height to make the button smaller */
+  width: auto; /* Adjust width to content */
+}
+
+.header-bar .arco-btn:hover {
+  background-color: transparent !important; /* Remove hover effect */
+}
+
+.header-bar .arco-dropdown {
+  margin-left: auto; /* Push the dropdown to the right */
+}
+
+.header-bar .arco-dropdown .arco-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-bar .arco-dropdown .arco-icon-down {
+  margin-left: 5px; /* Space between text/icon */
+}
+.arco-btn img{
+  z-index: 500;
+}
