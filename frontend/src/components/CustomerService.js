@@ -8,16 +8,19 @@ const CustomerService = () => {
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
-  const currentUserIdRef = useRef(null);
+  const currentTokenRef = useRef(null);
   const textAreaRef = useRef(null);
 
   useEffect(() => {
-    const storedMessages = localStorage.getItem('customerServiceMessages');
+    const token = localStorage.getItem('token');
+    currentTokenRef.current = token;
+
+    // Load messages for the current token
+    const storedMessages = localStorage.getItem(`customerServiceMessages_${token}`);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
 
-    const token = localStorage.getItem('token');
     const socketURL = "ws://s2.gnip.vip:37895";
 
     socketRef.current = io(socketURL, {
@@ -27,8 +30,6 @@ const CustomerService = () => {
       reconnectionAttempts: Infinity,
       reconnectionDelay: 3000,
     });
-
-    currentUserIdRef.current = localStorage.getItem('user_id');
 
     const onConnect = () => {
       console.log('Socket.IO Connected');
@@ -45,7 +46,7 @@ const CustomerService = () => {
 
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
-        
+        console.log("data.message", data.message);
         const isFromCurrentUser = user_id === chat_id;
 
         if (!isFromCurrentUser) {
@@ -60,7 +61,7 @@ const CustomerService = () => {
           };
           setMessages(prev => {
             const updatedMessages = [...prev, newMessage];
-            localStorage.setItem('customerServiceMessages', JSON.stringify(updatedMessages));
+            localStorage.setItem(`customerServiceMessages_${token}`, JSON.stringify(updatedMessages));
             return updatedMessages;
           });
         }
@@ -98,7 +99,7 @@ const CustomerService = () => {
 
     const messageData = {
       msg: inputMessage,
-      user_id: currentUserIdRef.current
+      user_id: currentTokenRef.current // Use token for user_id
     };
 
     console.log('Sending message:', JSON.stringify(messageData, null, 2));
@@ -109,13 +110,13 @@ const CustomerService = () => {
       timestamp: new Date().toISOString(),
       isFromCurrentUser: true,
       userName: 'You',
-      userId: currentUserIdRef.current,
-      chatId: currentUserIdRef.current
+      userId: currentTokenRef.current,
+      chatId: currentTokenRef.current
     };
 
     setMessages(prev => {
       const updatedMessages = [...prev, newMessage];
-      localStorage.setItem('customerServiceMessages', JSON.stringify(updatedMessages));
+      localStorage.setItem(`customerServiceMessages_${currentTokenRef.current}`, JSON.stringify(updatedMessages));
       return updatedMessages;
     });
 
@@ -132,7 +133,7 @@ const CustomerService = () => {
 
   const clearMessages = () => {
     setMessages([]);
-    localStorage.removeItem('customerServiceMessages');
+    localStorage.removeItem(`customerServiceMessages_${currentTokenRef.current}`);
   };
 
   const scrollToBottom = () => {
@@ -174,7 +175,7 @@ const CustomerService = () => {
             <div className="message-content">
               <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
               <div className="message-text">
-                {msg.isFromCurrentUser ? `You: ${msg.text}` : `${msg.userName}: ${msg.text}`}
+                {msg.isFromCurrentUser ? `${msg.text}` : `${msg.userName}: ${msg.text}`}
               </div>
             </div>
           </div>
@@ -196,10 +197,10 @@ const CustomerService = () => {
           rows="1"
         />
         <div className="send-button-container">
-          <img 
-            className="vector send-button" 
-            alt="Send" 
-            src="/chat_box/vector.svg" 
+          <img
+            className="vector send-button"
+            alt="Send"
+            src="/chat_box/vector.svg"
             onClick={sendMessage}
           />
         </div>
