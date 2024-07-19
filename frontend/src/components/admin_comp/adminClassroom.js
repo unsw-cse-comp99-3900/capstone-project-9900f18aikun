@@ -43,7 +43,6 @@ function AdminClassroom() {
         type: item.type,
         permission: item.permission,
       }));
-
       // 在控制台输出前20条数据
       // console.log("First 20 items:", formattedData.slice(0, 20));
 
@@ -51,14 +50,15 @@ function AdminClassroom() {
     };
 
     if (isInitialMount.current) {
-      console.log("initial render", isInitialMount.current)
       isInitialMount.current = false;
-    } else  {
-      console.log("1")
+    } else {
       fetchData();
-      filter();
     }
   }, [change]);
+
+  useEffect(() => {
+    filter();
+  }, [classroomData]);
 
   const handleSelectChange = (event) => {
     setRoomType(event.target.value);
@@ -80,7 +80,7 @@ function AdminClassroom() {
     }
 
     setSearchCriteria(criteria);
-    console.log("Search Criteria:", criteria, roomType);
+    // console.log("Search Criteria:", criteria, roomType);
     const filtered = classroomData.filter((room) => {
       if (criteria.type === "level") {
         return (
@@ -102,7 +102,7 @@ function AdminClassroom() {
   const handleSubmit = (event) => {
     event.preventDefault();
     filter();
-    setChange(!change)
+    setChange(!change);
   };
 
   const handleCellClick = (entry) => {
@@ -130,9 +130,8 @@ function AdminClassroom() {
         throw new Error("Failed to fetch booking data");
       } else if (response.ok) {
         setChange(!change);
+        console.log("this is ok");
       }
-
-      console.log("this is ok");
     } catch (error) {
       console.error("Error fetching booking data:", error);
     }
@@ -234,7 +233,7 @@ function AdminClassroom() {
       {/* 使用 ConfigProvider 设置语言 */}
       <div>
         <h1 className="class-h1">Classroom Management</h1>
-        <form className="search" onSubmit={handleSubmit}>
+        <form className="search">
           <h2>Search classroom</h2>
           <div className="search_1">
             <label>Room types:</label>
@@ -251,7 +250,11 @@ function AdminClassroom() {
               value={inputValue}
               onChange={handleInputChange}
             />
-            <button type="submit" className="search-button">
+            <button
+              type="submit"
+              className="search-button"
+              onClick={handleSubmit}
+            >
               <img src="/admin_img/search.png" alt="Search" />
             </button>
           </div>
