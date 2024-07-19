@@ -1,0 +1,114 @@
+.reservation-history {
+    font-family: Arial, sans-serif;
+    width: 50vw;
+    margin: auto;
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.reservation {
+    background-color: #fff7e0;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.uncompleted {
+    background-color: #fff7e0;
+}
+
+.completed {
+    background-color: #e0f7e0;
+}
+
+.cancelled {
+    background-color: #f7e0e0;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    background-color: #ffd700;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #ffc107;
+}
+
+.cancel-button {
+    background-color: #ff5722;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #e64a19;
+}
+
+.rebook-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.rebook-button:hover {
+    background-color: #388e3c;
+}
+
+.evaluation-button {
+    background-color: #ffd700;
+    color: black;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.back-button, .next-page-button {
+    background-color: #ffd700;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.back-button:hover, .next-page-button:hover {
+    background-color: #ffc107;
+}
+
+.no-history {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em; /* Slightly increased font size */
+    text-align: center; /* Center text alignment */
+  }
+  

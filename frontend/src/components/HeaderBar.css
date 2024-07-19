@@ -17,6 +17,7 @@
   
   .image {
     height: 50px;
+    cursor: pointer;
   }
   
   .group {
@@ -26,13 +27,13 @@
     margin-right: 20px;
   }
   
-  .overlap-group {
+  /* .overlap-group {
     display: flex;
     align-items: center;
     background-color: #f5e6a5;
     padding: 5px 10px;
     border-radius: 5px;
-  }
+  } */
   
   .text-wrapper {
     font-size: 20px;
@@ -140,7 +141,7 @@
   font-weight: bold;
 }
 
-.logout-button {
+.logout-button, .history-button {
   background-color: #ffdc00; /* 颜色与header-bar一致 */
   color: black;
   border: none;
@@ -159,7 +160,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 添加阴影 */
 }
 
-.logout-button:hover {
+.logout-button:hover, .history-button:hover {
   background-color: #e6b800; /* 鼠标移到button上时颜色变为深黄色 */
 }
 
