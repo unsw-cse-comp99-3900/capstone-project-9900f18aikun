@@ -7,6 +7,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import ToMap from "./toMap";
+import { useNavigate } from "react-router-dom";
 // get sydney time
 const getSydneyTime = async () => {
   while (true) {
@@ -26,51 +27,18 @@ const getSydneyTime = async () => {
 // get time for table column
 const getTime = async (selectedDate) => {
   const times = [];
-  const cur = await getSydneyTime();
 
-  // if today, only show available time
-  if (selectedDate.isSame(cur, "day")) {
-    const minutes = cur.getMinutes();
-
-    // show whole hour before 15 or after 45, otherwise show half an hour
-    if (minutes < 15) {
-      cur.setMinutes(0, 0, 0);
-    } else if (minutes < 45) {
-      cur.setMinutes(30, 0, 0);
-    } else {
-      cur.setHours(cur.getHours() + 1);
-      cur.setMinutes(0, 0, 0);
-    }
-
-    // timeslot next 12 hours
-    for (let i = 0; i < 48; i++) {
-      times.push(
-        cur.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
-      cur.setMinutes(cur.getMinutes() + 30);
-      if (cur.getHours() === 0) {
-        break;
-      }
-    }
-
-    // if other days, show all time
-  } else {
-    const date = new Date(selectedDate.format("YYYY-MM-DD"));
-    date.setHours(0, 0, 0, 0);
-    for (let i = 0; i < 48; i++) {
-      times.push(
-        date.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
-      date.setMinutes(date.getMinutes() + 30);
-    }
+  const date = new Date(selectedDate.format("YYYY-MM-DD"));
+  date.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 48; i++) {
+    times.push(
+      date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+    );
+    date.setMinutes(date.getMinutes() + 30);
   }
   return times;
 };
@@ -87,9 +55,10 @@ const SelectWindow = ({
   selectedDate,
   reservations,
   permission,
+  change,
+  setChange,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [limit, setLimit] = useState(false);
   if (!visible) return null;
   const style = {
     top: position.top,
@@ -136,20 +105,6 @@ const SelectWindow = ({
   const confirmHandler = async () => {
     const newTimes = gettimeList(time, selectedIdx, reserved);
 
-    // Total booked hours calculation
-    const totalBooked = self.reduce((total, reservation) => {
-      reservation.time.forEach((slot) => {
-        if (slot.date === selectedDate.format("DD/MM/YYYY")) {
-          total += slot.timeslot.length;
-        }
-      });
-      return total;
-    }, 0);
-    if (totalBooked + newTimes.length > 16) {
-      setLimit(true);
-      return;
-    }
-
     // getting end time
     const [hour, minute] = newTimes[newTimes.length - 1].split(":").map(Number);
     let endTime = new Date();
@@ -168,7 +123,6 @@ const SelectWindow = ({
       end_time: endTime,
     };
     const token = localStorage.getItem("token");
-    // console.log("object is", obj);
 
     try {
       const response = await fetch("/api/booking/book", {
@@ -182,33 +136,8 @@ const SelectWindow = ({
       });
 
       if (response.ok) {
-        console.log("successfully sent");
-        const result = await response.json();
-        console.log(result);
-        // reservation
-        // if already has reservation for this day
-        const existing = self.find((reservation) => reservation.room === room);
-        if (existing) {
-          const existingDate = existing.time.find(
-            (date) => date.date === selectedDate.format("DD/MM/YYYY")
-          );
-          if (existingDate) {
-            existingDate.timeslot.push(...newTimes);
-          } else {
-            existing.time.push({
-              date: selectedDate.format("DD/MM/YYYY"),
-              timeslot: newTimes,
-            });
-          }
-          // if no reservation for this day
-        } else {
-          self.push({
-            room,
-            time: [
-              { date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes },
-            ],
-          });
-        }
+        await response.json();
+        setChange(!change);
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);
@@ -218,89 +147,50 @@ const SelectWindow = ({
       console.error("Error fetching booking data:", error);
     }
 
-    // const existing = self.find((reservation) => reservation.room === room);
-    // if (existing) {
-    //   const existingDate = existing.time.find(
-    //     (date) => date.date === selectedDate.format("DD/MM/YYYY")
-    //   );
-    //   if (existingDate) {
-    //     existingDate.timeslot.push(...newTimes);
-    //   } else {
-    //     existing.time.push({
-    //       date: selectedDate.format("DD/MM/YYYY"),
-    //       timeslot: newTimes,
-    //     });
-    //   }
-    //   // if no reservation for this day
-    // } else {
-    //   self.push({
-    //     room,
-    //     time: [{ date: selectedDate.format("DD/MM/YYYY"), timeslot: newTimes }],
-    //   });
-    // }
-
     close();
   };
 
   return (
     <div className="select-window" style={style}>
-      {limit ? (
-        <div style={{ style }}>
-          <p>
-            Booking limit exceeded for the day. You cannot book more than 8
-            hours for one day.
-          </p>
-          <Button
-            onClick={() => {
-              setLimit(false);
-              setSelectedIdx(1);
-              close();
-            }}
+      <>
+        <div>
+          <strong>{room}</strong>: {time} until...
+          <select
+            id="dropdown"
+            onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
           >
-            Close
-          </Button>
+            {dropdownTime.map((time, idx) => {
+              const [hour, minute] = time.split(":").map(Number);
+              let endTime = new Date();
+              endTime.setHours(hour, minute + 30, 0, 0);
+              endTime = endTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              });
+              return (
+                <option key={idx} value={idx}>
+                  {endTime}
+                </option>
+              );
+            })}
+            ;
+          </select>
         </div>
-      ) : (
-        <>
-          <div>
-            <strong>{room}</strong>: {time} until...
-            <select
-              id="dropdown"
-              onChange={(e) => setSelectedIdx(e.target.selectedIndex)}
-            >
-              {dropdownTime.map((time, idx) => {
-                const [hour, minute] = time.split(":").map(Number);
-                let endTime = new Date();
-                endTime.setHours(hour, minute + 30, 0, 0);
-                endTime = endTime.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                });
-                return (
-                  <option key={idx} value={idx}>
-                    {endTime}
-                  </option>
-                );
-              })}
-              ;
-            </select>
-          </div>
-          <br />
-          <div className="button-class">
-            <Button onClick={confirmHandler}>
-              {permission ? "Confirm" : "Request"}
-            </Button>
-            <Button onClick={close}>Close</Button>
-          </div>
-        </>
-      )}
+        <br />
+        <div className="button-class">
+          <Button onClick={confirmHandler}>
+            {permission ? "Confirm" : "Request"}
+          </Button>
+          <Button onClick={close}>Close</Button>
+        </div>
+      </>
     </div>
   );
 };
 
 // main table
-const Table = ({ data, selectedDate, setSelectedDate }) => {
+const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
   const [reservations, setReservations] = useState([]);
   const [selfReservations, setSelfReservations] = useState([]);
   const [times, setTimes] = useState([]);
@@ -312,12 +202,14 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     position: { top: 0, left: 0 },
     self: selfReservations,
     permission: "",
+    change: change,
+    setChange: setChange,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   // const [selectedDate, setSelectedDate] = useState(dayjs());
   const [hoveredRoom, setHoveredRoom] = useState(null);
-  // console.log("reservation is", reservations);
-  // console.log("selfReservation is", selfReservations);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setReservations(extractData(data, false));
@@ -329,6 +221,7 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       room: item.name,
       roomid: item.id,
       permission: item.permission,
+      is_available: item.is_available,
       time: [
         {
           date: selectedDate.format("DD/MM/YYYY"),
@@ -339,6 +232,9 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
   };
 
   const extractTime = (timeTable, self) => {
+    if (!timeTable) {
+      return [];
+    }
     const timeslots = [];
     timeTable.forEach((slot, index) => {
       if (!Array.isArray(slot)) {
@@ -380,10 +276,67 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     return () => clearInterval(timer);
   }, [selectedDate]);
 
+  // Scroll to the current time slot when times are updated
+  useEffect(() => {
+    const scrollToCurrentTime = async () => {
+      const currentTime = await getSydneyTime();
+
+      const minutes = currentTime.getMinutes();
+
+      // show whole hour before 15 or after 45, otherwise show half an hour
+      if (minutes < 15) {
+        currentTime.setMinutes(0, 0, 0);
+      } else if (minutes < 45) {
+        currentTime.setMinutes(30, 0, 0);
+      } else {
+        currentTime.setHours(currentTime.getHours() + 1);
+        currentTime.setMinutes(0, 0, 0);
+      }
+
+      const cur = currentTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      const currentTimeIndex = times.indexOf(cur);
+
+      if (currentTimeIndex !== -1) {
+        const table = document.getElementById("mytable");
+        const currentTimeCell = table.querySelector(
+          `thead th:nth-child(${currentTimeIndex})`
+        );
+
+        if (currentTimeCell) {
+          currentTimeCell.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "start",
+          });
+        }
+      }
+    };
+
+    if (times.length > 0) {
+      const today = dayjs().format("YYYY-MM-DD");
+      if (selectedDate.format("YYYY-MM-DD") === today) {
+        scrollToCurrentTime();
+      }
+    }
+  }, [times, selectedDate]);
+
   // allows popup when clicked on a given timeslot
   const clickHandler = (room, time, event, roomid) => {
+    const target = event.target;
+
+    if (
+      target.classList.contains("reserved") ||
+      target.classList.contains("selfreserved") ||
+      target.classList.contains("disabled")
+    ) {
+      return;
+    }
     const className = event.currentTarget.className;
-    console.log("classname is ", className);
     let permissionClass = "";
 
     if (className.includes("reserved")) {
@@ -395,16 +348,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     } else {
       permissionClass = true;
     }
-    const target = event.target;
 
-    if (
-      target.classList.contains("reserved") ||
-      target.classList.contains("selfreserved")
-    ) {
-      return;
-    }
-
-    const position = { top: event.clientY - 100, left: event.clientX - 290 };
+    const position = { top: event.clientY, left: event.clientX };
     setSelectWindow({
       visible: true,
       time,
@@ -413,6 +358,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
       position,
       self: selfReservations,
       permission: permissionClass, // Set the permission class
+      change: change,
+      setChange: setChange,
     });
   };
 
@@ -425,151 +372,189 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
     const sevenDaysFromNow = today.add(7, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
+  const [pastTimes, setPastTimes] = useState([]);
+
+  useEffect(() => {
+    const calculatePastTimes = async () => {
+      const currentTime = await getSydneyTime();
+      const past = times.filter((time) => {
+        const [timeHours, timeMinutes] = time.split(":").map(Number);
+        return (
+          currentTime.getHours() > timeHours ||
+          (currentTime.getHours() === timeHours &&
+            currentTime.getMinutes() >= timeMinutes + 15)
+        );
+      });
+      setPastTimes(past);
+    };
+
+    calculatePastTimes();
+  }, [times]);
 
   return (
-    <div className="table-container">
-      <div className="calendar-container">
-        <div className="calendar-row">
-          <Button
-            onClick={toggleCalendarVisibility}
-            variant="contained"
-            color="info"
-          >
-            {isCalendarVisible ? "Hide Calendar" : "Go to Date"}
-          </Button>
-          {isCalendarVisible && (
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateCalendar
-                shouldDisableDate={disableDates}
-                className="date-calendar-overlay"
-                onChange={handleDateChange}
-              />
-            </LocalizationProvider>
-          )}
-          <div className="calendar-text">
-            <strong>Chosen Date: </strong>
-            {selectedDate.format("dddd, MMMM D, YYYY")}
+    <div>
+      <div className="table-container">
+        <div className="calendar-container">
+          <div className="calendar-row">
+            <Button
+              onClick={toggleCalendarVisibility}
+              variant="contained"
+              color="info"
+            >
+              {isCalendarVisible ? "Hide Calendar" : "Go to Date"}
+            </Button>
+            {isCalendarVisible && (
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DateCalendar
+                  shouldDisableDate={disableDates}
+                  className="date-calendar-overlay"
+                  onChange={handleDateChange}
+                />
+              </LocalizationProvider>
+            )}
+            <div className="calendar-text">
+              <strong>Chosen Date: </strong>
+              {selectedDate.format("dddd, MMMM D, YYYY")}
+            </div>
+          </div>
+          <div className="to-map">
+            <ToMap />
           </div>
         </div>
-        <div className="to-map">
-          <ToMap />
-        </div>
-      </div>
 
-      <div className="legend">
-        <div className="legend-item">
-          <div
-            className="legend-color"
-            style={{ backgroundColor: "#b9b9b9" }}
-          ></div>
-          <div className="legend-text">Reserved By Others</div>
+        <div className="legend">
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#ffcccc" }}
+            ></div>
+            <div className="legend-text">Disabled Public Use</div>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#b9b9b9" }}
+            ></div>
+            <div className="legend-text">Reserved By Others</div>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#4c2d83" }}
+            ></div>
+            <div className="legend-text">Self-Reserved</div>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#fce8a3" }}
+            ></div>
+            <div className="legend-text">Available</div>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "rgb(221, 216, 169)" }}
+            ></div>
+            <div className="legend-text">Booking Request Required</div>
+          </div>
         </div>
-        <div className="legend-item">
-          <div
-            className="legend-color"
-            style={{ backgroundColor: "#4c2d83" }}
-          ></div>
-          <div className="legend-text">Self-Reserved</div>
+
+        <div className="table-wrapper">
+          <table id="mytable">
+            <thead>
+              <tr>
+                <th className="select-space">Select Space</th>
+                {times.map((time) => (
+                  <th key={time} className="time-column">
+                    {time}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {reservations.map((item) => {
+                const permission = item.permission;
+                const roomData = data.find((d) => d.name === item.room);
+                return (
+                  <tr key={item.room} id={item.roomid}>
+                    <td
+                      className="room-column"
+                      onMouseEnter={() => setHoveredRoom(roomData)}
+                      onMouseLeave={() => setHoveredRoom(null)}
+                      onClick={() => {
+                        navigate("/room/" + item.roomid);
+                      }}
+                    >
+                      {item.room}
+                      {hoveredRoom && hoveredRoom.name === item.room && (
+                        <div className="room-info">
+                          <p>Name: {hoveredRoom.name}</p>
+                          <p>Building: {hoveredRoom.building}</p>
+                          <p>Level: {hoveredRoom.level}</p>
+                          <p>Capacity: {hoveredRoom.capacity}</p>
+                        </div>
+                      )}
+                    </td>
+
+                    {times.map((time) => {
+                      let isPast = false;
+                      const today = dayjs().format("YYYY-MM-DD");
+                      if (selectedDate.format("YYYY-MM-DD") === today) {
+                        isPast = pastTimes.includes(time);
+                      }
+                      return (
+                        <td
+                          key={time}
+                          className={`time-column ${(() => {
+                            const isReserved = reservations.some(
+                              (reservation) =>
+                                reservation.room === item.room &&
+                                reservation.time.some(
+                                  (slot) =>
+                                    slot.date ===
+                                      selectedDate.format("DD/MM/YYYY") &&
+                                    slot.timeslot.some((t) => t === time)
+                                )
+                            );
+
+                            const isSelfReserved = selfReservations.some(
+                              (reservation) =>
+                                reservation.room === item.room &&
+                                reservation.time.some(
+                                  (slot) =>
+                                    slot.date ===
+                                      selectedDate.format("DD/MM/YYYY") &&
+                                    slot.timeslot.some((t) => t === time)
+                                )
+                            );
+                            if (isPast || !item.is_available) {
+                              return "disabled";
+                            } else if (isSelfReserved) {
+                              return "selfreserved";
+                            } else if (isReserved) {
+                              return "reserved";
+                            } else if (permission) {
+                              return "permission";
+                            } else {
+                              return "no-permission";
+                            }
+                          })()}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (!isPast) {
+                              clickHandler(item.room, time, event, item.roomid);
+                            }
+                          }}
+                        ></td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-        <div className="legend-item">
-          <div
-            className="legend-color"
-            style={{ backgroundColor: "#fce8a3" }}
-          ></div>
-          <div className="legend-text">Available</div>
-        </div>
-        <div className="legend-item">
-          <div
-            className="legend-color"
-            style={{ backgroundColor: "rgb(221, 216, 169)" }}
-          ></div>
-          <div className="legend-text">Booking Request Required</div>
-        </div>
-      </div>
-
-      <div className="table-wrapper">
-        <table id="mytable">
-          <thead>
-            <tr>
-              <th className="select-space">Select Space</th>
-              {times.map((time) => (
-                <th key={time} className="time-column">
-                  {time}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {reservations.map((item) => {
-              const permission = item.permission;
-              const roomData = data.find((d) => d.name === item.room);
-              return (
-                <tr key={item.room} id={item.roomid}>
-                  <td
-                    className="room-column"
-                    onMouseEnter={() => setHoveredRoom(roomData)}
-                    onMouseLeave={() => setHoveredRoom(null)}
-                  >
-                    {item.room}
-                    {hoveredRoom && hoveredRoom.name === item.room && (
-                      <div className="room-info">
-                        <p>Name: {hoveredRoom.name}</p>
-                        <p>Building: {hoveredRoom.building}</p>
-                        <p>Level: {hoveredRoom.level}</p>
-                        <p>Capacity: {hoveredRoom.capacity}</p>
-                      </div>
-                    )}
-                  </td>
-
-                  {times.map((time) => {
-                    return (
-                      <td
-                        key={time}
-                        className={`time-column ${(() => {
-                          const isReserved = reservations.some(
-                            (reservation) =>
-                              reservation.room === item.room &&
-                              reservation.time.some(
-                                (slot) =>
-                                  slot.date ===
-                                    selectedDate.format("DD/MM/YYYY") &&
-                                  slot.timeslot.some((t) => t === time)
-                              )
-                          );
-
-                          const isSelfReserved = selfReservations.some(
-                            (reservation) =>
-                              reservation.room === item.room &&
-                              reservation.time.some(
-                                (slot) =>
-                                  slot.date ===
-                                    selectedDate.format("DD/MM/YYYY") &&
-                                  slot.timeslot.some((t) => t === time)
-                              )
-                          );
-
-                          if (isSelfReserved) {
-                            return "selfreserved";
-                          } else if (isReserved) {
-                            return "reserved";
-                          } else if (permission) {
-                            return "permission";
-                          } else {
-                            return "no-permission";
-                          }
-                        })()}`}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          clickHandler(item.room, time, event, item.roomid);
-                        }}
-                      ></td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
       </div>
       <SelectWindow
         visible={selectWindow.visible}
@@ -582,6 +567,8 @@ const Table = ({ data, selectedDate, setSelectedDate }) => {
         selectedDate={selectedDate}
         reservations={reservations}
         permission={selectWindow.permission}
+        change={change}
+        setChange={setChange}
       />
     </div>
   );
