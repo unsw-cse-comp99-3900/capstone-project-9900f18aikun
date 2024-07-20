@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
-import "./ChatBox.css";
+import "./CustomerService.css";
 
 const CustomerService = () => {
   const [inputMessage, setInputMessage] = useState("");

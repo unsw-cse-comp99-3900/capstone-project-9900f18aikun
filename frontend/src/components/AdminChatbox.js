@@ -12,6 +12,7 @@ const AdminChatbox = ({ onClose }) => {
   const [newMessageUsers, setNewMessageUsers] = useState(new Set());
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
+  const pendingMessages = useRef(new Set());
 
   const connectSocket = () => {
     const token = localStorage.getItem('token');
@@ -47,25 +48,25 @@ const AdminChatbox = ({ onClose }) => {
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
         
-        if (!adminId) {
+        const isAdminMessage = user_id !== chat_id;
+
+        if (isAdminMessage && !adminId) {
           setAdminId(user_id);
         }
 
-        const isAdminMessage = chat_id !== user_id;
+        setActiveUsers(prev => {
+          const newMap = new Map(prev);
+          newMap.set(chat_id, { 
+            userName: isAdminMessage ? "Admin" : user_name, 
+            chatId: chat_id,
+            lastMessageTime: timestamp
+          });
+          return newMap;
+        });
 
         if (!isAdminMessage) {
-          setActiveUsers(prev => {
-            const newMap = new Map(prev);
-            newMap.set(user_id, { 
-              ...newMap.get(user_id), 
-              userName: user_name, 
-              chatId: chat_id,
-              lastMessageTime: timestamp
-            });
-            return newMap;
-          });
-          setSelectedUser(prevSelected => prevSelected || user_id);
-          setNewMessageUsers(prev => new Set(prev).add(user_id));
+          setSelectedUser(prevSelected => prevSelected || chat_id);
+          setNewMessageUsers(prev => new Set(prev).add(chat_id));
         }
 
         const newMessage = { 
@@ -73,15 +74,24 @@ const AdminChatbox = ({ onClose }) => {
           text: message, 
           sender: isAdminMessage ? "admin" : "user", 
           timestamp: new Date(timestamp),
-          userId: user_id,
-          userName: user_name,
+          userId: isAdminMessage ? user_id : chat_id,
+          userName: isAdminMessage ? "Admin" : user_name,
           chatId: chat_id
         };
 
-        setMessageHistories(prev => ({
-          ...prev,
-          [user_id]: [...(prev[user_id] || []), newMessage]
-        }));
+        setMessageHistories(prev => {
+          const updatedMessages = [...(prev[chat_id] || [])];
+          if (!pendingMessages.current.has(message_id)) {
+            updatedMessages.push(newMessage);
+            updatedMessages.sort((a, b) => a.timestamp - b.timestamp);
+          }
+          return {
+            ...prev,
+            [chat_id]: updatedMessages
+          };
+        });
+
+        pendingMessages.current.delete(message_id);
       } else {
         console.warn('Received data in unexpected format:', data);
       }
@@ -94,25 +104,32 @@ const AdminChatbox = ({ onClose }) => {
 
       if (data && data.chat && Array.isArray(data.chat)) {
         data.chat.forEach(chat => {
-          const userId = chat.chat_id;
-          newActiveUsers.set(userId, { 
-            userName: chat.name, 
-            chatId: userId,
+          const chatId = chat.chat_id;
+          newActiveUsers.set(chatId, { 
+            userName: chat.name || "Unknown",
+            chatId: chatId,
             lastMessageTime: chat.last_message_time,
             isHandled: chat.is_handled,
             isViewed: chat.is_viewed
           });
           
-          const messages = Array.isArray(chat.messages) ? chat.messages.map(msg => ({
-            id: msg.message_id,
-            text: msg.message,
-            sender: msg.user_id === userId ? "user" : "admin",
-            timestamp: new Date(msg.timestamp),
-            userId: msg.user_id,
-            userName: msg.user_name
-          })) : [];
+          const messages = Array.isArray(chat.messages) ? chat.messages.map(msg => {
+            const isAdminMessage = msg.user_id !== chatId;
+            if (isAdminMessage && !adminId) {
+              setAdminId(msg.user_id);
+            }
+            return {
+              id: msg.message_id,
+              text: msg.message,
+              sender: isAdminMessage ? "admin" : "user",
+              timestamp: new Date(msg.timestamp),
+              userId: isAdminMessage ? msg.user_id : chatId,
+              userName: isAdminMessage ? "Admin" : msg.user_name,
+              chatId: chatId
+            };
+          }).sort((a, b) => a.timestamp - b.timestamp) : [];
 
-          newMessageHistories[userId] = messages;
+          newMessageHistories[chatId] = messages;
         });
       } else {
         console.error('Unexpected data structure for admin_chat_history:', data);
@@ -177,7 +194,7 @@ const AdminChatbox = ({ onClose }) => {
   };
 
   const handleSendMessage = () => {
-    if (message.trim() === "" || !socketRef.current || !selectedUser) return;
+    if (message.trim() === "" || !socketRef.current || !selectedUser || !adminId) return;
 
     const messageData = {
       msg: message,
@@ -186,23 +203,46 @@ const AdminChatbox = ({ onClose }) => {
 
     console.log('Admin sending message:', messageData);
     
+    const tempId = Date.now().toString();
     const newMessage = { 
+      id: tempId,
       text: message, 
       sender: "admin", 
       timestamp: new Date(), 
       userId: adminId,
-      userName: "Admin"
+      userName: "Admin",
+      chatId: selectedUser
     };
+
+    pendingMessages.current.add(tempId);
+
     setMessageHistories(prev => ({
       ...prev,
-      [selectedUser]: [...(prev[selectedUser] || []), newMessage]
+      [selectedUser]: [...(prev[selectedUser] || []), newMessage].sort((a, b) => a.timestamp - b.timestamp)
     }));
 
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Admin message acknowledged:', acknowledgement);
+        // Update the message with the server-generated ID if provided
+        if (acknowledgement.message_id) {
+          setMessageHistories(prev => ({
+            ...prev,
+            [selectedUser]: prev[selectedUser].map(msg => 
+              msg.id === tempId ? { ...msg, id: acknowledgement.message_id } : msg
+            )
+          }));
+          pendingMessages.current.delete(tempId);
+          pendingMessages.current.add(acknowledgement.message_id);
+        }
       } else {
         console.warn('Admin message not acknowledged');
+        // Remove the message if not acknowledged
+        setMessageHistories(prev => ({
+          ...prev,
+          [selectedUser]: prev[selectedUser].filter(msg => msg.id !== tempId)
+        }));
+        pendingMessages.current.delete(tempId);
       }
     });
 
@@ -251,12 +291,12 @@ const AdminChatbox = ({ onClose }) => {
           <div className="chat-content">
             {selectedUser && messageHistories[selectedUser] ? (
               messageHistories[selectedUser].map((msg, index) => (
-                <div key={index} className={`message ${msg.sender}`}>
+                <div key={msg.id} className={`message ${msg.sender}`}>
                   <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
                   <div className="message-text">
                     {msg.sender === "user" 
                       ? `${msg.userName} (${msg.userId}): ${msg.text}` 
-                      : `Admin (${adminId}): ${msg.text}`}
+                      : `Admin (${msg.userId}): ${msg.text}`}
                   </div>
                 </div>
               ))
@@ -273,7 +313,7 @@ const AdminChatbox = ({ onClose }) => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              disabled={!selectedUser}
+              disabled={!selectedUser || !adminId}
             />
             <img
               className="vector"
@@ -287,14 +327,14 @@ const AdminChatbox = ({ onClose }) => {
           <div className="active-users">
             Active Users: {activeUsers.size}
           </div>
-          {Array.from(activeUsers.entries()).map(([userId, userInfo]) => (
+          {Array.from(activeUsers.entries()).map(([chatId, userInfo]) => (
             <div 
-              key={userId} 
-              className={`user-item ${selectedUser === userId ? 'selected' : ''} ${newMessageUsers.has(userId) ? 'new-message' : ''}`}
-              onClick={() => handleUserSelect(userId)}
+              key={chatId} 
+              className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
+              onClick={() => handleUserSelect(chatId)}
             >
-              {userInfo.userName} ({userId})
-              {newMessageUsers.has(userId) && <span className="new-message-prompt">New</span>}
+              {userInfo.userName} ({chatId})
+              {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
               <br />
               Last message: {formatDateTime(userInfo.lastMessageTime)}
               <br />

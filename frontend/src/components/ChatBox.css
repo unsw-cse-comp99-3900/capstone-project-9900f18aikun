@@ -457,6 +457,15 @@ cursor: pointer;
 .mode-switch-button:hover {
 background-color: #45a049;
 }
+.message.received {
+background-color: #f0f0f0; /* Light gray background for received messages */
+align-self: flex-start;
+margin-right: auto;
+padding: 10px 20px; /* Add padding to increase the background color size */
+border-radius: 10px; /* Optional: add rounded corners */
+max-width: 80%; /* Ensure the message doesn't exceed the container width */
+word-wrap: break-word; /* Ensure long words break to fit within the container */
+}
 
 
 
@@ -466,7 +475,7 @@ display: flex;
 flex-direction: column;
 }
 .message.user {
-align-self: flex-end;
+align-self: flex-start;
 /* other styles for user messages */
 }
 
@@ -495,7 +504,7 @@ line-height: 1.4;
 }
 
 .message.sent {
-align-self: flex-start;
+align-self: flex-end  ;
 background-color: #dcf8c6;
 }
 
@@ -540,13 +549,3 @@ cursor: pointer;
 .send-button:hover {
 background-color: #0056b3;
 }
-.message.received {
-  background-color: #f0f0f0; /* Light gray background for received messages */
-  align-self: flex-start;
-  margin-right: auto;
-  padding: 10px 20px; /* Add padding to increase the background color size */
-  border-radius: 10px; /* Optional: add rounded corners */
-  max-width: 80%; /* Ensure the message doesn't exceed the container width */
-  word-wrap: break-word; /* Ensure long words break to fit within the container */
-  }
-  
