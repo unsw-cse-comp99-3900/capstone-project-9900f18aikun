@@ -54,28 +54,12 @@ const AdminChatbox = ({ onClose }) => {
           setAdminId(user_id);
         }
 
-        setActiveUsers(prev => {
-          const newMap = new Map(prev);
-          newMap.set(chat_id, { 
-            userName: isAdminMessage ? "Admin" : user_name, 
-            chatId: chat_id,
-            lastMessageTime: timestamp
-          });
-          return newMap;
-        });
-
-        if (!isAdminMessage) {
-          setSelectedUser(prevSelected => prevSelected || chat_id);
-          setNewMessageUsers(prev => new Set(prev).add(chat_id));
-        }
-
         const newMessage = { 
           id: message_id,
           text: message, 
           sender: isAdminMessage ? "admin" : "user", 
           timestamp: new Date(timestamp),
-          userId: isAdminMessage ? user_id : chat_id,
-          userName: isAdminMessage ? "Admin" : user_name,
+          userId: user_id,
           chatId: chat_id
         };
 
@@ -90,6 +74,23 @@ const AdminChatbox = ({ onClose }) => {
             [chat_id]: updatedMessages
           };
         });
+
+        setActiveUsers(prev => {
+          const newMap = new Map(prev);
+          const existingUser = newMap.get(chat_id);
+          newMap.set(chat_id, { 
+            ...existingUser,
+            userName: existingUser ? existingUser.userName : user_name, 
+            chatId: chat_id,
+            lastMessageTime: timestamp
+          });
+          return newMap;
+        });
+
+        if (!isAdminMessage) {
+          setSelectedUser(prevSelected => prevSelected || chat_id);
+          setNewMessageUsers(prev => new Set(prev).add(chat_id));
+        }
 
         pendingMessages.current.delete(message_id);
       } else {
@@ -123,8 +124,7 @@ const AdminChatbox = ({ onClose }) => {
               text: msg.message,
               sender: isAdminMessage ? "admin" : "user",
               timestamp: new Date(msg.timestamp),
-              userId: isAdminMessage ? msg.user_id : chatId,
-              userName: isAdminMessage ? "Admin" : msg.user_name,
+              userId: msg.user_id,
               chatId: chatId
             };
           }).sort((a, b) => a.timestamp - b.timestamp) : [];
@@ -210,21 +210,32 @@ const AdminChatbox = ({ onClose }) => {
       sender: "admin", 
       timestamp: new Date(), 
       userId: adminId,
-      userName: "Admin",
       chatId: selectedUser
     };
 
     pendingMessages.current.add(tempId);
 
-    setMessageHistories(prev => ({
-      ...prev,
-      [selectedUser]: [...(prev[selectedUser] || []), newMessage].sort((a, b) => a.timestamp - b.timestamp)
-    }));
+    setMessageHistories(prev => {
+      const updatedMessages = [...(prev[selectedUser] || []), newMessage].sort((a, b) => a.timestamp - b.timestamp);
+      return {
+        ...prev,
+        [selectedUser]: updatedMessages
+      };
+    });
+
+    setActiveUsers(prev => {
+      const newMap = new Map(prev);
+      const currentUser = newMap.get(selectedUser);
+      newMap.set(selectedUser, { 
+        ...currentUser,
+        lastMessageTime: newMessage.timestamp
+      });
+      return newMap;
+    });
 
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Admin message acknowledged:', acknowledgement);
-        // Update the message with the server-generated ID if provided
         if (acknowledgement.message_id) {
           setMessageHistories(prev => ({
             ...prev,
@@ -237,7 +248,6 @@ const AdminChatbox = ({ onClose }) => {
         }
       } else {
         console.warn('Admin message not acknowledged');
-        // Remove the message if not acknowledged
         setMessageHistories(prev => ({
           ...prev,
           [selectedUser]: prev[selectedUser].filter(msg => msg.id !== tempId)
@@ -290,13 +300,13 @@ const AdminChatbox = ({ onClose }) => {
           </div>
           <div className="chat-content">
             {selectedUser && messageHistories[selectedUser] ? (
-              messageHistories[selectedUser].map((msg, index) => (
+              messageHistories[selectedUser].map((msg) => (
                 <div key={msg.id} className={`message ${msg.sender}`}>
                   <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
                   <div className="message-text">
-                    {msg.sender === "user" 
-                      ? `${msg.userName} (${msg.userId}): ${msg.text}` 
-                      : `Admin (${msg.userId}): ${msg.text}`}
+                    {msg.sender === "admin" 
+                      ? `Admin (${msg.userId}): ${msg.text}` 
+                      : `${activeUsers.get(msg.chatId).userName}: ${msg.text}`}
                   </div>
                 </div>
               ))
@@ -324,24 +334,42 @@ const AdminChatbox = ({ onClose }) => {
           </div>
         </div>
         <div className="messages-list">
-          <div className="active-users">
-            Active Users: {activeUsers.size}
-          </div>
-          {Array.from(activeUsers.entries()).map(([chatId, userInfo]) => (
-            <div 
-              key={chatId} 
-              className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
-              onClick={() => handleUserSelect(chatId)}
-            >
-              {userInfo.userName} ({chatId})
-              {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
-              <br />
-              Last message: {formatDateTime(userInfo.lastMessageTime)}
-              <br />
-              Handled: {userInfo.isHandled ? 'Yes' : 'No'}, Viewed: {userInfo.isViewed ? 'Yes' : 'No'}
-            </div>
-          ))}
+  {Array.from(activeUsers.entries()).map(([chatId, userInfo], index) => {
+    const latestMessage = messageHistories[chatId] && messageHistories[chatId].length > 0
+      ? messageHistories[chatId][messageHistories[chatId].length - 1]
+      : null;
+    const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
+    const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    
+    return (
+      <div 
+        key={chatId} 
+        className={`user-item ${selectedUser === chatId ? 'selected' : ''}`}
+        onClick={() => handleUserSelect(chatId)}
+      >
+        <div className="user-avatar" style={{backgroundColor: avatarColor}}>
+          {initials}
         </div>
+        <div className="user-item-info">
+          <div className="user-item-header">
+            <span className="user-item-name">{chatId} {userInfo.userName}</span>
+            <span className="user-item-time">
+              {latestMessage ? formatDateTime(latestMessage.timestamp) : ''}
+            </span>
+          </div>
+          <div className="user-item-last-message">
+            {latestMessage 
+              ? `${latestMessage.sender === 'admin' 
+                  ? `Admin (${latestMessage.userId})` 
+                  : `${chatId}`}: ${latestMessage.text}`
+              : 'No messages yet'}
+          </div>
+          {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
+        </div>
+      </div>
+    );
+  })}
+</div>
       </div>
     </div>
   );
