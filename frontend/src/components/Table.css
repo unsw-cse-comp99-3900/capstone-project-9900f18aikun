@@ -74,8 +74,18 @@ td.selfreserved {
   color: white;
 }
 
+td.requested {
+  background-color: green !important;
+  color: white;
+}
+
+td.signedin {
+  background-color: red !important;
+  color: white;
+}
+
 td:not(.reserved):not(.selfreserved) {
-  background-color: #FDF4BF;
+  background-color: #fdf4bf;
 }
 
 td:not(.reserved):not(.selfreserved):hover {
@@ -153,6 +163,14 @@ tbody tr td.room-column {
 
 .legend {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.legendbox {
+  display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
@@ -309,10 +327,10 @@ tbody tr td.room-column {
 
 td.time-column.disabled {
   background-color: #e8c1bb;
-  cursor: not-allowed; 
+  cursor: not-allowed;
 }
 
 td.time-column.disabled:hover {
   background-color: #dbaea7;
-  cursor: not-allowed; 
+  cursor: not-allowed;
 }
