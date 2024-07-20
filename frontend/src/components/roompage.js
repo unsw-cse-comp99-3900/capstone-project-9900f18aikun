@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import "./roompage.css";
 import Table from "./Table";
 import { Button, Input } from "@arco-design/web-react";
+import ErrorBox from "./errorBox";
+import { Spin, Space } from "@arco-design/web-react";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -12,46 +14,40 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [roomData, setRoomData] = useState(null);
   const [loadingRoom, setLoadingRoom] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [change, setChange] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const [reportText, setReportText] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleReportClick = () => {
     setIsReporting(!isReporting);
   };
 
   const handleSubmit = async () => {
-    // Handle the report submission logic here
-    console.log("Report submitted:", reportText);
     const obj = {
-      message: reportText
+      message: reportText,
     };
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `/api/admin/report`,
-        {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(obj),
-        }
-      );
+      const response = await fetch(`/api/admin/report`, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(obj),
+      });
 
       if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error("Server responded with an error: " + errorText);
+        const errorText = await response.text();
+        throw new Error("Server responded with an error: " + errorText);
       } else {
         setIsReporting(false);
         setReportText("");
       }
-
     } catch (error) {
-      setError(error);
+      setErrorMessage(error.message);
     } finally {
       setLoadingData(false);
     }
@@ -82,7 +78,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         setData(dataArray);
       } catch (error) {
         console.error("Error fetching booking data:", error);
-        setError(error);
+        setErrorMessage(error.message);
       } finally {
         setLoadingData(false);
       }
@@ -108,7 +104,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         setRoom(result.message);
       } catch (error) {
         console.error("Error fetching room data:", error);
-        setError(error);
+        setErrorMessage(error.message);
       } finally {
         setLoadingRoom(false);
       }
@@ -126,74 +122,81 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   }, [room, data]);
 
   if (loadingRoom || loadingData) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
-  if (!room) {
-    return <div>No room data available</div>;
+    return (
+      <div className="loading-container">
+        <Space size={40}>
+          <Spin size={40} />
+        </Space>
+      </div>
+    );
   }
 
   return (
     <div className="content">
-      <div className="room-card">
-        <div className="room-details">
-          <div className="room-title">
-            <h1>{room.room_detail.name}</h1>
-            <Button
-              type="primary"
-              status={isReporting ? "default" : "danger"}
-              className="report-button"
-              onClick={handleReportClick}
-            >
-              {isReporting ? "Cancel" : "Report"}
-            </Button>
-          </div>
-          <span className="room-subtitle">
-            ({room.room_detail.building}: Level {room.room_detail.level}) Max.
-            capacity: {room.room_detail.capacity}
-          </span>
+      {room ? (
+        <div>
+          <div className="room-card">
+            <div className="room-details">
+              <div className="room-title">
+                <h1>{room.room_detail.name}</h1>
+                <Button
+                  type="primary"
+                  status={isReporting ? "default" : "danger"}
+                  className="report-button"
+                  onClick={handleReportClick}
+                >
+                  {isReporting ? "Cancel" : "Report"}
+                </Button>
+              </div>
+              <span className="room-subtitle">
+                ({room.room_detail.building}: Level {room.room_detail.level})
+                Max. capacity: {room.room_detail.capacity}
+              </span>
 
-          {isReporting && (
-            <div>
-              <input
-                placeholder="Enter report details"
-                value={reportText}
-                onChange={(e) => setReportText(e.target.value)}
-              />
-              <Button type="primary" onClick={handleSubmit}>
-                Submit
-              </Button>
+              {isReporting && (
+                <div>
+                  <input
+                    placeholder="Enter report details"
+                    value={reportText}
+                    onChange={(e) => setReportText(e.target.value)}
+                  />
+                  <Button type="primary" onClick={handleSubmit}>
+                    Submit
+                  </Button>
+                </div>
+              )}
+
+              <div className="room-image">
+                <img src={room.room_detail.image_url} alt="Room" />
+              </div>
+              <p>
+                <strong>Type:</strong>{" "}
+                {room.room_type === "room" ? "Meeting Room" : "Hot Desk"}
+              </p>
+              <p>
+                <strong>Location:</strong> {room.room_detail.building} Level{" "}
+                {room.room_detail.level}
+              </p>
+              <p>💡 Power available</p>
             </div>
-          )}
-
-          <div className="room-image">
-            <img src={room.room_detail.image_url} alt="Room" />
           </div>
-          <p>
-            <strong>Type:</strong>{" "}
-            {room.room_type === "room" ? "Meeting Room" : "Hot Desk"}
-          </p>
-          <p>
-            <strong>Location:</strong> {room.room_detail.building} Level{" "}
-            {room.room_detail.level}
-          </p>
-          <p>💡 Power available</p>
-        </div>
-      </div>
 
-      {roomData && (
-        <Table
-          data={roomData}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          map={false}
-          change={change}
-          setChange={setChange}
-        />
+          {roomData && (
+            <Table
+              data={roomData}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              map={false}
+              change={change}
+              setChange={setChange}
+            />
+          )}
+        </div>
+      ) : (
+        <div>No room information</div>
+      )}
+      {errorMessage && (
+        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
       )}
     </div>
   );

@@ -5,11 +5,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
-import { Table as ArcoTable } from '@arco-design/web-react';
-import { Spin, Space } from '@arco-design/web-react';
+import { Table as ArcoTable } from "@arco-design/web-react";
+import { Spin, Space } from "@arco-design/web-react";
 import ErrorBox from "./errorBox";
-
-
 
 const Rebook = () => {
   const [history, setHistory] = useState([]);
@@ -18,7 +16,6 @@ const Rebook = () => {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
   const [errorMessage, setErrorMessage] = useState("");
-
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -106,7 +103,7 @@ const Rebook = () => {
           <Spin size={40} />
         </Space>
       </div>
-    );;
+    );
   }
 
   if (error) {
@@ -115,22 +112,22 @@ const Rebook = () => {
 
   const columns = [
     {
-      title: 'Time',
-      dataIndex: 'time',
-      key: 'time',
-      align: 'center',
+      title: "Time",
+      dataIndex: "time",
+      key: "time",
+      align: "center",
       render: (_, record) => `${record.start_time} - ${record.end_time}`,
     },
     {
-      title: 'Room Name',
-      dataIndex: 'room_name',
-      key: 'room_name',
-      align: 'center',
+      title: "Room Name",
+      dataIndex: "room_name",
+      key: "room_name",
+      align: "center",
     },
     {
-      title: 'Action',
-      key: 'action',
-      align: 'center',
+      title: "Action",
+      key: "action",
+      align: "center",
       render: (_, record) => (
         <span
           id={record.booking_id}
@@ -148,22 +145,20 @@ const Rebook = () => {
       <header>
         <h1>Last Booking:</h1>
       </header>
-      
-      {
-        history[0] ? (
 
-<div>
-      <ArcoTable
-        columns={columns}
-        data={history}
-        rowKey="booking_id"
-        pagination={false} 
-      />
-      </div>
-    ) : (
-      <div className="no-history">No previous reservation history</div>
-    )}
-          {isCalendarVisible && (
+      {history[0] ? (
+        <div>
+          <ArcoTable
+            columns={columns}
+            data={history}
+            rowKey="booking_id"
+            pagination={false}
+          />
+        </div>
+      ) : (
+        <div className="no-history">No previous reservation history</div>
+      )}
+      {isCalendarVisible && (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
             shouldDisableDate={disableDates}
@@ -178,8 +173,8 @@ const Rebook = () => {
           />
         </LocalizationProvider>
       )}
-    
-    {errorMessage && (
+
+      {errorMessage && (
         <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
       )}
     </div>
