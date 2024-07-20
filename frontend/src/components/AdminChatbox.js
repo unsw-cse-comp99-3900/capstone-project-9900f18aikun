@@ -49,11 +49,11 @@ const AdminChatbox = ({ onClose }) => {
         const { message_id, user_name, user_id, message, timestamp, chat_id } = data.message;
         
         const isAdminMessage = user_id !== chat_id;
-
+    
         if (isAdminMessage && !adminId) {
           setAdminId(user_id);
         }
-
+    
         const newMessage = { 
           id: message_id,
           text: message, 
@@ -62,7 +62,7 @@ const AdminChatbox = ({ onClose }) => {
           userId: user_id,
           chatId: chat_id
         };
-
+    
         setMessageHistories(prev => {
           const updatedMessages = [...(prev[chat_id] || [])];
           if (!pendingMessages.current.has(message_id)) {
@@ -74,7 +74,7 @@ const AdminChatbox = ({ onClose }) => {
             [chat_id]: updatedMessages
           };
         });
-
+    
         setActiveUsers(prev => {
           const newMap = new Map(prev);
           const existingUser = newMap.get(chat_id);
@@ -86,12 +86,12 @@ const AdminChatbox = ({ onClose }) => {
           });
           return newMap;
         });
-
+    
         if (!isAdminMessage) {
           setSelectedUser(prevSelected => prevSelected || chat_id);
           setNewMessageUsers(prev => new Set(prev).add(chat_id));
         }
-
+    
         pendingMessages.current.delete(message_id);
       } else {
         console.warn('Received data in unexpected format:', data);
@@ -352,16 +352,14 @@ const AdminChatbox = ({ onClose }) => {
         </div>
         <div className="user-item-info">
           <div className="user-item-header">
-            <span className="user-item-name">{chatId} {userInfo.userName}</span>
-            <span className="user-item-time">
-              {latestMessage ? formatDateTime(latestMessage.timestamp) : ''}
-            </span>
+            <span className="user-item-name">{userInfo.userName}</span>
+            <span className="user-item-time">{formatDateTime(userInfo.lastMessageTime)}</span>
           </div>
           <div className="user-item-last-message">
             {latestMessage 
-              ? `${latestMessage.sender === 'admin' 
-                  ? `Admin (${latestMessage.userId})` 
-                  : `${chatId}`}: ${latestMessage.text}`
+              ? (latestMessage.sender === 'admin'
+                  ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
+                  : `${userInfo.userName}: ${latestMessage.text}`)
               : 'No messages yet'}
           </div>
           {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
