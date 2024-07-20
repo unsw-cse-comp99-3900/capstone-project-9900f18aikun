@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit
+from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -357,19 +357,19 @@ class MeetingRoom(Resource):
                 "level": detail.level,
                 "capacity": detail.capacity,
                 "type": book_type,
-                "permission": self.check_permission(detail, user_type),
+                "permission": check_permission(detail, user_type),
                 "time_table": [[] for _ in range(48)],
                 "is_available": is_available
             }
         return output
 
-    def check_permission(self, detail, user_type):
-        if user_type == "HDR_student":
-            return detail.HDR_student_permission
-        elif user_type == "CSE_staff":
-            return detail.CSE_staff_permission
-        else:
-            return False
+def check_permission(detail, user_type):
+    if user_type == "HDR_student":
+        return detail.HDR_student_permission
+    elif user_type == "CSE_staff":
+        return detail.CSE_staff_permission
+    else:
+        return False
 
 
 @booking_ns.route('/meetingroom-report')
@@ -521,6 +521,12 @@ class ExpressBook(Resource):
                 query = query.filter(HotDeskDetail.level == level)
 
         available_rooms = query.all()
+        user_type = "staff"
+        if is_student(zid):
+            user_type = "student"
+        elif db.session.get(CSEStaff, zid).school_name != "CSE":
+            user_type = "non-cse_staff"
+
 
         unfiltered_available_room_details = [
             {"room_id": room.id,
@@ -529,7 +535,8 @@ class ExpressBook(Resource):
              "capacity": room.capacity,
              "date": date,
              "start_time": start_time,
-             "end_time": end_time}
+             "end_time": end_time,
+             "permission": express_permission(user_type, room.HDR_student_permission)}
             for room in available_rooms
         ]
         available_room_details = []
@@ -537,15 +544,33 @@ class ExpressBook(Resource):
             if is_room_available(room["room_id"]):
                 available_room_details.append(room)
 
-
-        if len(available_room_details) > 5:
-            available_room_details = random.sample(available_room_details, 5)
-
         if len(available_room_details) == 0:
             return {'error': "Sorry, we couldn't find a location that meets your needs."}, 400
 
-        return available_room_details, 200
+        rooms_with_permission = []
+        rooms_without_permission = []
 
+        for room in available_room_details:
+            if room['permission']:
+                rooms_with_permission.append(room)
+            else:
+                rooms_without_permission.append(room)
+        permission_room_len = len(rooms_with_permission)
+        all_room_len = len(available_room_details)
+
+        if len(rooms_with_permission) >= 5:
+            output = random.sample(rooms_with_permission, 5)
+        else:
+            without_permission_output = random.sample(rooms_without_permission, min((all_room_len - permission_room_len), (5 - permission_room_len)))
+            output = rooms_with_permission + without_permission_output
+
+        return output, 200
+def express_permission(user_type, student_permission):
+    if user_type == "student":
+        return student_permission
+    if user_type == "non-cse_staff":
+        return False
+    return True
 #1. 改成当天时间 1 ------
 # 2. admin是prof 1-------
 # 3. admin给别人book ed 如果占着就强行取消 ----------

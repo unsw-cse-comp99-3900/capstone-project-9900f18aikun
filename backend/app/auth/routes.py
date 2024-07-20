@@ -37,6 +37,7 @@ class UserLogin(Resource):
         zid = data['zid']
         password = data['password']
         user_data = db.session.get(Users, zid)
+
         if not user_data or user_data.password != password:
             return {'error': 'Invalid zid or password'}, 400
 

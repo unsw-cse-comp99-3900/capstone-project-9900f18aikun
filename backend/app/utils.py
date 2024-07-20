@@ -171,3 +171,4 @@ def who_made_comment(comment_id: int ) -> str:
 
 def get_like_count(comment_id: int ) -> int:
     return Like.query.filter_by(comment_id=comment_id).count()
+
