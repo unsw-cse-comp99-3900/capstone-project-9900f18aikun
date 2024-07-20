@@ -55,9 +55,8 @@ function Filter({ onFilter }) {
           <label>Capacity:</label>
           <Slider
             defaultValue={1}
-            max={100}
             min={1}
-            value={filters.capacity}
+            max={100}
             onChange={handleSliderChange}
             showInput={{
               style: {
