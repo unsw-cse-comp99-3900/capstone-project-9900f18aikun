@@ -342,29 +342,32 @@ const AdminChatbox = ({ onClose }) => {
     const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     
     return (
-      <div 
-        key={chatId} 
-        className={`user-item ${selectedUser === chatId ? 'selected' : ''}`}
-        onClick={() => handleUserSelect(chatId)}
-      >
-        <div className="user-avatar" style={{backgroundColor: avatarColor}}>
-          {initials}
-        </div>
-        <div className="user-item-info">
-          <div className="user-item-header">
-            <span className="user-item-name">{userInfo.userName}</span>
-            <span className="user-item-time">{formatDateTime(userInfo.lastMessageTime)}</span>
-          </div>
-          <div className="user-item-last-message">
-            {latestMessage 
-              ? (latestMessage.sender === 'admin'
-                  ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
-                  : `${userInfo.userName}: ${latestMessage.text}`)
-              : 'No messages yet'}
-          </div>
-          {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
-        </div>
-      </div>
+      // In the return statement, update the user-item div:
+<div 
+  key={chatId} 
+  className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
+  onClick={() => handleUserSelect(chatId)}
+>
+  <div className="user-avatar" style={{backgroundColor: avatarColor}}>
+    {initials}
+  </div>
+  <div className="user-item-info">
+    <div className="user-item-header">
+      <span className="user-item-name">
+        {userInfo.userName}
+        {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
+      </span>
+      <span className="user-item-time">{formatDateTime(userInfo.lastMessageTime)}</span>
+    </div>
+    <div className="user-item-last-message">
+      {latestMessage 
+        ? (latestMessage.sender === 'admin'
+            ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
+            : `${userInfo.userName}: ${latestMessage.text}`)
+        : 'No messages yet'}
+    </div>
+  </div>
+</div>
     );
   })}
 </div>

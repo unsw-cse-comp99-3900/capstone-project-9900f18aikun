@@ -352,12 +352,14 @@
     padding: 0;
   }
   
-  .admin-chatbox .user-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  }
+  
+.admin-chatbox .user-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background-color 0.3s ease;
+}
   
   .admin-chatbox .user-avatar {
     width: 40px;
@@ -413,4 +415,99 @@
     padding: 2px 6px;
     border-radius: 10px;
     margin-left: 5px;
+  }
+  .admin-chatbox .messages-list {
+    background-color: #a083d5;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 599px;
+    width: 290px;
+    overflow-y: auto;
+    padding: 0;
+  }
+  
+  .admin-chatbox .user-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    transition: background-color 0.3s ease;
+  }
+  
+  .admin-chatbox .user-item.selected {
+    background-color: #8a6cc9;
+  }
+  
+  .admin-chatbox .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  .admin-chatbox .user-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .admin-chatbox .user-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  
+  .admin-chatbox .user-item-name {
+    font-weight: bold;
+    font-size: 14px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+  }
+  
+  .admin-chatbox .user-item-time {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .admin-chatbox .user-item-last-message {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  .admin-chatbox .new-message-prompt {
+    background-color: #ff4500;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+  }
+  
+  @keyframes selectAnimation {
+    0% {
+      background-color: #a083d5;
+    }
+    50% {
+      background-color: #8a6cc9;
+    }
+    100% {
+      background-color: #7e5cc1;
+    }
+  }
+  
+  .admin-chatbox .user-item.selected {
+    animation: selectAnimation 0.3s ease forwards;
   }
