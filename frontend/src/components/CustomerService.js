@@ -42,7 +42,7 @@ const CustomerService = () => {
           id: data.message.message_id,
           text: data.message.message,
           timestamp: data.message.timestamp,
-          isFromCurrentUser: data.message.user_id === currentTokenRef.current,
+          isFromAdmin: data.message.user_id !== data.message.chat_id,
           userName: data.message.user_name,
           userId: data.message.user_id,
           chatId: data.message.chat_id
@@ -58,7 +58,7 @@ const CustomerService = () => {
           id: msg.message_id,
           text: msg.message,
           timestamp: msg.timestamp,
-          isFromCurrentUser: msg.user_id === msg.chat_id,
+          isFromAdmin: msg.user_id !== msg.chat_id,
           userName: msg.user_name,
           userId: msg.user_id,
           chatId: msg.chat_id
@@ -138,11 +138,11 @@ const CustomerService = () => {
     <div className="customer-service">
       <div className="chat-messages">
         {messages.map((msg, index) => (
-          <div key={msg.id || index} className={`message ${msg.isFromCurrentUser ? 'sent' : 'received'}`}>
+          <div key={msg.id || index} className={`message ${msg.isFromAdmin ? 'sent' : 'received'}`}>
             <div className="message-content">
               <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
               <div className="message-text">
-                {msg.isFromCurrentUser ? `${msg.text}` : `${msg.userName}: ${msg.text}`}
+                {msg.isFromAdmin ? `Admin (${msg.userId}): ${msg.text}` : `${msg.userName} (${msg.userId}): ${msg.text}`}
               </div>
             </div>
           </div>
