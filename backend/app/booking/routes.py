@@ -329,8 +329,13 @@ class MeetingRoom(Resource):
             for booking in bookings:
                 start_index, end_index = start_end_time_convert(booking.start_time, booking.end_time)
                 for index in range(start_index, end_index):
+                    if value["time_table"][index]:
+                        if not value["time_table"][index]["is_request"]:
+                            continue
                     value["time_table"][index] = {
                         "id": booking.id,
+                        "user_id": booking.user_id,
+                        "is_request": booking.is_request,
                         "current_user_booking": True if booking.user_id == user_zid else False
                     }
         return output, 200
