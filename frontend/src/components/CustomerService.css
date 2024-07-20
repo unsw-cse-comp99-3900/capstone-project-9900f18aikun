@@ -293,17 +293,7 @@
     outline: none;
     max-width: 80%; 
   }
-  .chat-input textarea {
-    flex: 1;
-    padding: 10px 14px;
-    font-size: 35px;
-    border: none;
-    background: transparent;
-    outline: none;
-    resize: none;
-    max-height: 150px;
-    overflow-y: auto;
-  }
+ 
   .send-button-container {
     display: flex;
     align-items: center;

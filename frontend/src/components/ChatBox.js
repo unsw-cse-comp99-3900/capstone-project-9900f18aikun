@@ -21,6 +21,31 @@ export const ChatBox = ({ change, setChange }) => {
   const messagesEndRef = useRef(null);
   const [optionSelected, setOptionSelected] = useState(false);
   const textAreaRef = useRef(null);
+  const [roomType, setRoomType] = useState("hotdesk");
+
+  useEffect(() => {
+    if (isOpen) {
+      const storedMessages = localStorage.getItem('expressBookMessages');
+      let messages = storedMessages ? JSON.parse(storedMessages) : [];
+  
+      const initialMessage = { 
+        text: `Default option is hotdesk. Press the "exchange.png" to switch to meeting room.`, 
+        sender: "bot", 
+        timestamp: new Date(),
+        showExchangeButton: true
+      };
+  
+      // Check if the first message is already the prompt
+      if (messages.length === 0 || messages[0].text !== initialMessage.text) {
+        messages = [initialMessage, ...messages];
+      }
+  
+      setExpressBookMessages(messages);
+    }
+  }, [isOpen]);
+  useEffect(() => {
+    localStorage.setItem('expressBookMessages', JSON.stringify(expressBookMessages));
+  }, [expressBookMessages]);
 
   const toggleChatBox = () => {
     setIsOpen(prevState => !prevState);
@@ -29,6 +54,7 @@ export const ChatBox = ({ change, setChange }) => {
   const clearChat = () => {
     if (mode === 'ExpressBook') {
       setExpressBookMessages([]);
+      localStorage.removeItem('expressBookMessages');
     } else {
       setCustomerServiceMessages([]);
     }
@@ -43,23 +69,28 @@ export const ChatBox = ({ change, setChange }) => {
     setRefreshKey(prevKey => prevKey + 1);
   };
 
+  const toggleRoomType = () => {
+    if (mode === 'ExpressBook') {
+      const newRoomType = roomType === "hotdesk" ? "meeting_room" : "hotdesk";
+      setRoomType(newRoomType);
+      const message = { 
+        text: `You switched to ${newRoomType === "hotdesk" ? "hotdesk" : "meeting room"}!`, 
+        sender: "bot", 
+        timestamp: new Date() 
+      };
+      setExpressBookMessages(prev => [...prev, message]);
+    }
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [expressBookMessages, customerServiceMessages]);
 
-  const adjustTextAreaHeight = () => {
-    const textArea = textAreaRef.current;
-    if (textArea) {
-      textArea.style.height = 'auto';
-      textArea.style.height = textArea.scrollHeight + 'px';
-    }
-  };
 
-  useEffect(() => {
-    adjustTextAreaHeight();
-  }, [inputMessage]);
+
+ 
 
   const formatRoomInfo = (rooms) => {
     if (rooms.length === 0) {
@@ -132,7 +163,6 @@ export const ChatBox = ({ change, setChange }) => {
       if (!token) throw new Error('No authentication token found');
   
       const intRoomId = parseInt(selectedRoom.room_id, 10);
-      console.log("book id", selectedRoom)
       if (isNaN(intRoomId)) {
         throw new Error('Invalid room ID');
       }
@@ -156,37 +186,38 @@ export const ChatBox = ({ change, setChange }) => {
         body: JSON.stringify(bookingInfo),
       });
   
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`);
-      }
-  
       const data = await response.json();
       console.log('API response:', data);
   
-      const bookingConfirmation = { 
-        text: "Booking successful! Your room has been reserved 😀.", 
-        sender: "bot", 
-        timestamp: new Date() 
-      };
-      setExpressBookMessages(prev => [...prev, bookingConfirmation]);
-      setBookedRooms(prev => new Set(prev).add(selectedRoom.name));
-      setChange(!change)
-      
-      // Update the messages to change the "Book Room" button to "Booked"
-      setExpressBookMessages(prev => prev.map(msg => {
-        if (msg.text.includes(`[Book Room](book:${selectedRoom.room_id})`)) {
-          return {
-            ...msg,
-            text: msg.text.replace(`[Book Room](book:${selectedRoom.room_id})`, `[Booked](booked:${selectedRoom.room_id})`)
-          };
-        }
-        return msg;
-      }));
+      if (data.message && data.message.startsWith("Booking confirmed")) {
+        const bookingConfirmation = { 
+          text: "Booking successful! Your room has been reserved 😀.", 
+          sender: "bot", 
+          timestamp: new Date() 
+        };
+        setExpressBookMessages(prev => [...prev, bookingConfirmation]);
+        setBookedRooms(prev => new Set(prev).add(selectedRoom.name));
+        setChange(!change);
+        
+        // Update the messages to change the "Book Room" button to "Booked"
+        setExpressBookMessages(prev => prev.map(msg => {
+          if (msg.text.includes(`[Book Room](book:${selectedRoom.room_id})`)) {
+            return {
+              ...msg,
+              text: msg.text.replace(`[Book Room](book:${selectedRoom.room_id})`, `[Booked](booked:${selectedRoom.room_id})`)
+            };
+          }
+          return msg;
+        }));
+      } else if (data.error) {
+        throw new Error(data.error);
+      } else {
+        throw new Error('Unexpected response from server');
+      }
     } catch (error) {
       console.error("Error booking room:", error);
       const errorMessage = { 
-        text: `Sorry, there was an error processing your booking request: ${error.message}`, 
+        text: `Error: ${error.message}`, 
         sender: "bot", 
         timestamp: new Date() 
       };
@@ -216,7 +247,7 @@ export const ChatBox = ({ change, setChange }) => {
   
       const requestBody = {
         query: inputMessage,
-        room_type: "any" // ask for room type after confirming validity
+        room_type: roomType
       };
   
       console.log("Sending to server:", JSON.stringify(requestBody, null, 2));
@@ -233,160 +264,40 @@ export const ChatBox = ({ change, setChange }) => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`);
+        throw new Error(errorData.error || 'An error occurred while processing your request');
       }
   
       const data = await response.json();
   
       if (Array.isArray(data) && data.length > 0) {
-        // Valid response
-        const optionsMessage = {
-          text: "Please select the type of space you'd like to book:",
-          sender: "bot",
+        const botResponse = formatRoomInfo(data);
+        const botMessage = { 
+          text: botResponse, 
+          sender: "bot", 
           timestamp: new Date(),
-          options: [
-            { 
-              text: "Meeting Room", 
-              id: "meeting_room", 
-              disabled: optionSelected
-            },
-            { 
-              text: "Hot Desk", 
-              id: "hot_desk", 
-              disabled: optionSelected
-            }
-          ]
+          rooms: data
         };
-        setExpressBookMessages(prev => [...prev, optionsMessage]);
-      } else if (data.error) {
-        // Invalid response
-        const errorMessage = {
-          text: `${data.error}!`,
-          sender: "bot",
-          timestamp: new Date()
-        };
-        setExpressBookMessages(prev => [...prev, errorMessage]);
+        setExpressBookMessages(prev => [...prev, botMessage]);
       } else {
-        // Unexpected response format
         throw new Error('Unexpected response format from server');
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      let errorMessage;
-      
-      if (error.message.includes('HTTP error!')) {
-        try {
-          const errorJson = JSON.parse(error.message.split('message:')[1]);
-          errorMessage = { 
-            text: `${errorJson.error}!`, // Add exclamation mark here
-            sender: "bot", 
-            timestamp: new Date() 
-          };
-        } catch (parseError) {
-          errorMessage = { 
-            text: "Sorry, there was an error processing your request. Please try again.", 
-            sender: "bot", 
-            timestamp: new Date() 
-          };
-        }
-      } else if (error.message === 'No authentication token found') {
-        errorMessage = { 
-          text: "You are not logged in. Please log in to use this feature.", 
-          sender: "bot", 
-          timestamp: new Date() 
-        };
-      } else {
-        errorMessage = { 
-          text: "Sorry, there was an error processing your request. Please try again.", 
-          sender: "bot", 
-          timestamp: new Date() 
-        };
-      }
-      
-      setExpressBookMessages(prev => [...prev, errorMessage]);
-    }
-  
-    setInputMessage("");
-  };
-  const [selectedOptionId, setSelectedOptionId] = useState(null);
-  const handleOptionSelection = async (roomType) => {
-    if (optionSelected) return; // Prevent selecting any option if one has already been chosen
-    setOptionSelected(true);
-    setSelectedOptionId(roomType);
-
-   // Update the messages to reflect the new selection
-  setExpressBookMessages(prev => prev.map(msg => {
-    if (msg.options) {
-      return {
-        ...msg,
-        options: msg.options.map(option => ({
-          ...option,
-          text: option.id === roomType ? `${option.text} Chosen!` : option.text,
-          disabled: true // Disable all options after selection
-        }))
-      };
-    }
-    return msg;
-  }));
-  
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const requestBody = {
-        query: storedQuery,
-        room_type: roomType
-      };
-
-      console.log("Sending to server:", JSON.stringify(requestBody, null, 2));
-
-      const response = await fetch('http://s2.gnip.vip:37895/booking/express-book', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      let botResponse;
-
-      if (Array.isArray(data) && data.length > 0) {
-        botResponse = formatRoomInfo(data);
-      } else {
-        botResponse = "I'm sorry, I couldn't find any rooms matching your request.";
-      }
-
-      const botMessage = { 
-        text: botResponse, 
-        sender: "bot", 
-        timestamp: new Date(),
-        rooms: data
-      };
-      setExpressBookMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage = { 
         text: error.message === 'No authentication token found' 
           ? "You are not logged in. Please log in to use this feature." 
-          : "Sorry, there was an error processing your request.", 
+          : error.message, 
         sender: "bot", 
         timestamp: new Date() 
       };
       setExpressBookMessages(prev => [...prev, errorMessage]);
     }
+  
+    setInputMessage("");
   };
 
   const formatDateTime = (date) => {
-    return date.toLocaleString('en-US', {
+    return new Date(date).toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -413,6 +324,20 @@ export const ChatBox = ({ change, setChange }) => {
                         </div>
                         <div className="message-text">
                           {msg.text.split('\n').map((line, i) => {
+                             if (line.includes('"exchange.png"')) {
+                              const [before, after] = line.split('"exchange.png"');
+                              return (
+                                <p key={i}>
+                                  {before}
+                                  <img 
+                                    src="/chat_box/exchange.png" 
+                                    alt="Exchange" 
+                                    style={{ width: '35px', height: '35px', verticalAlign: 'middle' }} 
+                                  />
+                                  {after}
+                                </p>
+                              );}
+                            
                             if (line.includes('[Select Room]')) {
                               const roomName = line.match(/\(select:(.*?)\)/)[1];
                               const isThisRoomBooked = bookedRooms.has(roomName);
@@ -456,54 +381,54 @@ export const ChatBox = ({ change, setChange }) => {
                                   Booked
                                 </button>
                               );
+                            } else if (line.includes('Press the exchange button')) {
+                              return (
+                                <p key={i}>
+                                  {line.replace('exchange button', 'exchange button ')}
+                                  <img 
+                                    src="/chat_box/exchange.png" 
+                                    alt="Exchange" 
+                                    style={{ width: '20px', height: '20px', verticalAlign: 'middle' }} 
+                                  />
+                                </p>
+                              );
                             }
                             return <p key={i}>{line}</p>;
                           })}
-                          {msg.options && (
-                            <div className="option-buttons">
-                              {msg.options.map((option, i) => (
-                                <button 
-                                  key={i} 
-                                  onClick={() => handleOptionSelection(option.id)}
-                                  disabled={option.disabled}
-                                  style={{ 
-                                    backgroundColor: option.disabled ? 'grey' : '#4CAF50',
-                                    cursor: option.disabled ? 'not-allowed' : 'pointer'
-                                  }}
-                                >
-                                  {option.text}
-                                </button>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
                     <div ref={messagesEndRef} />
                   </div>
                   <div className="chat-input">
-                    <textarea
-                      ref={textAreaRef}
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      placeholder="Type your message here..."
-                      rows="1"
-                    />
-                    <div className="send-button-container">
-                      <img 
-                        className="vector send-button" 
-                        alt="Send" 
-                        src="/chat_box/vector.svg" 
-                        onClick={sendMessage}
-                      />
-                    </div>
-                  </div>
+  <img 
+    src="/chat_box/exchange.png" 
+    alt="Exchange" 
+    className="exchange-button" 
+    onClick={toggleRoomType}
+  />
+  <textarea
+    ref={textAreaRef}
+    value={inputMessage}
+    onChange={(e) => setInputMessage(e.target.value)}
+    onKeyPress={(e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }}
+    placeholder="Type your message here..."
+    rows="1"
+  />
+  <div className="send-button-container">
+    <img 
+      className="vector send-button" 
+      alt="Send" 
+      src="/chat_box/vector.svg" 
+      onClick={sendMessage}
+    />
+  </div>
+</div>
                 </>
               ) : (
                 <CustomerService 
@@ -529,6 +454,7 @@ export const ChatBox = ({ change, setChange }) => {
                   {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
                 </span>
               </div>
+              
             </div>
           </div>
         </div>
