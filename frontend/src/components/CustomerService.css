@@ -272,21 +272,10 @@
 
   
 
-  .chat-input {
-    position: absolute;
-    bottom: 30px;
-    left: 30px;
-    right: 30px;
-    display: flex;
-    align-items: flex-end;
-    background-color: #eff6fcde;
-    border-radius: 25px;
-    padding: 10px;
-  }
-  
+ 
   .chat-input input {
     flex: 1;
-    padding: 10px 14px;
+    padding: 10px 10px;
     font-size: 35px;
     border: none;
     background: transparent;
@@ -474,14 +463,6 @@
   border-top: 1px solid #e0e0e0;
   }
   
-  .chat-input {
-  flex-grow: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 20px;
-  font-size: 16px;
-  background-color: #f0f0f0;
-  }
   
   .send-button {
   margin-left: 10px;
@@ -496,4 +477,4 @@
   .send-button:hover {
   background-color: #0056b3;
   }
-  
+ 

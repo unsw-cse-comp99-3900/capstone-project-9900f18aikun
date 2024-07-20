@@ -122,18 +122,6 @@ const CustomerService = () => {
     });
   };
 
-  const adjustTextAreaHeight = () => {
-    const textArea = textAreaRef.current;
-    if (textArea) {
-      textArea.style.height = 'auto';
-      textArea.style.height = textArea.scrollHeight + 'px';
-    }
-  };
-
-  useEffect(() => {
-    adjustTextAreaHeight();
-  }, [inputMessage]);
-
   return (
     <div className="customer-service">
       <div className="chat-messages">
