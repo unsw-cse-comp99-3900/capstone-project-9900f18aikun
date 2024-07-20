@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
 import "./history.css";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableRow from "@mui/material/TableRow";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import { Table as ArcoTable } from '@arco-design/web-react';
+import { Spin, Space } from '@arco-design/web-react';
+import ErrorBox from "./errorBox";
+
+
 
 const Rebook = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
   const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
+  const [errorMessage, setErrorMessage] = useState("");
+
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -60,7 +60,6 @@ const Rebook = () => {
   }
 
   const handleDateChange = async (date) => {
-    setSelectedDate(date);
     // send request to backend
     const obj = {
       room_id: history[0].room_id,
@@ -101,11 +100,17 @@ const Rebook = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container">
+        <Space size={40}>
+          <Spin size={40} />
+        </Space>
+      </div>
+    );;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    setErrorMessage(error.message);
   }
 
   const columns = [
@@ -143,14 +148,40 @@ const Rebook = () => {
       <header>
         <h1>Last Booking:</h1>
       </header>
-      <div>
+      
+      {
+        history[0] ? (
+
+<div>
       <ArcoTable
         columns={columns}
         data={history}
         rowKey="booking_id"
         pagination={false} 
       />
-    </div>
+      </div>
+    ) : (
+      <div className="no-history">No previous reservation history</div>
+    )}
+          {isCalendarVisible && (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateCalendar
+            shouldDisableDate={disableDates}
+            className="date-calendar-overlay"
+            onChange={(date) => handleDateChange(date)}
+            style={{
+              position: "absolute",
+              left: `${calendarPosition.x}px`,
+              top: `${calendarPosition.y}px`,
+              zIndex: 100,
+            }}
+          />
+        </LocalizationProvider>
+      )}
+    
+    {errorMessage && (
+        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
+      )}
     </div>
   );
 };
