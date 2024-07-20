@@ -277,6 +277,7 @@ class BookSpace(Resource):
             return {'error': "You are not in booked status"}, 409
 
         booking.booking_status = 'cancelled'
+        booking.is_request = False
         db.session.commit()
 
         return {'message': 'Booking cancelled successfully'}, 200
@@ -335,6 +336,7 @@ class MeetingRoom(Resource):
                     value["time_table"][index] = {
                         "id": booking.id,
                         "user_id": booking.user_id,
+                        "booking_status": booking.booking_status,
                         "is_request": booking.is_request,
                         "current_user_booking": True if booking.user_id == user_zid else False
                     }
