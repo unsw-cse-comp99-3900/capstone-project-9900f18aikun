@@ -82,7 +82,7 @@ const AdminChatbox = ({ onClose }) => {
             ...existingUser,
             userName: existingUser ? existingUser.userName : user_name, 
             chatId: chat_id,
-            lastMessageTime: timestamp
+            lastMessageTime: timestamp  // Update this to the new message timestamp
           });
           return newMap;
         });
@@ -223,15 +223,21 @@ const AdminChatbox = ({ onClose }) => {
       };
     });
 
-    setActiveUsers(prev => {
-      const newMap = new Map(prev);
-      const currentUser = newMap.get(selectedUser);
-      newMap.set(selectedUser, { 
-        ...currentUser,
-        lastMessageTime: newMessage.timestamp
+    const handleSendMessage = () => {
+     
+    
+      setActiveUsers(prev => {
+        const newMap = new Map(prev);
+        const currentUser = newMap.get(selectedUser);
+        newMap.set(selectedUser, { 
+          ...currentUser,
+          lastMessageTime: newMessage.timestamp  // Update this to the new message timestamp
+        });
+        return newMap;
       });
-      return newMap;
-    });
+    
+     
+    };
 
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
@@ -333,44 +339,45 @@ const AdminChatbox = ({ onClose }) => {
             />
           </div>
         </div>
-        <div className="messages-list">
-  {Array.from(activeUsers.entries()).map(([chatId, userInfo], index) => {
-    const latestMessage = messageHistories[chatId] && messageHistories[chatId].length > 0
-      ? messageHistories[chatId][messageHistories[chatId].length - 1]
-      : null;
-    const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
-    const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    
-    return (
-      // In the return statement, update the user-item div:
-<div 
-  key={chatId} 
-  className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
-  onClick={() => handleUserSelect(chatId)}
->
-  <div className="user-avatar" style={{backgroundColor: avatarColor}}>
-    {initials}
-  </div>
-  <div className="user-item-info">
-    <div className="user-item-header">
-      <span className="user-item-name">
-        {userInfo.userName}
-        {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
-      </span>
-      <span className="user-item-time">{formatDateTime(userInfo.lastMessageTime)}</span>
-    </div>
-    <div className="user-item-last-message">
-      {latestMessage 
-        ? (latestMessage.sender === 'admin'
-            ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
-            : `${userInfo.userName}: ${latestMessage.text}`)
-        : 'No messages yet'}
-    </div>
-  </div>
-</div>
-    );
-  })}
-</div>
+                <div className="messages-list">
+          {Array.from(activeUsers.entries()).map(([chatId, userInfo], index) => {
+            const latestMessage = messageHistories[chatId] && messageHistories[chatId].length > 0
+              ? messageHistories[chatId][messageHistories[chatId].length - 1]
+              : null;
+            const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
+            const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            
+            return (
+              <div 
+                key={chatId} 
+                className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
+                onClick={() => handleUserSelect(chatId)}
+              >
+                <div className="user-avatar" style={{backgroundColor: avatarColor}}>
+                  {initials}
+                </div>
+                <div className="user-item-info">
+                  <div className="user-item-header">
+                    <span className="user-item-name">
+                      {userInfo.userName}
+                      {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
+                    </span>
+                    <span className="user-item-time">
+                      {latestMessage ? formatDateTime(latestMessage.timestamp) : ''}
+                    </span>
+                  </div>
+                  <div className="user-item-last-message">
+                    {latestMessage 
+                      ? (latestMessage.sender === 'admin'
+                          ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
+                          : `${userInfo.userName}: ${latestMessage.text}`)
+                      : 'No messages yet'}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
