@@ -1,5 +1,6 @@
 from app.extensions import db
 from app.booking.models import RoomDetail, Space, HotDeskDetail
+from app.comment.models import Comment, Like
 from app.models import CSEStaff, HDRStudent, Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from jwt import exceptions
@@ -7,6 +8,7 @@ from datetime import datetime, timedelta
 import os
 import re
 from sqlalchemy import func
+import pytz
 # convert time HH:MM to index for every half hour
 
 
@@ -125,6 +127,9 @@ def check_valid_room(roomid: int ) -> bool:
     room = Space.query.get(roomid)
     return room != None
 
+def check_valid_comment(comment_id: int ) -> bool:
+    comment = Comment.query.get(comment_id)
+    return comment != None
 
 def get_room_image(room_id: int):
     image_directory = 'app/static/images'
@@ -149,3 +154,20 @@ def get_total_room() -> int:
     room_number = db.session.query(func.count(RoomDetail.id)).scalar()
     desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
     return room_number + desk_number
+
+def get_date():
+    sydney_tz = pytz.timezone('Australia/Sydney')
+    sydney_now = datetime.now(sydney_tz)
+    return sydney_now.date()
+
+def get_time():
+    sydney_tz = pytz.timezone('Australia/Sydney')
+    sydney_now = datetime.now(sydney_tz)
+    return sydney_now.strftime('%H:%M:%S')
+
+def who_made_comment(comment_id: int ) -> str:
+    comment = Comment.query.get(comment_id)
+    return comment.user_id
+
+def get_like_count(comment_id: int ) -> int:
+    return Like.query.filter_by(comment_id=comment_id).count()

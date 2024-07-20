@@ -45,7 +45,15 @@
     display: block;
   }
   
-  select, button {
+  .form-group select {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+  }
+
+  form-group button {
     padding: 10px;
     font-size: 14px;
     border-radius: 5px;
@@ -53,17 +61,23 @@
     width: 100%;
   }
   
-  select {
+.filter-select {
     background-color: #6a4f9c;
     color: white;
-  }
+}
   
-  button {
+.filter-button {
     background-color: #8a6bb8;
     color: white;
     cursor: pointer;
   }
   
-  button:hover {
+  .filter-button:hover {
     background-color: #7a5ba8;
+  }
+
+  /* Add this to your existing CSS file */
+  .arco-slider .arco-input-number {
+    background-color: #6a4f9c !important; /* 使用 !important 确保样式应用 */
+    color: white !important;
   }

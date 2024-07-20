@@ -9,8 +9,8 @@ class Chat(db.Model):
     user_id = db.Column(db.String(128), db.ForeignKey('users.zid'), nullable=False)
     is_handled = db.Column(db.Boolean, nullable=False)
     is_viewed = db.Column(db.Boolean, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_message_time = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    last_message_time = db.Column(db.DateTime, default=datetime.now)
 
 
 class Message(db.Model):
@@ -19,7 +19,7 @@ class Message(db.Model):
     user_name = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.String(128), db.ForeignKey('users.zid'), nullable=False)
     message = db.Column(db.String(500), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.now)
     chat_id = db.Column(db.String, db.ForeignKey('chat.chat_id'), nullable=False)
 
 

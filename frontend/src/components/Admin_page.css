@@ -1,0 +1,219 @@
+.admin-page {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+.admin-sidebar {
+    background-color:#442675;
+    color: white;
+    padding: 20px;
+    width: 250px; /* Default width */
+    transition: width 0.1s, left 0.1s; /* Smooth transition for width and position */
+    position: fixed; /* Keep sidebar fixed */
+    height: 100%;
+    z-index: 2; 
+}
+
+.admin-sidebar.closed {
+    width: 0;
+    padding: 20px 0;
+    overflow: hidden;
+}
+
+.admin-sidebar h1 {
+    margin: 10px 0 10px 0;
+}
+
+.admin-sidebar button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    color: white;
+    text-align: left;
+    cursor: pointer; /* Change cursor to pointer on hover */
+    font-size: 16px;
+    transition: background 0.3s;
+    height: 55px; /* Increase the height of each button */
+}
+
+.admin-sidebar button img {
+    margin-right: 10px;
+    width: 25px;
+    height: 25px;
+}
+
+.admin-sidebar button:hover {
+    background-color: #5a148a;
+}
+
+.admin-top-bar {
+        
+        background-color: #FADC19;
+        height: 25px;
+        padding: 20px 20px;
+        width: calc(100% - 270px); /* Adjust width based on sidebar state */
+        display: flex;
+        align-items: center;
+        /* justify-content: space-between;  */
+        /* This will place the child elements at the space-between */
+        position: fixed; /* Fixed position */
+        top: 0; /* Align to the top */
+        left: 270px; /* Adjust based on sidebar state */
+        transition: left 0.3s; /* Smooth transition for left position */
+        z-index: 1; /* Below the sidebar */
+ }
+
+
+.admin-top-bar.closed {
+    left: 0;
+    width: 100%;
+}
+
+.admin-top-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.admin-closebar {
+    margin-left: 10px;
+    width: 30px;
+    height: 30px;
+    color: black;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 0 10px; /* Reduce padding to control the size */
+    /* margin-right: auto; */
+     /* Push all other elements to the right */
+
+}
+
+.admin-user{
+        margin-left: auto; /* Push the user button to the right */
+        /* width: 30px;
+        height: 30px; */
+        background: none;
+        border: none;
+        cursor: pointer;
+}
+
+.admin-right-button {
+    margin-left: auto;
+}
+
+.admin-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #fff;
+    margin-top: 70px;
+    transition: margin-left 0.3s;
+    margin-left: 270px;
+}
+
+
+
+
+.admin-top-bar {
+    background-color: #FADC19;
+    height: 25px;
+    padding: 20px 20px;
+    width: calc(100% - 270px); /* Adjust width based on sidebar state */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensure elements align to the edges */
+    position: fixed; /* Fixed position */
+    top: 0; /* Align to the top */
+    left: 270px; /* Adjust based on sidebar state */
+    transition: left 0.3s; /* Smooth transition for left position */
+    z-index: 1; /* Below the sidebar */
+}
+
+.admin-top-bar.closed {
+    left: 0;
+    width: 100%;
+}
+
+.admin-top-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+
+.admin-user {
+    /* No margin-left needed, justify-content will handle the alignment */
+    margin-right: 40px;
+    width: 50px;
+    height: 50px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.admin-user img{
+    width: 40px;
+    height: 40px;
+}
+
+.admin-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #fff;
+    margin-top: 70px;
+    transition: margin-left 0.3s;
+    margin-left: 270px;
+}
+
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* 设置下拉菜单位于按钮的正下方 */
+    right: 0; /* 右对齐到按钮 */
+    background-color: white; /* 背景颜色 */
+    border: 1px solid #ccc; /* 边框 */
+    border-radius: 5px; /* 圆角 */
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2); /* 阴影效果 */
+    z-index: 1000; /* 确保下拉菜单在其他内容之上 */
+    width: 100px;
+    margin-right: 35px;
+}
+
+.dropdown-menu button {
+    font-size: 15px;
+    color: #6B7785;
+    display: block; /* 使按钮占满整个宽度 */
+    width: 100%;
+    padding: 10px; /* 填充 */
+    text-align: center; /* 文本中间对齐 */
+    border: none; /* 无边框 */
+    background: none; /* 无背景 */
+    outline: none; /* 去除焦点轮廓 */
+    cursor: pointer; /* 鼠标指针 */
+}
+
+.dropdown-menu button:hover {
+    background-color: #f1f1f1; /* 鼠标悬停背景色 */
+}
+
+/* 邮件按钮样式 */
+.admin-message {
+    /* No margin-left needed, justify-content will handle the alignment */
+    margin:0 0 0 5px;
+    width: 50px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.admin-message img{
+    width: 40px;
+    height: 40px;
+}
