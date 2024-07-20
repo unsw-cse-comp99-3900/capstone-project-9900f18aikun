@@ -273,7 +273,7 @@ class BookSpace(Resource):
         if booking.user_id != zid:
             return {'error': 'Unauthorized'}, 401
 
-        if booking.booking_status != BookingStatus.booked.value or booking.booking_status != BookingStatus.requested.value:
+        if booking.booking_status != BookingStatus.booked.value and booking.booking_status != BookingStatus.requested.value:
             return {'error': "You are not in booked status"}, 409
 
         booking.booking_status = 'cancelled'
