@@ -597,6 +597,8 @@ transition: background-color 0.3s ease;
   cursor: pointer;
   padding: 0;
   margin-right: 10px;
+  opacity: 0.6; 
+  /* transition: opacity 0.3s ease; */
 }
 
 .calendar-button img {
@@ -604,6 +606,8 @@ transition: background-color 0.3s ease;
   height: 27px;
   margin-left: 10px;
   margin-top: 6px;
+  /* opacity: 0.4;  */
+  transition: opacity 0.3s ease;
 }
 
 
