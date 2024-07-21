@@ -115,14 +115,18 @@ export const ChatBox = ({ change, setChange }) => {
       levelRooms.forEach((room) => {
         formattedResponse += `  • ${room.name} (Capacity: ${room.capacity})\n`;
         const isBooked = bookedRooms.has(room.name);
-        formattedResponse += isBooked ? 
-          `    [Booked](booked:${room.name})\n` :
-          `    [Select Room](select:${room.name})\n`;
+        if (isBooked) {
+          formattedResponse += `    [Booked](booked:${room.name})\n`;
+        } else if (room.permission) {
+          formattedResponse += `    [Select Room](select:${room.name})\n`;
+        } else {
+          formattedResponse += `    [Request](request:${room.name})\n`;
+        }
       });
-
+  
       formattedResponse += '\n';
     });
-
+  
     return formattedResponse;
   };
 
@@ -295,7 +299,62 @@ export const ChatBox = ({ change, setChange }) => {
   
     setInputMessage("");
   };
-
+  const handleRequestRoom = async (roomName) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No authentication token found');
+  
+      const selectedRoom = expressBookMessages
+        .flatMap(msg => msg.rooms || [])
+        .find(room => room.name === roomName);
+  
+      if (!selectedRoom) throw new Error('Room information not found');
+  
+      const bookingInfo = {
+        room_id: parseInt(selectedRoom.room_id, 10),
+        date: selectedRoom.date,
+        start_time: selectedRoom.start_time.split(':')[0] + ':00',
+        end_time: selectedRoom.end_time.split(':')[0] + ':00'
+      };
+  
+      console.log('Booking information being sent to API:', bookingInfo);
+  
+      const response = await fetch('http://s2.gnip.vip:37895/booking/book', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(bookingInfo),
+      });
+  
+      const data = await response.json();
+      console.log('API response:', data);
+  
+      if (data.message && data.message.startsWith("Booking confirmed")) {
+        const bookingConfirmation = { 
+          text: "Your room request has been submitted. We'll notify you when it's approved.", 
+          sender: "bot", 
+          timestamp: new Date() 
+        };
+        setExpressBookMessages(prev => [...prev, bookingConfirmation]);
+      } else if (data.error) {
+        throw new Error(data.error);
+      } else {
+        throw new Error('Unexpected response from server');
+      }
+  
+    } catch (error) {
+      console.error("Error requesting room:", error);
+      const errorMessage = { 
+        text: `Error: ${error.message}`, 
+        sender: "bot", 
+        timestamp: new Date() 
+      };
+      setExpressBookMessages(prev => [...prev, errorMessage]);
+    }
+  };
   const formatDateTime = (date) => {
     return new Date(date).toLocaleString('en-US', {
       year: 'numeric',
@@ -324,7 +383,7 @@ export const ChatBox = ({ change, setChange }) => {
                         </div>
                         <div className="message-text">
                           {msg.text.split('\n').map((line, i) => {
-                             if (line.includes('"exchange.png"')) {
+                            if (line.includes('"exchange.png"')) {
                               const [before, after] = line.split('"exchange.png"');
                               return (
                                 <p key={i}>
@@ -336,7 +395,8 @@ export const ChatBox = ({ change, setChange }) => {
                                   />
                                   {after}
                                 </p>
-                              );}
+                              );
+                            }
                             
                             if (line.includes('[Select Room]')) {
                               const roomName = line.match(/\(select:(.*?)\)/)[1];
@@ -352,6 +412,20 @@ export const ChatBox = ({ change, setChange }) => {
                                   }}
                                 >
                                   {isThisRoomBooked ? 'Booked' : 'Select Room'}
+                                </button>
+                              );
+                            } else if (line.includes('[Request]')) {
+                              const roomName = line.match(/\(request:(.*?)\)/)[1];
+                              return (
+                                <button 
+                                  key={i} 
+                                  onClick={() => handleRequestRoom(roomName)}
+                                  style={{ 
+                                    backgroundColor: '#FFA500',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Request
                                 </button>
                               );
                             } else if (line.includes('[Book Room]')) {
@@ -401,34 +475,34 @@ export const ChatBox = ({ change, setChange }) => {
                     <div ref={messagesEndRef} />
                   </div>
                   <div className="chat-input">
-  <img 
-    src="/chat_box/exchange.png" 
-    alt="Exchange" 
-    className="exchange-button" 
-    onClick={toggleRoomType}
-  />
-  <textarea
-    ref={textAreaRef}
-    value={inputMessage}
-    onChange={(e) => setInputMessage(e.target.value)}
-    onKeyPress={(e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    }}
-    placeholder="Type your message here..."
-    rows="1"
-  />
-  <div className="send-button-container">
-    <img 
-      className="vector send-button" 
-      alt="Send" 
-      src="/chat_box/vector.svg" 
-      onClick={sendMessage}
-    />
-  </div>
-</div>
+                    <img 
+                      src="/chat_box/exchange.png" 
+                      alt="Exchange" 
+                      className="exchange-button" 
+                      onClick={toggleRoomType}
+                    />
+                    <textarea
+                      ref={textAreaRef}
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder="Type your message here..."
+                      rows="1"
+                    />
+                    <div className="send-button-container">
+                      <img 
+                        className="vector send-button" 
+                        alt="Send" 
+                        src="/chat_box/vector.svg" 
+                        onClick={sendMessage}
+                      />
+                    </div>
+                  </div>
                 </>
               ) : (
                 <CustomerService 
@@ -454,7 +528,6 @@ export const ChatBox = ({ change, setChange }) => {
                   {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
                 </span>
               </div>
-              
             </div>
           </div>
         </div>
