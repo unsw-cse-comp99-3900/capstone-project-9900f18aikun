@@ -4,16 +4,22 @@ from flask_socketio import emit, join_room, leave_room
 from flask_jwt_extended import decode_token
 from datetime import datetime
 from app.extensions import db
-from .models import Chat, Message
+from .models import Chat, Message, ChatView
 from app.models import Users
-from app.utils import get_user_name, is_admin
+from app.utils import get_user_name, is_admin, verify_jwt
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.orm import joinedload
+from flask_restx import Namespace, Resource, fields
+
+
+chat_ns = Namespace('chat', description='Chatting operations')
 
 
 def handle_connect():
     token = request.args.get('token')
     if not token:
         print('Client connection refused: Missing token')
+
         return False
 
     try:
@@ -34,8 +40,6 @@ def handle_connect():
                 chat_id=user_id,
                 name=f'{user_id} {user_name}',
                 user_id=user_id,
-                is_handled=False,
-                is_viewed=False,
             )
             db.session.add(new_chat)
             db.session.commit()
@@ -82,7 +86,7 @@ def convert_message_output(message):
         "user_id": message.user_id,
         "message": message.message,
         "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-        "chat_id": message.chat_id
+        "chat_id": message.chat_id,
     }
     return message_data
 
@@ -92,13 +96,15 @@ def convert_chat_output(chat):
         "chat_id": chat.chat_id,
         "name": chat.name,
         "user_id": chat.user_id,
-        "is_handled": chat.is_handled,
-        "is_viewed": chat.is_viewed,
         "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S"),
         "last_message_time": chat.last_message_time.strftime("%Y-%m-%d %H:%M:%S"),
+        "views": get_chat_views(chat.chat_id),
         "messages": []
     }
     return chat_data
+
+
+
 
 
 def handle_disconnect():
@@ -136,7 +142,8 @@ def handle_send_message(data):
         if chat:
             chat.last_message_time = datetime.utcnow()
             db.session.commit()
-
+        # reset view, chat id is same to user id.
+        reset_chat_views(user_id, user_id)
         message = convert_message_output(message)
         emit('message', {'message': message}, room=user_id)
         emit('message', {'message': message}, room="admin")
@@ -171,6 +178,8 @@ def handle_reply_message(data):
             db.session.commit()
 
         message = convert_message_output(message)
+        # reset view, chat id is same to user id.
+        reset_chat_views(user_id, admin_id)
         print(f'user is {user_id}')
         emit('message', {'message': message}, room=user_id)
         emit('message', {'message': message}, room="admin")
@@ -195,3 +204,47 @@ def handle_leave(data):
         leave_room(room)
         emit('message', {'msg': f'{user_id} has left the room {room}'}, room=room)
         print(f'{user_id} left room: {room}')
+
+
+@chat_ns.route('/view/<string:chat_id>')
+class View(Resource):
+    # Book a room
+    @chat_ns.response(200, "success")
+    @chat_ns.response(400, "Bad request")
+    @chat_ns.doc(description="Book a space")
+    @chat_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def post(self, chat_id):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
+        exists = db.session.query(Chat.chat_id).filter_by(chat_id=chat_id).first()
+        if not exists:
+            return {'error': 'Chat ID does not exist.'}, 400
+        existing_view = ChatView.query.filter_by(user_id=zid, chat_id=chat_id).first()
+
+        if existing_view:
+            return {'message': 'Chat already viewed.'}, 200
+        else:
+            new_view = ChatView(user_id=zid, chat_id=chat_id)
+            db.session.add(new_view)
+            db.session.commit()
+            return {'message': 'Chat view recorded.'}, 201
+
+
+def get_chat_views(chat_id):
+    views = ChatView.query.filter_by(chat_id=chat_id).all()
+    views = [view.user_id for view in views]
+    return views
+
+
+def reset_chat_views(chat_id, user_id):
+    views = ChatView.query.filter_by(chat_id=chat_id).all()
+    for view in views:
+        db.session.delete(view)
+    new_view = ChatView(user_id=user_id, chat_id=chat_id)
+    db.session.add(new_view)
+    db.session.commit()
+
+

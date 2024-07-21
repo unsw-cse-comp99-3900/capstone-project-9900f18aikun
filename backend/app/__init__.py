@@ -40,6 +40,9 @@ def create_app():
     from .comment.routes import comment_ns
     api.add_namespace(comment_ns, path='/comment')
 
+    from .chat.routes import chat_ns
+    api.add_namespace(chat_ns, path='/chat')
+
     from app.chat.routes import handle_connect, handle_disconnect, handle_send_message, handle_join, handle_leave
 
     socketio.on_event('connect', handle_connect)
