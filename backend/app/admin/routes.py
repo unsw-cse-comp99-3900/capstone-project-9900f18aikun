@@ -13,6 +13,8 @@ from app.utils import verify_jwt, is_admin
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.utils import is_admin, get_user_name
+from .models import NotificationView
+
 
 admin_ns = Namespace('admin', description='Admin operations')
 
@@ -229,3 +231,54 @@ class edit_comment(Resource):
             "edit_date": comment.edit_date.isoformat(), 
             "edit_time": comment.edit_time.isoformat()
         }
+
+@admin_ns.route('/view')
+class NotificationViewApi(Resource):
+    # Book a room
+    @admin_ns.response(200, "success")
+    @admin_ns.response(400, "Bad request")
+    @admin_ns.doc(description="Post notification view function")
+    @admin_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def post(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
+
+        view = db.session.get(NotificationView, zid)
+
+        if not is_admin(zid):
+            return {'error': "you are not admin"}, 400
+
+        if not view:
+            notification_view = NotificationView(user_id=zid, is_viewed=True)
+            db.session.add(notification_view)
+            db.session.commit()
+            return {"message": "you have viewed notification"}, 200
+        else:
+            view.is_viewed = True
+            db.session.commit()
+            return {"message": "you have viewed notification"}, 200
+
+    @admin_ns.response(200, "success")
+    @admin_ns.response(400, "Bad request")
+    @admin_ns.doc(description="Get notification view function")
+    @admin_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
+        if not is_admin(zid):
+            return {'error': "you are not admin"}, 400
+        view = db.session.get(NotificationView, zid)
+
+        if not view:
+            notification_view = NotificationView(user_id=zid, is_viewed=False)
+            db.session.add(notification_view)
+            db.session.commit()
+            return {"is_viewed": False}, 201
+        else:
+            return {"is_viewed": view.is_viewed}, 200

@@ -10,6 +10,7 @@ from app.utils import get_user_name, is_admin, verify_jwt
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.orm import joinedload
 from flask_restx import Namespace, Resource, fields
+from app.admin.models import NotificationView
 
 
 chat_ns = Namespace('chat', description='Chatting operations')
@@ -56,8 +57,14 @@ def handle_connect():
         emit('user_chat_history', {'messages': output}, room=user_id)
 
     else:
+        is_view = db.session.get(NotificationView, user_id)
+        if not is_view:
+            notification_view = NotificationView(user_id=user_id, is_viewed=False)
+            db.session.add(notification_view)
+            db.session.commit()
         join_room(user_id)
         join_room("admin")
+        join_room("notification")
         message = get_chats_and_messages()
         emit('admin_chat_history', {'chat': message}, room=user_id)
 

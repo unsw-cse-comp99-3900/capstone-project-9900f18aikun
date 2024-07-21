@@ -11,12 +11,14 @@ from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
 from app.config import Config
+from app.admin.models import NotificationView
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
 import google.generativeai as genai
 from datetime import datetime
 import json
 from sqlalchemy import func
+from flask_socketio import emit
 import pytz
 import random
 
@@ -121,6 +123,12 @@ class BookSpace(Resource):
         statu = new_booking.booking_status
         db.session.add(new_booking)
         db.session.commit()
+        if statu == BookingStatus.requested.value:
+            emit('request_notification', {'new_request': True}, room="notification", namespace='/')
+            db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
+            db.session.commit()
+
+
         bookingid = new_booking.id
         send_confirm_email_async(zid, room_id, date, start_time, end_time)
         schedule_reminder(zid, room_id, start_time, date, end_time)
