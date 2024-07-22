@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.booking.models import RoomDetail, Space, HotDeskDetail
+from app.booking.models import RoomDetail, Space, HotDeskDetail, Booking
 from app.comment.models import Comment, Like
 from app.models import CSEStaff, HDRStudent, Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
@@ -172,3 +172,9 @@ def who_made_comment(comment_id: int ) -> str:
 def get_like_count(comment_id: int ) -> int:
     return Like.query.filter_by(comment_id=comment_id).count()
 
+def is_booking_today(date):
+    booking = db.session.query(Booking).filter(Booking.date == date).first()
+    if booking:
+        return True
+    else:
+        return False

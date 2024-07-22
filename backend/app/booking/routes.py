@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student
+from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student, is_booking_today
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -940,4 +940,24 @@ class handle_request(Resource):
             return {
                 "message": f"admin {user_zid} set booking id {booking_id} as cancelled"
             }, 200
+
+@booking_ns.route("/is_book_today")
+class CheckBookToday(Resource):
+    @booking_ns.doc(description="Check user whether is admin")
+    @booking_ns.response(200, "Success")
+    @booking_ns.response(400, "Bad request")
+
+    @booking_ns.expect(date_query)
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        date = request.args.get('date')
+
+        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+            return {'error': 'Date must be in YYYY-MM-DD format'}, 400
+
+        return is_booking_today(date)
+
         

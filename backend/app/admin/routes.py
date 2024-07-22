@@ -282,3 +282,12 @@ class NotificationViewApi(Resource):
             return {"is_viewed": False}, 201
         else:
             return {"is_viewed": view.is_viewed}, 200
+
+
+@admin_ns.route('/time')
+class GetTime(Resource):
+    @admin_ns.response(200, "success")
+    @admin_ns.doc(description="Get current sydney time")
+    def get(self):
+        current_time = datetime.now().isoformat()
+        return {"datetime": current_time}
