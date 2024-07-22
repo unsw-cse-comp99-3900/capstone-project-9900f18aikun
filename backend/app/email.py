@@ -16,7 +16,7 @@ def get_email(zid: str) -> str:
         return staff.email
     
 # send email
-def send_confirm_email(user_name, room_name, date, start_time, end_time, to_addr):
+def send_confirm_email(user_name, room_name, date, start_time, end_time, to_addr, week_of_duration):
     subject = "Confirmation of K17 Room Booking"
     message = f"""
     Hi {user_name},
@@ -27,6 +27,29 @@ def send_confirm_email(user_name, room_name, date, start_time, end_time, to_addr
     - Date: {date}
     - Time: {start_time} -- {end_time}
 
+    Please contact us if you need to make any changes or have any questions.
+
+    Best regards,
+
+    K17 Room Booking System
+    """
+    message = f"""
+        Hi {user_name},
+
+        I am writing to confirm your booking at our system. Details of the booking are as follows:
+
+        - Room: {room_name}
+        - Date: {date}
+        - Time: {start_time} -- {end_time}
+        
+        """
+
+
+    if week_of_duration > 1:
+        message += f"""This booking repeats weekly for a total of {week_of_duration} weeks."""
+
+    message += f"""
+    
     Please contact us if you need to make any changes or have any questions.
 
     Best regards,
@@ -50,11 +73,11 @@ def send_confirm_email(user_name, room_name, date, start_time, end_time, to_addr
         server.sendmail(from_addr, to_addr, msg.as_string())
 
 # send email 
-def send_confirm_email_async(zid, room_id, date, start_time, end_time):
+def send_confirm_email_async(zid, room_id, date, start_time, end_time, week_of_duration):
     user_name = get_user_name(zid)
     room_name = get_room_name(room_id)
     to_addr = get_email(zid)
-    thread1 = Thread(target=send_confirm_email, args=(user_name, room_name, date, start_time, end_time, to_addr))
+    thread1 = Thread(target=send_confirm_email, args=(user_name, room_name, date, start_time, end_time, to_addr, week_of_duration))
     thread1.start()
 
 

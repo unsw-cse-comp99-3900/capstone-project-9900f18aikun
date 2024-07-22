@@ -91,7 +91,7 @@ class BookSpace(Resource):
             if error:
                 return error
 
-        send_confirm_email_async(zid, room_id, date, start_time, end_time)
+        send_confirm_email_async(zid, room_id, date, start_time, end_time, weeks_of_duration)
 
         return {'message': f"Booking confirmed\n"
                            f"room id: {room_id}\n"
@@ -1014,18 +1014,7 @@ class ExtendBook(Resource):
             return {
                 'error': "Sorry, you don't have the permission to extend this booking, please request a new book"}, 400
 
-        conflict_bookings = Booking.query.filter(
-            Booking.date == date,
-            Booking.room_id == room_id,
-            Booking.booking_status != "requested",
-            Booking.booking_status != "cancelled",
-            or_(
-                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
-                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
-                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
-                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
-            )
-        ).all()
+        conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time)
 
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 409
