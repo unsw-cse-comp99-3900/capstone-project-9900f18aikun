@@ -958,6 +958,6 @@ class CheckBookToday(Resource):
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        return is_booking_today(date)
+        return {'is_booking_today': is_booking_today(date)}, 200
 
         
