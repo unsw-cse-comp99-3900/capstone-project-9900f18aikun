@@ -971,11 +971,13 @@ class CheckBookToday(Resource):
         if jwt_error:
             return jwt_error
         date = request.args.get('date')
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
 
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        return {'is_booking_today': is_booking_today(date)}, 200
+        return {'is_booking_today': is_booking_today(date, zid)}, 200
 
 
 @booking_ns.route('/extend_book/<int:booking_id>')

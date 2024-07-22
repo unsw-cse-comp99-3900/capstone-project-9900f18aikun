@@ -172,8 +172,8 @@ def who_made_comment(comment_id: int ) -> str:
 def get_like_count(comment_id: int ) -> int:
     return Like.query.filter_by(comment_id=comment_id).count()
 
-def is_booking_today(date):
-    booking = db.session.query(Booking).filter(Booking.date == date).first()
+def is_booking_today(date, user_id):
+    booking = db.session.query(Booking).filter(Booking.date == date, Booking.user_id == user_id).first()
     if booking:
         return True
     else:
