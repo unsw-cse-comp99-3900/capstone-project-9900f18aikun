@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useCallback} from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Input } from "@arco-design/web-react";
+import { Button, Input, Comment, Avatar, } from "@arco-design/web-react";
+import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon"; // 确保导入图标
 import ErrorBox from "./errorBox";
 import { Spin, Space } from "@arco-design/web-react";
 
@@ -18,6 +19,12 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [isReporting, setIsReporting] = useState(false);
   const [reportText, setReportText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  //评论state
+  const [comments, setComments] = useState([]);
+  const [replyingTo, setReplyingTo] = useState(null); // 用于存储当前正在回复的评论ID
+  const [replyText, setReplyText] = useState(""); // 用于存储回复内容
+  // 在 RoomCard 组件内部添加新的状态
+  const [tempComments, setTempComments] = useState([]);
 
   const handleReportClick = () => {
     setIsReporting(!isReporting);
@@ -52,6 +59,36 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       setLoadingData(false);
     }
   };
+
+
+  const fetchComments = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`, {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 204) {
+        setComments([]);
+        console.log("No comments found for this room.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch comments");
+      }
+
+      const commentsData = await response.json();
+      setComments(commentsData.comments);
+      console.log("Fetched comments:", commentsData.comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  }, [roomid]); 
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -110,9 +147,12 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       }
     };
 
+
+  
+    fetchComments();
     fetchBookingData();
     fetchRoom();
-  }, [roomid, selectedDate, change]);
+  }, [roomid, selectedDate, change,fetchComments]);
 
   useEffect(() => {
     if (room && data.length) {
@@ -120,6 +160,163 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       setRoomData(roomData);
     }
   }, [room, data]);
+
+  //评论回复
+  const handleReplyClick = (commentId) => {
+    setReplyingTo(commentId);
+  };
+
+  const handleReplySubmit = async () => {
+    const tempReply = {
+      id: `temp-${Date.now()}`, // 临时ID
+      room_id: roomid,
+      comment: replyText,
+      comment_to_id: replyingTo,
+      user_name: "Current User", // 假设当前用户的名字
+      user_id: "current_user_id", // 假设当前用户的ID
+      like_count: 0,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      is_edited: false,
+      child_comment: [],
+    };
+  
+    // 立即将临时回复添加到评论列表中
+    setTempComments([...tempComments, tempReply]);
+    setReplyingTo(null);
+    setReplyText("");
+  
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          room_id: roomid,
+          comment: replyText,
+          comment_to_id: replyingTo,
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error("Server responded with an error: " + errorText);
+      } else {
+        const result = await response.json();
+        // 更新临时评论的ID为服务器返回的ID
+        setTempComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.id === tempReply.id ? { ...comment, id: result.id } : comment
+          )
+        );
+      }
+    } catch (error) {
+      setErrorMessage(error.message);
+      // 如果请求失败，移除临时评论
+      setTempComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== tempReply.id)
+      );
+    }
+  };
+  
+  const handleInputChange = (e) => {
+    if (!e || !e.target) {
+      console.error('Event or event target is undefined');
+      return;
+    }
+    setReplyText(e.target.value);
+  };
+
+
+  //头像颜色列表
+  const colors = ['#3370ff', '#ff4d4f', '#52c41a', '#faad14', '#13c2c2', '#eb2f96'];
+  const userColors = {}; // 用于存储每个用户的颜色
+
+  const getUserColor = (userId) => {
+    if (!userColors[userId]) {
+      const colorIndex = Object.keys(userColors).length % colors.length;
+      userColors[userId] = colors[colorIndex];
+    }
+    return userColors[userId];
+  };
+  const renderComments = (comments, level = 0) => {
+    const allComments = [...comments, ...tempComments];
+    return comments.map((comment) => (
+      <Comment
+        key={comment.id}
+        actions={[
+          <button
+            className="custom-comment-action"
+            key="heart"
+            onClick={() => console.log("Like button clicked")}
+          >
+            <IconHeart />
+            {comment.like_count}
+          </button>,
+          <span
+            className="custom-comment-action"
+            key="reply"
+            onClick={() => handleReplyClick(comment.id)}
+          >
+            <IconMessage /> Reply
+          </span>,
+        ]}
+        author={comment.user_name}
+        avatar={
+          <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
+            {comment.user_name.charAt(0).toUpperCase()}
+          </Avatar>
+        }
+        content={<div>{comment.content}</div>}
+        datetime={
+          comment.is_edited
+            ? `${comment.edit_date} ${comment.edit_time}`
+            : `${comment.date} ${comment.time}`
+        }
+      >
+        {comment.child_comment &&
+          renderComments(comment.child_comment, level + 1)}
+        {replyingTo === comment.id && (
+          <Comment
+            align="right"
+            actions={[
+              <Button key="0" type="secondary" onClick={() => setReplyingTo(null)}>
+                Cancel
+              </Button>,
+              <Button key="1" type="primary" onClick={handleReplySubmit}>
+                Reply
+              </Button>,
+            ]}
+            avatar={
+              <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
+                {comment.user_name.charAt(0).toUpperCase()}
+              </Avatar>
+            }
+            content={
+              <div>
+                <input
+                  type="text"
+                  value={replyText}
+                  onChange={(e) => {
+                    if (!e || !e.target) {
+                      console.error('Event or event target is undefined');
+                      return;
+                    }
+                    setReplyText(e.target.value);
+                  }}
+                  placeholder="Here is your content."
+                />
+              </div>
+            }
+          />
+        )}
+      </Comment>
+    ));
+  };
 
   if (loadingRoom || loadingData) {
     return (
@@ -157,8 +354,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
                 <div>
                   <input
                     placeholder="Enter report details"
-                    value={reportText}
-                    onChange={(e) => setReportText(e.target.value)}
+                    value={reportText} // 这里应该是 reportText 而不是 replyText
+                    onChange={(e) => setReportText(e.target.value)} // 确保事件对象被正确传递
                   />
                   <Button type="primary" onClick={handleSubmit}>
                     Submit
@@ -191,6 +388,13 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               setChange={setChange}
             />
           )}
+
+          {/* Add a comment section below the table */}
+          <div className="comment-continaer">
+            <h2>Comments</h2>
+            {renderComments(comments)}
+          </div>
+          
         </div>
       ) : (
         <div>No room information</div>
