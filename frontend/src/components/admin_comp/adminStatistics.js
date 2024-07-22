@@ -30,7 +30,7 @@ function AdminStatistics() {
 
     const fetchData = async (formattedDate) => {
         try {
-            const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-report?date=${formattedDate}`, {
+            const response = await fetch(`/api/booking/meetingroom-report?date=${formattedDate}`, {
                 method: "GET",
                 headers: {
                     'accept': 'application/json',
@@ -141,7 +141,7 @@ function AdminStatistics() {
 
     const fetchUsageData = async (formattedDate) => {
         try {
-            const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-usage?date=${formattedDate}`, {
+            const response = await fetch(`/api/booking/meetingroom-usage?date=${formattedDate}`, {
                 method: "GET",
                 headers: {
                     'accept': 'application/json',
@@ -221,7 +221,7 @@ function AdminStatistics() {
 
     const fetchTopListData = async (formattedDate) => {
         try {
-            const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-top10-byCount?date=${formattedDate}`, {
+            const response = await fetch(`/api/booking/meetingroom-top10-byCount?date=${formattedDate}`, {
                 method: "GET",
                 headers: {
                     'accept': 'application/json',

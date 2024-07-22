@@ -39,7 +39,7 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setError("");
     try {
-      const response = await fetch("http://s2.gnip.vip:37895/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +61,7 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleOutlookLogin = () => {
-    window.location.href = "http://localhost:5001/auth/outlook-login";
+    window.location.href = "/api/auth/outlook-login";
   };
 
   const handleForgotPassword = () => {

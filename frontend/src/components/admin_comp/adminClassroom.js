@@ -22,7 +22,7 @@ function AdminClassroom() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://s2.gnip.vip:37895/booking/meetingroom?date=${formattedDate}`,
+        `/api/booking/meetingroom?date=${formattedDate}`,
         {
           method: "GET",
           headers: {

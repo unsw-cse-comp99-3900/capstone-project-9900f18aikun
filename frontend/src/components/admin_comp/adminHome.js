@@ -14,7 +14,7 @@ function AdminHome() {
             const token = localStorage.getItem("token");
             const formattedDate = dayjs().format('YYYY-MM-DD');
             try {
-                const response = await fetch(`http://s2.gnip.vip:37895/history/alluser-booking-history?date=${formattedDate}`, {
+                const response = await fetch(`/api/history/alluser-booking-history?date=${formattedDate}`, {
                     method: 'GET',
                     headers: {
                         accept: 'application/json',
@@ -37,7 +37,7 @@ function AdminHome() {
             const token = localStorage.getItem("token");
             const formattedDate = dayjs().format('YYYY-MM-DD');
             try {
-                const response = await fetch(`http://s2.gnip.vip:37895/booking/meetingroom-usage?date=${formattedDate}`, {
+                const response = await fetch(`/api/booking/meetingroom-usage?date=${formattedDate}`, {
                     method: 'GET',
                     headers: {
                         accept: 'application/json',

@@ -180,7 +180,7 @@ export const ChatBox = ({ change, setChange }) => {
   
       console.log('Booking information being sent to API:', bookingInfo);
   
-      const response = await fetch('http://s2.gnip.vip:37895/booking/book', {
+      const response = await fetch('/api/booking/book', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -256,7 +256,7 @@ export const ChatBox = ({ change, setChange }) => {
   
       console.log("Sending to server:", JSON.stringify(requestBody, null, 2));
   
-      const response = await fetch('http://s2.gnip.vip:37895/booking/express-book', {
+      const response = await fetch('/api/booking/express-book', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -319,7 +319,7 @@ export const ChatBox = ({ change, setChange }) => {
   
       console.log('Booking information being sent to API:', bookingInfo);
   
-      const response = await fetch('http://s2.gnip.vip:37895/booking/book', {
+      const response = await fetch('/api/booking/book', {
         method: 'POST',
         headers: {
           'accept': 'application/json',

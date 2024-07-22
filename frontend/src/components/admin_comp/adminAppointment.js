@@ -17,7 +17,7 @@ function AdminAppointment({ token }) {
         const fetchBookingData = async () => {
             try {
                 const formattedDate = date.format('YYYY-MM-DD');
-                const response = await fetch(`http://s2.gnip.vip:37895/history/alluser-booking-history?date=${formattedDate}`, {
+                const response = await fetch(`/api/history/alluser-booking-history?date=${formattedDate}`, {
                     method: 'GET',
                     headers: {
                         accept: 'application/json',
@@ -37,7 +37,7 @@ function AdminAppointment({ token }) {
 
         const fetchRequestData = async () => { // 新增请求数据
             try {
-                const response = await fetch('http://s2.gnip.vip:37895/booking/show-request', {
+                const response = await fetch('/api/booking/show-request', {
                     method: 'GET',
                     headers: {
                         accept: 'application/json',
@@ -72,7 +72,7 @@ function AdminAppointment({ token }) {
     const handleApprove = async (entry) => {
         
         try {
-            const response = await fetch('http://s2.gnip.vip:37895/booking/handle-request', {
+            const response = await fetch('/api/booking/handle-request', {
                 method: 'POST',
                 headers: {
                     accept: 'application/json',
@@ -101,7 +101,7 @@ function AdminAppointment({ token }) {
     const handleReject = async (entry) => {
         
         try {
-            const response = await fetch('http://s2.gnip.vip:37895/booking/handle-request', {
+            const response = await fetch('/api/booking/handle-request', {
                 method: 'POST',
                 headers: {
                     accept: 'application/json',

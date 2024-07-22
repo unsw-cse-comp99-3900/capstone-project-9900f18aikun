@@ -70,7 +70,7 @@ function App() {
       if (token) {
         try {
           const response = await fetch(
-            "http://s2.gnip.vip:37895/auth/auto-login",
+            "/api/auth/auto-login",
             {
               method: "GET",
               headers: {

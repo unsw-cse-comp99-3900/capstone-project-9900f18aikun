@@ -191,7 +191,7 @@ const AdminChatbox = ({ onClose }) => {
     const token = localStorage.getItem('token');
   
     try {
-      const response = await fetch(`http://s2.gnip.vip:37895/admin/get-usage-report-txt?date=${formattedDate}`, {
+      const response = await fetch(`/api/admin/get-usage-report-txt?date=${formattedDate}`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',
