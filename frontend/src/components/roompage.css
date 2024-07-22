@@ -83,3 +83,15 @@
   width: 180px;
   height: 180px;
 }
+
+/* Add styles for the comment section */
+.comment-continaer {
+  margin: 25px;
+  background-color: antiquewhite;
+}
+
+.comment-section h2 {
+  margin-bottom: 10px;
+}
+
+

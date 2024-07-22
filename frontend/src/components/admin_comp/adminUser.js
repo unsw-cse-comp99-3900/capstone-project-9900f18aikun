@@ -21,7 +21,7 @@ function AdminUser() {
 
     const fetchBookingHistory = () => {
         const token = localStorage.getItem("token"); // 从 localStorage 获取 token
-        fetch(`http://s2.gnip.vip:37895/history/certain-booking-history?user_zid=${userZid}`, {
+        fetch(`/api/history/certain-booking-history?user_zid=${userZid}`, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',

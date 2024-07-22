@@ -264,25 +264,7 @@ padding: 10px;
   word-wrap: break-word;
 }
 
-.admin-chatbox .message.user {
-align-self: flex-end;
-background-color: #dcf8c6; /* Light green for user messages */
-margin-left: auto;
-margin-right: 0;
-}
 
-.admin-chatbox .message.admin {
-align-self: flex-start;
-background-color: #e6e6e6; /* Light gray for admin/response messages */
-margin-left: 0;
-margin-right: auto;
-}
-.admin-chatbox .message.user {
-align-self: flex-start;
-background-color: #e6e6e6; /* Light gray for user messages */
-margin-left: 0;
-margin-right: auto;
-}
 
 .admin-chatbox .message.admin {
 align-self: flex-end;
@@ -328,19 +310,12 @@ margin-right: 0;
   width: 780px;
 }
 .admin-chatbox .message.user {
-  align-self: flex-end;
-  background-color: #e6e6e6; /* Light green for user messages */
-  margin-left: auto;
-  margin-right: 0;
-}
-
-.admin-chatbox .message.admin {
   align-self: flex-start;
-   /* Light gray for admin/response messages */
-  background-color: #dcf8c6; 
+  background-color: #e6e6e6; /* Light gray for user messages */
   margin-left: 0;
   margin-right: auto;
 }
+
 .admin-chatbox .messages-list {
   background-color: #a083d5;
   border-radius: 10px;

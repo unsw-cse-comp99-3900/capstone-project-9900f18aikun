@@ -191,7 +191,7 @@ const AdminChatbox = ({ onClose }) => {
     const token = localStorage.getItem('token');
   
     try {
-      const response = await fetch(`http://s2.gnip.vip:37895/admin/get-usage-report-txt?date=${formattedDate}`, {
+      const response = await fetch(`/api/admin/get-usage-report-txt?date=${formattedDate}`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',
@@ -328,144 +328,144 @@ const AdminChatbox = ({ onClose }) => {
   }, [messageHistories, selectedUser]);
 
   return (
-  <div className="admin-chatbox">
-    <div className="chatbox-container">
-      <div className="message-box">
-        <div 
-          className="overlap-group"
-          style={{backgroundImage: `url(${process.env.PUBLIC_URL}/admin_chatbox_img/rectangle-7.png)`}}
-        >
-          <div className="frame">
-            <div className="text-wrapper-2">Admin Chat</div>
-          </div>
+    <div className="admin-chatbox">
+      <div className="chatbox-container">
+        <div className="messages-list">
+          {Array.from(activeUsers.entries()).map(([chatId, userInfo], index) => {
+            const latestMessage = messageHistories[chatId] && messageHistories[chatId].length > 0
+              ? messageHistories[chatId][messageHistories[chatId].length - 1]
+              : null;
+            const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
+            const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            
+            return (
+              <div 
+                key={chatId} 
+                className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
+                onClick={() => handleUserSelect(chatId)}
+              >
+                <div className="user-avatar" style={{backgroundColor: avatarColor}}>
+                  {initials}
+                </div>
+                <div className="user-item-info">
+                  <div className="user-item-header">
+                    <span className="user-item-name">
+                      {userInfo.userName}
+                      {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
+                    </span>
+                    <span className="user-item-time">
+                      {latestMessage ? formatDateTime(latestMessage.timestamp) : ''}
+                    </span>
+                  </div>
+                  <div className="user-item-last-message">
+                    {latestMessage 
+                      ? (latestMessage.sender === 'admin'
+                          ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
+                          : `${userInfo.userName}: ${latestMessage.text}`)
+                      : 'No messages yet'}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="message-box">
           <div 
-            className="icon-minus"
-            style={{backgroundImage: `url(${process.env.PUBLIC_URL}/admin_chatbox_img/ellipse-1.svg)`}}
-            onClick={onClose}
+            className="overlap-group"
+            style={{backgroundImage: `url(${process.env.PUBLIC_URL}/admin_chatbox_img/rectangle-7.png)`}}
           >
-            <img className="rectangle" alt="Rectangle" src={process.env.PUBLIC_URL + "/admin_chatbox_img/rectangle-1.svg"} />
-          </div>
-          <img className="customer" alt="Customer" src={process.env.PUBLIC_URL + "/admin_chatbox_img/customer-1.png"} />
-        </div>
-        <div className="chat-content">
-          {selectedUser && messageHistories[selectedUser] ? (
-            <>
-              {messageHistories[selectedUser].map((msg) => {
-                if (msg.isUsageReport) {
-                  return (
-                    <div key={msg.id} className="message system">
-                      <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-                      <div className="message-text usage-report">
-                        <strong>Usage Report for {msg.reportDate}:</strong>
-                        <p>{msg.text}</p>
-                      </div>
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div key={msg.id} className={`message ${msg.sender}`}>
-                      <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-                      <div className="message-text">
-                        {msg.sender === "admin" 
-                          ? `Admin (${msg.userId}): ${msg.text}` 
-                          : `${activeUsers.get(msg.chatId).userName}: ${msg.text}`}
-                      </div>
-                    </div>
-                  );
-                }
-              })}
-            </>
-          ) : (
-            <div className="no-messages">Select a user to view messages</div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className="bottom-base">
-          <div className="calendar-button-wrapper">
-            <button 
-              className="calendar-button" 
-              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-            >
-              <img 
-                src={process.env.PUBLIC_URL + "/admin_chatbox_img/analysis.png"} 
-                alt="Calendar" 
-              />
-            </button>
-            <span className="calendar-tooltip">Get room usage analysis</span>
-          </div>
-          {isCalendarOpen && (
-            <div className="calendar-wrapper">
-              <button className="close-calendar" onClick={() => setIsCalendarOpen(false)}>×</button>
-              <DatePicker
-                selected={selectedDate}
-                onChange={date => {
-                  setSelectedDate(date);
-                  setIsCalendarOpen(false);
-                  fetchUsageReport(date);
-                }}
-                inline
-              />
+            <div className="frame">
+              <div className="text-wrapper-2">Admin Chat</div>
             </div>
-          )}
-          <input
-            type="text"
-            className="message-input"
-            placeholder={`Type your message here... ${selectedUser ? `(to ${selectedUser})` : '(select a user)'}`}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={!selectedUser || !adminId}
-          />
-          <img
-            className="vector"
-            alt="Send"
-            src={process.env.PUBLIC_URL + "/admin_chatbox_img/vector.svg"}
-            onClick={handleSendMessage}
-          />
-        </div>
-      </div>
-      <div className="messages-list">
-        {Array.from(activeUsers.entries()).map(([chatId, userInfo], index) => {
-          const latestMessage = messageHistories[chatId] && messageHistories[chatId].length > 0
-            ? messageHistories[chatId][messageHistories[chatId].length - 1]
-            : null;
-          const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
-          const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-          
-          return (
             <div 
-              key={chatId} 
-              className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
-              onClick={() => handleUserSelect(chatId)}
+              className="icon-minus"
+              style={{backgroundImage: `url(${process.env.PUBLIC_URL}/admin_chatbox_img/ellipse-1.svg)`}}
+              onClick={onClose}
             >
-              <div className="user-avatar" style={{backgroundColor: avatarColor}}>
-                {initials}
-              </div>
-              <div className="user-item-info">
-                <div className="user-item-header">
-                  <span className="user-item-name">
-                    {userInfo.userName}
-                    {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
-                  </span>
-                  <span className="user-item-time">
-                    {latestMessage ? formatDateTime(latestMessage.timestamp) : ''}
-                  </span>
-                </div>
-                <div className="user-item-last-message">
-                  {latestMessage 
-                    ? (latestMessage.sender === 'admin'
-                        ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
-                        : `${userInfo.userName}: ${latestMessage.text}`)
-                    : 'No messages yet'}
-                </div>
-              </div>
+              <img className="rectangle" alt="Rectangle" src={process.env.PUBLIC_URL + "/admin_chatbox_img/rectangle-1.svg"} />
             </div>
-          );
-        })}
+            <img className="customer" alt="Customer" src={process.env.PUBLIC_URL + "/admin_chatbox_img/customer-1.png"} />
+          </div>
+          <div className="chat-content">
+            {selectedUser && messageHistories[selectedUser] ? (
+              <>
+                {messageHistories[selectedUser].map((msg) => {
+                  if (msg.isUsageReport) {
+                    return (
+                      <div key={msg.id} className="message system">
+                        <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
+                        <div className="message-text usage-report">
+                          <strong>Usage Report for {msg.reportDate}:</strong>
+                          <p>{msg.text}</p>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={msg.id} className={`message ${msg.sender}`}>
+                        <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
+                        <div className="message-text">
+                          {msg.sender === "admin" 
+                            ? `Admin (${msg.userId}): ${msg.text}` 
+                            : `${activeUsers.get(msg.chatId).userName}: ${msg.text}`}
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </>
+            ) : (
+              <div className="no-messages">Select a user to view messages</div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="bottom-base">
+            <div className="calendar-button-wrapper">
+              <button 
+                className="calendar-button" 
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+              >
+                <img 
+                  src={process.env.PUBLIC_URL + "/admin_chatbox_img/analysis.png"} 
+                  alt="Calendar" 
+                />
+              </button>
+              <span className="calendar-tooltip">Get room usage analysis</span>
+            </div>
+            {isCalendarOpen && (
+              <div className="calendar-wrapper">
+                <button className="close-calendar" onClick={() => setIsCalendarOpen(false)}>×</button>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={date => {
+                    setSelectedDate(date);
+                    setIsCalendarOpen(false);
+                    fetchUsageReport(date);
+                  }}
+                  inline
+                />
+              </div>
+            )}
+            <input
+              type="text"
+              className="message-input"
+              placeholder={`Type your message here... ${selectedUser ? `(to ${selectedUser})` : '(select a user)'}`}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={!selectedUser || !adminId}
+            />
+            <img
+              className="vector"
+              alt="Send"
+              src={process.env.PUBLIC_URL + "/admin_chatbox_img/vector.svg"}
+              onClick={handleSendMessage}
+            />
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default AdminChatbox;

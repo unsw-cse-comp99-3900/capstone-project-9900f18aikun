@@ -37,7 +37,7 @@ const QrCodeCheckIn = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://s2.gnip.vip:37895/sign_in/sign-in/${qrCode}`,
+        `/api/sign_in/sign-in/${qrCode}`,
         {
           headers: {
             accept: 'application/json',

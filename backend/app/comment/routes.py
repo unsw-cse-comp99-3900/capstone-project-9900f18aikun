@@ -169,23 +169,35 @@ class get_comment(Resource):
             }, 204
 
     def get_comment_by_roomid(self, room_id):
-        comments = Comment.query.filter_by(room_id=room_id).all()
+        root_comments = Comment.query.filter_by(room_id=room_id, comment_to_id=0).all()
         res = []
-        for comment in comments:
-            res.append({"id": comment.id,
-                "room_id": comment.room_id,
-                "user_id": comment.user_id,
-                "user_name": get_user_name(comment.user_id),
-                "date": comment.date.isoformat(),
-                "time": comment.time.isoformat(),
-                "content": comment.content,
-                "is_edited": comment.is_edited,
-                "edit_date": comment.edit_date.isoformat(), 
-                "edit_time": comment.edit_time.isoformat(),
-                "like_count": get_like_count(comment.id),
-                "comment_to_id": comment.comment_to_id
-                })
+        for comment in root_comments:
+            res.append(self.build_comment_tree(comment, level=1))
         return res
+
+    def build_comment_tree(self, comment, level):
+        comment_dict = {
+            "id": comment.id,
+            "room_id": comment.room_id,
+            "user_id": comment.user_id,
+            "user_name": get_user_name(comment.user_id),
+            "date": comment.date.isoformat(),
+            "time": comment.time.isoformat(),
+            "content": comment.content,
+            "is_edited": comment.is_edited,
+            "edit_date": comment.edit_date.isoformat() if comment.edit_date else None,
+            "edit_time": comment.edit_time.isoformat() if comment.edit_time else None,
+            "like_count": get_like_count(comment.id),
+            "level": level
+        }
+
+        child_comments = Comment.query.filter_by(comment_to_id=comment.id).all()
+        if child_comments:
+            comment_dict['child_comment'] = [self.build_comment_tree(child, level + 1) for child in child_comments]  # 递归时层级加 1
+        else:
+            comment_dict['child_comment'] = None
+
+        return comment_dict
 
 edit_comment_model = comment_ns.model('Edit comment', {
     'comment_id': fields.Integer(required=True, description='The comment id', default=1),
@@ -315,3 +327,48 @@ class like_comment(Resource):
     def check_double_like(self, comment_id, user_zid) -> bool:
         like = Like.query.filter_by(comment_id = comment_id, who_like_id = user_zid).first()
         return like != None
+
+@comment_ns.route('/unlike-comment')
+class unlike_comment(Resource):
+    # Get the
+    @comment_ns.response(200, "success")
+    @comment_ns.response(400, "Bad request")
+    @comment_ns.response(403, "Forbidden")
+    @comment_ns.expect(like_comment_model)
+    @comment_ns.doc(description="unlike comment")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def put(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        comment_id = request.json["comment_id"]
+
+        if not check_valid_comment(comment_id):
+            return {
+                "error": f"invalid comment {comment_id}"
+            }, 400
+        
+        if not self.check_already_like(comment_id, user_zid):
+            return {
+                "error": f"user {user_zid} has not liked commentid {comment_id}"
+            }, 400
+        
+        self.set_unlike(comment_id, user_zid)
+        
+        return {
+            "message": f"successfully like comment {comment_id}",
+            "like_count": get_like_count(comment_id)
+        }, 200
+    
+    def check_already_like(self, comment_id, user_zid) -> bool:
+        like = Like.query.filter_by(comment_id = comment_id, who_like_id = user_zid).first()
+        return like != None
+    
+    def set_unlike(self, comment_id, user_zid):
+        like = Like.query.filter_by(comment_id = comment_id, who_like_id = user_zid).first()
+        db.session.delete(like)
+        db.session.commit()
+        
