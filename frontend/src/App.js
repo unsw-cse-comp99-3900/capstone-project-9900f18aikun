@@ -21,7 +21,7 @@ import { ChatBox } from "./components/ChatBox";
 import AdminRoomPage from "./components/admin_comp/adminRoompage";
 import QrCodeCheckIn from "./components/QrCodeCheckIn";
 //loading
-import { Spin, Space } from '@arco-design/web-react';
+import { Spin, Space } from "@arco-design/web-react";
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
