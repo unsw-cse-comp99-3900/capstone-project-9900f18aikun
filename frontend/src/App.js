@@ -8,16 +8,13 @@ import {
   useParams,
 } from "react-router-dom";
 import dayjs from "dayjs";
-import Table from "./components/Table";
-import Filter from "./components/filter";
+import Dashboard from "./components/dashboard";
 import LoginPage from "./components/LoginPage";
 import HeaderBar from "./components/HeaderBar";
 import SelectMap from "./components/selectMap";
 import History from "./components/history";
 import RoomInfo from "./components/roompage";
-import Rebook from "./components/rebook";
 import AdminPage from "./components/Admin_page";
-import { ChatBox } from "./components/ChatBox";
 import AdminRoomPage from "./components/admin_comp/adminRoompage";
 import QrCodeCheckIn from "./components/QrCodeCheckIn";
 //loading
@@ -50,35 +47,24 @@ const ProtectedRoute = ({
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [filters, setFilters] = useState({
-    level: "",
-    capacity: "",
-    category: "meeting_room",
-  });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+
   const navigate = useNavigate();
   const location = useLocation();
-  const [change, setChange] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
   useEffect(() => {
     const autoLogin = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch(
-            "/api/auth/auto-login",
-            {
-              method: "GET",
-              headers: {
-                accept: "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const response = await fetch("/api/auth/auto-login", {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
           if (response.ok) {
             const data = await response.json();
@@ -107,53 +93,6 @@ function App() {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
   };
-
-  const fetchBookingData = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const formattedDate = selectedDate.format("YYYY-MM-DD");
-      const response = await fetch(
-        `/api/booking/meetingroom?date=${formattedDate}`,
-        {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
-      const text = await response.text();
-      const bookingData = JSON.parse(text);
-      const dataArray = Object.values(bookingData);
-      setData(dataArray);
-    } catch (error) {
-      console.error("Error fetching booking data:", error);
-    }
-  };
-
-  const handleFilter = (filters) => {
-    const newFilteredData = data.filter((item) => {
-      return (
-        (filters.level === "" || item.level === filters.level) &&
-        (filters.capacity === "" || item.capacity >= filters.capacity) &&
-        (filters.category === "all" || item.type === filters.category)
-      );
-    });
-    setFilteredData(newFilteredData);
-    setFilters(filters);
-  };
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchBookingData();
-    }
-  }, [selectedDate, isLoggedIn, change]);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      handleFilter(filters);
-    }
-  }, [data]);
 
   const handleLogin = (admin) => {
     setIsLoggedIn(true);
@@ -241,33 +180,11 @@ function App() {
             >
               <>
                 <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
-                <div className="main-content">
-                  <div
-                    className={`sidebar ${isSidebarOpen ? "open" : "closed"}`}
-                  >
-                    <img
-                      src="/On@2x.png"
-                      alt="Toggle Sidebar"
-                      className="toggle-icon"
-                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    />
-                    {isSidebarOpen && <Filter onFilter={handleFilter} />}
-                  </div>
-                  <div className="content">
-                    <Rebook change={change} setChange={setChange} />
-                    <Table
-                      data={filteredData}
-                      selectedDate={selectedDate}
-                      setSelectedDate={setSelectedDate}
-                      map={true}
-                      change={change}
-                      setChange={setChange}
-                    />
-                  </div>
-                </div>
-                <div className="chat-box-wrapper">
-                  <ChatBox change={change} setChange={setChange} />
-                </div>
+                <Dashboard
+                  isLoggedIn={isLoggedIn}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                />
               </>
             </ProtectedRoute>
           }
