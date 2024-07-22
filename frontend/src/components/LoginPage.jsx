@@ -21,13 +21,10 @@ const LoginPage = ({ onLogin }) => {
 
   const handleSuccessfulLogin = (data) => {
     localStorage.setItem("token", data.access_token);
-    console.log("handle success data is ", data)
     onLogin(data.is_admin);
 
     const fromQr = location.state?.fromQr;
     const qrCode = localStorage.getItem("qrCode");
-
-    console.log("fromQr =", fromQr, "qrCode =", qrCode);
 
     if (fromQr && qrCode) {
       navigate("/qr-check-in");
@@ -53,7 +50,6 @@ const LoginPage = ({ onLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Login successful");
         handleSuccessfulLogin(data);
       } else {
         setError(data.message || "Login failed. Please try again.");
