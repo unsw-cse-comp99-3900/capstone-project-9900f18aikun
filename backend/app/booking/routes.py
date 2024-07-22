@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from flask_restx import Namespace, Resource, fields
-from flask import request, Flask
+from flask import request, Flask, jsonify
 from app.extensions import db, api, scheduler, app
 from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
@@ -30,7 +30,8 @@ booking_model = booking_ns.model('Booking request', {
     'room_id': fields.Integer(required=True, description='The room id', default=1),
     'date': fields.Date(required=True, description='Date of the booking', default="2024-07-16"),
     'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)', default="12:00"),
-    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00")
+    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00"),
+    'weeks_of_duration': fields.Integer(required=False, description='Number of weeks to repeat the booking', default=1)
 })
 
 
@@ -57,6 +58,7 @@ class BookSpace(Resource):
         start_time = data['start_time']
         end_time = data['end_time']
         date = data['date']
+        weeks_of_duration = data.get('weeks_of_duration', 1)
 
         if not isinstance(data['room_id'], int):
             return {'error': 'room id must be integer'}, 400
@@ -78,81 +80,94 @@ class BookSpace(Resource):
         except:
             return {'error': 'Invalid room id'}, 400
 
-        conflict_bookings = Booking.query.filter(
-            Booking.date == date,
-            Booking.room_id == room_id,
-            Booking.booking_status != "requested",
-            Booking.booking_status != "cancelled",
-            or_(
-                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
-                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
-                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
-                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
-            )
-        ).all()
+        date = datetime.strptime(date, "%Y-%m-%d").date()
 
         if not is_room_available(room_id):
             return {'error': f"room {room_id} is unavailable"}, 400
 
-        if conflict_bookings:
-            return {'error': 'Booking conflict, please check other time'}, 400
+        for week in range(weeks_of_duration):
+            new_date = date + timedelta(weeks=week)
+            error = book_or_request(new_date, room_id, start_time, end_time, zid, room_name)
+            if error:
+                return error
 
-        user = db.session.get(Users, zid)
-        if not user:
-            return {'error': 'Invalid zid'}, 400
-        user_type = user.user_type
-        is_request = False
-        if user_type != "CSE_staff" and not is_student_permit(room_id):
-            is_request = True
-        if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
-            is_request = True
-        status = 'booked'
-        if is_request:
-            status = 'requested'
-
-        new_booking = Booking(
-            room_id=room_id,
-            room_name=room_name,
-            user_id=zid,
-            start_time=start_time,
-            end_time=end_time,
-            date=date,
-            booking_status=status,
-            is_request=is_request
-        )
-        statu = new_booking.booking_status
-        db.session.add(new_booking)
-        db.session.commit()
-        if statu == BookingStatus.requested.value:
-            emit('request_notification', {'new_request': True}, room="notification", namespace='/')
-            db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
-            db.session.commit()
-
-
-        bookingid = new_booking.id
         send_confirm_email_async(zid, room_id, date, start_time, end_time)
-        schedule_reminder(zid, room_id, start_time, date, end_time)
-        dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
-        check_time = dt_start_time + timedelta(minutes=15)
-        scheduler.add_job(self.schedule_check_sign_in, 'date', run_date=check_time, args=[bookingid])
 
         return {'message': f"Booking confirmed\n"
                            f"room id: {room_id}\n"
                            f"start time: {start_time}\n"
                            f"end time: {end_time}\n"
                            f"date: {date}\n"
-                           f"status: {statu}\n"
-                           f"checktime: {check_time}"
-                           f"bookingid:{bookingid}"
                 }, 200
-    
-    def schedule_check_sign_in(self, bookingid):
-        from app.extensions import db, app
-        with app.app_context():  # 推入 Flask 应用上下文
-            booking = Booking.query.get(bookingid)
-            if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
-                booking.booking_status = "cancelled"
-                db.session.commit()
+
+
+def check_conflict_booking(date, room_id, start_time, end_time):
+    conflict_bookings = Booking.query.filter(
+        Booking.date == date,
+        Booking.room_id == room_id,
+        Booking.booking_status != "requested",
+        Booking.booking_status != "cancelled",
+        or_(
+            and_(Booking.start_time >= start_time, Booking.start_time < end_time),
+            and_(Booking.end_time > start_time, Booking.end_time <= end_time),
+            and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
+            and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
+        )
+    ).all()
+    return conflict_bookings
+
+
+def book_or_request(date, room_id, start_time, end_time, zid, room_name):
+    conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time)
+
+    if conflict_bookings:
+        return {'error': 'Booking conflict, please check other time'}, 400
+
+    user = db.session.get(Users, zid)
+    if not user:
+        return {'error': 'Invalid zid'}, 400
+    user_type = user.user_type
+    is_request = False
+    if user_type != "CSE_staff" and not is_student_permit(room_id):
+        is_request = True
+    if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+        is_request = True
+    status = 'booked'
+    if is_request:
+        status = 'requested'
+
+    new_booking = Booking(
+        room_id=room_id,
+        room_name=room_name,
+        user_id=zid,
+        start_time=start_time,
+        end_time=end_time,
+        date=date,
+        booking_status=status,
+        is_request=is_request
+    )
+    statu = new_booking.booking_status
+    db.session.add(new_booking)
+    db.session.commit()
+    if statu == BookingStatus.requested.value:
+        emit('request_notification', {'new_request': True}, room="notification", namespace='/')
+        db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
+        db.session.commit()
+
+    bookingid = new_booking.id
+    schedule_reminder(zid, room_id, start_time, date, end_time)
+    dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+    check_time = dt_start_time + timedelta(minutes=15)
+    scheduler.add_job(schedule_check_sign_in, 'date', run_date=check_time, args=[bookingid])
+
+
+def schedule_check_sign_in(bookingid):
+    from app.extensions import db, app
+    with app.app_context():  # 推入 Flask 应用上下文
+        booking = Booking.query.get(bookingid)
+        if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
+            booking.booking_status = "cancelled"
+            db.session.commit()
 
 
 # booking room model
@@ -903,6 +918,7 @@ request_model = booking_ns.model('request handling', {
     'confirmed': fields.Boolean(description='Confirmed status', default=True)
 })
 
+
 @booking_ns.route('/handle-request')
 class handle_request(Resource):
     # Get the
@@ -941,6 +957,7 @@ class handle_request(Resource):
                 "message": f"admin {user_zid} set booking id {booking_id} as cancelled"
             }, 200
 
+
 @booking_ns.route("/is_book_today")
 class CheckBookToday(Resource):
     @booking_ns.doc(description="Check user whether is admin")
@@ -959,5 +976,74 @@ class CheckBookToday(Resource):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         return {'is_booking_today': is_booking_today(date)}, 200
+
+
+@booking_ns.route('/extend_book/<int:booking_id>')
+class ExtendBook(Resource):
+    # Book a room
+    @booking_ns.response(200, "success")
+    @booking_ns.response(400, "Bad request")
+    @booking_ns.response(404, "User not found")
+    @booking_ns.response(409, "Booking conflict")
+    @booking_ns.doc(description="Book a space")
+    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def post(self, booking_id):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        zid = current_user['zid']
+
+
+
+        original_book = db.session.get(Booking, booking_id)
+        date = original_book.date
+        room_id = original_book.room_id
+        start_time = original_book.end_time
+        end_time = (datetime.combine(date, start_time) + timedelta(hours=1)).time()
+
+        user = db.session.get(Users, zid)
+        if not user:
+            return {'error': 'Invalid zid'}, 404
+        user_type = user.user_type
+
+        if user_type != "CSE_staff" and not is_student_permit(room_id):
+            return {
+                'error': "Sorry, you don't have the permission to extend this booking, please request a new book"}, 400
+        if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+            return {
+                'error': "Sorry, you don't have the permission to extend this booking, please request a new book"}, 400
+
+        conflict_bookings = Booking.query.filter(
+            Booking.date == date,
+            Booking.room_id == room_id,
+            Booking.booking_status != "requested",
+            Booking.booking_status != "cancelled",
+            or_(
+                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
+                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
+                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
+                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
+            )
+        ).all()
+
+        if conflict_bookings:
+            return {'error': 'Booking conflict, please check other time'}, 409
+
+        new_booking = Booking(
+            room_id=room_id,
+            room_name=original_book.room_name,
+            user_id=zid,
+            start_time=start_time,
+            end_time=end_time,
+            date=date,
+            booking_status=BookingStatus.booked.value,
+            is_request=False
+        )
+        db.session.add(new_booking)
+        db.session.commit()
+        return {'message': 'Extend successful'}, 200
+
+
 
         

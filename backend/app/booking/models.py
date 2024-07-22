@@ -27,7 +27,6 @@ class RoomDetail(db.Model):
     CSE_staff_permission = db.Column(db.Boolean, nullable=False)
 
 
-
 class HotDeskDetail(db.Model):
     __tablename__ = "hot_desk_detail"
     id = db.Column(db.Integer, db.ForeignKey('space.id'), primary_key=True, unique=True, nullable=False)
