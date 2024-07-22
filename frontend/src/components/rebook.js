@@ -9,7 +9,7 @@ import { Table as ArcoTable } from "@arco-design/web-react";
 import { Spin, Space } from "@arco-design/web-react";
 import ErrorBox from "./errorBox";
 
-const Rebook = () => {
+const Rebook = ({ change, setChange }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -79,6 +79,7 @@ const Rebook = () => {
 
       if (response.ok) {
         const result = await response.json();
+        setChange(!change);
       } else {
         const errorText = await response.text();
         console.error("Server responded with an error:", errorText);

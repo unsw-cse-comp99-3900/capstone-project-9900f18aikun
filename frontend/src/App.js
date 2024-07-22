@@ -254,7 +254,7 @@ function App() {
                     {isSidebarOpen && <Filter onFilter={handleFilter} />}
                   </div>
                   <div className="content">
-                    <Rebook date={selectedDate} />
+                    <Rebook change={change} setChange={setChange} />
                     <Table
                       data={filteredData}
                       selectedDate={selectedDate}
