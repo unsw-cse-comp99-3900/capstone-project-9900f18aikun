@@ -10,7 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import {  Spin, Space, Table as ArcoTable } from '@arco-design/web-react';
+import { Spin, Space, Table as ArcoTable } from "@arco-design/web-react";
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
 
@@ -150,41 +150,75 @@ const ReservationHistory = () => {
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
+  const handleExtend = async (entry) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        "/api/booking/extend_book/" + entry.booking_id,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+
+      if (response.ok) {
+        setErrorMessage("Successfully Booked");
+        setChange(!change);
+      } else {
+        const errorText = await response.text();
+        setErrorMessage("Unsuccessful Booking");
+        console.error("Server responded with an error:", errorText);
+        throw new Error("Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
+  };
 
   const columns = [
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
-      align: 'center',
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      align: "center",
     },
     {
-      title: 'Time',
-      key: 'time',
-      align: 'center',
+      title: "Time",
+      key: "time",
+      align: "center",
       render: (_, record) => `${record.start_time} - ${record.end_time}`,
     },
     {
-      title: 'Room',
-      dataIndex: 'room_name',
-      key: 'room_name',
-      align: 'center',
+      title: "Room",
+      dataIndex: "room_name",
+      key: "room_name",
+      align: "center",
     },
     {
-      title: 'Booking Status',
-      dataIndex: 'booking_status',
-      key: 'booking_status',
-      align: 'center',
+      title: "Booking Status",
+      dataIndex: "booking_status",
+      key: "booking_status",
+      align: "center",
     },
     {
-      title: 'Operation',
-      key: 'operation',
-      align: 'center',
+      title: "Operation",
+      key: "operation",
+      align: "center",
       render: (_, record) => {
-        const isRebook = record.booking_status === "cancelled" || record.booking_status === "signed-in";
-        const text = isRebook ? (isCalendarVisible ? "Hide Calendar" : "Rebook") : "Cancel";
+        const isRebook =
+          record.booking_status === "cancelled" ||
+          record.booking_status === "signed-in";
+        const text = isRebook
+          ? isCalendarVisible
+            ? "Hide Calendar"
+            : "Rebook"
+          : "Cancel";
         const color = text === "Cancel" ? "red" : "green";
-  
+
         return (
           <span
             id={record.booking_id}
@@ -196,9 +230,19 @@ const ReservationHistory = () => {
         );
       },
     },
+    {
+      title: "Extend Booking",
+      key: "extend",
+      align: "center",
+      render: (_, record) => {
+        if (record.booking_status === "signed-in") {
+          return <input type="checkbox" onClick={() => handleExtend(record)} />;
+        } else {
+          return <input type="checkbox" disabled={true} />;
+        }
+      },
+    },
   ];
-
-
 
   if (loading) {
     return (
@@ -222,13 +266,12 @@ const ReservationHistory = () => {
       {history.length > 0 ? (
         <div className="history-table">
           <ArcoTable
-          columns={columns}
-          data={history}
-          rowKey="booking_id"
-          pagination={6}
-        />
+            columns={columns}
+            data={history}
+            rowKey="booking_id"
+            pagination={6}
+          />
         </div>
-
       ) : (
         <div className="no-history">No previous reservation history</div>
       )}

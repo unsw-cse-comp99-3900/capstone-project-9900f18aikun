@@ -57,8 +57,12 @@ const SelectWindow = ({
   permission,
   change,
   setChange,
+  setErrorMessage,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [checked, setChecked] = useState(false);
+  const [weeks, setWeeks] = useState("");
+
   if (!visible) return null;
 
   // Filter the reservations for the selected room and date
@@ -120,9 +124,10 @@ const SelectWindow = ({
       date: selectedDate.format("YYYY-MM-DD"),
       start_time: newTimes[0],
       end_time: endTime,
+      ...(weeks && { weeks_of_duration: parseInt(weeks, 10) }),
     };
     const token = localStorage.getItem("token");
-
+    console.log(obj);
     try {
       const response = await fetch("/api/booking/book", {
         method: "POST",
@@ -137,9 +142,14 @@ const SelectWindow = ({
       if (response.ok) {
         await response.json();
         setChange(!change);
+        if (permission) {
+          setErrorMessage("Successfully Booked");
+        } else {
+          setErrorMessage("Successfully Requested");
+        }
       } else {
         const errorText = await response.text();
-        console.error("Server responded with an error:", errorText);
+        setErrorMessage("Booking Failed");
         throw new Error("Something went wrong");
       }
     } catch (error) {
@@ -147,6 +157,17 @@ const SelectWindow = ({
     }
 
     close();
+  };
+
+  const handleCheckboxChange = () => {
+    setChecked(!checked);
+    if (!checked) {
+      setWeeks(""); // Clear the weeks input when checkbox is unchecked
+    }
+  };
+
+  const handleInputChange = (event) => {
+    setWeeks(event.target.value);
   };
 
   return (
@@ -179,6 +200,29 @@ const SelectWindow = ({
             ;
           </select>
         </div>
+        {permission ? (
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={handleCheckboxChange}
+              />
+              I want to book for
+            </label>
+            <input
+              type="number"
+              value={weeks}
+              onChange={handleInputChange}
+              disabled={!checked}
+              placeholder="Enter number of weeks"
+              min="1"
+            />
+            <span> weeks</span>
+          </div>
+        ) : (
+          <div></div>
+        )}
         <br />
         <div className="button-class">
           <Button onClick={confirmHandler}>
@@ -191,7 +235,14 @@ const SelectWindow = ({
   );
 };
 
-const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
+const Table = ({
+  data,
+  selectedDate,
+  setSelectedDate,
+  change,
+  setChange,
+  setErrorMessage,
+}) => {
   const [times, setTimes] = useState([]);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [hoveredRoom, setHoveredRoom] = useState(null);
@@ -337,6 +388,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
       change: change,
       permission: permissionClass,
       setChange: setChange,
+      setErrorMessage: setErrorMessage,
     });
   };
 
@@ -548,6 +600,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
         permission={selectWindow.permission}
         change={change}
         setChange={setChange}
+        setErrorMessage={setErrorMessage}
       />
     </div>
   );

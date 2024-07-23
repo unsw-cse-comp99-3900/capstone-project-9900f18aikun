@@ -5,7 +5,6 @@ import Rebook from "./rebook";
 import Table from "./Table";
 import ChatBox from "./ChatBox";
 import ErrorBox from "./errorBox";
-import { Spin, Space } from "@arco-design/web-react";
 
 const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -132,6 +131,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
             map={true}
             change={change}
             setChange={setChange}
+            setErrorMessage={setErrorMessage}
           />
         </div>
       </div>
