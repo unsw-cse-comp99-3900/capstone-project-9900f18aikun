@@ -178,3 +178,11 @@ def is_booking_today(date, user_id):
         return True
     else:
         return False
+    
+def is_who_like_comment(user_id: str, comment_id: int) -> bool:
+    likes = Like.query.filter_by(comment_id=comment_id).all()
+    if likes:
+        for like in likes:
+            if like.who_like_id == user_id:
+                return True
+    return False

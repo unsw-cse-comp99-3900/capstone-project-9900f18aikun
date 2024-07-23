@@ -6,7 +6,7 @@ from app.models import Users, CSEStaff
 from .models import Comment, Like
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_comment, check_valid_room, get_date, get_like_count, get_time, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, who_made_comment
+from app.utils import check_valid_comment, check_valid_room, get_date, get_like_count, get_time, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, is_who_like_comment, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, who_made_comment
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -156,7 +156,7 @@ class get_comment(Resource):
                 "error": f"invalid roomid {room_id}"
             }, 400
         
-        res = self.get_comment_by_roomid(room_id)
+        res = self.get_comment_by_roomid(room_id, user_zid)
         if res:
             return {
                 "room_id": room_id,
@@ -169,14 +169,14 @@ class get_comment(Resource):
                 "message": "No comment found for room {room_id}",
             }, 204
 
-    def get_comment_by_roomid(self, room_id):
+    def get_comment_by_roomid(self, room_id, user_zid):
         root_comments = Comment.query.filter_by(room_id=room_id, comment_to_id=0).all()
         res = []
         for comment in root_comments:
-            res.append(self.build_comment_tree(comment, level=1))
+            res.append(self.build_comment_tree(comment, user_zid, level=1))
         return res
 
-    def build_comment_tree(self, comment, level):
+    def build_comment_tree(self, comment, user_zid, level):
 
         comment_dict = {
             "id": comment.id,
@@ -190,12 +190,13 @@ class get_comment(Resource):
             "edit_date": comment.edit_date.isoformat() if comment.edit_date else None,
             "edit_time": comment.edit_time.isoformat() if comment.edit_time else None,
             "like_count": get_like_count(comment.id),
-            "level": level
+            "level": level,
+            "current_user_liked": is_who_like_comment(user_zid, comment.id)
         }
 
         child_comments = Comment.query.filter_by(comment_to_id=comment.id).all()
         if child_comments:
-            comment_dict['child_comment'] = [self.build_comment_tree(child, level + 1) for child in child_comments]  # 递归时层级加 1
+            comment_dict['child_comment'] = [self.build_comment_tree(child, user_zid, level + 1) for child in child_comments]  # 递归时层级加 1
         else:
             comment_dict['child_comment'] = None
 
@@ -375,3 +376,6 @@ class unlike_comment(Resource):
         db.session.delete(like)
         db.session.commit()
         
+
+# 15分钟没到加absent
+# 完成后completed
