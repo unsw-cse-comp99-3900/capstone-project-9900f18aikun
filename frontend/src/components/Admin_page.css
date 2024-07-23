@@ -57,6 +57,7 @@
         width: calc(100% - 270px); /* Adjust width based on sidebar state */
         display: flex;
         align-items: center;
+        
         /* justify-content: space-between;  */
         /* This will place the child elements at the space-between */
         position: fixed; /* Fixed position */
@@ -131,7 +132,7 @@
     top: 0; /* Align to the top */
     left: 270px; /* Adjust based on sidebar state */
     transition: left 0.3s; /* Smooth transition for left position */
-    z-index: 1; /* Below the sidebar */
+    z-index: 1000;
 }
 
 .admin-top-bar.closed {
@@ -217,3 +218,41 @@
     width: 40px;
     height: 40px;
 }
+.admin-notification {
+    margin: 7 10px;
+    width: 50px;
+    height: 40px;
+    margin-top: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    /* position: relative; */
+}
+
+.admin-notification img {
+    width: 40px;
+    height: 40px;
+    margin-top: -8px;
+}
+
+.arco-badge {
+    margin-right: 10px;
+}
+.admin-chatbox {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .chatbox-container {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    z-index: 1001;
+  }
+  .admin-sidebar {
+    
+    z-index: 1000; /* Lower than the chatbox */
+}
+
