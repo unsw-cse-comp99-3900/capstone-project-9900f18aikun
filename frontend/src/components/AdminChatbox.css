@@ -635,3 +635,16 @@ transition: background-color 0.3s ease;
 .message {
   margin-top: 10px; /* Add space between messages */
 }
+.chat-content {
+  display: flex;
+  flex-direction: column;
+  height: 400px; /* Adjust as needed */
+  overflow-y: auto;
+}
+
+.messages-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}

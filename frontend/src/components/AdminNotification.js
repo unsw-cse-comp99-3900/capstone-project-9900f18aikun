@@ -54,7 +54,7 @@ function AdminNotification() {
 
     newSocket.on('request_notification', (data) => {
       console.log('Received request_notification:', data);
-      if (data.new_request) {
+      if (data && data.user_id && data.name) {
         setNotificationCount(prevCount => prevCount + 1);
         console.log('Increased notification count');
       }
