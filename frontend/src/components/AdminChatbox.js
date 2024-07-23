@@ -295,12 +295,24 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       if (acknowledgement) {
         console.log('Admin message acknowledged:', acknowledgement);
         if (acknowledgement.message_id) {
-          setMessageHistories(prev => ({
-            ...prev,
-            [selectedUser]: prev[selectedUser].map(msg => 
-              msg.id === tempId ? { ...msg, id: acknowledgement.message_id } : msg
-            )
-          }));
+          setMessageHistories(prev => {
+            const updatedMessages = {
+              ...prev,
+              [selectedUser]: prev[selectedUser].map(msg => 
+                msg.id === tempId ? { ...msg, id: acknowledgement.message_id } : msg
+              )
+            };
+            
+            // Scroll to bottom after state update
+            setTimeout(() => {
+              if (messagesEndRef.current) {
+                const chatContent = messagesEndRef.current.parentElement;
+                chatContent.scrollTop = chatContent.scrollHeight;
+              }
+            }, 0);
+  
+            return updatedMessages;
+          });
           pendingMessages.current.delete(tempId);
           pendingMessages.current.add(acknowledgement.message_id);
         }
@@ -340,10 +352,14 @@ const AdminChatbox = ({ onClose, onToggle }) => {
         [userId]: prev[userId]?.map(msg => ({ ...msg, isViewed: true })) || []
       }));
     }
+    // Remove any scrolling logic here
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      const chatContent = messagesEndRef.current.parentElement;
+      chatContent.scrollTop = chatContent.scrollHeight;
+    }
   }, [messageHistories, selectedUser]);
 
   return (
@@ -420,38 +436,40 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                 <img className="customer" alt="Customer" src={process.env.PUBLIC_URL + "/admin_chatbox_img/customer-1.png"} />
               </div>
               <div className="chat-content">
-                {selectedUser && messageHistories[selectedUser] ? (
-                  <>
-                    {messageHistories[selectedUser].map((msg) => {
-                      if (msg.isUsageReport) {
-                        return (
-                          <div key={msg.id} className="message system">
-                            <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-                            <div className="message-text usage-report">
-                              <strong>Usage Report for {msg.reportDate}:</strong>
-                              <p>{msg.text}</p>
-                            </div>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div key={msg.id} className={`message ${msg.sender}`}>
-                            <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-                            <div className="message-text">
-                              {msg.sender === "admin" 
-                                ? `Admin (${msg.userId}): ${msg.text}` 
-                                : `${activeUsers.get(msg.chatId).userName}: ${msg.text}`}
-                            </div>
-                          </div>
-                        );
-                      }
-                    })}
-                  </>
-                ) : (
-                  <div className="no-messages">Select a user to view messages</div>
-                )}
-                <div ref={messagesEndRef} />
+  <div className="messages-container">
+    {selectedUser && messageHistories[selectedUser] ? (
+      <>
+        {messageHistories[selectedUser].map((msg) => {
+          if (msg.isUsageReport) {
+            return (
+              <div key={msg.id} className="message system">
+                <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
+                <div className="message-text usage-report">
+                  <strong>Usage Report for {msg.reportDate}:</strong>
+                  <p>{msg.text}</p>
+                </div>
               </div>
+            );
+          } else {
+            return (
+              <div key={msg.id} className={`message ${msg.sender}`}>
+                <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
+                <div className="message-text">
+                  {msg.sender === "admin" 
+                    ? `Admin (${msg.userId}): ${msg.text}` 
+                    : `${activeUsers.get(msg.chatId).userName}: ${msg.text}`}
+                </div>
+              </div>
+            );
+          }
+        })}
+      </>
+    ) : (
+      <div className="no-messages">Select a user to view messages</div>
+    )}
+  </div>
+  <div ref={messagesEndRef} />
+</div>
               <div className="bottom-base">
                 <div className="calendar-button-wrapper">
                   <button 

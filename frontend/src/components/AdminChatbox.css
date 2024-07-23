@@ -271,6 +271,7 @@ align-self: flex-end;
 background-color: #dcf8c6; /* Light green for admin/response messages */
 margin-left: auto;
 margin-right: 0;
+max-width: 30%;
 }
 .admin-chatbox .message-timestamp {
   font-size: 12px;
@@ -314,6 +315,7 @@ margin-right: 0;
   background-color: #e6e6e6; /* Light gray for user messages */
   margin-left: 0;
   margin-right: auto;
+  max-width: 30%;
 }
 
 .admin-chatbox .messages-list {
@@ -622,3 +624,14 @@ transition: background-color 0.3s ease;
 }
 
 
+.chat-content {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 400px; /* Adjust this value as needed */
+  overflow-y: auto;
+  padding-bottom: 20px; /* Add some padding at the bottom */
+}
+
+.message {
+  margin-top: 10px; /* Add space between messages */
+}
