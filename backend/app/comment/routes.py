@@ -52,6 +52,11 @@ class make_comment(Resource):
             return {
                 "error": f"invalid roomid {room_id}"
             }, 400
+        
+        if comment_to_id != 0 and not check_valid_comment(comment_to_id):
+            return {
+                "error": f"invalid commentid {comment_to_id}"
+            }, 400
 
         new_comment = Comment(
             room_id = room_id,
@@ -121,14 +126,26 @@ class delete_test(Resource):
                 "error": f"comment {comment_id} is not made by user {user_zid}. Permission denied."
             }, 403
 
-        comment = Comment.query.filter_by(id=comment_id).first()
-
-        db.session.delete(comment)
-        db.session.commit()
+        
+        self.delete_comment_and_children(comment_id)
 
         return {
             "message": f"Comment {comment_id} deleted successfully."
         }, 200
+    
+    def delete_comment_and_children(self, comment_id):
+        def delete_children(c_id):
+            children = Comment.query.filter_by(comment_to_id=c_id).all()
+            for child in children:
+                delete_children(child.id)
+                db.session.delete(child)
+
+        comment = Comment.query.filter_by(id=comment_id).first()
+        if comment:
+            delete_children(comment_id)
+            db.session.delete(comment)
+            db.session.commit() 
+
     
 get_comment_query = comment_ns.parser()
 get_comment_query.add_argument('room_id', type=int, required=True, help='The room id', default=1)
@@ -379,3 +396,5 @@ class unlike_comment(Resource):
 
 # 15分钟没到加absent
 # 完成后completed
+# 给房间打分 
+# rank room 

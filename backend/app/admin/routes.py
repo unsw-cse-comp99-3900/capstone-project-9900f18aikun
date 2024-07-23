@@ -170,14 +170,24 @@ class delete_test(Resource):
                 "error": f"invalid comment_id {comment_id}"
             }, 400
         
-        comment = Comment.query.filter_by(id=comment_id).first()
-
-        db.session.delete(comment)
-        db.session.commit()
+        self.delete_comment_and_children(comment_id)
 
         return {
             "message": f"admin({user_zid}) delete Comment {comment_id} successfully."
         }, 200
+    
+    def delete_comment_and_children(self, comment_id):
+        def delete_children(c_id):
+            children = Comment.query.filter_by(comment_to_id=c_id).all()
+            for child in children:
+                delete_children(child.id)
+                db.session.delete(child)
+
+        comment = Comment.query.filter_by(id=comment_id).first()
+        if comment:
+            delete_children(comment_id)
+            db.session.delete(comment)
+            db.session.commit() 
     
 edit_comment_model = admin_ns.model('Edit comment', {
     'comment_id': fields.Integer(required=True, description='The comment id', default=1),
