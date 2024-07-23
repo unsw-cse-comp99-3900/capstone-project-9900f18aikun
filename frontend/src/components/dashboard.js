@@ -15,6 +15,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     level: "",
     capacity: "",
     category: "meeting_room",
+    sort: "default",
   });
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -78,16 +79,51 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     }
   };
 
-  const handleFilter = (filters) => {
-    const newFilteredData = data.filter((item) => {
-      return (
-        (filters.level === "" || item.level === filters.level) &&
-        (filters.capacity === "" || item.capacity >= filters.capacity) &&
-        (filters.category === "all" || item.type === filters.category)
+  const fetchRankedData = async () => {
+    try {
+      const formattedDate = selectedDate.format("YYYY-MM-DD");
+      const response = await fetch(
+        `/api/booking/meetingroom?date=${formattedDate}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
       );
-    });
-    setFilteredData(newFilteredData);
-    setFilters(filters);
+      const text = await response.text();
+      const bookingData = JSON.parse(text);
+      const dataArray = Object.values(bookingData);
+      setData(dataArray);
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
+  };
+
+  const handleFilter = async (filters) => {
+    if (filters.rating === "default") {
+      const newFilteredData = data.filter((item) => {
+        return (
+          (filters.level === "" || item.level === filters.level) &&
+          (filters.capacity === "" || item.capacity >= filters.capacity) &&
+          (filters.category === "all" || item.type === filters.category)
+        );
+      });
+      setFilteredData(newFilteredData);
+      setFilters(filters);
+    } else if (filters.rating === "rating") {
+      await fetchRankedData();
+      const newFilteredData = data.filter((item) => {
+        return (
+          (filters.level === "" || item.level === filters.level) &&
+          (filters.capacity === "" || item.capacity >= filters.capacity) &&
+          (filters.category === "all" || item.type === filters.category)
+        );
+      });
+      setFilteredData(newFilteredData);
+      setFilters(filters);
+    }
   };
 
   useEffect(() => {

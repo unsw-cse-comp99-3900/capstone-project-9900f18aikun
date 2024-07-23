@@ -7,6 +7,7 @@ function Filter({ onFilter }) {
     level: "",
     capacity: "",
     category: "meeting_room",
+    sort: "default",
   });
 
   const handleFilterChange = (e) => {
@@ -75,9 +76,20 @@ function Filter({ onFilter }) {
             onChange={handleFilterChange}
             className="filter-select"
           >
-            <option value="all">All</option> {/* 添加 'all' 选项 */}
+            <option value="all">All</option>
             <option value="meeting_room">Meeting Room</option>
             <option value="hot_desk">Hot Desk</option>
+          </select>
+        </div>
+        <div>
+          <label>Sort by:</label>
+          <select
+            name="sort"
+            value={filters.sort}
+            onChange={handleFilterChange}
+          >
+            <option value="default">Default</option>
+            <option value="rating">Rating</option>
           </select>
         </div>
         <button type="submit" className="filter-button">
