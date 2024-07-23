@@ -160,6 +160,7 @@ class get_comment(Resource):
         if res:
             return {
                 "room_id": room_id,
+                "current_zid": user_zid,
                 "room_name": get_room_name(room_id),
                 "comments": res
             }, 200
@@ -176,6 +177,7 @@ class get_comment(Resource):
         return res
 
     def build_comment_tree(self, comment, level):
+
         comment_dict = {
             "id": comment.id,
             "room_id": comment.room_id,
@@ -308,6 +310,7 @@ class like_comment(Resource):
         return {
             "message": f"successfully like comment {comment_id}",
             "like_list": self.show_like(),
+            "current_zid": user_zid,
             "like_count": get_like_count(comment_id)
         }, 200
 
