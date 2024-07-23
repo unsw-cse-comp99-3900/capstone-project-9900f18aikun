@@ -8,12 +8,28 @@
     background-color:#442675;
     color: white;
     padding: 20px;
-    width: 250px; /* Default width */
+    width: 260px; /* Default width */
     transition: width 0.1s, left 0.1s; /* Smooth transition for width and position */
     position: fixed; /* Keep sidebar fixed */
     height: 100%;
     z-index: 2; 
 }
+.admin-top-bar {
+    background-color: #FADC19;
+    height: 25px;
+    padding: 20px 20px;
+    width: calc(100% - 250px); 
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensure elements align to the edges */
+    position: fixed; /* Fixed position */
+    top: 0; /* Align to the top */
+    left: 270px; /* Adjust based on sidebar state */
+    transition: left 0.3s; 
+    z-index: 1000;
+    margin-left: 30px;
+}
+
 
 .admin-sidebar.closed {
     width: 0;
@@ -49,23 +65,6 @@
     background-color: #5a148a;
 }
 
-.admin-top-bar {
-        
-        background-color: #FADC19;
-        height: 25px;
-        padding: 20px 20px;
-        width: calc(100% - 270px); /* Adjust width based on sidebar state */
-        display: flex;
-        align-items: center;
-        
-        /* justify-content: space-between;  */
-        /* This will place the child elements at the space-between */
-        position: fixed; /* Fixed position */
-        top: 0; /* Align to the top */
-        left: 270px; /* Adjust based on sidebar state */
-        transition: left 0.3s; /* Smooth transition for left position */
-        z-index: 1; /* Below the sidebar */
- }
 
 
 .admin-top-bar.closed {
@@ -95,15 +94,6 @@
 
 }
 
-.admin-user{
-        margin-left: auto; /* Push the user button to the right */
-        /* width: 30px;
-        height: 30px; */
-        background: none;
-        border: none;
-        cursor: pointer;
-}
-
 .admin-right-button {
     margin-left: auto;
 }
@@ -120,20 +110,7 @@
 
 
 
-.admin-top-bar {
-    background-color: #FADC19;
-    height: 25px;
-    padding: 20px 20px;
-    width: calc(100% - 270px); /* Adjust width based on sidebar state */
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Ensure elements align to the edges */
-    position: fixed; /* Fixed position */
-    top: 0; /* Align to the top */
-    left: 270px; /* Adjust based on sidebar state */
-    transition: left 0.3s; /* Smooth transition for left position */
-    z-index: 1000;
-}
+
 
 .admin-top-bar.closed {
     left: 0;
@@ -149,8 +126,9 @@
 
 
 .admin-user {
+    margin-left: auto; 
     /* No margin-left needed, justify-content will handle the alignment */
-    margin-right: 40px;
+    margin-right: 60px;
     width: 50px;
     height: 50px;
     background: none;
