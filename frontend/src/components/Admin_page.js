@@ -9,7 +9,7 @@ import AdminStatistics from './admin_comp/adminStatistics';
 import AdminUser from './admin_comp/adminUser';
 import AdminChatbox from './AdminChatbox';
 import AdminNotification from './AdminNotification';
-
+import { Route, Routes } from 'react-router-dom';
 import '@arco-design/web-react/dist/css/arco.css';
 
 function AdminPage({token}) {
@@ -111,6 +111,11 @@ function AdminPage({token}) {
             </div>
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {renderContent()}
+                <Routes>
+                   
+                    <Route path="/admin/appointment" element={<AdminAppointment token={token} />} />
+                    
+                </Routes>
             </div>
         </div>
     );

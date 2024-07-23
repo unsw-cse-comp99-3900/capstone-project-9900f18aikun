@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Badge } from '@arco-design/web-react';
 import io from 'socket.io-client';
-
+import './AdminNotification.css';
+import { useNavigate } from 'react-router-dom';
 const socketURL = "ws://s2.gnip.vip:37895";
 
 function AdminNotification() {
   const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
   const socketRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchNotificationStatus = useCallback(async () => {
     try {
@@ -56,6 +59,19 @@ function AdminNotification() {
       console.log('Received request_notification:', data);
       if (data && data.user_id && data.name) {
         setNotificationCount(prevCount => prevCount + 1);
+        const newNotification = { 
+          id: Date.now(), 
+          message: `zid ${data.user_id} has new request` 
+        };
+        setNotifications(prevNotifications => [...prevNotifications, newNotification]);
+        
+        // Remove the notification after 4.5 second
+        setTimeout(() => {
+          setNotifications(prevNotifications => 
+            prevNotifications.filter(notification => notification.id !== newNotification.id)
+          );
+        }, 6500);
+        
         console.log('Increased notification count');
       }
     });
@@ -108,6 +124,9 @@ function AdminNotification() {
       if (response.ok) {
         setNotificationCount(0);
         console.log('Notifications marked as viewed, reset notification count to 0');
+        
+        // Navigate to the AdminAppointment page
+        navigate('/admin/appointment');
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -117,20 +136,37 @@ function AdminNotification() {
   };
 
   console.log('Rendering with notificationCount:', notificationCount);
-
+  const removeNotification = (id) => {
+    setNotifications(prevNotifications => 
+      prevNotifications.filter(notification => notification.id !== id)
+    );
+    navigate('/admin/appointment'); 
+  };
+  
   return (
-    <Badge 
-      count={notificationCount}
-      dotStyle={{ 
-        right: '-3px', 
-        top: '0px',
-      }}
-    >
-      <button className='admin-notification' onClick={handleNotificationClick}>
-        <img src="/admin_img/ringbell.jpg" alt="Notifications" />
-      </button>
-    </Badge>
+    <>
+      <Badge 
+        count={notificationCount}
+        dotStyle={{ 
+          right: '-3px', 
+          top: '0px',
+        }}
+      >
+        <button className='admin-notification' onClick={handleNotificationClick}>
+          <img src="/admin_img/ringbell.jpg" alt="Notifications" />
+        </button>
+      </Badge>
+      <div className="notification-container">
+        {notifications.map((notification) => (
+          <div key={notification.id} className="notification-item">
+            {notification.message}
+            <button onClick={() => removeNotification(notification.id)}>×</button>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
+
 
 export default AdminNotification;
