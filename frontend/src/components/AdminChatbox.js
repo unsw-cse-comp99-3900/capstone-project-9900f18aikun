@@ -66,7 +66,8 @@ const AdminChatbox = ({ onClose, onToggle }) => {
           sender: isAdminMessage ? "admin" : "user", 
           timestamp: new Date(timestamp),
           userId: user_id,
-          chatId: chat_id
+          chatId: chat_id,
+          isViewed: false
         };
     
         setMessageHistories(prev => {
@@ -93,7 +94,8 @@ const AdminChatbox = ({ onClose, onToggle }) => {
           return newMap;
         });
     
-        if (!isAdminMessage && !isOpen) {
+        if (!isAdminMessage) {
+          setNewMessageUsers(prev => new Set(prev).add(chat_id));
           setMessageCount(prevCount => prevCount + 1);
         }
     
@@ -190,9 +192,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
-    if (!isOpen) {
-      setMessageCount(0);
-    }
+    // Remove the line that resets the message count
     onToggle(!isOpen);
   };
   const fetchUsageReport = async (date) => {
@@ -325,11 +325,21 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
   const handleUserSelect = (userId) => {
     setSelectedUser(userId);
-    setNewMessageUsers(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(userId);
-      return newSet;
-    });
+    if (newMessageUsers.has(userId)) {
+      const newMessagesCount = messageHistories[userId]?.filter(msg => msg.sender !== 'admin' && !msg.isViewed).length || 0;
+      setMessageCount(prevCount => Math.max(prevCount - newMessagesCount, 0));
+      setNewMessageUsers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(userId);
+        return newSet;
+      });
+      
+      // Mark all messages for this user as viewed
+      setMessageHistories(prev => ({
+        ...prev,
+        [userId]: prev[userId]?.map(msg => ({ ...msg, isViewed: true })) || []
+      }));
+    }
   };
 
   useEffect(() => {
@@ -338,15 +348,15 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
   return (
     <>
-      <Badge count={messageCount}>
-        <button className='admin-message' onClick={handleToggle}>
-          <img src="/admin_img/Message.png" alt="Message" />
-        </button>
-      </Badge>
+<Badge count={messageCount} dot={false}>
+  <button className='admin-message' onClick={handleToggle}>
+    <img src="/admin_img/Message.png" alt="Message" />
+  </button>
+</Badge>
       {isOpen && (
         <div className="admin-chatbox">
           <div className="chatbox-container">
-<div className="messages-list">
+          <div className="messages-list">
   {Array.from(activeUsers.entries())
     .sort(([aId, a], [bId, b]) => {
       if (newMessageUsers.has(aId) && !newMessageUsers.has(bId)) return -1;
@@ -359,11 +369,12 @@ const AdminChatbox = ({ onClose, onToggle }) => {
         : null;
       const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
       const initials = userInfo.userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+      const hasNewMessages = newMessageUsers.has(chatId);
       
       return (
         <div 
           key={chatId} 
-          className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${newMessageUsers.has(chatId) ? 'new-message' : ''}`}
+          className={`user-item ${selectedUser === chatId ? 'selected' : ''} ${hasNewMessages ? 'new-message' : ''}`}
           onClick={() => handleUserSelect(chatId)}
         >
           <div className="user-avatar" style={{backgroundColor: avatarColor}}>
@@ -373,7 +384,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
             <div className="user-item-header">
               <span className="user-item-name">
                 {userInfo.userName}
-                {newMessageUsers.has(chatId) && <span className="new-message-prompt">New</span>}
+                {hasNewMessages && <span className="new-message-prompt">New</span>}
               </span>
               <span className="user-item-time">
                 {latestMessage ? formatDateTime(latestMessage.timestamp) : ''}
