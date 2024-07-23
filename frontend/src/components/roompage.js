@@ -26,6 +26,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [replyText, setReplyText] = useState(""); // 用于存储回复内容
   const [rootCommentText, setRootCommentText] = useState("");// 用于存储根评论
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState("");// 用于存储编辑评论
   // 在 RoomCard 组件内部添加新的状态
   const [tempComments, setTempComments] = useState([]);
 
@@ -78,25 +80,25 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.status === 204) {
         setComments([]);
         console.log("No comments found for this room.");
         return;
       }
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch comments");
       }
-
+  
       const commentsData = await response.json();
-      setComments(commentsData.comments);
+      setComments(commentsData.comments); // Use comments as received from backend
       setCurrentUserId(commentsData.current_zid); // 获取当前用户ID
       console.log("Fetched comments:", commentsData.comments);
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
-  }, [roomid]); 
+  }, [roomid]);
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -253,9 +255,44 @@ const handleRootCommentSubmit = async () => {
   //   setReplyText(e.target.value);
   // };
 
-  const handleEditClick = (commentId) => {
-    // 编辑评论的逻辑
+  const handleEditClick = (commentId, commentContent) => {
+    setEditingCommentId(commentId);
+    setEditingCommentText(commentContent);
   };
+
+  //---------------提交修改评论
+  const handleEditSubmit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`/api/comment/edit-comment`, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          comment_id: editingCommentId,
+          comment: editingCommentText,
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error("Server responded with an error: " + errorText);
+      }
+  
+      // 重新获取评论数据
+      await fetchComments();
+  
+      // 重置编辑状态
+      setEditingCommentId(null);
+      setEditingCommentText("");
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
 
   const handleDeleteClick = async (commentId) => {
     try {
@@ -315,13 +352,18 @@ const handleLikeClick = async (comment) => {
     }
 
     // 更新评论的点赞状态和数量
-    setComments((prevComments) =>
-      prevComments.map((c) =>
-        c.id === comment.id
-          ? { ...c, current_user_liked: !c.current_user_liked, like_count: result.like_count }
-          : c
-      )
-    );
+    const updateComments = (comments) => {
+      return comments.map((c) => {
+        if (c.id === comment.id) {
+          return { ...c, current_user_liked: !c.current_user_liked, like_count: result.like_count };
+        } else if (c.child_comment) {
+          return { ...c, child_comment: updateComments(c.child_comment) };
+        }
+        return c;
+      });
+    };
+
+    setComments((prevComments) => updateComments(prevComments));
   } catch (error) {
     setErrorMessage(error.message);
   }
@@ -366,21 +408,21 @@ const handleLikeClick = async (comment) => {
           >
             <IconMessage /> Reply
           </span>,
-           comment.user_id === currentUserId && (
+          comment.user_id === currentUserId && (
             <React.Fragment key="edit-delete">
-            <span
+              <span
               className="custom-comment-action"
-              onClick={() => handleEditClick(comment.id)}
-            >
-              Edit
-            </span>
-            <span
-              className="custom-comment-action"
-              onClick={() => handleDeleteClick(comment.id)}
-            >
-              Delete
-            </span>
-          </React.Fragment>
+              onClick={() => handleEditClick(comment.id, comment.content)}
+              >
+                Edit
+              </span>
+              <span
+                className="custom-comment-action"
+                onClick={() => handleDeleteClick(comment.id)}
+              >
+                Delete
+              </span>
+            </React.Fragment>
           ),
         ]}
         author={comment.user_name}
@@ -389,7 +431,25 @@ const handleLikeClick = async (comment) => {
             {comment.user_name.charAt(0).toUpperCase()}
           </Avatar>
         }
-        content={<div>{comment.content}</div>}
+        content={// 修改的部分：根据 editingCommentId 的值来决定是否显示评论内容或编辑输入框
+              editingCommentId === comment.id ? (
+                <div>
+                  <input
+                    type="text"
+                    value={editingCommentText}
+                    onChange={(e) => setEditingCommentText(e.target.value)}
+                  />
+                  <Button type="primary" onClick={handleEditSubmit}>
+                    Submit
+                  </Button>
+                  <Button type="secondary" onClick={() => setEditingCommentId(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div>{comment.content}</div>
+              )
+            }
         datetime={
           comment.is_edited
             ? `${comment.edit_date} ${comment.edit_time}`
