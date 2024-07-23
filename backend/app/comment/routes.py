@@ -3,7 +3,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
 from app.extensions import db, api, scheduler, app
 from app.models import Users, CSEStaff
-from .models import Comment, Like
+from .models import Comment, Like, Rank
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import check_valid_comment, check_valid_room, get_date, get_like_count, get_time, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, is_who_like_comment, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, who_made_comment
@@ -193,7 +193,7 @@ class get_comment(Resource):
             }, 204
 
     def get_comment_by_roomid(self, room_id, user_zid):
-        root_comments = Comment.query.filter_by(room_id=room_id, comment_to_id=0).all()
+        root_comments = Comment.query.filter_by(room_id=room_id, comment_to_id=0).order_by(Comment.edit_date.desc(), Comment.edit_time.desc()).all()
         res = []
         for comment in root_comments:
             res.append(self.build_comment_tree(comment, user_zid, level=1))
@@ -404,3 +404,88 @@ class unlike_comment(Resource):
 # 完成后completed
 # 给房间打分 
 # rank room 
+
+
+
+make_rate_model = comment_ns.model('Make rate', {
+    'room_id': fields.Integer(required=True, description='The room id', default=1),
+    'rate': fields.Integer(required=True, description='room rate', default=5),
+})
+@comment_ns.route('/make-rate')
+class make_rate(Resource):
+    @comment_ns.response(200, "success")
+    @comment_ns.response(400, "Bad request")
+    @comment_ns.expect(make_rate_model)
+    @comment_ns.doc(description="make rate to room")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def put(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        room_id = request.json["room_id"]
+        rate = request.json["rate"]
+
+        if check_already_rate(user_zid, room_id):
+            return {
+                "error": f"user {user_zid} has already rate roomid {room_id}"
+            }, 400
+
+        new_rank = Rank(
+            room_id = room_id,
+            who_rank_id = user_zid,
+            rate = rate
+        )
+
+        db.session.add(new_rank)
+        db.session.commit()
+
+        new_score = get_room_score(room_id)
+
+        return {
+            "message": f"user {user_zid} successfully rate room_id {room_id}",
+            "new_score": new_score
+        }, 200
+    
+def check_already_rate(user_zid, room_id) -> bool:
+    rate = Rank.query.filter_by(who_rank_id = user_zid, room_id = room_id).first()
+    return rate != None
+    
+def get_room_score(room_id):
+    ranks = Rank.query.filter_by(room_id=room_id).all()
+    if ranks:
+        total_score = sum(rank.rate for rank in ranks)
+        average_score = total_score / len(ranks)
+        return average_score
+    else:
+        return None
+    
+
+
+get_rate_query = comment_ns.parser()
+get_rate_query.add_argument('room_id', type=int, required=True, help='The room id', default=1)
+
+
+@comment_ns.route('/get-rate')
+class get_rate(Resource):
+    @comment_ns.response(200, "success")
+    @comment_ns.response(400, "Bad request")
+    @comment_ns.expect(get_rate_query)
+    @comment_ns.doc(description="get room rate")
+    @api.header('Authorization', 'Bearer <your_access_token>', required=True)
+    def get(self):
+        jwt_error = verify_jwt()
+        if jwt_error:
+            return jwt_error
+        current_user = get_jwt_identity()
+        user_zid = current_user['zid']
+
+        room_id = request.args.get('room_id')
+
+        score = get_room_score(room_id)
+        return {
+            "is_rated": check_already_rate(user_zid, room_id),
+            "score": score
+        }, 200

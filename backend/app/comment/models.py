@@ -31,3 +31,10 @@ class Like(db.Model):
     like_who_id = db.Column(db.String(128), db.ForeignKey('users.zid'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
+
+class Rank(db.Model):
+    __tablename__ = "rank"
+    id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer, db.ForeignKey('space.id'), nullable=False)
+    who_rank_id = db.Column(db.String(128), db.ForeignKey('users.zid'), nullable=False)
+    rate = db.Column(db.Integer, nullable=False)
