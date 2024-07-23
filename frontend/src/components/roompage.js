@@ -23,8 +23,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null); // 用于存储当前正在回复的评论ID
   const [replyText, setReplyText] = useState(""); // 用于存储回复内容
-  // 在 RoomCard 组件内部添加新的状态
   const [tempComments, setTempComments] = useState([]);
+  const [likedComments, setLikedComments] = useState({}); // 用于存储每个评论的点赞状态
 
   const handleReportClick = () => {
     setIsReporting(!isReporting);
@@ -161,7 +161,66 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
   }, [room, data]);
 
-  //评论回复
+  //添加根评论
+  const handleRootCommentSubmit = async () => {
+    const tempComment = {
+      id: `temp-${Date.now()}`, // 临时ID
+      room_id: roomid,
+      content: replyText, 
+      comment_to_id: 0, // 根评论
+      user_name: "Current User", // 假设当前用户的名字
+      user_id: "current_user_id", // 假设当前用户的ID
+      like_count: 0,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      is_edited: false,
+      child_comment: [],
+    };
+  
+    // 立即将临时评论添加到评论列表中
+    setComments([...comments, tempComment]);
+    setReplyText("");
+  
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          room_id: roomid,
+          comment: replyText,
+          comment_to_id: 0,
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error("Server responded with an error: " + errorText);
+      } else {
+        const result = await response.json();
+        // 更新临时评论的ID为服务器返回的ID
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.id === tempComment.id ? { ...comment, id: result.id } : comment
+          )
+        );
+      }
+    } catch (error) {
+      setErrorMessage(error.message);
+      // 如果请求失败，移除临时评论
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== tempComment.id)
+      );
+    }
+  };
+
+
+
+  //添加评论回复
   const handleReplyClick = (commentId) => {
     setReplyingTo(commentId);
   };
@@ -223,6 +282,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
   };
   
+  //输入框
   const handleInputChange = (e) => {
     if (!e || !e.target) {
       console.error('Event or event target is undefined');
@@ -243,8 +303,57 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
     return userColors[userId];
   };
+
+  //点赞和取消点赞
+  const handleLikeClick = async (commentId) => {
+    const isLiked = likedComments[commentId];
+    const url = isLiked
+      ? 'http://3.26.67.188:5001/comment/unlike-comment'
+      : 'http://3.26.67.188:5001/comment/like-comment';
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ comment_id: commentId }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error("Server responded with an error: " + errorText);
+      }
+
+      // Update the like count in the comments state
+    setComments((prevComments) =>
+      prevComments.map((comment) =>
+        comment.id === commentId
+          ? { ...comment, like_count: comment.like_count + (isLiked ? -1 : 1) }
+          : comment
+      )
+    );
+
+    // Update the likedComments state
+    setLikedComments((prev) => ({
+      ...prev,
+      [commentId]: !isLiked,
+    }));
+  } catch (error) {
+    setErrorMessage(error.message);
+  }
+};
+
+//渲染评论区----------------------
   const renderComments = (comments, level = 0) => {
-    const allComments = [...comments, ...tempComments];
+    if (level > 10) { // 递归深度限制
+      console.error('Too deep recursion detected');
+      return null;
+    }
+
     return comments.map((comment) => (
       <Comment
         key={comment.id}
@@ -252,9 +361,13 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           <button
             className="custom-comment-action"
             key="heart"
-            onClick={() => console.log("Like button clicked")}
+            onClick={() => handleLikeClick(comment.id)}
           >
-            <IconHeart />
+            {likedComments[comment.id] ? (
+              <IconHeartFill style={{ color: '#f53f3f' }} />
+            ) : (
+              <IconHeart />
+            )}
             {comment.like_count}
           </button>,
           <span
@@ -278,7 +391,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             : `${comment.date} ${comment.time}`
         }
       >
-        {comment.child_comment &&
+        {comment.child_comment &&comment.child_comment.length > 0 &&
           renderComments(comment.child_comment, level + 1)}
         {replyingTo === comment.id && (
           <Comment
@@ -301,19 +414,45 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
                 <input
                   type="text"
                   value={replyText}
-                  onChange={(e) => {
-                    if (!e || !e.target) {
-                      console.error('Event or event target is undefined');
-                      return;
-                    }
-                    setReplyText(e.target.value);
-                  }}
+                  onChange={handleInputChange}
                   placeholder="Here is your content."
                 />
               </div>
             }
           />
         )}
+        {tempComments
+        .filter(tempComment => tempComment.comment_to_id === comment.id)
+        .map(tempComment => (
+          <Comment
+            key={tempComment.id}
+            actions={[
+              <button
+                className="custom-comment-action"
+                key="heart"
+                onClick={() => console.log("Like button clicked")}
+              >
+                <IconHeart />
+                {tempComment.like_count}
+              </button>,
+              <span
+                className="custom-comment-action"
+                key="reply"
+                onClick={() => handleReplyClick(tempComment.id)}
+              >
+                <IconMessage /> Reply
+              </span>,
+            ]}
+            author={tempComment.user_name}
+            avatar={
+              <Avatar style={{ backgroundColor: getUserColor(tempComment.user_id) }}>
+                {tempComment.user_name.charAt(0).toUpperCase()}
+              </Avatar>
+            }
+            content={<div>{tempComment.comment}</div>}
+            datetime={`${tempComment.date} ${tempComment.time}`}
+          />
+        ))}
       </Comment>
     ));
   };
@@ -393,7 +532,33 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           <div className="comment-continaer">
             <h2>Comments</h2>
             {renderComments(comments)}
-          </div>
+            <Comment
+                align="right"
+                actions={[
+                  <Button key="0" type="secondary" onClick={() => setReplyText("")}>
+                    Cancel
+                  </Button>,
+                  <Button key="1" type="primary" onClick={handleRootCommentSubmit}>
+                    Reply
+                  </Button>,
+                ]}
+                avatar={
+                  <Avatar style={{ backgroundColor: getUserColor("current_user_id") }}>
+                    {"Current User".charAt(0).toUpperCase()}
+                  </Avatar>
+                }
+                content={
+                  <div>
+                    <input
+                      type="text"
+                      value={replyText}
+                      onChange={handleInputChange}
+                      placeholder="Here is your content."
+                />
+              </div>
+            }
+          />
+        </div>         
           
         </div>
       ) : (
