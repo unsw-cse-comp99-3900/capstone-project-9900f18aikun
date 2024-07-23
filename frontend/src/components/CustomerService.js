@@ -47,10 +47,14 @@ const CustomerService = () => {
           userId: data.message.user_id,
           chatId: data.message.chat_id
         };
-        setMessages(prev => [...prev, newMessage]);
+        setMessages(prev => {
+          const updatedMessages = [...prev, newMessage];
+          setTimeout(scrollToBottom, 0); // Scroll after state update
+          return updatedMessages;
+        });
       }
     };
-
+    
     const onUserChatHistory = (history) => {
       console.log('Received chat history:', history);
       if (history && Array.isArray(history.messages)) {
@@ -64,6 +68,7 @@ const CustomerService = () => {
           chatId: msg.chat_id
         }));
         setMessages(formattedHistory);
+        setTimeout(scrollToBottom, 0); // Scroll after state update
       }
     };
 
@@ -85,26 +90,29 @@ const CustomerService = () => {
 
   const sendMessage = () => {
     if (inputMessage.trim() === "" || !isConnected || !socketRef.current) return;
-
+  
     const messageData = {
       msg: inputMessage,
     };
-
+  
     console.log('Sending message:', messageData);
-
+  
     socketRef.current.emit('send_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
         console.log('Message acknowledged by server');
+        scrollToBottom(); // Scroll after the message is sent
       } else {
         console.warn('Message not acknowledged by server');
       }
     });
-
+  
     setInputMessage("");
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+    }
   };
 
   useEffect(scrollToBottom, [messages]);
@@ -124,19 +132,18 @@ const CustomerService = () => {
 
   return (
     <div className="customer-service">
-      <div className="chat-messages">
-        {messages.map((msg, index) => (
-          <div key={msg.id || index} className={`message ${msg.isFromAdmin ? 'sent' : 'received'}`}>
-            <div className="message-content">
-              <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-              <div className="message-text">
-                {msg.isFromAdmin ? `Admin (${msg.userId}): ${msg.text}` : `${msg.userName} (${msg.userId}): ${msg.text}`}
-              </div>
+      <div className="chat-messages" ref={messagesEndRef}>
+      {messages.map((msg, index) => (
+        <div key={msg.id || index} className={`message ${msg.isFromAdmin ? 'sent' : 'received'}`}>
+          <div className="message-content">
+            <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
+            <div className="message-text">
+              {msg.isFromAdmin ? `Admin (${msg.userId}): ${msg.text}` : `${msg.userName} (${msg.userId}): ${msg.text}`}
             </div>
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+        </div>
+      ))}
+    </div>
       <div className="chat-input">
         <textarea
           ref={textAreaRef}
