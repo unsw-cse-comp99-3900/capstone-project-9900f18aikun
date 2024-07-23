@@ -7,7 +7,8 @@ import AdminClassroom from './admin_comp/adminClassroom';
 import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics'; 
 import AdminUser from './admin_comp/adminUser';
-import AdminChatbox from './AdminChatbox'; // Import the AdminChatbox component
+import AdminChatbox from './AdminChatbox';
+import AdminNotification from './AdminNotification';
 
 import '@arco-design/web-react/dist/css/arco.css';
 
@@ -97,13 +98,8 @@ function AdminPage({token}) {
             </div>
             <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`} style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
-                
-                <Badge count={15}>
-                    <button className='admin-message' onClick={() => setShowChatbox(!showChatbox)}>
-                        <img src="/admin_img/Message.png" alt="Message" />
-                    </button>
-                </Badge>
-
+                <AdminNotification />
+                <AdminChatbox onToggle={setShowChatbox} />
                 <button className='admin-user' onClick={() => setShowDropdown(!showDropdown)}>
                     <img src="/admin_img/user.png" alt="User" />
                 </button>
@@ -116,7 +112,6 @@ function AdminPage({token}) {
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
                 {renderContent()}
             </div>
-            {showChatbox && <AdminChatbox onClose={() => setShowChatbox(false)} />}
         </div>
     );
 }
