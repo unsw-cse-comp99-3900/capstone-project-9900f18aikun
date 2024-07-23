@@ -75,25 +75,25 @@ function AdminPage({token}) {
         <div className="admin-page">
             <div className={`admin-sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
                 <h1>Administration</h1>
-                <button onClick={() => setContentState(1)} >
+                <button onClick={() => navigate('/admin')}>
                     <img src="/admin_img/home.png" alt="Home" />
                     Home page
                 </button>
-                <button onClick={() => setContentState(5)}>
+                <button onClick={() => navigate('/admin/users')}>
                     <img src="/admin_img/student.png" alt="User Management" />
                     User management
                 </button>
-                <button onClick={() => setContentState(2)}>
+                <button onClick={() => navigate('/admin/classrooms')}>
                     <img src="/admin_img/classroom.png" alt="Classroom Management" />
                     Classroom management
                 </button>
-                <button onClick={() => setContentState(3)}>
+                <button onClick={() => navigate('/admin/appointment')}>
                     <img src="/admin_img/appointment.png" alt="Appointment Management" />
                     Appointment management
                 </button>
-                <button onClick={() => setContentState(4)}>
+                <button onClick={() => navigate('/admin/statistics')}>
                     <img src="/admin_img/checkin.png" alt="Check-in Statistics" />
-                    statistics
+                    Statistics
                 </button>
             </div>
             <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`} style={topBarStyle}>
@@ -110,11 +110,12 @@ function AdminPage({token}) {
                 )}
             </div>
             <div className="admin-content" style={{ marginLeft: isSidebarOpen ? '270px' : '20px' }}>
-                {renderContent()}
                 <Routes>
-                   
-                    <Route path="/admin/appointment" element={<AdminAppointment token={token} />} />
-                    
+                    <Route path="/" element={<AdminHome />} />
+                    <Route path="/users" element={<AdminUser />} />
+                    <Route path="/classrooms" element={<AdminClassroom />} />
+                    <Route path="/appointment" element={<AdminAppointment token={token} />} />
+                    <Route path="/statistics" element={<AdminStatistics />} />
                 </Routes>
             </div>
         </div>

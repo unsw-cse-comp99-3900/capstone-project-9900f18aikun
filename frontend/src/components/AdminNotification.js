@@ -3,6 +3,7 @@ import { Badge } from '@arco-design/web-react';
 import io from 'socket.io-client';
 import './AdminNotification.css';
 import { useNavigate } from 'react-router-dom';
+
 const socketURL = "ws://s2.gnip.vip:37895";
 
 function AdminNotification() {
@@ -58,7 +59,11 @@ function AdminNotification() {
     newSocket.on('request_notification', (data) => {
       console.log('Received request_notification:', data);
       if (data && data.user_id && data.name) {
-        setNotificationCount(prevCount => prevCount + 1);
+        setNotificationCount(prevCount => {
+          const newCount = prevCount + 1;
+          console.log('New notification count:', newCount);
+          return newCount;
+        });
         const newNotification = { 
           id: Date.now(), 
           message: `zid ${data.user_id} has new request` 
