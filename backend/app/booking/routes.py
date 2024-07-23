@@ -150,7 +150,7 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     db.session.add(new_booking)
     db.session.commit()
     if statu == BookingStatus.requested.value:
-        emit('request_notification', {'new_request': True}, room="notification", namespace='/')
+        emit('request_notification', {'user_id': zid, 'name': get_user_name(zid)}, room="notification", namespace='/')
         db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
         db.session.commit()
 
