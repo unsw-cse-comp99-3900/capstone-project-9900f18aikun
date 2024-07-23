@@ -8,7 +8,7 @@ from app.utils import check_valid_comment, get_total_room, is_valid_date, start_
 from app.email import get_email, schedule_reminder, send_confirm_email_async, send_report_email_async
 from jwt import exceptions
 from app.booking.models import Booking
-from app.comment.models import Comment
+from app.comment.models import Comment, Like
 from app.utils import verify_jwt, is_admin
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -181,13 +181,19 @@ class delete_test(Resource):
             children = Comment.query.filter_by(comment_to_id=c_id).all()
             for child in children:
                 delete_children(child.id)
+                likes = Like.query.filter_by(comment_id=child.id).all()
+                for like in likes:
+                    db.session.delete(like)
                 db.session.delete(child)
 
         comment = Comment.query.filter_by(id=comment_id).first()
         if comment:
             delete_children(comment_id)
+            likes = Like.query.filter_by(comment_id=comment_id).all()
+            for like in likes:
+                db.session.delete(like)
             db.session.delete(comment)
-            db.session.commit() 
+            db.session.commit()
     
 edit_comment_model = admin_ns.model('Edit comment', {
     'comment_id': fields.Integer(required=True, description='The comment id', default=1),
