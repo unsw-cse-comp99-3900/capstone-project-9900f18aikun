@@ -19,12 +19,16 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [isReporting, setIsReporting] = useState(false);
   const [reportText, setReportText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
   //评论state
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null); // 用于存储当前正在回复的评论ID
   const [replyText, setReplyText] = useState(""); // 用于存储回复内容
+  const [rootCommentText, setRootCommentText] = useState("");// 用于存储根评论
+  const [currentUserId, setCurrentUserId] = useState(null);
+  // 在 RoomCard 组件内部添加新的状态
   const [tempComments, setTempComments] = useState([]);
-  const [likedComments, setLikedComments] = useState({}); // 用于存储每个评论的点赞状态
+
 
   const handleReportClick = () => {
     setIsReporting(!isReporting);
@@ -61,6 +65,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   };
 
 
+
+
+
   const fetchComments = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
@@ -84,6 +91,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
       const commentsData = await response.json();
       setComments(commentsData.comments);
+      setCurrentUserId(commentsData.current_zid); // 获取当前用户ID
       console.log("Fetched comments:", commentsData.comments);
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -161,90 +169,50 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
   }, [room, data]);
 
-  //添加根评论
-  const handleRootCommentSubmit = async () => {
-    const tempComment = {
-      id: `temp-${Date.now()}`, // 临时ID
-      room_id: roomid,
-      content: replyText, 
-      comment_to_id: 0, // 根评论
-      user_name: "Current User", // 假设当前用户的名字
-      user_id: "current_user_id", // 假设当前用户的ID
-      like_count: 0,
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
-      is_edited: false,
-      child_comment: [],
-    };
-  
-    // 立即将临时评论添加到评论列表中
-    setComments([...comments, tempComment]);
-    setReplyText("");
-  
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          room_id: roomid,
-          comment: replyText,
-          comment_to_id: 0,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
-      } else {
-        const result = await response.json();
-        // 更新临时评论的ID为服务器返回的ID
-        setComments((prevComments) =>
-          prevComments.map((comment) =>
-            comment.id === tempComment.id ? { ...comment, id: result.id } : comment
-          )
-        );
-      }
-    } catch (error) {
-      setErrorMessage(error.message);
-      // 如果请求失败，移除临时评论
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment.id !== tempComment.id)
-      );
-    }
-  };
 
 
 
-  //添加评论回复
   const handleReplyClick = (commentId) => {
     setReplyingTo(commentId);
   };
 
+//--------------添加根评论
+const handleRootCommentSubmit = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        room_id: roomid,
+        comment: rootCommentText,
+        comment_to_id: 0, // 根评论的 comment_to_id 始终为 0
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error("Server responded with an error: " + errorText);
+    }
+
+    // 重新获取评论数据
+    await fetchComments();
+  } catch (error) {
+    setErrorMessage(error.message);
+  } finally {
+    // 重置根评论输入框
+    setRootCommentText("");
+  }
+};
+
+
+
+  //--------------添加回复评论
   const handleReplySubmit = async () => {
-    const tempReply = {
-      id: `temp-${Date.now()}`, // 临时ID
-      room_id: roomid,
-      comment: replyText,
-      comment_to_id: replyingTo,
-      user_name: "Current User", // 假设当前用户的名字
-      user_id: "current_user_id", // 假设当前用户的ID
-      like_count: 0,
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
-      is_edited: false,
-      child_comment: [],
-    };
-  
-    // 立即将临时回复添加到评论列表中
-    setTempComments([...tempComments, tempReply]);
-    setReplyingTo(null);
-    setReplyText("");
-  
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
@@ -264,34 +232,104 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error("Server responded with an error: " + errorText);
-      } else {
-        const result = await response.json();
-        // 更新临时评论的ID为服务器返回的ID
-        setTempComments((prevComments) =>
-          prevComments.map((comment) =>
-            comment.id === tempReply.id ? { ...comment, id: result.id } : comment
-          )
-        );
       }
+  
+      // 重新获取评论数据
+      await fetchComments();
     } catch (error) {
       setErrorMessage(error.message);
-      // 如果请求失败，移除临时评论
-      setTempComments((prevComments) =>
-        prevComments.filter((comment) => comment.id !== tempReply.id)
-      );
+    } finally {
+      // 重置回复状态
+      setReplyingTo(null);
+      setReplyText("");
     }
   };
-  
-  //输入框
-  const handleInputChange = (e) => {
-    if (!e || !e.target) {
-      console.error('Event or event target is undefined');
-      return;
-    }
-    setReplyText(e.target.value);
+
+  // const handleInputChange = (e) => {
+  //   if (!e || !e.target) {
+  //     console.error('Event or event target is undefined');
+  //     return;
+  //   }
+  //   setReplyText(e.target.value);
+  // };
+
+  const handleEditClick = (commentId) => {
+    // 编辑评论的逻辑
   };
 
+  const handleDeleteClick = async (commentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://3.26.67.188:5001/comment/delete-comment`, {
+        method: "DELETE",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          comment_id: commentId,
+        }),
+      });
 
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete comment");
+      }
+
+      // 重新获取评论数据
+      await fetchComments();
+
+      // 显示成功消息
+      setErrorMessage("Comment deleted successfully.");
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
+//评论点赞
+const handleLikeClick = async (comment) => {
+  try {
+    const token = localStorage.getItem("token");
+    const url = comment.current_user_liked
+      ? `http://3.26.67.188:5001/comment/unlike-comment`
+      : `http://3.26.67.188:5001/comment/like-comment`;
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        accept: "application/json",
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        comment_id: comment.id,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to update like status");
+    }
+
+    // 更新评论的点赞状态和数量
+    setComments((prevComments) =>
+      prevComments.map((c) =>
+        c.id === comment.id
+          ? { ...c, current_user_liked: !c.current_user_liked, like_count: result.like_count }
+          : c
+      )
+    );
+  } catch (error) {
+    setErrorMessage(error.message);
+  }
+};
+
+
+
+//--------------渲染评论数据----------
   //头像颜色列表
   const colors = ['#3370ff', '#ff4d4f', '#52c41a', '#faad14', '#13c2c2', '#eb2f96'];
   const userColors = {}; // 用于存储每个用户的颜色
@@ -303,57 +341,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
     return userColors[userId];
   };
-
-  //点赞和取消点赞
-  const handleLikeClick = async (commentId) => {
-    const isLiked = likedComments[commentId];
-    const url = isLiked
-      ? 'http://3.26.67.188:5001/comment/unlike-comment'
-      : 'http://3.26.67.188:5001/comment/like-comment';
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ comment_id: commentId }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
-      }
-
-      // Update the like count in the comments state
-    setComments((prevComments) =>
-      prevComments.map((comment) =>
-        comment.id === commentId
-          ? { ...comment, like_count: comment.like_count + (isLiked ? -1 : 1) }
-          : comment
-      )
-    );
-
-    // Update the likedComments state
-    setLikedComments((prev) => ({
-      ...prev,
-      [commentId]: !isLiked,
-    }));
-  } catch (error) {
-    setErrorMessage(error.message);
-  }
-};
-
-//渲染评论区----------------------
   const renderComments = (comments, level = 0) => {
-    if (level > 10) { // 递归深度限制
-      console.error('Too deep recursion detected');
-      return null;
-    }
-
+    // const allComments = [...comments, ...tempComments];
     return comments.map((comment) => (
       <Comment
         key={comment.id}
@@ -361,9 +350,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           <button
             className="custom-comment-action"
             key="heart"
-            onClick={() => handleLikeClick(comment.id)}
+            onClick={() => handleLikeClick(comment)}
           >
-            {likedComments[comment.id] ? (
+            {comment.current_user_liked ? (
               <IconHeartFill style={{ color: '#f53f3f' }} />
             ) : (
               <IconHeart />
@@ -377,6 +366,22 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           >
             <IconMessage /> Reply
           </span>,
+           comment.user_id === currentUserId && (
+            <React.Fragment key="edit-delete">
+            <span
+              className="custom-comment-action"
+              onClick={() => handleEditClick(comment.id)}
+            >
+              Edit
+            </span>
+            <span
+              className="custom-comment-action"
+              onClick={() => handleDeleteClick(comment.id)}
+            >
+              Delete
+            </span>
+          </React.Fragment>
+          ),
         ]}
         author={comment.user_name}
         avatar={
@@ -391,7 +396,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             : `${comment.date} ${comment.time}`
         }
       >
-        {comment.child_comment &&comment.child_comment.length > 0 &&
+        {comment.child_comment &&
           renderComments(comment.child_comment, level + 1)}
         {replyingTo === comment.id && (
           <Comment
@@ -405,8 +410,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               </Button>,
             ]}
             avatar={
-              <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
-                {comment.user_name.charAt(0).toUpperCase()}
+              <Avatar style={{ backgroundColor: '#14a9f8' }}>
+                Me
               </Avatar>
             }
             content={
@@ -414,45 +419,19 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
                 <input
                   type="text"
                   value={replyText}
-                  onChange={handleInputChange}
-                  placeholder="Here is your content."
+                  onChange={(e) => {
+                    if (!e || !e.target) {
+                      console.error('Event or event target is undefined');
+                      return;
+                    }
+                    setReplyText(e.target.value);
+                  }}
+                  placeholder="Input your content."
                 />
               </div>
             }
           />
         )}
-        {tempComments
-        .filter(tempComment => tempComment.comment_to_id === comment.id)
-        .map(tempComment => (
-          <Comment
-            key={tempComment.id}
-            actions={[
-              <button
-                className="custom-comment-action"
-                key="heart"
-                onClick={() => console.log("Like button clicked")}
-              >
-                <IconHeart />
-                {tempComment.like_count}
-              </button>,
-              <span
-                className="custom-comment-action"
-                key="reply"
-                onClick={() => handleReplyClick(tempComment.id)}
-              >
-                <IconMessage /> Reply
-              </span>,
-            ]}
-            author={tempComment.user_name}
-            avatar={
-              <Avatar style={{ backgroundColor: getUserColor(tempComment.user_id) }}>
-                {tempComment.user_name.charAt(0).toUpperCase()}
-              </Avatar>
-            }
-            content={<div>{tempComment.comment}</div>}
-            datetime={`${tempComment.date} ${tempComment.time}`}
-          />
-        ))}
       </Comment>
     ));
   };
@@ -532,34 +511,41 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           <div className="comment-continaer">
             <h2>Comments</h2>
             {renderComments(comments)}
-            <Comment
-                align="right"
-                actions={[
-                  <Button key="0" type="secondary" onClick={() => setReplyText("")}>
-                    Cancel
-                  </Button>,
-                  <Button key="1" type="primary" onClick={handleRootCommentSubmit}>
-                    Reply
-                  </Button>,
-                ]}
-                avatar={
-                  <Avatar style={{ backgroundColor: getUserColor("current_user_id") }}>
-                    {"Current User".charAt(0).toUpperCase()}
-                  </Avatar>
-                }
-                content={
-                  <div>
-                    <input
-                      type="text"
-                      value={replyText}
-                      onChange={handleInputChange}
-                      placeholder="Here is your content."
+          {/* Root comment input */}
+          <Comment
+            align="right"
+            actions={[
+              <Button key="0" type="secondary" onClick={() => setRootCommentText("")}>
+                Cancel
+              </Button>,
+              <Button key="1" type="primary" onClick={handleRootCommentSubmit}>
+                Comment
+              </Button>,
+            ]}
+            avatar={
+              <Avatar style={{ backgroundColor: '#14a9f8' }}>
+                Me
+              </Avatar>
+            }
+            content={
+              <div>
+                <input
+                  type="text"
+                  value={rootCommentText}
+                  onChange={(e) => {
+                    if (!e || !e.target) {
+                      console.error('Event or event target is undefined');
+                      return;
+                    }
+                    setRootCommentText(e.target.value);
+                  }}
+                  placeholder="Add a comment..."
                 />
               </div>
             }
           />
-        </div>         
-          
+        </div>
+              
         </div>
       ) : (
         <div>No room information</div>
