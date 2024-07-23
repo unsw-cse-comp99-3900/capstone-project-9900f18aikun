@@ -11,18 +11,44 @@ import ToMap from "./toMap";
 import "./Table.css";
 
 // get sydney time
-const getSydneyTime = async () => {
-  while (true) {
-    try {
-      const response = await axios.get(
-        "http://worldtimeapi.org/api/timezone/Australia/Sydney"
-      );
-      const datetime = new Date(response.data.datetime);
+// const getSydneyTime = async () => {
+//   while (true) {
+//     try {
+//       const response = await axios.get(
+//         "http://worldtimeapi.org/api/timezone/Australia/Sydney"
+//       );
+//       const datetime = new Date(response.data.datetime);
+//       return datetime;
+//     } catch (error) {
+//       console.error("Error fetching Sydney time:", error);
+//       await new Promise((resolve) => setTimeout(resolve, 10));
+//     }
+//   }
+// };
+
+const getSydneyTime = async (setErrorMessage) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch("/api/admin/time", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + token,
+      },
+    });
+
+    if (response.ok) {
+      const res = await response.json();
+      const datetime = new Date(res.datetime);
       return datetime;
-    } catch (error) {
-      console.error("Error fetching Sydney time:", error);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+    } else {
+      const errorText = await response.text();
+      setErrorMessage("Fetch Time Failed");
+      throw new Error("Something went wrong");
     }
+  } catch (error) {
+    console.error("Error fetching booking data:", error);
   }
 };
 
