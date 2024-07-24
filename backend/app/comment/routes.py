@@ -428,10 +428,7 @@ class make_rate(Resource):
         room_id = request.json["room_id"]
         rate = request.json["rate"]
 
-        if check_already_rate(user_zid, room_id):
-            return {
-                "error": f"user {user_zid} has already rate roomid {room_id}"
-            }, 400
+        check_delete_already_rate(user_zid, room_id)
 
         new_rank = Rank(
             room_id = room_id,
@@ -449,7 +446,13 @@ class make_rate(Resource):
             "new_score": new_score
         }, 200
     
-def check_already_rate(user_zid, room_id) -> bool:
+def check_delete_already_rate(user_zid, room_id):
+    rate = Rank.query.filter_by(who_rank_id = user_zid, room_id = room_id).first()
+    if rate:
+        db.session.delete(rate)
+        db.session.commit()
+
+def check_already_rate(user_zid, room_id):
     rate = Rank.query.filter_by(who_rank_id = user_zid, room_id = room_id).first()
     return rate != None
     
@@ -459,6 +462,13 @@ def get_room_score(room_id):
         total_score = sum(rank.rate for rank in ranks)
         average_score = total_score / len(ranks)
         return average_score
+    else:
+        return None
+    
+def get_zid_room_score(user_zid, room_id):
+    rank = Rank.query.filter_by(who_rank_id = user_zid, room_id=room_id).first()
+    if rank:
+        return rank.rate
     else:
         return None
     
@@ -487,5 +497,6 @@ class get_rate(Resource):
         score = get_room_score(room_id)
         return {
             "is_rated": check_already_rate(user_zid, room_id),
-            "score": score
+            "my_rate": get_zid_room_score(user_zid, room_id),
+            "room_score": score
         }, 200
