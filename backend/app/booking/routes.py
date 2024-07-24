@@ -128,6 +128,7 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
         return {'error': 'Invalid zid'}, 400
     user_type = user.user_type
     is_request = False
+    print(user_type)
     if user_type != "CSE_staff" and not is_student_permit(room_id):
         is_request = True
     if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
@@ -149,7 +150,9 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     statu = new_booking.booking_status
     db.session.add(new_booking)
     db.session.commit()
+    print(statu)
     if statu == BookingStatus.requested.value:
+        print(1)
         emit('request_notification', {'user_id': zid, 'name': get_user_name(zid)}, room="notification", namespace='/')
         db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
         db.session.commit()
