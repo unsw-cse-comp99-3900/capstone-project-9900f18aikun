@@ -1,10 +1,11 @@
 import React, { useEffect, useState,useCallback} from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Input, Comment, Avatar, } from "@arco-design/web-react";
+import { Button, Comment, Avatar, Rate  } from "@arco-design/web-react";
 import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon"; // 确保导入图标
 import ErrorBox from "./errorBox";
 import { Spin, Space } from "@arco-design/web-react";
+import MakeRate from "./makerate"; 
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -20,7 +21,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [reportText, setReportText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  //评论state
+  //评论评分state
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null); // 用于存储当前正在回复的评论ID
   const [replyText, setReplyText] = useState(""); // 用于存储回复内容
@@ -28,8 +29,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");// 用于存储编辑评论
-  // 在 RoomCard 组件内部添加新的状态
-  const [tempComments, setTempComments] = useState([]);
+  const [ratingData, setRatingData] = useState({ is_rated: false, my_rate: 0, room_score: 0 });
+  const [isRateModalVisible, setIsRateModalVisible] = useState(false); // State for modal visibility
+ 
 
 
   const handleReportClick = () => {
@@ -100,6 +102,29 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
   }, [roomid]);
 
+  const fetchRatingData = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://3.26.67.188:5001/comment/get-rate?room_id=${roomid}`, {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + token,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch rating data");
+      }
+
+      const ratingData = await response.json();
+      setRatingData(ratingData);
+    } catch (error) {
+      console.error("Error fetching rating data:", error);
+      setErrorMessage(error.message);
+    }
+  }, [roomid]);
+
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
@@ -158,11 +183,13 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     };
 
 
-  
+
+
+    fetchRatingData();
     fetchComments();
     fetchBookingData();
     fetchRoom();
-  }, [roomid, selectedDate, change,fetchComments]);
+  }, [roomid, selectedDate, change,fetchComments,fetchRatingData]);
 
   useEffect(() => {
     if (room && data.length) {
@@ -540,6 +567,16 @@ const handleLikeClick = async (comment) => {
                   </Button>
                 </div>
               )}
+              {/*  rating component */}
+              <div className="room-rating">
+                <Rate readonly allowHalf value={ratingData.is_rated ? ratingData.room_score : 0} />
+                <span>
+                  {ratingData.is_rated ? ratingData.room_score : "Nobody rated before"}
+                </span>
+                <Button type="primary" onClick={() => setIsRateModalVisible(true)}>
+                  Make Rate
+                </Button>
+              </div>
 
               <div className="room-image">
                 <img src={room.room_detail.image_url} alt="Room" />
@@ -554,6 +591,14 @@ const handleLikeClick = async (comment) => {
               </p>
               <p>💡 Power available</p>
             </div>
+          {/* Add MakeRate modal here */}
+          <MakeRate
+            visible={isRateModalVisible}
+            onClose={() => setIsRateModalVisible(false)}
+            roomid={roomid}
+            myRate={ratingData.my_rate}
+            fetchRatingData={fetchRatingData} // Pass fetchRatingData to MakeRate
+          />
           </div>
 
           {roomData && (
