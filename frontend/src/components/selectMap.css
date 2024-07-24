@@ -60,3 +60,35 @@
   background-color: #4b2e83;
 }
 
+/* 地图和地图遮罩 */
+.map-container {
+  position: relative;
+  display: inline-block;
+}
+
+.map-image {
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.clickable-area {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.clickable-area.meetingroom {
+  background: rgba(0, 0, 255, 0.3); /* 半透明蓝色 */
+}
+
+.clickable-area.desk {
+  background: rgba(0, 255, 0, 0.3); /* 半透明绿色 */
+}
