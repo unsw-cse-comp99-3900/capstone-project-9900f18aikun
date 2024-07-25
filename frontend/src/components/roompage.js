@@ -1,11 +1,10 @@
 import React, { useEffect, useState,useCallback} from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Comment, Avatar, Rate  } from "@arco-design/web-react";
-import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon"; // 确保导入图标
+import { Button, Rate, Spin, Space } from "@arco-design/web-react";
 import ErrorBox from "./errorBox";
-import { Spin, Space } from "@arco-design/web-react";
-import MakeRate from "./makerate"; 
+import MakeRate from "./makerate";
+import Comments from "./Comments"; // Import the new Comments component
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -21,16 +20,17 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [reportText, setReportText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  //评论评分state
+  // //评论评分state
   const [comments, setComments] = useState([]);
-  const [replyingTo, setReplyingTo] = useState(null); // 用于存储当前正在回复的评论ID
-  const [replyText, setReplyText] = useState(""); // 用于存储回复内容
-  const [rootCommentText, setRootCommentText] = useState("");// 用于存储根评论
-  const [currentUserId, setCurrentUserId] = useState(null);
-  const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editingCommentText, setEditingCommentText] = useState("");// 用于存储编辑评论
+  // const [replyingTo, setReplyingTo] = useState(null); // 用于存储当前正在回复的评论ID
+  // const [replyText, setReplyText] = useState(""); // 用于存储回复内容
+  // const [rootCommentText, setRootCommentText] = useState("");// 用于存储根评论
+  // const [currentUserId, setCurrentUserId] = useState(null);
+  // const [editingCommentId, setEditingCommentId] = useState(null);
+  // const [editingCommentText, setEditingCommentText] = useState("");// 用于存储编辑评论
   const [ratingData, setRatingData] = useState({ is_rated: false, my_rate: 0, room_score: 0 });
   const [isRateModalVisible, setIsRateModalVisible] = useState(false); // State for modal visibility
+  const [currentUserId, setCurrentUserId] = useState(null); // Add currentUserId state
  
 
 
@@ -201,328 +201,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
 
 
-  const handleReplyClick = (commentId) => {
-    setReplyingTo(commentId);
-  };
-
-//--------------添加根评论
-const handleRootCommentSubmit = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        room_id: roomid,
-        comment: rootCommentText,
-        comment_to_id: 0, // 根评论的 comment_to_id 始终为 0
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error("Server responded with an error: " + errorText);
-    }
-
-    // 重新获取评论数据
-    await fetchComments();
-  } catch (error) {
-    setErrorMessage(error.message);
-  } finally {
-    // 重置根评论输入框
-    setRootCommentText("");
-  }
-};
-
-
-
-  //--------------添加回复评论
-  const handleReplySubmit = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          room_id: roomid,
-          comment: replyText,
-          comment_to_id: replyingTo,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
-      }
-  
-      // 重新获取评论数据
-      await fetchComments();
-    } catch (error) {
-      setErrorMessage(error.message);
-    } finally {
-      // 重置回复状态
-      setReplyingTo(null);
-      setReplyText("");
-    }
-  };
-
-  // const handleInputChange = (e) => {
-  //   if (!e || !e.target) {
-  //     console.error('Event or event target is undefined');
-  //     return;
-  //   }
-  //   setReplyText(e.target.value);
-  // };
-
-  const handleEditClick = (commentId, commentContent) => {
-    setEditingCommentId(commentId);
-    setEditingCommentText(commentContent);
-  };
-
-  //---------------提交修改评论
-  const handleEditSubmit = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/comment/edit-comment`, {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          comment_id: editingCommentId,
-          comment: editingCommentText,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
-      }
-  
-      // 重新获取评论数据
-      await fetchComments();
-  
-      // 重置编辑状态
-      setEditingCommentId(null);
-      setEditingCommentText("");
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  };
-
-
-  const handleDeleteClick = async (commentId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/delete-comment`, {
-        method: "DELETE",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          comment_id: commentId,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to delete comment");
-      }
-
-      // 重新获取评论数据
-      await fetchComments();
-
-      // 显示成功消息
-      setErrorMessage("Comment deleted successfully.");
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  };
-
-//评论点赞
-const handleLikeClick = async (comment) => {
-  try {
-    const token = localStorage.getItem("token");
-    const url = comment.current_user_liked
-      ? `http://3.26.67.188:5001/comment/unlike-comment`
-      : `http://3.26.67.188:5001/comment/like-comment`;
-
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        accept: "application/json",
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        comment_id: comment.id,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to update like status");
-    }
-
-    // 更新评论的点赞状态和数量
-    const updateComments = (comments) => {
-      return comments.map((c) => {
-        if (c.id === comment.id) {
-          return { ...c, current_user_liked: !c.current_user_liked, like_count: result.like_count };
-        } else if (c.child_comment) {
-          return { ...c, child_comment: updateComments(c.child_comment) };
-        }
-        return c;
-      });
-    };
-
-    setComments((prevComments) => updateComments(prevComments));
-  } catch (error) {
-    setErrorMessage(error.message);
-  }
-};
-
-
-
-//--------------渲染评论数据----------
-  //头像颜色列表
-  const colors = ['#3370ff', '#ff4d4f', '#52c41a', '#faad14', '#13c2c2', '#eb2f96'];
-  const userColors = {}; // 用于存储每个用户的颜色
-
-  const getUserColor = (userId) => {
-    if (!userColors[userId]) {
-      const colorIndex = Object.keys(userColors).length % colors.length;
-      userColors[userId] = colors[colorIndex];
-    }
-    return userColors[userId];
-  };
-  const renderComments = (comments, level = 0) => {
-    // const allComments = [...comments, ...tempComments];
-    return comments.map((comment) => (
-      <Comment
-        key={comment.id}
-        actions={[
-          <button
-            className="custom-comment-action"
-            key="heart"
-            onClick={() => handleLikeClick(comment)}
-          >
-            {comment.current_user_liked ? (
-              <IconHeartFill style={{ color: '#f53f3f' }} />
-            ) : (
-              <IconHeart />
-            )}
-            {comment.like_count}
-          </button>,
-          <span
-            className="custom-comment-action"
-            key="reply"
-            onClick={() => handleReplyClick(comment.id)}
-          >
-            <IconMessage /> Reply
-          </span>,
-          comment.user_id === currentUserId && (
-            <React.Fragment key="edit-delete">
-              <span
-              className="custom-comment-action"
-              onClick={() => handleEditClick(comment.id, comment.content)}
-              >
-                Edit
-              </span>
-              <span
-                className="custom-comment-action"
-                onClick={() => handleDeleteClick(comment.id)}
-              >
-                Delete
-              </span>
-            </React.Fragment>
-          ),
-        ]}
-        author={comment.user_name}
-        avatar={
-          <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
-            {comment.user_name.charAt(0).toUpperCase()}
-          </Avatar>
-        }
-        content={// 修改的部分：根据 editingCommentId 的值来决定是否显示评论内容或编辑输入框
-              editingCommentId === comment.id ? (
-                <div>
-                  <input
-                    type="text"
-                    value={editingCommentText}
-                    onChange={(e) => setEditingCommentText(e.target.value)}
-                  />
-                  <Button type="primary" onClick={handleEditSubmit}>
-                    Submit
-                  </Button>
-                  <Button type="secondary" onClick={() => setEditingCommentId(null)}>
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <div>{comment.content}</div>
-              )
-            }
-        datetime={
-          comment.is_edited
-            ? `${comment.edit_date} ${comment.edit_time}`
-            : `${comment.date} ${comment.time}`
-        }
-      >
-        {comment.child_comment &&
-          renderComments(comment.child_comment, level + 1)}
-        {replyingTo === comment.id && (
-          <Comment
-            align="right"
-            actions={[
-              <Button key="0" type="secondary" onClick={() => setReplyingTo(null)}>
-                Cancel
-              </Button>,
-              <Button key="1" type="primary" onClick={handleReplySubmit}>
-                Reply
-              </Button>,
-            ]}
-            avatar={
-              <Avatar style={{ backgroundColor: '#14a9f8' }}>
-                Me
-              </Avatar>
-            }
-            content={
-              <div>
-                <input
-                  type="text"
-                  value={replyText}
-                  onChange={(e) => {
-                    if (!e || !e.target) {
-                      console.error('Event or event target is undefined');
-                      return;
-                    }
-                    setReplyText(e.target.value);
-                  }}
-                  placeholder="Input your content."
-                />
-              </div>
-            }
-          />
-        )}
-      </Comment>
-    ));
-  };
-
+ 
   if (loadingRoom || loadingData) {
     return (
       <div className="loading-container">
@@ -613,43 +292,7 @@ const handleLikeClick = async (comment) => {
           )}
 
           {/* Add a comment section below the table */}
-          <div className="comment-continaer">
-            <h2>Comments</h2>
-            {renderComments(comments)}
-          {/* Root comment input */}
-          <Comment
-            align="right"
-            actions={[
-              <Button key="0" type="secondary" onClick={() => setRootCommentText("")}>
-                Cancel
-              </Button>,
-              <Button key="1" type="primary" onClick={handleRootCommentSubmit}>
-                Comment
-              </Button>,
-            ]}
-            avatar={
-              <Avatar style={{ backgroundColor: '#14a9f8' }}>
-                Me
-              </Avatar>
-            }
-            content={
-              <div>
-                <input
-                  type="text"
-                  value={rootCommentText}
-                  onChange={(e) => {
-                    if (!e || !e.target) {
-                      console.error('Event or event target is undefined');
-                      return;
-                    }
-                    setRootCommentText(e.target.value);
-                  }}
-                  placeholder="Add a comment..."
-                />
-              </div>
-            }
-          />
-        </div>
+          <Comments roomid={roomid} currentUserId={currentUserId} setCurrentUserId={setCurrentUserId} />
               
         </div>
       ) : (

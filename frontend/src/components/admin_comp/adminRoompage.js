@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../roompage.css";
 import AdminTable from "./adminTable";
+import Comments from "../Comments"; // Import the Comments component
 import { Spin, Space } from '@arco-design/web-react';
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
@@ -16,7 +17,36 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedRoom, setEditedRoom] = useState({});
   const [change, setChange] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // Add isAdmin state
   
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch('http://3.26.67.188:5001/admin/check_admin', {
+          method: 'GET',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to check admin status");
+        }
+
+        const result = await response.json();
+        setIsAdmin(result.is_admin);
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        setError(error);
+      }
+    };
+
+    checkAdminStatus();
+  }, []);
+
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -270,6 +300,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           setChange={setChange}
         />
       )}
+
+      <Comments roomid={roomid} currentUserId={null} isAdmin={isAdmin} /> 
     </div>
   );
 };
