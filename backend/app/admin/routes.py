@@ -177,21 +177,24 @@ class delete_test(Resource):
         }, 200
     
     def delete_comment_and_children(self, comment_id):
+        def delete_likes(comment_id):
+            likes = Like.query.filter_by(comment_id=comment_id).all()
+            for like in likes:
+                db.session.delete(like)
+            db.session.commit()
+
         def delete_children(c_id):
             children = Comment.query.filter_by(comment_to_id=c_id).all()
             for child in children:
                 delete_children(child.id)
-                likes = Like.query.filter_by(comment_id=child.id).all()
-                for like in likes:
-                    db.session.delete(like)
+                delete_likes(child.id)
                 db.session.delete(child)
+            db.session.commit()
 
         comment = Comment.query.filter_by(id=comment_id).first()
         if comment:
             delete_children(comment_id)
-            likes = Like.query.filter_by(comment_id=comment_id).all()
-            for like in likes:
-                db.session.delete(like)
+            delete_likes(comment_id)
             db.session.delete(comment)
             db.session.commit()
     
