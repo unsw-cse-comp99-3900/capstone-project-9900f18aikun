@@ -18,18 +18,18 @@ const level = [
 // 配置每张地图的遮罩区域和对应的跳转路径
 const mapOverlays = {
   'A-K17-B': [
-    { id: 1, top: '28%', left: '35%', width: '127px', height: '150px', roomId: 1,type: 'meetingroom' },
-    { id: 2, top: '73%', left: '14%', width: '130px', height: '60px', roomId: 2 ,type: 'meetingroom'},
+    { id: 1, top: '28%', left: '35%', width: '127px', height: '150px', roomId: 1, type: 'meetingroom', name: 'CSE Basement' },
+    { id: 2, top: '73%', left: '14%', width: '130px', height: '60px', roomId: 2, type: 'meetingroom', name: 'CSE Basement Board Room' },
     
   ],
   'A-K17-G': [
-    { id: 3, top: '29%', left: '51%', width: '40px', height: '40px', roomId: 3,type: 'meetingroom' },
-    { id: 4, top: '29%', left: '58%', width: '40px', height: '40px', roomId: 4,type: 'meetingroom' },
+    { id: 3, top: '29%', left: '51%', width: '40px', height: '40px', roomId: 3, type: 'meetingroom', name: 'G01' },
+    { id: 4, top: '29%', left: '58%', width: '40px', height: '40px', roomId: 4, type: 'meetingroom', name: 'G02' },
     
   ],
   'A-K17-L1': [
-    { id: 5, top: '15%', left: '68%', width: '49px', height: '110px', roomId: 5,type: 'meetingroom' },
-    { id: 6, top: '47%', left: '8%', width: '190px', height: '110px', roomId: 6 ,type: 'meetingroom'},
+    { id: 5, top: '15%', left: '68%', width: '49px', height: '110px', roomId: 5, type: 'meetingroom', name: '103' },
+    { id: 6, top: '47%', left: '8%', width: '190px', height: '110px', roomId: 6, type: 'meetingroom', name: '113' },
     
   ],
   'A-K17-L2': [
@@ -95,33 +95,28 @@ const mapOverlays = {
     
   ],
   'A-K17-L3': [
-    { id: 61, top: '34%', left: '52%', width: '95px', height: '60px', roomId: 8,type: 'meetingroom'},
-    { id: 62, top: '43.5%', left: '42%', width: '12px', height: '12px', roomId: 68,type: 'desk' },
-    { id: 64, top: '31.5%', left: '42%', width: '12px', height: '12px', roomId: 69,type: 'desk' },
-    { id: 65, top: '43.5%', left: '39.5%', width: '12px', height: '12px', roomId: 71,type: 'desk' },
-    { id: 66, top: '37.5%', left: '39.5%', width: '12px', height: '12px', roomId: 72,type: 'desk' },
-    { id: 67, top: '31.5%', left: '39.5%', width: '12px', height: '12px', roomId: 73,type: 'desk' },
-
-    { id: 68, top: '41%', left: '34.5%', width: '12px', height: '12px', roomId: 74,type: 'desk' },
-    { id: 69, top: '35%', left: '34.5%', width: '12px', height: '12px', roomId: 75,type: 'desk' },
-    { id: 70, top: '41%', left: '31.5%', width: '12px', height: '12px', roomId: 76,type: 'desk' },
-    { id: 71, top: '35%', left: '31.5%', width: '12px', height: '12px', roomId: 77,type: 'desk' },
-
-    { id: 72, top: '43.5%', left: '26.5%', width: '12px', height: '12px', roomId: 78,type: 'desk' },
-    { id: 73, top: '37.5%', left: '26.5%', width: '12px', height: '12px', roomId: 79,type: 'desk' },
-    { id: 74, top: '31.5%', left: '26.5%', width: '12px', height: '12px', roomId: 80,type: 'desk' },
-    { id: 75, top: '43.5%', left: '24%', width: '12px', height: '12px', roomId: 81,type: 'desk' },
-    { id: 76, top: '37.5%', left: '24%', width: '12px', height: '12px', roomId: 82,type: 'desk' },
-    { id: 77, top: '31.5%', left: '24%', width: '12px', height: '12px', roomId: 83,type: 'desk' },
-
-    { id: 78, top: '94%', left: '62%', width: '12px', height: '12px', roomId: 84,type: 'desk' },
-    { id: 79, top: '87.5%', left: '62%', width: '12px', height: '12px', roomId: 85,type: 'desk' },
-
-    { id: 80, top: '94%', left: '67%', width: '12px', height: '12px', roomId: 86,type: 'desk' },
-    { id: 81, top: '87.5%', left: '67%', width: '12px', height: '12px', roomId: 87,type: 'desk' },
-    
-    { id: 82, top: '94%', left: '69%', width: '12px', height: '12px', roomId: 88,type: 'desk' },
-    { id: 83, top: '87.5%', left: '69%', width: '12px', height: '12px', roomId: 89,type: 'desk' },
+    { id: 61, top: '34%', left: '52%', width: '95px', height: '60px', roomId: 8, type: 'meetingroom', name: '302' },
+    { id: 62, top: '43.5%', left: '42%', width: '12px', height: '12px', roomId: 68, type: 'desk', name: 'Room 301 table 1' },
+    { id: 64, top: '31.5%', left: '42%', width: '12px', height: '12px', roomId: 69, type: 'desk', name: 'Room 301 table 2' },
+    { id: 65, top: '43.5%', left: '39.5%', width: '12px', height: '12px', roomId: 71, type: 'desk', name: 'Room 301 table 4' },
+    { id: 66, top: '37.5%', left: '39.5%', width: '12px', height: '12px', roomId: 72, type: 'desk', name: 'Room 301 table 5' },
+    { id: 67, top: '31.5%', left: '39.5%', width: '12px', height: '12px', roomId: 73, type: 'desk', name: 'Room 301 table 6' },
+    { id: 68, top: '41%', left: '34.5%', width: '12px', height: '12px', roomId: 74, type: 'desk', name: 'Room 301 table 7' },
+    { id: 69, top: '35%', left: '34.5%', width: '12px', height: '12px', roomId: 75, type: 'desk', name: 'Room 301 table 8' },
+    { id: 70, top: '41%', left: '31.5%', width: '12px', height: '12px', roomId: 76, type: 'desk', name: 'Room 301 table 9' },
+    { id: 71, top: '35%', left: '31.5%', width: '12px', height: '12px', roomId: 77, type: 'desk', name: 'Room 301 table 10' },
+    { id: 72, top: '43.5%', left: '26.5%', width: '12px', height: '12px', roomId: 78, type: 'desk', name: 'Room 301 table 11' },
+    { id: 73, top: '37.5%', left: '26.5%', width: '12px', height: '12px', roomId: 79, type: 'desk', name: 'Room 301 table 12' },
+    { id: 74, top: '31.5%', left: '26.5%', width: '12px', height: '12px', roomId: 80, type: 'desk', name: 'Room 301 table 13' },
+    { id: 75, top: '43.5%', left: '24%', width: '12px', height: '12px', roomId: 81, type: 'desk', name: 'Room 301 table 14' },
+    { id: 76, top: '37.5%', left: '24%', width: '12px', height: '12px', roomId: 82, type: 'desk', name: 'Room 301 table 15' },
+    { id: 77, top: '31.5%', left: '24%', width: '12px', height: '12px', roomId: 83, type: 'desk', name: 'Room 301 table 16' },
+    { id: 78, top: '94%', left: '62%', width: '12px', height: '12px', roomId: 84, type: 'desk', name: 'Room 301 table 45' },
+    { id: 79, top: '87.5%', left: '62%', width: '12px', height: '12px', roomId: 85, type: 'desk', name: 'Room 301 table 46' },
+    { id: 80, top: '94%', left: '67%', width: '12px', height: '12px', roomId: 86, type: 'desk', name: 'Room 301 table 47' },
+    { id: 81, top: '87.5%', left: '67%', width: '12px', height: '12px', roomId: 87, type: 'desk', name: 'Room 301 table 48' },
+    { id: 82, top: '94%', left: '69%', width: '12px', height: '12px', roomId: 88, type: 'desk', name: 'Room 301 table 49' },
+    { id: 83, top: '87.5%', left: '69%', width: '12px', height: '12px', roomId: 89, type: 'desk', name: 'Room 301 table 50' },
   ],
   'A-K17-L4': [
     { id: 84, top: '34%', left: '49.5%', width: '45px', height: '43px', roomId: 10,type: 'meetingroom'},
@@ -275,7 +270,7 @@ const mapOverlays = {
    
   ],
   'A-J17-L5': [
-    { id: 140, top: '64%', left: '13%', width: '80px', height: '160px', roomId: 14,type: 'meetingroom'},
+    { id: 140, top: '64%', left: '13%', width: '80px', height: '160px', roomId: 14,type: 'meetingroom',name: 'Design Next Studio' },
   ],
 
 
@@ -341,6 +336,7 @@ function SelectMap() {
                 height: overlay.height,
               }}
               onClick={() => handleOverlayClick(overlay.roomId)}
+              title={overlay.name}
             ></div>
           ))}
         </div>
