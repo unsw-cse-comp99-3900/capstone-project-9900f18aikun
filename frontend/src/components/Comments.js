@@ -4,7 +4,7 @@ import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/ic
 import "./Comments.css";
 import ErrorBox from "./errorBox";
 
-const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
+const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
@@ -36,7 +36,9 @@ const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
 
       const commentsData = await response.json();
       setComments(commentsData.comments);
-      setCurrentUserId(commentsData.current_zid); // Update currentUserId
+      if (setCurrentUserId) {
+        setCurrentUserId(commentsData.current_zid); // Update currentUserId
+      }
       console.log("Fetched comments:", commentsData.comments);
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -120,7 +122,11 @@ const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
   const handleEditSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/comment/edit-comment`, {
+      const url = isAdmin
+        ? `http://3.26.67.188:5001/admin/edit-comment`
+        : `/api/comment/edit-comment`;
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -149,7 +155,11 @@ const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
   const handleDeleteClick = async (commentId) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/delete-comment`, {
+      const url = isAdmin
+        ? `http://3.26.67.188:5001/admin/delete-comment`
+        : `http://3.26.67.188:5001/comment/delete-comment`;
+
+      const response = await fetch(url, {
         method: "DELETE",
         headers: {
           accept: "application/json",
@@ -251,7 +261,7 @@ const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
           >
             <IconMessage /> Reply
           </span>,
-          comment.user_id === currentUserId && (
+          (isAdmin || comment.user_id === currentUserId) && ( // Check if admin or current user
             <React.Fragment key="edit-delete">
               <span
                 className="custom-comment-action"
@@ -261,6 +271,7 @@ const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
               </span>
               <span
                 className="custom-comment-action"
+                style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
                 onClick={() => handleDeleteClick(comment.id)}
               >
                 Delete
@@ -268,7 +279,7 @@ const Comments = ({ roomid, currentUserId ,setCurrentUserId,}) => {
             </React.Fragment>
           ),
         ]}
-        author={comment.user_name}
+        author={`${comment.user_name}${comment.user_id === currentUserId ? ' (ME)' : ''}`} // Add user identifier
         avatar={
           <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
             {comment.user_name.charAt(0).toUpperCase()}
