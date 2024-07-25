@@ -2,13 +2,37 @@ import React, { useState } from "react";
 import { Slider } from "@arco-design/web-react";
 import "./filter.css";
 
-function Filter({ onFilter }) {
+function Filter({ onFilter, setData, selectedDate }) {
   const [filters, setFilters] = useState({
     level: "",
     capacity: "",
     category: "meeting_room",
     sort: "default",
   });
+
+  const fetchRankedData = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const formattedDate = selectedDate.format("YYYY-MM-DD");
+      const response = await fetch(
+        `/api/booking/meetingroom?date=${formattedDate}&is_ranked=true`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      const text = await response.text();
+      const bookingData = JSON.parse(text);
+      const dataArray = Object.values(bookingData);
+      setData(dataArray);
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+    }
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -25,8 +49,11 @@ function Filter({ onFilter }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (filters.sort === "rating") {
+      await fetchRankedData();
+    }
     onFilter(filters);
   };
 

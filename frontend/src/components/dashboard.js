@@ -79,51 +79,16 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     }
   };
 
-  const fetchRankedData = async () => {
-    try {
-      const formattedDate = selectedDate.format("YYYY-MM-DD");
-      const response = await fetch(
-        `/api/booking/meetingroom?date=${formattedDate}`,
-        {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
-      const text = await response.text();
-      const bookingData = JSON.parse(text);
-      const dataArray = Object.values(bookingData);
-      setData(dataArray);
-    } catch (error) {
-      console.error("Error fetching booking data:", error);
-    }
-  };
-
   const handleFilter = async (filters) => {
-    if (filters.rating === "default") {
-      const newFilteredData = data.filter((item) => {
-        return (
-          (filters.level === "" || item.level === filters.level) &&
-          (filters.capacity === "" || item.capacity >= filters.capacity) &&
-          (filters.category === "all" || item.type === filters.category)
-        );
-      });
-      setFilteredData(newFilteredData);
-      setFilters(filters);
-    } else if (filters.rating === "rating") {
-      await fetchRankedData();
-      const newFilteredData = data.filter((item) => {
-        return (
-          (filters.level === "" || item.level === filters.level) &&
-          (filters.capacity === "" || item.capacity >= filters.capacity) &&
-          (filters.category === "all" || item.type === filters.category)
-        );
-      });
-      setFilteredData(newFilteredData);
-      setFilters(filters);
-    }
+    const newFilteredData = data.filter((item) => {
+      return (
+        (filters.level === "" || item.level === filters.level) &&
+        (filters.capacity === "" || item.capacity >= filters.capacity) &&
+        (filters.category === "all" || item.type === filters.category)
+      );
+    });
+    setFilteredData(newFilteredData);
+    setFilters(filters);
   };
 
   useEffect(() => {
@@ -148,7 +113,13 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
             className="toggle-icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           />
-          {isSidebarOpen && <Filter onFilter={handleFilter} />}
+          {isSidebarOpen && (
+            <Filter
+              onFilter={handleFilter}
+              setData={setData}
+              selectedDate={selectedDate}
+            />
+          )}
           <div>
             {errorMessage && (
               <ErrorBox
