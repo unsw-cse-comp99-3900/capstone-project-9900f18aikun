@@ -66,7 +66,7 @@ function AdminNotification() {
         });
         const newNotification = { 
           id: Date.now(), 
-          message: `zid ${data.user_id} has new request` 
+          message: `${data.user_id} has new request` 
         };
         setNotifications(prevNotifications => [...prevNotifications, newNotification]);
         

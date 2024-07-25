@@ -21,7 +21,7 @@
     width: calc(100% - 250px); 
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Ensure elements align to the edges */
+    justify-content: flex-start; /* Ensure elements align to the edges */
     position: fixed; /* Fixed position */
     top: 0; /* Align to the top */
     left: 270px; /* Adjust based on sidebar state */
@@ -197,20 +197,23 @@
     height: 40px;
 }
 .admin-notification {
-    margin: 7 10px;
-    width: 50px;
+    margin: 0;
+    width: 40px;
     height: 40px;
-    margin-top: 3px;
     background: none;
     border: none;
     cursor: pointer;
-    /* position: relative; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 
 .admin-notification img {
     width: 40px;
     height: 40px;
-    margin-top: -8px;
+    margin-left: 10px;
+    /* margin-top: -8px; */
 }
 
 .arco-badge {
@@ -232,4 +235,9 @@
   .admin-sidebar {
     
     z-index: 1000; /* Lower than the chatbox */
+}
+.admin-top-bar-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
 }

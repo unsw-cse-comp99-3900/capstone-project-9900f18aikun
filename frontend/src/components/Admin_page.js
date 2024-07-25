@@ -98,11 +98,15 @@ function AdminPage({token}) {
             </div>
             <div className={`admin-top-bar ${isSidebarOpen ? '' : 'closed'}`} style={topBarStyle}>
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
-                <AdminNotification />
-                <AdminChatbox onToggle={setShowChatbox} />
-                <button className='admin-user' onClick={() => setShowDropdown(!showDropdown)}>
-                    <img src="/admin_img/user.png" alt="User" />
-                </button>
+                
+                <div className="admin-top-bar-right">
+                    <AdminNotification />
+                    <AdminChatbox onToggle={setShowChatbox} />
+                    <button className='admin-user' onClick={() => setShowDropdown(!showDropdown)}>
+                        <img src="/admin_img/user.png" alt="User" />
+                    </button>
+                </div>
+                
                 {showDropdown && (
                     <div className="dropdown-menu">
                         <button onClick={handleLogout}>Logout</button>
