@@ -346,15 +346,15 @@ class MeetingRoom(Resource):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         # define output list
-        output = {}
+        output = []
         output = self.generate_space_output(output, "meeting_room", user_type)
         output = self.generate_space_output(output, "hot_desk", user_type)
 
         # add time content
-        for key, value in output.items():
+        for value in output:
             bookings = Booking.query.filter(
                 Booking.date == date,
-                Booking.room_id == key,
+                Booking.room_id == value["id"],
                 Booking.booking_status != "cancelled",
                 not_(and_(Booking.booking_status == "requested", Booking.user_id != user_zid)),
             ).all()
@@ -372,8 +372,7 @@ class MeetingRoom(Resource):
                         "current_user_booking": True if booking.user_id == user_zid else False
                     }
         if is_rank:
-            output = sorted(output.items(), key=lambda item: (item[1]['rank'] is not None, item[1]['rank']), reverse=True)
-            output = {item[0]: item[1] for item in output}
+            output = sorted(output, key=lambda item: (item['rank'] is not None, item['rank']), reverse=True)
 
 
         return output, 200
@@ -386,7 +385,7 @@ class MeetingRoom(Resource):
             details = HotDeskDetail.query.all()
         for detail in details:
             is_available = is_room_available(detail.id)
-            output[detail.id] = {
+            output.append({
                 "id": detail.id,
                 "name": detail.name,
                 "building": detail.building,
@@ -397,7 +396,7 @@ class MeetingRoom(Resource):
                 "is_available": is_available,
                 "rank": get_room_score(detail.id),
                 "time_table": [[] for _ in range(48)],
-            }
+            })
         return output
 
 def check_permission(detail, user_type):
