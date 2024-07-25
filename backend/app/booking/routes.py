@@ -12,6 +12,7 @@ from jwt import exceptions
 from sqlalchemy import and_, or_, not_
 from app.config import Config
 from app.admin.models import NotificationView
+from app.comment.routes import get_room_score
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
 import google.generativeai as genai
@@ -311,6 +312,9 @@ class BookSpace(Resource):
 
 date_query = booking_ns.parser()
 date_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-19")
+book_time_query = booking_ns.parser()
+book_time_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-19")
+book_time_query.add_argument('is_ranked', type=bool, required=False, help='Flag to indicate if ranking is required', default=False, store_missing=True)
 
 roomid_query = booking_ns.parser()
 roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
@@ -324,7 +328,7 @@ class MeetingRoom(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Get meeting room time list")
-    @booking_ns.expect(date_query)
+    @booking_ns.expect(book_time_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
         jwt_error = verify_jwt()
@@ -334,6 +338,8 @@ class MeetingRoom(Resource):
         user_zid = current_user['zid']
 
         date = request.args.get('date')
+        is_rank = request.args.get('is_ranked')
+
         user_type = db.session.get(Users, user_zid).user_type
 
         if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
@@ -343,7 +349,6 @@ class MeetingRoom(Resource):
         output = {}
         output = self.generate_space_output(output, "meeting_room", user_type)
         output = self.generate_space_output(output, "hot_desk", user_type)
-
 
         # add time content
         for key, value in output.items():
@@ -366,6 +371,11 @@ class MeetingRoom(Resource):
                         "is_request": booking.is_request,
                         "current_user_booking": True if booking.user_id == user_zid else False
                     }
+        if is_rank:
+            output = sorted(output.items(), key=lambda item: (item[1]['rank'] is None, item[1]['rank']))
+            output = {item[0]: item[1] for item in output}
+
+
         return output, 200
 
     def generate_space_output(self, output, book_type, user_type):
@@ -384,8 +394,9 @@ class MeetingRoom(Resource):
                 "capacity": detail.capacity,
                 "type": book_type,
                 "permission": check_permission(detail, user_type),
+                "is_available": is_available,
+                "rank": get_room_score(detail.id),
                 "time_table": [[] for _ in range(48)],
-                "is_available": is_available
             }
         return output
 
