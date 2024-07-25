@@ -1,0 +1,9 @@
+.comment-container {
+    margin: 25px;
+    background-color: antiquewhite;
+  }
+  
+  .custom-comment-action {
+    margin-right: 10px;
+    cursor: pointer;
+  }
