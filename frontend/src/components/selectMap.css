@@ -86,9 +86,40 @@
 }
 
 .clickable-area.meetingroom {
-  background: rgba(0, 0, 255, 0.3); /* 半透明蓝色 */
+  background: rgba(139, 188, 226, 0.4); /* 半透明 #9FD4FD */
+  border-radius: 5px; 
 }
 
 .clickable-area.desk {
-  background: rgba(0, 255, 0, 0.3); /* 半透明绿色 */
+  background: rgba(104, 200, 116, 0.3); /* 半透明 #7BE188 */
+  border-radius: 3px; 
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+  border-radius: 4px;
+}
+
+.legend-color.meetingroom {
+  background: rgba(159, 212, 253, 0.3); /* 半透明 #9FD4FD */
+  border: 1px solid #9FD4FD;
+}
+
+.legend-color.desk {
+  background: rgba(123, 225, 136, 0.3); /* 半透明 #7BE188 */
+  border: 1px solid #7BE188;
 }
