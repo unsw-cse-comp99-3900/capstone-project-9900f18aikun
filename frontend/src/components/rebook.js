@@ -73,6 +73,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
 
       if (response.ok) {
         const result = await response.json();
+        setErrorMessage("Sucessfully Booked");
         setChange(!change);
       } else {
         const errorText = await response.text();

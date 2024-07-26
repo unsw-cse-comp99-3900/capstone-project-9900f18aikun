@@ -27,11 +27,11 @@ const getSydneyTime = async (setErrorMessage) => {
       return datetime;
     } else {
       const errorText = await response.text();
-      setErrorMessage("Fetch Time Failed");
+      setErrorMessage("Failed to Fetch Time\nPlease Refresh");
       throw new Error("Something went wrong");
     }
   } catch (error) {
-    console.error("Error fetching booking data:", error);
+    setErrorMessage("Failed to Fetch Time\nPlease Refresh");
   }
 };
 
@@ -138,16 +138,22 @@ const SelectWindow = ({
       });
 
       if (response.ok) {
-        console.log("successfully sent");
-        const result = await response.json();
-        console.log(result);
+        await response.json();
+        setChange(!change);
+        if (permission) {
+          setErrorMessage("Successfully Booked");
+        } else {
+          setErrorMessage("Successfully Requested");
+        }
       } else {
         const errorText = await response.text();
-        console.error("Server responded with an error:", errorText);
+        setErrorMessage(
+          "Booking Failed.\nYou can only book up to 8 hours a day"
+        );
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Booking Failed.\nYou can only book up to 8 hours a day");
     }
 
     close();
@@ -455,66 +461,85 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
               </tr>
             </thead>
             <tbody>
-              {reservations.map((item) => {
-                const roomData = data.find((d) => d.name === item.room);
-                return (
-                  <tr key={item.room} id={item.roomid}>
-                    <td
-                      className="room-column"
-                      onMouseEnter={() => setHoveredRoom(roomData)}
-                      onMouseLeave={() => setHoveredRoom(null)}
-                    >
-                      {item.room}
-                      {hoveredRoom && hoveredRoom.name === item.room && (
-                        <div className="room-info">
-                          <p>Name: {hoveredRoom.name}</p>
-                          <p>Building: {hoveredRoom.building}</p>
-                          <p>Level: {hoveredRoom.level}</p>
-                          <p>Capacity: {hoveredRoom.capacity}</p>
-                        </div>
-                      )}
-                    </td>
+              {reservations && reservations.length > 0 ? (
+                reservations.map((item) => {
+                  const roomData = data.find((d) => d.name === item.room);
+                  return (
+                    <tr key={item.room} id={item.roomid}>
+                      <td
+                        className="room-column"
+                        onMouseEnter={() => setHoveredRoom(roomData)}
+                        onMouseLeave={() => setHoveredRoom(null)}
+                      >
+                        {item.room}
+                        {hoveredRoom && hoveredRoom.name === item.room && (
+                          <div className="room-info">
+                            <p>Name: {hoveredRoom.name}</p>
+                            <p>Building: {hoveredRoom.building}</p>
+                            <p>Level: {hoveredRoom.level}</p>
+                            <p>Capacity: {hoveredRoom.capacity}</p>
+                          </div>
+                        )}
+                      </td>
 
-                    {times.map((time) => {
-                      let isPast = false;
-                      const today = dayjs().format("YYYY-MM-DD");
-                      if (selectedDate.format("YYYY-MM-DD") === today) {
-                        isPast = pastTimes.includes(time);
-                      }
-                      return (
-                        <td
-                          key={time}
-                          className={`time-column ${(() => {
-                            const isReserved = reservations.some(
-                              (reservation) =>
-                                reservation.room === item.room &&
-                                reservation.time.some(
-                                  (slot) =>
-                                    slot.date ===
-                                      selectedDate.format("DD/MM/YYYY") &&
-                                    slot.timeslot.some((t) => t === time)
-                                )
-                            );
-                            if (isPast || !item.is_available) {
-                              return "disabled";
-                            } else if (isReserved) {
-                              return "reserved";
-                            } else {
-                              return "";
-                            }
-                          })()}`}
-                          onClick={async (event) => {
-                            event.stopPropagation();
-                            if (!isPast) {
-                              clickHandler(item.room, time, event, item.roomid);
-                            }
-                          }}
-                        ></td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+                      {times && times.length > 0 ? (
+                        times.map((time) => {
+                          let isPast = false;
+                          const today = dayjs().format("YYYY-MM-DD");
+                          if (selectedDate.format("YYYY-MM-DD") === today) {
+                            isPast = pastTimes.includes(time);
+                          }
+                          return (
+                            <td
+                              key={time}
+                              className={`time-column ${(() => {
+                                const isReserved = reservations.some(
+                                  (reservation) =>
+                                    reservation.room === item.room &&
+                                    reservation.time.some(
+                                      (slot) =>
+                                        slot.date ===
+                                          selectedDate.format("DD/MM/YYYY") &&
+                                        slot.timeslot.some((t) => t === time)
+                                    )
+                                );
+                                if (isPast || !item.is_available) {
+                                  return "disabled";
+                                } else if (isReserved) {
+                                  return "reserved";
+                                } else {
+                                  return "";
+                                }
+                              })()}`}
+                              onClick={async (event) => {
+                                event.stopPropagation();
+                                if (!isPast) {
+                                  clickHandler(
+                                    item.room,
+                                    time,
+                                    event,
+                                    item.roomid
+                                  );
+                                }
+                              }}
+                            ></td>
+                          );
+                        })
+                      ) : (
+                        <td colSpan={times ? times.length : 1}>
+                          No available times
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={times ? times.length : 1}>
+                    No available reservations
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
