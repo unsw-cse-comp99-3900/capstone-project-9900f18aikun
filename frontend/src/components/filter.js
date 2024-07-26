@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Slider } from "@arco-design/web-react";
 import "./filter.css";
 
-function Filter({ onFilter, setData, selectedDate }) {
+function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
   const [filters, setFilters] = useState({
     level: "",
     capacity: "",
@@ -25,12 +25,16 @@ function Filter({ onFilter, setData, selectedDate }) {
           },
         }
       );
-      const text = await response.text();
-      const bookingData = JSON.parse(text);
-      const dataArray = Object.values(bookingData);
-      setData(dataArray);
+      if (response.ok) {
+        const text = await response.text();
+        const bookingData = JSON.parse(text);
+        const dataArray = Object.values(bookingData);
+        setData(dataArray);
+      } else {
+        setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
+      }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
     }
   };
 

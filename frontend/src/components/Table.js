@@ -44,11 +44,11 @@ const getSydneyTime = async (setErrorMessage) => {
       return datetime;
     } else {
       const errorText = await response.text();
-      setErrorMessage("Fetch Time Failed");
+      setErrorMessage("Failed to Fetch Time\nPlease Refresh");
       throw new Error("Something went wrong");
     }
   } catch (error) {
-    console.error("Error fetching booking data:", error);
+    setErrorMessage("Failed to Fetch Time\nPlease Refresh");
   }
 };
 
@@ -175,11 +175,13 @@ const SelectWindow = ({
         }
       } else {
         const errorText = await response.text();
-        setErrorMessage("Booking Failed");
+        setErrorMessage(
+          "Booking Failed.\nYou can only book up to 8 hours a day"
+        );
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Booking Failed.\nYou can only book up to 8 hours a day");
     }
 
     close();
@@ -561,55 +563,65 @@ const Table = ({
             </thead>
 
             <tbody>
-              {data.map((room) => {
-                const roomData = data.find((d) => d.name === room.name);
-                return (
-                  <tr key={room.id}>
-                    <td
-                      className="room-column"
-                      onMouseEnter={() => setHoveredRoom(roomData)}
-                      onMouseLeave={() => setHoveredRoom(null)}
-                      onClick={() => {
-                        navigate("/room/" + room.id);
-                      }}
-                    >
-                      {room.name}
-                      {hoveredRoom && hoveredRoom.name === room.name && (
-                        <div className="room-info">
-                          <p>Name: {hoveredRoom.name}</p>
-                          <p>Building: {hoveredRoom.building}</p>
-                          <p>Level: {hoveredRoom.level}</p>
-                          <p>Capacity: {hoveredRoom.capacity}</p>
-                        </div>
+              {data && data.length > 0 ? (
+                data.map((room) => {
+                  const roomData = data.find((d) => d.name === room.name);
+                  return (
+                    <tr key={room.id}>
+                      <td
+                        className="room-column"
+                        onMouseEnter={() => setHoveredRoom(roomData)}
+                        onMouseLeave={() => setHoveredRoom(null)}
+                        onClick={() => {
+                          navigate("/room/" + room.id);
+                        }}
+                      >
+                        {room.name}
+                        {hoveredRoom && hoveredRoom.name === room.name && (
+                          <div className="room-info">
+                            <p>Name: {hoveredRoom.name}</p>
+                            <p>Building: {hoveredRoom.building}</p>
+                            <p>Level: {hoveredRoom.level}</p>
+                            <p>Capacity: {hoveredRoom.capacity}</p>
+                          </div>
+                        )}
+                      </td>
+
+                      {times && times.length > 0 ? (
+                        times.map((time) => {
+                          let isPast = false;
+                          if (pastTimes) {
+                            isPast = pastTimes.includes(time);
+                          }
+
+                          return (
+                            <td
+                              key={time}
+                              className={`time-column ${getClassName(
+                                time,
+                                room,
+                                isPast
+                              )}`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                if (!isPast) {
+                                  clickHandler(room.name, time, event, room.id);
+                                }
+                              }}
+                            ></td>
+                          );
+                        })
+                      ) : (
+                        <td colSpan={times.length}>No available times</td>
                       )}
-                    </td>
-
-                    {times.map((time) => {
-                      let isPast = false;
-                      if (pastTimes) {
-                        isPast = pastTimes.includes(time);
-                      }
-
-                      return (
-                        <td
-                          key={time}
-                          className={`time-column ${getClassName(
-                            time,
-                            room,
-                            isPast
-                          )}`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            if (!isPast) {
-                              clickHandler(room.name, time, event, room.id);
-                            }
-                          }}
-                        ></td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={times.length}>No available data</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -23,6 +23,7 @@
 .popup-message {
   margin-bottom: 20px;
   color: black;
+  white-space: pre-wrap;
 }
 
 .popup-buttons {

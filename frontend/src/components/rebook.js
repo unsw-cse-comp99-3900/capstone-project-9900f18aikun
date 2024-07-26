@@ -6,16 +6,11 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import { Table as ArcoTable } from "@arco-design/web-react";
-import { Spin, Space } from "@arco-design/web-react";
-import ErrorBox from "./errorBox";
 
-const Rebook = ({ change, setChange }) => {
+const Rebook = ({ change, setChange, setErrorMessage }) => {
   const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
-  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -34,12 +29,11 @@ const Rebook = ({ change, setChange }) => {
           setHistory([result[0]]); // Update here to set the first result item inside an array
         } else {
           const errorText = await response.text();
+          setErrorMessage("Failed to Fetch User History\nPlease Refresh");
           throw new Error("Server responded with an error: " + errorText);
         }
       } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
+        setErrorMessage("Failed to Fetch User History\nPlease Refresh");
       }
     };
 
@@ -82,11 +76,11 @@ const Rebook = ({ change, setChange }) => {
         setChange(!change);
       } else {
         const errorText = await response.text();
-        console.error("Server responded with an error:", errorText);
+        setErrorMessage("Failed to Rebook\nPlease Refresh");
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Failed to Rebook\nPlease Refresh");
     }
     setIsCalendarVisible(!isCalendarVisible);
   };
@@ -96,20 +90,6 @@ const Rebook = ({ change, setChange }) => {
     const sevenDaysFromNow = today.add(7, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <Space size={40}>
-          <Spin size={40} />
-        </Space>
-      </div>
-    );
-  }
-
-  if (error) {
-    setErrorMessage(error.message);
-  }
 
   const columns = [
     {
@@ -173,10 +153,6 @@ const Rebook = ({ change, setChange }) => {
             }}
           />
         </LocalizationProvider>
-      )}
-
-      {errorMessage && (
-        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
       )}
     </div>
   );

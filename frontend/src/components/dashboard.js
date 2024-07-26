@@ -39,17 +39,15 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
         if (result.is_booking_today) {
           const errorText = `There is already a booking for ${selectedDate.format(
             "YYYY-MM-DD"
-          )}. \n Please avoid double booking`;
+          )}. \n Please Avoid Double Booking`;
           setErrorMessage(errorText);
         }
       } else {
         const errorText = await response.text();
-        setErrorMessage(errorText);
-        console.error("Server responded with an error:", errorText);
+        setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
       }
     } catch (error) {
-      setErrorMessage("Error fetching booking data");
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
     }
   };
 
@@ -70,12 +68,16 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
           },
         }
       );
-      const text = await response.text();
-      const bookingData = JSON.parse(text);
-      const dataArray = Object.values(bookingData);
-      setData(dataArray);
+      if (response.ok) {
+        const text = await response.text();
+        const bookingData = JSON.parse(text);
+        const dataArray = Object.values(bookingData);
+        setData(dataArray);
+      } else {
+        setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
+      }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
     }
   };
 
@@ -118,6 +120,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
               onFilter={handleFilter}
               setData={setData}
               selectedDate={selectedDate}
+              setErrorMessage={setErrorMessage}
             />
           )}
           <div>
@@ -130,7 +133,11 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
           </div>
         </div>
         <div className="content">
-          <Rebook change={change} setChange={setChange} />
+          <Rebook
+            change={change}
+            setChange={setChange}
+            setErrorMessage={setErrorMessage}
+          />
           <Table
             data={filteredData}
             selectedDate={selectedDate}

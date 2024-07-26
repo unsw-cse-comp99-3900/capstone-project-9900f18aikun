@@ -7,7 +7,7 @@ function ErrorBox({ message, onClose }) {
         <div className="popup-message">{message}</div>
         <div className="popup-buttons">
           <button className="popup-button" onClick={onClose}>
-            Cancel
+            Confirm
           </button>
         </div>
       </div>
