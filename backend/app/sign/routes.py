@@ -92,9 +92,3 @@ def schedule_set_completed(bookingid):
         booking = Booking.query.get(bookingid)
         booking.booking_status = "completed"
         db.session.commit()
-
-
-
-
-
-

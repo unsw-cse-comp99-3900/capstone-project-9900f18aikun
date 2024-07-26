@@ -170,7 +170,7 @@ def schedule_check_sign_in(bookingid):
     with app.app_context():  
         booking = Booking.query.get(bookingid)
         if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
-            booking.booking_status = "cancelled"
+            booking.booking_status = "absent"
             db.session.commit()
 
 
@@ -1047,7 +1047,3 @@ class ExtendBook(Resource):
         db.session.add(new_booking)
         db.session.commit()
         return {'message': 'Extend successful'}, 200
-
-
-
-        
