@@ -129,17 +129,16 @@ const ReservationHistory = () => {
       });
 
       if (response.ok) {
-        console.log("successfully sent");
+        setErrorMessage("Successfully Booked");
         const result = await response.json();
         setChange(!change);
       } else {
         const errorText = await response.text();
-        setErrorMessage(errorText);
-        console.error("Server responded with an error:", errorText);
+        setErrorMessage("Booking was Unsuccessful");
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Booking was Unsuccessful");
     }
     setIsCalendarVisible(!isCalendarVisible);
   };
@@ -166,16 +165,15 @@ const ReservationHistory = () => {
       );
 
       if (response.ok) {
-        setErrorMessage("Successfully Booked");
+        setErrorMessage("Successfully Extended");
         setChange(!change);
       } else {
         const errorText = await response.text();
-        setErrorMessage("Unsuccessful Booking");
-        console.error("Server responded with an error:", errorText);
+        setErrorMessage("Extension was Unsuccessful");
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      setErrorMessage("Extension was Unsuccessful");
     }
   };
 
