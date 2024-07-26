@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import "../roompage.css";
 import AdminTable from "./adminTable";
 import Comments from "../Comments"; // Import the Comments component
-import { Spin, Space } from '@arco-design/web-react';
+import { Spin, Space } from "@arco-design/web-react";
+import ErrorBox from "../errorBox";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -18,35 +19,39 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [editedRoom, setEditedRoom] = useState({});
   const [change, setChange] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false); // Add isAdmin state
-  
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch('http://3.26.67.188:5001/admin/check_admin', {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://3.26.67.188:5001/admin/check_admin",
+          {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
+          setErrorMessage("Failed to Get Admin Info");
+
           throw new Error("Failed to check admin status");
         }
 
         const result = await response.json();
         setIsAdmin(result.is_admin);
       } catch (error) {
-        console.error("Error checking admin status:", error);
+        setErrorMessage("Failed to Get Admin Info");
         setError(error);
       }
     };
 
     checkAdminStatus();
   }, []);
-
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -65,15 +70,16 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         );
 
         if (!response.ok) {
+          setErrorMessage("Failed to Fetch Booking Data");
+
           throw new Error("Failed to fetch booking data");
         }
 
         const bookingData = await response.json();
         const dataArray = Object.values(bookingData);
         setData(dataArray);
-        console.log("this is ok");
       } catch (error) {
-        console.error("Error fetching booking data:", error);
+        setErrorMessage("Failed to Fetch Booking Data");
         setError(error);
       } finally {
         setLoadingData(false);
@@ -93,15 +99,14 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
         if (!response.ok) {
           const errorText = await response.text();
+          setErrorMessage("Failed to Fetch Room Info");
           throw new Error("Server responded with an error: " + errorText);
         }
-
         const result = await response.json();
-        console.log(result);
         setRoom(result.message);
         setEditedRoom(result.message);
       } catch (error) {
-        console.error("Error fetching room data:", error);
+        setErrorMessage("Failed to Fetch Room Info");
         setError(error);
       } finally {
         setLoadingRoom(false);
@@ -163,9 +168,13 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         }),
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        setErrorMessage("Failed to Update Room Data");
+
         throw new Error("Failed to update room data");
       } else if (response.ok) {
+        setErrorMessage("Successfully Updated");
+
         setChange(!change);
       }
 
@@ -179,17 +188,13 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   };
 
   if (loadingRoom || loadingData) {
-    return(
+    return (
       <div className="loading-container">
         <Space size={40}>
           <Spin size={40} />
         </Space>
       </div>
     );
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
   }
 
   if (!room) {
@@ -298,10 +303,19 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           map={false}
           change={change}
           setChange={setChange}
+          setErrorMessage={setErrorMessage}
         />
       )}
 
-      <Comments roomid={roomid} currentUserId={null} isAdmin={isAdmin} /> 
+      <Comments roomid={roomid} currentUserId={null} isAdmin={isAdmin} />
+      <div>
+        {errorMessage && (
+          <ErrorBox
+            message={errorMessage}
+            onClose={() => setErrorMessage("")}
+          />
+        )}
+      </div>
     </div>
   );
 };

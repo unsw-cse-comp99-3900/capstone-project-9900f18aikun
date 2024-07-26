@@ -64,6 +64,7 @@ const SelectWindow = ({
   selectedDate,
   change,
   setChange,
+  setErrorMessage,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [zID, setZID] = useState("");
@@ -140,11 +141,7 @@ const SelectWindow = ({
       if (response.ok) {
         await response.json();
         setChange(!change);
-        if (permission) {
-          setErrorMessage("Successfully Booked");
-        } else {
-          setErrorMessage("Successfully Requested");
-        }
+        setErrorMessage("Successfully Booked");
       } else {
         const errorText = await response.text();
         setErrorMessage(
@@ -220,7 +217,14 @@ const SelectWindow = ({
 };
 
 // main table
-const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
+const Table = ({
+  data,
+  selectedDate,
+  setSelectedDate,
+  change,
+  setChange,
+  setErrorMessage,
+}) => {
   const [reservations, setReservations] = useState([]);
   const [times, setTimes] = useState([]);
   const [pastTimes, setPastTimes] = useState([]);
@@ -233,6 +237,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
     permission: "",
     change: change,
     setChange: setChange,
+    setErrorMessage: setErrorMessage,
   });
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [hoveredRoom, setHoveredRoom] = useState(null);
@@ -555,6 +560,7 @@ const Table = ({ data, selectedDate, setSelectedDate, change, setChange }) => {
         reservations={reservations}
         change={change}
         setChange={setChange}
+        setErrorMessage={setErrorMessage}
       />
     </div>
   );
