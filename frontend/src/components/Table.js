@@ -372,16 +372,18 @@ const Table = ({
 
       if (currentTimeIndex !== -1) {
         const table = document.getElementById("mytable");
-        const currentTimeCell = table.querySelector(
-          `thead th:nth-child(${currentTimeIndex})`
-        );
+        if (table) {
+          const currentTimeCell = table.querySelector(
+            `thead th:nth-child(${currentTimeIndex})`
+          );
 
-        if (currentTimeCell) {
-          currentTimeCell.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-            inline: "start",
-          });
+          if (currentTimeCell) {
+            currentTimeCell.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+              inline: "start",
+            });
+          }
         }
       }
     };
