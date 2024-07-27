@@ -14,31 +14,33 @@
 }
 
 .QR-code-check-in .overlap-group {
-  height: 123px;
+  height: 80px;
   left: 0;
   position: absolute;
-  top: 0;
+  top:0;
   width: 1440px;
   object-fit: cover;
 }
 
 .QR-code-check-in .image {
-  height: 81px;
+  height: 64px;
   left: 27px;
   object-fit: cover;
   position: absolute;
-  top: 21px;
-  width: 76px;
+  top: 7px;
+  width: 60px;
 }
 
 .QR-code-check-in .overlap {
-  background-color: #ffdc00;
+  background-color: #f2f2f273;
+  border: 1px solid;
+  border-color: #cecece;
   border-radius: 30px;
-  height: 183px;
-  left: 355px;
+  height: 70px;
+  left: 350px;
   position: absolute;
-  top: 254px;
-  width: 672px;
+  top: 300px;
+  width: 250px;
 }
 
 .QR-code-check-in .text-wrapper {
@@ -46,7 +48,7 @@
   font-family: "Inter", Helvetica;
   font-size: 60px;
   font-weight: 400;
-  left: 130px;
+  left: 40px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
@@ -55,24 +57,92 @@
 }
 
 .QR-code-check-in .div-wrapper {
-  background-color: #ffdc00;
+  background-color: #f2f2f273;
+  border: 1px solid;
+  border-color: #cecece;
   border-radius: 30px;
-  height: 183px;
-  left: 355px;
+  height: 70px;
+  right: 320px;
   position: absolute;
-  top: 576px;
-  width: 672px;
+  top: 535px;
+  width: 300px;
 }
 
 .QR-code-check-in .text-wrapper-2 {
-  color: #000000;
+  color: #fcfcfcc9;
   font-family: "Inter", Helvetica;
-  font-size: 60px;
+  font-size: 65px;
   font-weight: 400;
-  left: 130px;
+  left: 80px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
-  top: 52px;
-  width: 490px;
+  margin-top: -5px;
+  width: 300px;
+  
+}
+.QR-code-check-in .text-wrapper-3 {
+  font-family: "Inter", Helvetica;
+  font-size: 105px;
+  font-weight: 400;
+  left: 300px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 167px;
+}
+.QR-code-check-in .text-wrapper-4 {
+  color: #fcfcfcc9;
+  font-family: "Inter", Helvetica;
+  font-size: 105px;
+  font-weight: 400;
+  right: 410px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 400px;
+}
+.background-container {
+  background-image: url('../img/homepage-banner-1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+.QR-code-check-in.rectangle {
+  background-color: #f6f6f66e;
+  height: 490px;
+  left: 0;
+  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  width: 379px;
+}
+.background-container {
+  background-image: url('../img/homepage-banner-1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+.white-overlay-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;  /* Adjust this value to change the width of the white area */
+  height: 100%;
+  background-color: white;
+  opacity: 30%;
+  z-index: -1;
 }
