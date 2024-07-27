@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask
-from app.extensions import db, api
+from app.extensions import db, api, scheduler
 from app.booking.models import Booking, BookingStatus
 from app.models import Users, CSEStaff
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
@@ -78,13 +78,17 @@ class Detail(Resource):
                 booking.booking_status = BookingStatus.signed_in.value
                 db.session.add(booking)
                 db.session.commit()
+                end_time = booking.end_time
+                book_date = booking.date
+                booking_end_time = datetime.strptime(f"{book_date} {end_time}", "%Y-%m-%d %H:%M")
+                scheduler.add_job(schedule_set_completed, 'date', run_date=booking_end_time, args=[booking.id])
                 return {"message": "You have signed in"}, 200
             case _:
                 return {"message": "Unknown status"}, 400
 
-
-
-
-
-
-
+def schedule_set_completed(bookingid):
+    from app.extensions import db, app
+    with app.app_context():  
+        booking = Booking.query.get(bookingid)
+        booking.booking_status = "completed"
+        db.session.commit()
