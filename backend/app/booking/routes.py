@@ -6,7 +6,7 @@ from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
 from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student, is_booking_today
+from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student, is_booking_today, calculate_time_difference
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
 from sqlalchemy import and_, or_, not_
@@ -15,6 +15,7 @@ from app.admin.models import NotificationView
 from app.comment.routes import get_room_score
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
+
 import google.generativeai as genai
 from datetime import datetime
 import json
@@ -108,6 +109,7 @@ def check_conflict_booking(date, room_id, start_time, end_time):
         Booking.room_id == room_id,
         Booking.booking_status != "requested",
         Booking.booking_status != "cancelled",
+        Booking.booking_status != BookingStatus.absent.value,
         or_(
             and_(Booking.start_time >= start_time, Booking.start_time < end_time),
             and_(Booking.end_time > start_time, Booking.end_time <= end_time),
@@ -123,6 +125,25 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
 
     if conflict_bookings:
         return {'error': 'Booking conflict, please check other time'}, 400
+
+    # check the total book time
+    user_books = Booking.query.filter(
+        and_(
+            Booking.user_id == zid,
+            Booking.date == date,
+            Booking.booking_status != BookingStatus.cancelled.value,
+            Booking.booking_status != BookingStatus.requested.value
+        )
+    )
+
+    total_duration = timedelta()
+    for booking in user_books:
+        total_duration += calculate_time_difference(date, booking.start_time, booking.end_time)
+    # add this book time
+    total_duration += calculate_time_difference(date, start_time + ":00", end_time + ":00")
+
+    if total_duration > timedelta(hours=8):
+        return {'error': 'Total booking time exceeds 8 hours, no further bookings allowed.'}, 400
 
     user = db.session.get(Users, zid)
     if not user:
@@ -151,9 +172,7 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     statu = new_booking.booking_status
     db.session.add(new_booking)
     db.session.commit()
-    print(statu)
     if statu == BookingStatus.requested.value:
-        print(1)
         emit('request_notification', {'user_id': zid, 'name': get_user_name(zid)}, room="notification", namespace='/')
         db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
         db.session.commit()
@@ -271,7 +290,7 @@ class AdminBook(Resource):
         db.session.add(new_booking)
         db.session.commit()
 
-        send_confirm_email_async(user_id, room_id, date, start_time, end_time)
+        send_confirm_email_async(user_id, room_id, date, start_time, end_time, 1)
         schedule_reminder(user_id, room_id, start_time, date, end_time)
         dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
         reminder_time = dt_start_time - timedelta(hours=1)
@@ -1047,7 +1066,3 @@ class ExtendBook(Resource):
         db.session.add(new_booking)
         db.session.commit()
         return {'message': 'Extend successful'}, 200
-
-
-
-        
