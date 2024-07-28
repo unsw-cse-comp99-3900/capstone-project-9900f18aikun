@@ -186,10 +186,10 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
 
 def schedule_check_sign_in(bookingid):
     from app.extensions import db, app
-    with app.app_context():  # 推入 Flask 应用上下文
+    with app.app_context():  
         booking = Booking.query.get(bookingid)
         if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
-            booking.booking_status = "cancelled"
+            booking.booking_status = "absent"
             db.session.commit()
 
 
