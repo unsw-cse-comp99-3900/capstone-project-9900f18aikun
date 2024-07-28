@@ -320,7 +320,7 @@ class BookSpace(Resource):
             return {'error': 'Unauthorized'}, 401
 
         if booking.booking_status != BookingStatus.booked.value and booking.booking_status != BookingStatus.requested.value:
-            return {'error': "You are not in booked status"}, 409
+            return {'error': "You are not in booked or requested status"}, 409
 
         booking.booking_status = 'cancelled'
         booking.is_request = False
