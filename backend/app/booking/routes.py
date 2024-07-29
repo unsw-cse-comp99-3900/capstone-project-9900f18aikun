@@ -155,6 +155,8 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
         is_request = True
     if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
         is_request = True
+    if start_time < "07:00" or end_time > "17:00":
+        is_request = True
     status = 'booked'
     if is_request:
         status = 'requested'
