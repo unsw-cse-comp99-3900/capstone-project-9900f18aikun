@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Comment, Avatar, Button } from "@arco-design/web-react";
+import { Comment, Avatar, Button,Popconfirm, Notification } from "@arco-design/web-react";
 import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon";
 import "./Comments.css";
 import ErrorBox from "./errorBox";
@@ -178,7 +178,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       }
 
       await fetchComments();
-      setErrorMessage("Comment deleted successfully.");
+      Notification.success({
+        title: 'Success',
+        content: 'Comment deleted successfully.',
+      });
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -270,13 +273,20 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
               >
                 Edit
               </span>
-              <span
-                className="custom-comment-action"
-                style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
-                onClick={() => handleDeleteClick(comment.id)}
+              <Popconfirm
+                  focusLock
+                  title='Do you want to delete the comment?'
+                  okText='Delete'
+                  cancelButtonProps={{ style: { display: 'none' } }}
+                  onOk={() => handleDeleteClick(comment.id)}
               >
-                Delete
-              </span>
+                <span
+                  className="custom-comment-action"
+                  style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
+                >
+                  Delete
+                </span>
+              </Popconfirm>
             </React.Fragment>
           ),
         ]}
