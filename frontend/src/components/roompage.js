@@ -1,7 +1,7 @@
 import React, { useEffect, useState,useCallback} from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Rate, Spin, Space } from "@arco-design/web-react";
+import { Button, Rate, Spin, Space,Modal,Input } from "@arco-design/web-react";
 import ErrorBox from "./errorBox";
 import MakeRate from "./makerate";
 import Comments from "./Comments"; // Import the new Comments component
@@ -226,6 +226,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
                   className="report-button"
                   onClick={handleReportClick}
                 >
+                  <img src="/img/Setting.png" alt="Setting" className="icon" />
                   {isReporting ? "Cancel" : "Report"}
                 </Button>
               </div>
@@ -249,10 +250,10 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               {/*  rating component */}
               <div className="room-rating">
                 <Rate readonly allowHalf value={ratingData.is_rated ? ratingData.room_score : 0} />
-                <span>
+                <span className="rate-span">
                   {ratingData.is_rated ? ratingData.room_score : "Nobody rated before"}
                 </span>
-                <Button type="primary" onClick={() => setIsRateModalVisible(true)}>
+                <Button className='make-rate-button' type="primary" onClick={() => setIsRateModalVisible(true)}>
                   Make Rate
                 </Button>
               </div>
