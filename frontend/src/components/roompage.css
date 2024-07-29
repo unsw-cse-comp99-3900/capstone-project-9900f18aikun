@@ -5,9 +5,10 @@
 .room-card {
   position: relative;
   padding: 20px;
-  margin: 0 auto;
+  margin: 0 0 0 18vh;
   font-family: Arial, sans-serif;
-  max-width: 1000px; /* 限制最大宽度，使内容居中 */
+  width: 1000px;
+
 }
 
 .room-info {
@@ -51,7 +52,7 @@
 
 .room-details p {
   margin: 5px 0;
-  font-size: 25px;
+  font-size: 20px;
 }
 
 .room-details p strong {
@@ -75,9 +76,13 @@
   background-color: #0056b3;
 }
 
+.subtitle-button{
+  display: flex;
+}
+
 .report-button {
   position: absolute;
-  left: 40vw;
+  left: 55vw;
   width: fit-content;
 }
 

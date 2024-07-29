@@ -76,6 +76,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       }
 
       await fetchComments();
+      Notification.success({
+        title: 'Success',
+        content: 'Comment success.',
+      });
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -147,6 +151,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       await fetchComments();
       setEditingCommentId(null);
       setEditingCommentText("");
+      Notification.success({
+        title: 'Success',
+        content: 'Edit comment success!',
+      });
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -365,7 +373,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
 
   return (
     <div className="comment-container">
-      <h2>Comments</h2>
+      <h2 className="comment-title">Comments</h2>
       {renderComments(comments)}
       <Comment
         align="right"

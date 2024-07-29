@@ -262,20 +262,22 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             <div className="room-details">
               <div className="room-title">
                 <h1>{room.room_detail.name}</h1>
-                <Button
-                  type="primary"
-                  status={isReporting ? "default" : "danger"}
-                  className="report-button"
-                  onClick={handleReportClick}
-                >
-                  <img src="/img/Setting.png" alt="Setting" className="icon" />
-                  {isReporting ? "Cancel" : "Report"}
-                </Button>
               </div>
+              <div className="subtitle-button">
               <span className="room-subtitle">
                 ({room.room_detail.building}: Level {room.room_detail.level})
                 Max. capacity: {room.room_detail.capacity}
               </span>
+              <Button
+                  type="primary"
+                  status={isReporting ? "default" : "danger"}
+                  className="report-button"
+                  onClick={handleReportClick}
+              >
+                  <img src="/img/Setting.png" alt="Setting" className="icon" />
+                  {isReporting ? "Cancel" : "Report"}
+              </Button>
+              </div>
               {/* {isReporting && (
                 <div>
                   <input
