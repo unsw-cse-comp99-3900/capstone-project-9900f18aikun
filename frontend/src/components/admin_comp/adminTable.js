@@ -429,21 +429,21 @@ const Table = ({
           </div>
         </div>
 
-        <div className="legend">
+        <div className="legendbox">
           <div className="legend-item">
             <div
               className="legend-color"
-              style={{ backgroundColor: "#b9b9b9" }}
+              style={{ backgroundColor: "rgb(204, 202, 200)" }}
             ></div>
             <div className="legend-text">Reserved</div>
           </div>
-          <div className="legend-item">
+          {/* <div className="legend-item">
             <div
               className="legend-color"
               style={{ backgroundColor: "#ffcccc" }}
             ></div>
             <div className="legend-text">Disabled Public Use</div>
-          </div>
+          </div> */}
           <div className="legend-item">
             <div
               className="legend-color"

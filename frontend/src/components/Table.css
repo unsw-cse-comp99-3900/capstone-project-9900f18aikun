@@ -63,7 +63,7 @@ table {
   min-width: 100%;
 }
 
-td {
+#mytable td {
   border: 1px solid black;
   text-align: center;
   position: relative;
@@ -73,7 +73,7 @@ td {
   height: 40px;
 }
 
-th {
+#mytable th {
   background-color: #d3a6d4;
   color: black;
 }
@@ -113,8 +113,8 @@ td.permission {
   background-color: white;
 }
 
-thead tr th:first-child,
-tbody tr td.room-column {
+#mytable thead tr th:first-child,
+#mytable tbody tr td.room-column {
   background-color: rgb(249, 249, 249) !important;
   position: sticky;
   left: 0;
