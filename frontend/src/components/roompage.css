@@ -1,8 +1,14 @@
+.content {
+  width: 100%; /* 占据整个页面宽度 */
+  height: 100%; /* 占据整个页面高度 */
+}
 .room-card {
   position: relative;
   padding: 20px;
-  margin: 0 auto;
+  margin: 0 0 0 18vh;
   font-family: Arial, sans-serif;
+  width: 1000px;
+
 }
 
 .room-info {
@@ -33,18 +39,20 @@
 
 .room-image {
   margin-left: 15px;
+  width: 350px; /* 增加图片尺寸 */
+  height: 350px;
 }
 
 .room-image img {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   border-radius: 8px;
 }
 
 .room-details p {
   margin: 5px 0;
-  font-size: 25px;
+  font-size: 20px;
 }
 
 .room-details p strong {
@@ -52,27 +60,40 @@
 }
 
 .edit-button {
-  position: absolute;
-  left: 50vw;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 14px;
-  border-radius: 5px;
-  width: fit-content;
+  background-color: #E0E0E0 !important;
+  color: #333 !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin-left: 65vh;
+}
+
+.edit-button .icon {
+  margin-right: 5px;
+  width: 16px;
+  height: 16px;
 }
 
 .edit-button:hover {
   background-color: #0056b3;
 }
 
+.subtitle-button{
+  display: flex;
+}
+
 .report-button {
   position: absolute;
-  left: 50vw;
+  left: 55vw;
   width: fit-content;
 }
+
+
+
 
 .room-image{
   margin-top: 15px;
@@ -93,5 +114,59 @@
 .comment-section h2 {
   margin-bottom: 10px;
 } */
+
+.rate-span {
+  margin: 0 10px;
+}
+
+.room-card .report-button {
+  background-color: #E0E0E0 !important;
+  color: #333 !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.room-card .report-button:hover {
+  background-color: #BDBDBD !important;
+}
+
+.report-button .icon {
+  margin-right: 5px;
+  width: 16px;
+  height: 16px;
+}
+.room-card .make-rate-button {
+  background-color: #FFF9C4 !important;
+  color: #333 !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
+  margin-left: 10px !important;
+}
+
+.room-card .make-rate-button:hover {
+  background-color: #FFF176 !important;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
 
 

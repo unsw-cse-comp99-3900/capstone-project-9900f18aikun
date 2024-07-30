@@ -1,7 +1,8 @@
 import React, { useEffect, useState,useCallback} from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Rate, Spin, Space } from "@arco-design/web-react";
+import { Button, Rate, Spin, Space,Modal, Notification ,ConfigProvider} from "@arco-design/web-react";
+import enUS from '@arco-design/web-react/es/locale/en-US';
 import ErrorBox from "./errorBox";
 import MakeRate from "./makerate";
 import Comments from "./Comments"; // Import the new Comments component
@@ -31,11 +32,12 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const [ratingData, setRatingData] = useState({ is_rated: false, my_rate: 0, room_score: 0 });
   const [isRateModalVisible, setIsRateModalVisible] = useState(false); // State for modal visibility
   const [currentUserId, setCurrentUserId] = useState(null); // Add currentUserId state
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
  
 
-
   const handleReportClick = () => {
-    setIsReporting(!isReporting);
+    setIsReportModalVisible(true);
   };
 
   const handleSubmit = async () => {
@@ -53,13 +55,19 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         },
         body: JSON.stringify(obj),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error("Server responded with an error: " + errorText);
       } else {
         setIsReporting(false);
         setReportText("");
+        setIsReportModalVisible(false); // 关闭 Modal
+        
+        Notification.success({
+          title: 'Success',
+          content: 'You have successfully reported.',
+        });
       }
     } catch (error) {
       setErrorMessage(error.message);
@@ -67,6 +75,41 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       setLoadingData(false);
     }
   };
+
+
+  // const handleReportClick = () => {
+  //   setIsReporting(!isReporting);
+  // };
+
+  // const handleSubmit = async () => {
+  //   const obj = {
+  //     message: reportText,
+  //   };
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await fetch(`/api/admin/report`, {
+  //       method: "POST",
+  //       headers: {
+  //         accept: "application/json",
+  //         Authorization: "Bearer " + token,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(obj),
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorText = await response.text();
+  //       throw new Error("Server responded with an error: " + errorText);
+  //     } else {
+  //       setIsReporting(false);
+  //       setReportText("");
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage(error.message);
+  //   } finally {
+  //     setLoadingData(false);
+  //   }
+  // };
 
 
 
@@ -220,21 +263,23 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             <div className="room-details">
               <div className="room-title">
                 <h1>{room.room_detail.name}</h1>
-                <Button
-                  type="primary"
-                  status={isReporting ? "default" : "danger"}
-                  className="report-button"
-                  onClick={handleReportClick}
-                >
-                  {isReporting ? "Cancel" : "Report"}
-                </Button>
               </div>
+              <div className="subtitle-button">
               <span className="room-subtitle">
                 ({room.room_detail.building}: Level {room.room_detail.level})
                 Max. capacity: {room.room_detail.capacity}
               </span>
-
-              {isReporting && (
+              <Button
+                  type="primary"
+                  status={isReporting ? "default" : "danger"}
+                  className="report-button"
+                  onClick={handleReportClick}
+              >
+                  <img src="/img/Setting.png" alt="Setting" className="icon" />
+                  {isReporting ? "Cancel" : "Report"}
+              </Button>
+              </div>
+              {/* {isReporting && (
                 <div>
                   <input
                     placeholder="Enter report details"
@@ -245,14 +290,14 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
                     Submit
                   </Button>
                 </div>
-              )}
+              )} */}
               {/*  rating component */}
               <div className="room-rating">
                 <Rate readonly allowHalf value={ratingData.is_rated ? ratingData.room_score : 0} />
-                <span>
-                  {ratingData.is_rated ? ratingData.room_score : "Nobody rated before"}
+                <span className="rate-span">
+                  {ratingData.is_rated ? ratingData.room_score.toFixed(1) : "Nobody rated before"}
                 </span>
-                <Button type="primary" onClick={() => setIsRateModalVisible(true)}>
+                <Button className='make-rate-button' type="primary" onClick={() => setIsRateModalVisible(true)}>
                   Make Rate
                 </Button>
               </div>
@@ -301,6 +346,21 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       {errorMessage && (
         <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
       )}
+      <ConfigProvider locale={enUS}>
+        <Modal
+        title="Report"
+        visible={isReportModalVisible}
+        onOk={handleSubmit}
+        onCancel={() => setIsReportModalVisible(false)}
+        >
+          <textarea
+            placeholder="Enter report details"
+            value={reportText}
+            onChange={(e) => setReportText(e.target.value)}
+            style={{ width: '450px', height: '100px', padding: '10px', fontSize: '14px' }}
+          />
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };

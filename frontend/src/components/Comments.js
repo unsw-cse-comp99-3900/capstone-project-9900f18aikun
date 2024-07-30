@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Comment, Avatar, Button } from "@arco-design/web-react";
+import { Comment, Avatar, Button,Popconfirm, Notification } from "@arco-design/web-react";
 import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon";
 import "./Comments.css";
 import ErrorBox from "./errorBox";
@@ -76,6 +76,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       }
 
       await fetchComments();
+      Notification.success({
+        title: 'Success',
+        content: 'Comment success.',
+      });
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -147,6 +151,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       await fetchComments();
       setEditingCommentId(null);
       setEditingCommentText("");
+      Notification.success({
+        title: 'Success',
+        content: 'Edit comment success!',
+      });
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -178,7 +186,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       }
 
       await fetchComments();
-      setErrorMessage("Comment deleted successfully.");
+      Notification.success({
+        title: 'Success',
+        content: 'Comment deleted successfully.',
+      });
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -226,7 +237,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
     }
   };
 
-  const colors = ['#3370ff', '#ff4d4f', '#52c41a', '#faad14', '#13c2c2', '#eb2f96'];
+  const colors = ['#FCE996', '#9FD4FD', '#FB9DC7', '#89E9E0', '#7BE188', '#FCC59F'];
   const userColors = {};
 
   const getUserColor = (userId) => {
@@ -246,6 +257,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
             className="custom-comment-action"
             key="heart"
             onClick={() => handleLikeClick(comment)}
+            style={{ backgroundColor: '#E5E6EB', border: 'none', padding: '5px 10px', borderRadius: '4px' }}
           >
             {comment.current_user_liked ? (
               <IconHeartFill style={{ color: '#f53f3f' }} />
@@ -269,13 +281,20 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
               >
                 Edit
               </span>
-              <span
-                className="custom-comment-action"
-                style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
-                onClick={() => handleDeleteClick(comment.id)}
+              <Popconfirm
+                  focusLock
+                  title='Do you want to delete the comment?'
+                  okText='Delete'
+                  cancelButtonProps={{ style: { display: 'none' } }}
+                  onOk={() => handleDeleteClick(comment.id)}
               >
-                Delete
-              </span>
+                <span
+                  className="custom-comment-action"
+                  style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
+                >
+                  Delete
+                </span>
+              </Popconfirm>
             </React.Fragment>
           ),
         ]}
@@ -287,18 +306,21 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
         }
         content={
           editingCommentId === comment.id ? (
-            <div>
+            <div className="edit-comment-container">
               <input
                 type="text"
                 value={editingCommentText}
                 onChange={(e) => setEditingCommentText(e.target.value)}
+                className="edit-input"
               />
-              <Button type="primary" onClick={handleEditSubmit}>
-                Submit
-              </Button>
-              <Button type="secondary" onClick={() => setEditingCommentId(null)}>
-                Cancel
-              </Button>
+              <div className="edit-comment-actions"> 
+                <Button type="secondary" onClick={() => setEditingCommentId(null)}>
+                  Cancel
+                </Button>
+                <Button type="primary" onClick={handleEditSubmit} style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}>
+                  Submit
+                </Button>
+              </div>
             </div>
           ) : (
             <div>{comment.content}</div>
@@ -318,7 +340,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
               <Button key="0" type="secondary" onClick={() => setReplyingTo(null)}>
                 Cancel
               </Button>,
-              <Button key="1" type="primary" onClick={handleReplySubmit}>
+              <Button key="1" type="primary" onClick={handleReplySubmit} style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}>
                 Reply
               </Button>,
             ]}
@@ -351,7 +373,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
 
   return (
     <div className="comment-container">
-      <h2>Comments</h2>
+      <h2 className="comment-title">Comments</h2>
       {renderComments(comments)}
       <Comment
         align="right"
@@ -359,7 +381,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
           <Button key="0" type="secondary" onClick={() => setRootCommentText("")}>
             Cancel
           </Button>,
-          <Button key="1" type="primary" onClick={handleRootCommentSubmit}>
+          <Button key="1" type="primary" onClick={handleRootCommentSubmit}style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}>
             Comment
           </Button>,
         ]}

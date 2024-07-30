@@ -26,7 +26,14 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
 
         if (response.ok) {
           const result = await response.json();
-          setHistory([result[0]]); // Update here to set the first result item inside an array
+          // console.log("result is", [result[0]]);
+          // setHistory([result[0]]); // Update here to set the first result item inside an array
+
+          const completedBooking =
+            result.find((booking) => booking.booking_status === "completed") ||
+            null;
+          console.log(completedBooking);
+          setHistory([completedBooking]); // Update here to set the first result item inside an array
         } else {
           const errorText = await response.text();
           setErrorMessage("Failed to Fetch User History\nPlease Refresh");
@@ -89,7 +96,8 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
   const disableDates = (date) => {
     const today = dayjs();
     const sevenDaysFromNow = today.add(7, "day");
-    return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
+    const tmr = today.add(1, "day");
+    return date.isBefore(tmr, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
   const columns = [
@@ -138,7 +146,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
           />
         </div>
       ) : (
-        <div className="no-history">No previous reservation history</div>
+        <div className="no-history">No Completed Reservation</div>
       )}
       {isCalendarVisible && (
         <LocalizationProvider dateAdapter={AdapterDayjs}>

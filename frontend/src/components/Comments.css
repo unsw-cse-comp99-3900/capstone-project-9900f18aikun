@@ -1,9 +1,60 @@
 .comment-container {
-    margin: 25px;
-    background-color: antiquewhite;
-  }
-  
+  width: 1000px;
+  margin: 35px  0 0 35vh ; 
+  background-color: #f9f9f9; 
+  padding: 30px; 
+  border-radius: 8px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  /* max-width: 800px;  */
+}
   .custom-comment-action {
     margin-right: 10px;
     cursor: pointer;
+  }
+  
+
+  .comment-container h2.comment-title {
+    font-size: 28px; /* Larger font size for the title */
+    margin-bottom: 20px; /* More space below the title */
+    color: #333; /* Darker color for the title */
+    font-family: 'Arial', sans-serif; /* Font family for a modern look */
+    font-weight: bold; /* Bold font weight */
+    text-align: center; /* Center align the title */
+  }
+  
+  .comment-container input[type="text"] {
+    width: 100%; /* Full width input */
+    padding: 10px; /* Padding for better spacing */
+    margin-top: 10px; /* Space above the input */
+    border: 1px solid #d9d9d9; /* Light grey border */
+    border-radius: 4px; /* Rounded corners */
+  }
+
+  .comment-container  input[type="text"] {
+    width: 95%;
+    height: 40px; /* Adjusted width */
+    padding: 0 10px 0 10px; /* Padding for better spacing */
+    margin-top: 10px; /* Space above the input */
+    border: 1px solid #d9d9d9; /* Light grey border */
+    border-radius: 4px; /* Rounded corners */
+  }
+  
+  .comment-container input[type="text"]:focus {
+    border-color: #1890ff; /* Blue border on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(24, 144, 255, 0.2); /* Subtle shadow on focus */
+  }
+
+  .edit-comment-container {
+    position: relative;
+  }
+  
+  .edit-comment-actions {
+    margin-top: 10px; /* Add margin to the top to separate from the input */
+    margin-left: 410px;
+    display: flex;
+    gap: 10px;
+  }
+  .edit-comment-container input[type="text"]{
+    width: 80vh;
   }
