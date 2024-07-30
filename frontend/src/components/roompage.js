@@ -246,7 +246,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: 'Error',
+        title: 'notification',
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
         onClose: () => setErrorMessage("")
@@ -344,6 +344,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               map={false}
               change={change}
               setChange={setChange}
+              setErrorMessage={setErrorMessage}
             />
           )}
 
