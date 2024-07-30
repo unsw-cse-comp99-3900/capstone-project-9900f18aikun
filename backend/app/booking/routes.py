@@ -392,8 +392,10 @@ class MeetingRoom(Resource):
                         "is_request": booking.is_request,
                         "current_user_booking": True if booking.user_id == user_zid else False
                     }
-        if is_rank:
+        if is_rank and is_rank != 'false':
             output = sorted(output, key=lambda item: (item['rank'] is not None, item['rank']), reverse=True)
+        else:
+            output = sorted(output, key=lambda item: (item['id']))
 
 
         return output, 200
