@@ -66,6 +66,7 @@ function AdminNotification() {
         });
         const newNotification = { 
           id: Date.now(), 
+          title: 'Notification',
           message: `${data.user_id} has new request` 
         };
         setNotifications(prevNotifications => [...prevNotifications, newNotification]);
@@ -162,13 +163,17 @@ function AdminNotification() {
         </button>
       </Badge>
       <div className="notification-container">
-        {notifications.map((notification) => (
-          <div key={notification.id} className="notification-item">
-            {notification.message}
-            <button onClick={() => removeNotification(notification.id)}>×</button>
+      {notifications.map((notification) => (
+        <div key={notification.id} className="notification-item">
+          <div className="notification-icon">i</div>
+          <div className="notification-content">
+            <div className="notification-title">{notification.title}</div>
+            <div className="notification-message">{notification.message}</div>
           </div>
-        ))}
-      </div>
+          <button onClick={() => removeNotification(notification.id)}>×</button>
+        </div>
+      ))}
+    </div>
     </>
   );
 }
