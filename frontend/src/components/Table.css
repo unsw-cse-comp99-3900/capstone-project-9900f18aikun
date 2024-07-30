@@ -29,9 +29,9 @@
 /* Table wrapper styling */
 .table-wrapper {
   overflow-x: auto;
-  max-width: 780px;
+  max-width: 70vw;
   overflow-y: scroll;
-  max-height: 600px;
+  max-height: 70vh;
 }
 
 .calendar-row {
