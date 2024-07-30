@@ -475,12 +475,15 @@ export const ChatBox = ({ change, setChange }) => {
                     <div ref={messagesEndRef} />
                   </div>
                   <div className="chat-input">
-                    <img 
-                      src="/chat_box/exchange.png" 
-                      alt="Exchange" 
-                      className="exchange-button" 
-                      onClick={toggleRoomType}
-                    />
+                  <div className="exchange-button-container">
+  <img 
+    src="/chat_box/exchange.png" 
+    alt="Exchange" 
+    className="exchange-button" 
+    onClick={toggleRoomType}
+  />
+  <span className="exchange-button-hint">Switch room type</span>
+</div>
                     <textarea
                       ref={textAreaRef}
                       value={inputMessage}
@@ -517,17 +520,22 @@ export const ChatBox = ({ change, setChange }) => {
                 <img src="/chat_box/ellipse-1.svg" alt="Ellipse" className="ellipse-image" />
                 <img className="rectangle-4" alt="Rectangle" src="/chat_box/rectangle-1.svg" />
               </div>
-              <div className="chat-header" onClick={toggleMode}>
-                <img 
-                  key={refreshKey}
-                  className={mode === 'ExpressBook' ? "bot-image" : "service-image"}
-                  alt={mode === 'ExpressBook' ? "Bot" : "Service"}
-                  src={mode === 'ExpressBook' ? "/chat_box/image-3.png" : "/chat_box/service.png"}
-                />
-                <span className="express-book-text">
-                  {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
-                </span>
-              </div>
+              <div className="chat-header-container">
+  <div className="chat-header" onClick={toggleMode}>
+    <img 
+      key={refreshKey}
+      className={mode === 'ExpressBook' ? "bot-image" : "service-image"}
+      alt={mode === 'ExpressBook' ? "Bot" : "Service"}
+      src={mode === 'ExpressBook' ? "/chat_box/image-3.png" : "/chat_box/service.png"}
+    />
+    <span className="express-book-text">
+      {mode === 'ExpressBook' ? '𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠' : '𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚'}
+    </span>
+  </div>
+  <span className="chat-header-hint">
+    {mode === 'ExpressBook' ? 'Talk to 𝘾𝙪𝙨𝙩𝙤𝙢𝙚𝙧𝙎𝙚𝙧𝙫𝙞𝙘𝙚' : 'Switch to 𝙀𝙭𝙥𝙧𝙚𝙨𝙨𝘽𝙤𝙤𝙠'}
+  </span>
+</div>
             </div>
           </div>
         </div>
