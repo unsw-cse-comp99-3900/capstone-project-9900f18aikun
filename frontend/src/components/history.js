@@ -219,7 +219,9 @@ const ReservationHistory = () => {
       key: "operation",
       align: "center",
       render: (_, record) => {
-        let text = "No Operation Allowed";
+        let text = (
+          <img src="/img/Remove.png" alt="No Operation Allowed" />
+        );
 
         if (record.booking_status === "completed") {
           text = isCalendarVisible ? "Hide Calendar" : "Rebook";
