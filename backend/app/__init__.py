@@ -1,6 +1,7 @@
 from .config import Config
 from .extensions import db, migrate, jwt, app, api, scheduler, socketio
 from .database_setup import set_up_database
+from .models import Users
 import time
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -53,7 +54,8 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-        set_up_database()
+        if not Users.query.first():
+            set_up_database()
 
     scheduler.start()
 
