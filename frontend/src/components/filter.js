@@ -112,12 +112,13 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
             <option value="hot_desk">Hot Desk</option>
           </select>
         </div>
-        <div>
+        <div className="form-group">
           <label>Sort by:</label>
           <select
             name="sort"
             value={filters.sort}
             onChange={handleFilterChange}
+            className="filter-select"
           >
             <option value="default">Default</option>
             <option value="rating">Rating</option>

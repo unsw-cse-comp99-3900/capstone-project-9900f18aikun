@@ -12,7 +12,7 @@
     transition: width 0.1s, left 0.1s; /* Smooth transition for width and position */
     position: fixed; /* Keep sidebar fixed */
     height: 100%;
-    z-index: 2; 
+    z-index: 50; 
 }
 .admin-top-bar {
     background-color: #FADC19;
@@ -26,8 +26,8 @@
     top: 0; /* Align to the top */
     left: 270px; /* Adjust based on sidebar state */
     transition: left 0.3s; 
-    z-index: 1000;
-    margin-left: 30px;
+    z-index: 10;
+    /* margin-left: 30px; */
 }
 
 
@@ -161,7 +161,7 @@
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2); /* 阴影效果 */
     z-index: 1000; /* 确保下拉菜单在其他内容之上 */
     width: 100px;
-    margin-right: 35px;
+    margin-right: 45px;
 }
 
 .dropdown-menu button {

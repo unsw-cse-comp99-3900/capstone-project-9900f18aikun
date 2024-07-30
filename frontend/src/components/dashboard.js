@@ -1,10 +1,11 @@
 // Dashboard.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import Filter from "./filter";
 import Rebook from "./rebook";
 import Table from "./Table";
 import ChatBox from "./ChatBox";
 import ErrorBox from "./errorBox";
+import { Notification } from '@arco-design/web-react';
 
 const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -21,39 +22,39 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
 
   const token = localStorage.getItem("token");
 
-  // const checkTodayBooking = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       "/api/booking/is_book_today?date=" + selectedDate.format("YYYY-MM-DD"),
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           Accept: "application/json",
-  //           Authorization: "Bearer " + token,
-  //         },
-  //       }
-  //     );
+  const checkTodayBooking = async () => {
+    try {
+      const response = await fetch(
+        "/api/booking/is_book_today?date=" + selectedDate.format("YYYY-MM-DD"),
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
 
-  //     if (response.ok) {
-  //       const result = await response.json();
-  //       if (result.is_booking_today) {
-  //         const errorText = `There is already a booking for ${selectedDate.format(
-  //           "YYYY-MM-DD"
-  //         )}. \n Please Avoid Double Booking`;
-  //         setErrorMessage(errorText);
-  //       }
-  //     } else {
-  //       const errorText = await response.text();
-  //       setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
-  //     }
-  //   } catch (error) {
-  //     setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
-  //   }
-  // };
+      if (response.ok) {
+        const result = await response.json();
+        if (result.is_booking_today) {
+          const errorText = `There is already a booking for ${selectedDate.format(
+            "YYYY-MM-DD"
+          )}. \n Please Avoid Double Booking`;
+          setErrorMessage(errorText);
+        }
+      } else {
+        const errorText = await response.text();
+        setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
+      }
+    } catch (error) {
+      setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
+    }
+  };
 
-  // useEffect(() => {
-  //   checkTodayBooking();
-  // }, [selectedDate]);
+  useEffect(() => {
+    checkTodayBooking();
+  }, [selectedDate]);
 
   const fetchBookingData = async () => {
     try {
@@ -105,6 +106,17 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (errorMessage) {
+      Notification.info({
+        title: 'Booking notification',
+        content: errorMessage,
+        duration: 0, // 0 means the notification will not auto close
+        onClose: () => setErrorMessage("")
+      });
+    }
+  }, [errorMessage]); 
+
   return (
     <>
       <div className="main-content">
@@ -124,12 +136,12 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
             />
           )}
           <div>
-            {errorMessage && (
+            {/* {errorMessage && (
               <ErrorBox
                 message={errorMessage}
                 onClose={() => setErrorMessage("")}
               />
-            )}
+            )} */}
           </div>
         </div>
         <div className="content">

@@ -125,6 +125,17 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
   }, [room, data]);
 
+  useEffect(() => {
+    if (errorMessage) {
+      Notification.info({
+        title: 'Error',
+        content: errorMessage,
+        duration: 0, // 0 means the notification will not auto close
+        onClose: () => setErrorMessage("")
+      });
+    }
+  }, [errorMessage]);
+
   const handleEditClick = () => {
     setIsEditing(true); // 修改 handleEditClick 函数
   };
@@ -256,12 +267,12 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
       <Comments roomid={roomid} currentUserId={null} isAdmin={isAdmin} />
       <div>
-        {errorMessage && (
+        {/* {errorMessage && (
           <ErrorBox
             message={errorMessage}
             onClose={() => setErrorMessage("")}
           />
-        )}
+        )} */}
       </div>
     <ConfigProvider locale={enUS}>
       <Modal

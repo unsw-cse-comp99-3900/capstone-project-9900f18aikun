@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "./history.css";
-
+// import "./history.css";
+import "./rebook.css"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -131,7 +131,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
   ];
 
   return (
-    <div className="reservation-history">
+    <div className="rebook-container">
       <header>
         <h1>Last Booking:</h1>
       </header>

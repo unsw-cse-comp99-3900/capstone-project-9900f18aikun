@@ -22,7 +22,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
   const connectSocket = () => {
     const token = localStorage.getItem('token');
-    const socketURL = "ws://s2.gnip.vip:37895";
+    const socketURL = "ws://3.26.67.188:5001";
     
     console.log("Attempting to connect to:", socketURL);
     console.log("Token:", token);
