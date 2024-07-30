@@ -1,23 +1,25 @@
 .reservation-history {
-    font-family: Arial, sans-serif;
-    width: 65vw;
-    margin: auto;
-    background-color: #f7f7f7;
-    padding: 20px;
-    border-radius: 8px;
+    font-family: 'Roboto', Arial, sans-serif;
+    width: 90%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
 
-}
-
-header {
+  header {
     text-align: center;
-    margin-bottom: 20px;
-}
+    margin-bottom: 2rem;
+  }
 
 header h1 {
-    font-size: 24px;
-    color: #4E5969;
-}
-
+    font-size: 2.2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
 ul {
     list-style-type: none;
     padding: 0;
@@ -106,19 +108,21 @@ button:hover {
 }
 
 .no-history {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5em; /* Slightly increased font size */
-    text-align: center; /* Center text alignment */
+    text-align: center;
+    font-size: 1.4rem;
+    color: #8c8c8c;
+    margin-top: 2rem;
+    padding: 2rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
   }
 
   /* loading */
-.loading-container {
+  .loading-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Full viewport height */
+    height: 50vh;
   }
 
 .history-table .arco-table td {
@@ -166,3 +170,79 @@ button:hover {
 .reservation-history .arco-table tbody tr:hover {
     background-color: #f9f9f9; /* 悬停时修改行背景颜色 */}
 
+    .arco-table {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      
+      .arco-table th {
+        background-color: #f0f2f5 !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px !important;
+      }
+      
+      .arco-table td {
+        padding: 16px !important;
+      }
+      
+      .arco-table tr:nth-child(even) {
+        background-color: #f9fafb !important;
+      }
+      
+      .arco-table tr:hover {
+        background-color: #e6f7ff !important;
+        transition: background-color 0.3s ease;
+      }
+      
+      .arco-table-pagination {
+        margin-top: 20px;
+        text-align: right;
+      }
+      
+      /* Styling for operation buttons */
+      .arco-table td span[style*="cursor: pointer"] {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      
+      .arco-table td span[style*="color: red"] {
+        background-color: #ff4d4f;
+        color: white !important;
+      }
+      
+      .arco-table td span[style*="color: green"] {
+        background-color: #52c41a;
+        color: white !important;
+      }
+      
+      .arco-table td span[style*="cursor: pointer"]:hover {
+        opacity: 0.8;
+      }
+      
+      /* Styling for extend booking checkbox */
+      .arco-table td input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+      .error-box {
+        background-color: #fff2f0;
+        border: 1px solid #ffccc7;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-top: 1rem;
+        color: #ff4d4f;
+        font-weight: 500;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
