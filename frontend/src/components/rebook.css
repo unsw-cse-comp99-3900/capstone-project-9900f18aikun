@@ -1,56 +1,132 @@
 .rebook-container {
-    width: 40%;  /* Reduced from 50% */
-    max-width: 500px;  /* Reduced from 600px */
-    margin: 1rem 0 1rem 1rem;  /* Reduced margins */
-    padding: 1rem;  /* Reduced padding */
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
+  width: 90%;
+  max-width: 300px;
+  margin: 2rem 0 0.5rem 1rem; /* Increased top margin to move it down */
+  padding: 0.4rem;
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
   
-  .rebook-container header {
-    text-align: center;
-    margin-bottom: 0.5rem;  /* Reduced margin */
-  }
-  
-  .rebook-container h1 {
-    font-size: 1.5rem;  /* Reduced font size */
-    color: #333;
-  }
-  
-  .rebook-container .arco-table {
-    font-size: 0.8rem;  /* Slightly reduced font size */
-  }
-  
-  .rebook-container .arco-table th,
-  .rebook-container .arco-table td {
-    padding: 8px !important;  /* Reduced padding */
-  }
-  
-  .rebook-container .date-calendar-overlay {
-    transform: scale(0.8);  /* Further reduced scale */
-    transform-origin: top left;
-  }
-  
-  .rebook-container .no-history {
-    font-size: 1rem;  /* Reduced font size */
-    padding: 1rem;  /* Reduced padding */
-    text-align: center;
-    color: #8c8c8c;
-  }
-  
-  .rebook-container .arco-table td span[style*="cursor: pointer"] {
-    padding: 4px 8px;  /* Reduced padding */
-    font-size: 0.8rem;  /* Reduced font size */
-    border-radius: 3px;  /* Slightly reduced border radius */
-    transition: background-color 0.3s ease;
-  }
-  
-  /* The following styles remain unchanged */
-  .rebook-container .arco-table td span[style*="color: red"] {
-    background-color: #ff5722;
-  }
-  
-  .rebook-container .arco-table td span[style*="color: green"] {
-    background-color: #90ee90;
-  }
+}
+
+.rebook-container header {
+  margin-bottom: 0.3rem;
+  text-align: left;
+}
+
+.rebook-container h1 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.rebook-container .arco-table {
+  font-size: 0.7rem;
+}
+
+.rebook-container .arco-table-container {
+  margin-bottom: 0;
+}
+
+.rebook-container .arco-table th,
+.rebook-container .arco-table td {
+  padding: 6px !important;
+}
+
+.rebook-container .date-calendar-overlay {
+  transform: scale(0.8);
+  transform-origin: top center;
+}
+
+.rebook-container .no-history {
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  text-align: center;
+  color: #8c8c8c;
+}
+
+.rebook-container .arco-table td span[style*="cursor: pointer"] {
+  padding: 2px 4px;
+  font-size: 0.7rem;
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.rebook-container .arco-table td span[style*="color: red"] {
+  background-color: #54c761;
+  color: white !important;
+}
+
+.rebook-container .arco-table-th {
+  background-color: #f5f5f5 !important;
+  font-size: 0.7rem;
+  padding: 2px !important;
+  font-weight: normal; /* or semi-bold if you prefer */
+}
+
+.rebook-container .arco-table-row:hover {
+  background-color: #f0f0f0;
+}
+
+.rebook-container .arco-table table {
+  table-layout: fixed;
+}
+
+.rebook-container .arco-table-th:nth-child(1),
+.rebook-container .arco-table-td:nth-child(1) {
+  width: 45%;
+}
+
+.rebook-container .arco-table-th:nth-child(2),
+.rebook-container .arco-table-td:nth-child(2) {
+  width: 25%;
+}
+
+.rebook-container .arco-table-th:nth-child(3),
+.rebook-container .arco-table-td:nth-child(3) {
+  width: 30%;
+}
+
+.rebook-container .arco-table-cell {
+  white-space: normal;
+  word-break: break-word;
+}
+.rebook-container {
+  width: 90%;
+  max-width: 300px;
+  margin: 0rem 0 0.5rem 1rem; /* Reduced top margin from 2rem to 1rem */
+  padding: 0.2rem; /* Reduced padding from 0.4rem to 0.2rem */
+  background-color: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+
+.rebook-container h1 {
+  font-size: 0.68rem; /* Reduced from 1rem */
+}
+
+.rebook-container .arco-table {
+  font-size: 0.65rem; /* Reduced from 0.7rem */
+}
+
+.rebook-container .arco-table th,
+.rebook-container .arco-table td {
+  padding: 1px !important; /* Reduced from 6px */
+}
+
+.rebook-container .no-history {
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  padding: 0.3rem; /* Reduced from 0.5rem */
+}
+
+.rebook-container .arco-table td span[style*="cursor: pointer"] {
+  padding: 2px 4px; /* Reduced from 2px 4px */
+  font-size: 0.7rem; /* Reduced from 0.7rem */
+  font-weight: bold; /* Added to make text bold */
+  border-radius: 5px; 
+}
