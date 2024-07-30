@@ -406,8 +406,6 @@ const Table = ({
   }, [times]);
 
   const clickHandler = (room, time, event, roomid) => {
-    console.log(selectedDate);
-    return;
     const target = event.target;
     const targetClassList = target.classList;
     const tdClassList = target.closest("td").classList;
@@ -445,7 +443,7 @@ const Table = ({
 
   const disableDates = (date) => {
     const today = dayjs();
-    const sevenDaysFromNow = today.add(7, "day");
+    const sevenDaysFromNow = today.add(6, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
