@@ -127,7 +127,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
   useEffect(() => {
     if (errorMessage) {
-      Notification.error({
+      Notification.info({
         title: 'Error',
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
