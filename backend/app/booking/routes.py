@@ -103,10 +103,9 @@ class BookSpace(Resource):
                 }, 200
 
 
-def check_conflict_booking(date, room_id, start_time, end_time):
+def check_conflict_booking(date, room_id, start_time, end_time, zid):
     conflict_bookings = Booking.query.filter(
         Booking.date == date,
-        Booking.room_id == room_id,
         Booking.booking_status != "requested",
         Booking.booking_status != "cancelled",
         Booking.booking_status != BookingStatus.absent.value,
@@ -116,12 +115,17 @@ def check_conflict_booking(date, room_id, start_time, end_time):
             and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
             and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
         )
+    ).filter(
+        or_(
+            Booking.room_id == room_id,
+            Booking.user_id == zid
+        )
     ).all()
     return conflict_bookings
 
 
 def book_or_request(date, room_id, start_time, end_time, zid, room_name):
-    conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time)
+    conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, zid)
 
     if conflict_bookings:
         return {'error': 'Booking conflict, please check other time'}, 400
@@ -150,12 +154,12 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
         return {'error': 'Invalid zid'}, 400
     user_type = user.user_type
     is_request = False
-    print(user_type)
     if user_type != "CSE_staff" and not is_student_permit(room_id):
         is_request = True
     if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
         is_request = True
-    if start_time < "07:00" or end_time > "17:00":
+    # set time can't book
+    if start_time < "07:00" or end_time > "23:30":
         is_request = True
     status = 'booked'
     if is_request:
@@ -251,18 +255,7 @@ class AdminBook(Resource):
         except:
             return {'error': 'Invalid room id'}, 400
 
-        conflict_bookings = Booking.query.filter(
-            Booking.date == date,
-            Booking.room_id == room_id,
-            Booking.booking_status != "requested",
-            Booking.booking_status != "cancelled",
-            or_(
-                and_(Booking.start_time >= start_time, Booking.start_time < end_time),
-                and_(Booking.end_time > start_time, Booking.end_time <= end_time),
-                and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
-                and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
-            )
-        ).all()
+        conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, user_id)
 
         if not is_room_available(room_id):
             return {'error': f"room {room_id} is unavailable"}, 400
@@ -1052,7 +1045,7 @@ class ExtendBook(Resource):
             return {
                 'error': "Sorry, you don't have the permission to extend this booking, please request a new book"}, 400
 
-        conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time)
+        conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, zid)
 
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 409
