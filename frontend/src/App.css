@@ -39,11 +39,10 @@ body {
   display: flex;
   flex: 1;
 }
-.content {
+/* .content {
   flex: 1;
   overflow-y: auto;
-  
-}
+} */
 /* Sidebar styles */
 .sidebar {
   background-color: #4b0082; /* Dark purple */

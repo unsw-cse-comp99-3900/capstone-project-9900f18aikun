@@ -480,7 +480,7 @@ const Table = ({
   };
 
   return (
-    <div className="content">
+    <div className="table-content">
       <div className="table-container">
         {/* calendar */}
         <div className="calendar-container">

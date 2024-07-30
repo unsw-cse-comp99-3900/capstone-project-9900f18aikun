@@ -1,85 +1,85 @@
 /* CSS for the HeaderBar component */
 .header-bar {
-    background-color: #ffdc00;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 80px;
-  }
-  
-  .overlap {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: space-between;  /* zzw确保img在最左侧，button在最右侧 */
-  }
-  
-  .image {
-    height: 50px;
-    cursor: pointer;
-  }
-  
-  .group {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-    margin-right: 20px;
-  }
-  
-  /* .overlap-group {
+  background-color: #ffdc00;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 80px;
+}
+
+.overlap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between; /* zzw确保img在最左侧，button在最右侧 */
+}
+
+.image {
+  height: 50px;
+  cursor: pointer;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+/* .overlap-group {
     display: flex;
     align-items: center;
     background-color: #f5e6a5;
     padding: 5px 10px;
     border-radius: 5px;
   } */
-  
-  .text-wrapper {
-    font-size: 20px;
-    font-weight: bold;
-    margin-right: 10px;
-  }
-  
-  .icon-filter {
-    height: 20px;
-  }
-  
-  .text-wrapper-2 {
-    font-size: 20px;
-    font-weight: bold;
-    margin-left: auto;
-  }
-  
-  /* General CSS for the entire page layout */
-  .page-content {
-    display: flex;
+
+.text-wrapper {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.icon-filter {
+  height: 20px;
+}
+
+.text-wrapper-2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+/* General CSS for the entire page layout */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .header-bar {
     flex-direction: column;
-    align-items: center;
-    padding: 20px;
+    align-items: flex-start;
   }
-  
+
+  .overlap-group {
+    margin-top: 10px;
+  }
+
   .content {
-    width: 100%;
-    max-width: 1200px;
-    margin: 20px 0;
+    padding: 10px;
   }
-  
-  @media (max-width: 768px) {
-    .header-bar {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  
-    .overlap-group {
-      margin-top: 10px;
-    }
-  
-    .content {
-      padding: 10px;
-    }
-  }
-  /* CSS for the HeaderBar component */
+}
+/* CSS for the HeaderBar component */
 .header-bar {
   background-color: #ffdc00;
   display: flex;
@@ -141,7 +141,8 @@
   font-weight: bold;
 }
 
-.logout-button, .history-button {
+.logout-button,
+.history-button {
   background-color: #ffdc00; /* 颜色与header-bar一致 */
   color: black;
   border: none;
@@ -155,12 +156,13 @@
   align-items: center;
   justify-content: center;
   width: 120px; /* 固定宽度 */
-  font-family: 'Arial', sans-serif; /* 设置字体 */
+  font-family: "Arial", sans-serif; /* 设置字体 */
   letter-spacing: 1px; /* 增加字母间距 */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 添加阴影 */
 }
 
-.logout-button:hover, .history-button:hover {
+.logout-button:hover,
+.history-button:hover {
   background-color: #e6b800; /* 鼠标移到button上时颜色变为深黄色 */
 }
 
@@ -197,6 +199,6 @@
 .header-bar .arco-dropdown .arco-icon-down {
   margin-left: 5px; /* Space between text/icon */
 }
-.arco-btn img{
+.arco-btn img {
   z-index: 500;
 }
