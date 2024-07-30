@@ -168,7 +168,12 @@ function App() {
         />
         <Route
           path="/QR/:id"
-          element={<QrCodeRedirect onQrCodeScan={handleQrCodeScan} />}
+          element={
+            <QrCodeRedirect
+              onQrCodeScan={handleQrCodeScan}
+              isLoggedIn={isLoggedIn}
+            />
+          }
         />
         <Route
           path="/dashboard"
@@ -290,10 +295,10 @@ function App() {
   );
 }
 
-const QrCodeRedirect = ({ onQrCodeScan }) => {
+const QrCodeRedirect = ({ onQrCodeScan, isLoggedIn }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  // const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
   useEffect(() => {
     console.log("QR Code Redirect: id =", id, "isLoggedIn =", isLoggedIn);
