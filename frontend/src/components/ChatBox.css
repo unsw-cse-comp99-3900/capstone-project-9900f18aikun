@@ -3,25 +3,26 @@
   bottom: 80px; 
   right: 20px;
   z-index: 1000;
+  bottom:100px;
 }
 .chat-box-container.open .chat-box {
   display: block;
 }
 
 .chat-toggle-button {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #007bff;
+  position: fixed;
+  bottom: 23px;
+  right: 77px;
+  padding: 0;
+  background: none;
   border: none;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  z-index: 1001;
+  height: 48px; 
+  width: 51px;
+  transition: transform 0.3s ease; /* Add smooth transition */
 }
+
 
 .chat-box .overlap-group {
   height: 1060px;
@@ -229,21 +230,11 @@ height: 1050px;
 width: 953px;
 }
 
-.chat-toggle-button {
-  position: fixed;
-  bottom: 23px;
-  right: 77px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-  height: 48px; 
-  width: 51px; 
-}
+
 .chat-toggle-icon {
   width: 60px; 
   height: 60px; 
+  transition: transform 0.3s ease; /* Add smooth transition to the icon as well */
 }
 
 
@@ -530,4 +521,59 @@ cursor: pointer;
 
 .send-button:hover {
 background-color: #0056b3;
+}
+.chat-toggle-button:hover {
+  transform: scale(1.2); /* Make the button 20% larger on hover */
+  background: none;
+}
+.chat-toggle-button:hover .chat-toggle-icon {
+  transform: scale(1.2); /* Make the icon 20% larger on hover */
+}
+.chat-toggle-container {
+  position: fixed;
+  bottom: 23px;
+  right: 77px;
+  z-index: 1001;
+}
+.chat-toggle-button {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  height: 48px; 
+  width: 51px;
+  transition: transform 0.3s ease;
+}
+.chat-toggle-button:hover {
+  transform: scale(1.2);
+}
+
+.chat-toggle-icon {
+  width: 60px; 
+  height: 60px; 
+  transition: transform 0.3s ease;
+}
+
+.chat-toggle-button:hover .chat-toggle-icon {
+  transform: scale(1.2);
+}
+
+.chat-toggle-hint {
+  position: absolute;
+  top: -72px;
+  right: 19px;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.chat-toggle-container:hover .chat-toggle-hint {
+  opacity: 0.5;
 }

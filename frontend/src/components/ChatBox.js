@@ -532,9 +532,12 @@ export const ChatBox = ({ change, setChange }) => {
           </div>
         </div>
       )}
-      <button className="chat-toggle-button" onClick={toggleChatBox}>
-        <img src="/chat_box/image-2.png" alt="Chat" className="chat-toggle-icon" />
-      </button>
+      <div className="chat-toggle-container">
+  <button className="chat-toggle-button" onClick={toggleChatBox}>
+    <img src="/chat_box/image-2.png" alt="Chat" className="chat-toggle-icon" />
+  </button>
+  <span className="chat-toggle-hint">Ask for help</span>
+</div>
     </>
   );
 };
