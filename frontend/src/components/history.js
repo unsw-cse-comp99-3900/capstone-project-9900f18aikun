@@ -59,7 +59,7 @@ const ReservationHistory = () => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: 'Error',
+        title: 'Notification',
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
         onClose: () => setErrorMessage("")
