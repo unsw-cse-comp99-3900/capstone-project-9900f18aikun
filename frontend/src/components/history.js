@@ -146,7 +146,8 @@ const ReservationHistory = () => {
   const disableDates = (date) => {
     const today = dayjs();
     const sevenDaysFromNow = today.add(7, "day");
-    return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
+    const tmr = today.add(1, "day");
+    return date.isBefore(tmr, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
   const handleExtend = async (entry) => {
