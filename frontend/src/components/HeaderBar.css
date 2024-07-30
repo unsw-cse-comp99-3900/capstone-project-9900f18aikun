@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  height: 80px;
+  height: 10vh;
 }
 
 .overlap {
@@ -62,7 +62,6 @@
 .content {
   width: 100%;
   max-width: 1200px;
-  margin: 0;
 }
 
 @media (max-width: 768px) {

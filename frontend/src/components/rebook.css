@@ -1,23 +1,24 @@
 .rebook-container {
   width: 90%;
-  max-width: 300px;
-  margin: 2rem 0 0.5rem 1rem; /* Increased top margin to move it down */
-  padding: 0.4rem;
+  min-width: 30vw;
+  max-width: 30vw;
+  margin-top: 1vh; /* Increased top margin to move it down */
+  margin-bottom: 1vh;
+  padding: 0.2rem;
   background-color: #ffffff;
   border-radius: 6px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  
 }
 
 .rebook-container header {
   margin-bottom: 0.3rem;
-  text-align: left;
+  justify-content: center;
 }
 
 .rebook-container h1 {
-  font-size: 1rem;
+  font-size: 2rem !important;
   color: #333;
   margin: 0;
 }
@@ -93,18 +94,6 @@
   white-space: normal;
   word-break: break-word;
 }
-.rebook-container {
-  width: 90%;
-  max-width: 300px;
-  margin: 0rem 0 0.5rem 3rem; /* Reduced top margin from 2rem to 1rem */
-  padding: 0.2rem; /* Reduced padding from 0.4rem to 0.2rem */
-  background-color: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
 
 .rebook-container h1 {
   font-size: 0.68rem; /* Reduced from 1rem */
@@ -128,5 +117,5 @@
   padding: 2px 4px; /* Reduced from 2px 4px */
   font-size: 0.7rem; /* Reduced from 0.7rem */
   font-weight: bold; /* Added to make text bold */
-  border-radius: 5px; 
+  border-radius: 5px;
 }

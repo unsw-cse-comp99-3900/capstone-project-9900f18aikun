@@ -1,85 +1,87 @@
 .sidebar {
-    background-color: #4b2e83;
-    color: white;
-    padding: 20px;
-    transition: width 0.3s;
-    overflow: hidden;
-  }
-  
-  .sidebar.open {
-    width: 250px;
-  }
-  
-  .sidebar.closed {
-    width: 50px;
-  }
-  
-  .toggle-button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    margin-bottom: 20px;
-  }
-  
-  .filter-title {
-    color: white;
-    font-size: 22px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    margin-bottom: 5px;
-    font-size: 16px;
-    display: block;
-  }
-  
-  .form-group select {
-    
-    padding: 6px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: none;
-    width: 100%;
-  }
-
-  form-group button {
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: none;
-    width: 100%;
-  }
-  
-.filter-select {
-    background-color: #6a4f9c;
-    color: white;
+  background-color: #4b2e83;
+  color: white;
+  padding: 20px;
+  transition: width 0.3s;
+  overflow: hidden;
+  position: absolute;
+  left: 0vw;
+  height: 90vh;
 }
-  
-.filter-button {
-    background-color: #8a6bb8;
-    color: white;
-    cursor: pointer;
-    height: 35px;
-  }
-  
-  .filter-button:hover {
-    background-color: #7a5ba8;
-  }
 
-  /* Add this to your existing CSS file */
-  .arco-slider .arco-input-number {
-    background-color: #6a4f9c !important; /* 使用 !important 确保样式应用 */
-    color: white !important;
-  }
+.sidebar.open {
+  width: 12vw;
+}
+
+.sidebar.closed {
+  width: 2vw;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.filter-title {
+  color: white;
+  font-size: 22px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  margin-bottom: 5px;
+  font-size: 16px;
+  display: block;
+}
+
+.form-group select {
+  padding: 6px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: none;
+  width: 100%;
+}
+
+form-group button {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: none;
+  width: 100%;
+}
+
+.filter-select {
+  background-color: #6a4f9c;
+  color: white;
+}
+
+.filter-button {
+  background-color: #8a6bb8;
+  color: white;
+  cursor: pointer;
+  height: 35px;
+}
+
+.filter-button:hover {
+  background-color: #7a5ba8;
+}
+
+/* Add this to your existing CSS file */
+.arco-slider .arco-input-number {
+  background-color: #6a4f9c !important; /* 使用 !important 确保样式应用 */
+  color: white !important;
+}
