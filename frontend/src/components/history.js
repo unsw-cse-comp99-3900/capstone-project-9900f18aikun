@@ -10,7 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { Spin, Space, Table as ArcoTable } from "@arco-design/web-react";
+import { Spin, Space, Table as ArcoTable, Notification } from "@arco-design/web-react";
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
 
@@ -55,6 +55,17 @@ const ReservationHistory = () => {
 
     fetchHistory();
   }, [change]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      Notification.error({
+        title: 'Error',
+        content: errorMessage,
+        duration: 0, // 0 means the notification will not auto close
+        onClose: () => setErrorMessage("")
+      });
+    }
+  }, [errorMessage]);
 
   const toggleCalendarVisibility = (e) => {
     setIsCalendarVisible(!isCalendarVisible);
@@ -300,9 +311,9 @@ const ReservationHistory = () => {
           />
         </LocalizationProvider>
       )}
-      {errorMessage && (
+      {/* {errorMessage && (
         <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
-      )}
+      )} */}
     </div>
   );
 };

@@ -3,7 +3,8 @@ import "./roompage.css";
 import Table from "./Table";
 import { Button, Rate, Spin, Space,Modal, Notification ,ConfigProvider} from "@arco-design/web-react";
 import enUS from '@arco-design/web-react/es/locale/en-US';
-import ErrorBox from "./errorBox";
+// import ErrorBox from "./errorBox";
+
 import MakeRate from "./makerate";
 import Comments from "./Comments"; // Import the new Comments component
 
@@ -141,7 +142,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       setCurrentUserId(commentsData.current_zid); // 获取当前用户ID
       console.log("Fetched comments:", commentsData.comments);
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      setErrorMessage(error.message);
     }
   }, [roomid]);
 
@@ -218,7 +219,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         const result = await response.json();
         setRoom(result.message);
       } catch (error) {
-        console.error("Error fetching room data:", error);
+        // console.error("Error fetching room data:", error);
         setErrorMessage(error.message);
       } finally {
         setLoadingRoom(false);
@@ -242,7 +243,16 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   }, [room, data]);
 
 
-
+  useEffect(() => {
+    if (errorMessage) {
+      Notification.info({
+        title: 'Error',
+        content: errorMessage,
+        duration: 0, // 0 means the notification will not auto close
+        onClose: () => setErrorMessage("")
+      });
+    }
+  }, [errorMessage]);
 
  
   if (loadingRoom || loadingData) {
@@ -254,6 +264,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       </div>
     );
   }
+
 
   return (
     <div className="content">
@@ -343,9 +354,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       ) : (
         <div>No room information</div>
       )}
-      {errorMessage && (
+      {/* {errorMessage && (
         <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
-      )}
+      )} */}
       <ConfigProvider locale={enUS}>
         <Modal
         title="Report"
