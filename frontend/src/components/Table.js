@@ -132,6 +132,11 @@ const SelectWindow = ({
 
   // confirm selection function
   const confirmHandler = async () => {
+    const today = checkTodayBooking();
+    if (today) {
+      close();
+      return;
+    }
     const newTimes = gettimeList(time, selectedIdx, reserved);
 
     // getting end time
@@ -196,6 +201,40 @@ const SelectWindow = ({
 
   const handleInputChange = (event) => {
     setWeeks(event.target.value);
+  };
+
+  const checkTodayBooking = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        "/api/booking/is_book_today?date=" + selectedDate.format("YYYY-MM-DD"),
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.is_booking_today) {
+          const errorText = `There is already a booking for ${selectedDate.format(
+            "YYYY-MM-DD"
+          )}. \n Please Avoid Double Booking`;
+          setErrorMessage(errorText);
+          return true;
+        }
+      } else {
+        const errorText = await response.text();
+        setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
+        return false;
+      }
+    } catch (error) {
+      setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
+    }
   };
 
   return (
