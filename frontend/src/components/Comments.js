@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Comment, Avatar, Button,Popconfirm, Notification } from "@arco-design/web-react";
 import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon";
 import "./Comments.css";
-import ErrorBox from "./errorBox";
+// import ErrorBox from "./errorBox";
 
 const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
   const [comments, setComments] = useState([]);
