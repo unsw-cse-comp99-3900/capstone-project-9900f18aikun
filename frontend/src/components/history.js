@@ -208,14 +208,24 @@ const ReservationHistory = () => {
       key: "operation",
       align: "center",
       render: (_, record) => {
-        const isRebook =
-          record.booking_status === "cancelled" ||
-          record.booking_status === "signed-in";
-        const text = isRebook
-          ? isCalendarVisible
-            ? "Hide Calendar"
-            : "Rebook"
-          : "Cancel";
+        let text = "";
+
+        if (record.booking_status === "completed") {
+          text = isCalendarVisible ? "Hide Calendar" : "Rebook";
+        } else if (
+          record.booking_status === "booked" ||
+          record.booking_status === "requested"
+        ) {
+          text = "Cancel";
+        }
+        // const isRebook =
+        //   record.booking_status === "cancelled" ||
+        //   record.booking_status === "signed-in";
+        // const text = isRebook
+        //   ? isCalendarVisible
+        //     ? "Hide Calendar"
+        //     : "Rebook"
+        //   : "Cancel";
         const color = text === "Cancel" ? "red" : "green";
 
         return (
