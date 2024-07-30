@@ -335,19 +335,27 @@ const Table = ({
 
   useEffect(() => {
     const calculatePastTimes = async () => {
-      const currentTime = await getSydneyTime();
-      const past = times.filter((time) => {
-        const [timeHours, timeMinutes] = time.split(":").map(Number);
-        return (
-          currentTime.getHours() > timeHours ||
-          (currentTime.getHours() === timeHours &&
-            currentTime.getMinutes() >= timeMinutes + 15)
-        );
-      });
-      setPastTimes(past);
+      if (times.length > 0) {
+        const today = dayjs().format("YYYY-MM-DD");
+        if (selectedDate.format("YYYY-MM-DD") === today) {
+          const currentTime = await getSydneyTime();
+          const past = times.filter((time) => {
+            const [timeHours, timeMinutes] = time.split(":").map(Number);
+            return (
+              currentTime.getHours() > timeHours ||
+              (currentTime.getHours() === timeHours &&
+                currentTime.getMinutes() >= timeMinutes + 15)
+            );
+          });
+          setPastTimes(past);
+          return;
+        }
+      }
+      setPastTimes(null);
     };
 
     const scrollToCurrentTime = async () => {
+      console.log("did this happen");
       const currentTime = await getSydneyTime();
 
       const minutes = currentTime.getMinutes();
@@ -388,11 +396,18 @@ const Table = ({
       }
     };
 
+    if (times.length > 0) {
+      const today = dayjs().format("YYYY-MM-DD");
+      if (selectedDate.format("YYYY-MM-DD") === today) {
+        scrollToCurrentTime();
+      }
+    }
     calculatePastTimes();
-    scrollToCurrentTime();
   }, [times]);
 
   const clickHandler = (room, time, event, roomid) => {
+    console.log(selectedDate);
+    return;
     const target = event.target;
     const targetClassList = target.classList;
     const tdClassList = target.closest("td").classList;
@@ -549,7 +564,7 @@ const Table = ({
         </div>
 
         <div className="table-wrapper">
-          <table id="mytable">
+          <table id="mytable" className="mytable">
             <thead>
               <tr>
                 <th className="select-space">Select Space</th>
