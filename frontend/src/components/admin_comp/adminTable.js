@@ -527,7 +527,9 @@ const Table = ({
                                   );
                                 }
                               }}
-                            ></td>
+                            >
+                              <div className="box"></div>
+                            </td>
                           );
                         })
                       ) : (
