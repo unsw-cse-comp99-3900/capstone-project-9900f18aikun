@@ -208,7 +208,7 @@ const ReservationHistory = () => {
       key: "operation",
       align: "center",
       render: (_, record) => {
-        let text = "";
+        let text = "No Operation Allowed";
 
         if (record.booking_status === "completed") {
           text = isCalendarVisible ? "Hide Calendar" : "Rebook";
@@ -226,7 +226,8 @@ const ReservationHistory = () => {
         //     ? "Hide Calendar"
         //     : "Rebook"
         //   : "Cancel";
-        const color = text === "Cancel" ? "red" : "green";
+        const color =
+          text === "Cancel" ? "red" : text === "Rebook" ? "green" : "black";
 
         return (
           <span
