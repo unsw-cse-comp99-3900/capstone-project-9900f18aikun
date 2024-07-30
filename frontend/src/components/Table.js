@@ -522,8 +522,6 @@ const Table = ({
               ></div>
               <div className="legend-text">Self-Reserved</div>
             </div>
-          </div>
-          <div className="legendbox">
             <div className="legend-item">
               <div
                 className="legend-color"
