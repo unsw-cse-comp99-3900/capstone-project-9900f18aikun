@@ -394,11 +394,17 @@ const Table = ({
 
   const clickHandler = (room, time, event, roomid) => {
     const target = event.target;
-
+    const targetClassList = target.classList;
+    const tdClassList = target.closest("td").classList;
     if (
-      target.classList.contains("reserved") ||
-      target.classList.contains("selfreserved") ||
-      target.classList.contains("disabled")
+      targetClassList.contains("reserved") ||
+      targetClassList.contains("selfreserved") ||
+      targetClassList.contains("disabled") ||
+      targetClassList.contains("requested") ||
+      tdClassList.contains("reserved") ||
+      tdClassList.contains("selfreserved") ||
+      tdClassList.contains("disabled") ||
+      tdClassList.contains("requested")
     ) {
       return;
     }
@@ -448,7 +454,7 @@ const Table = ({
               case "requested":
                 return "requested";
               case "signed-in":
-                return "signedin";
+                return info.current_user_booking ? "signedin" : "reserved";
               default:
                 return reservation.permission ? "permission" : "no-permission";
             }
@@ -495,40 +501,33 @@ const Table = ({
         {/* legend */}
         <div className="legend">
           <div className="legendbox">
-            <div className="legend-item">
+            {/* <div className="legend-item">
               <div
                 className="legend-color"
                 style={{ backgroundColor: "#ffcccc" }}
               ></div>
               <div className="legend-text">Disabled Public Use</div>
-            </div>
+            </div> */}
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "#b9b9b9" }}
+                style={{ backgroundColor: "rgb(204, 202, 200)" }}
               ></div>
               <div className="legend-text">Reserved By Others</div>
             </div>
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "#4c2d83" }}
+                style={{ backgroundColor: "rgb(245, 238, 175)" }}
               ></div>
               <div className="legend-text">Self-Reserved</div>
-            </div>
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "#fce8a3" }}
-              ></div>
-              <div className="legend-text">Available</div>
             </div>
           </div>
           <div className="legendbox">
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "rgb(221, 216, 169)" }}
+                style={{ backgroundColor: "rgb(230, 212, 231)" }}
               ></div>
               <div className="legend-text">Booking Request Required</div>
             </div>
@@ -536,7 +535,7 @@ const Table = ({
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "green" }}
+                style={{ backgroundColor: "rgb(203, 237, 205)" }}
               ></div>
               <div className="legend-text">Requested</div>
             </div>
@@ -544,7 +543,7 @@ const Table = ({
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "red" }}
+                style={{ backgroundColor: "rgb(200, 232, 249)" }}
               ></div>
               <div className="legend-text">Signed-In</div>
             </div>
@@ -610,7 +609,9 @@ const Table = ({
                                   clickHandler(room.name, time, event, room.id);
                                 }
                               }}
-                            ></td>
+                            >
+                              <div className="box"></div>
+                            </td>
                           );
                         })
                       ) : (

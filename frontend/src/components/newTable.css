@@ -69,8 +69,8 @@ td {
   position: relative;
   text-align: center;
   vertical-align: middle;
-  width: 80px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
 }
 
 th {
@@ -79,10 +79,10 @@ th {
 }
 
 .box {
+  border: 1px solid white;
   width: 95%;
   height: 95%;
   margin: auto;
-  border-radius: 10px;
 }
 
 td.reserved .box {
@@ -101,8 +101,8 @@ td.signedin .box {
   background-color: rgb(200, 232, 249);
 }
 
-td.disabled {
-  background-color: rgb(231, 231, 231);
+td.disabled .box {
+  background-color: rgb(200, 232, 249);
 }
 
 td.no-permission .box {
@@ -129,8 +129,6 @@ tbody tr td.room-column {
 .room-column {
   min-width: 80px;
   max-width: 80px;
-  max-height: 100px;
-  min-height: 100px;
   /* width: max-content; */
   position: absolute;
   z-index: 2;
@@ -290,10 +288,10 @@ tbody tr td.room-column {
   max-width: 780px;
 }
 
-td.reserved .requested .selfreserved {
+td:not(.no-permission):not(.permission) {
   cursor: not-allowed;
 }
 
-td.reserved .requested .selfreserved:hover {
+td:not(.no-permission):not(.permission):hover {
   cursor: not-allowed;
 }

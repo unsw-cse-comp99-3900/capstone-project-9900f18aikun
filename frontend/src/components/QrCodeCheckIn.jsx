@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './QrCodeCheckIn.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./QrCodeCheckIn.css";
 
 const QrCodeCheckIn = () => {
-  const [qrCode, setQrCode] = useState('');
+  const [qrCode, setQrCode] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedQrCode = localStorage.getItem('qrCode');
+    const storedQrCode = localStorage.getItem("qrCode");
     if (!storedQrCode) {
-      navigate('/dashboard', { replace: true });
+      navigate("/dashboard", { replace: true });
     } else {
       setQrCode(storedQrCode);
     }
 
     // Prevent going back
     window.history.pushState(null, document.title, window.location.href);
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, [navigate]);
 
@@ -35,26 +35,28 @@ const QrCodeCheckIn = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `/api/sign_in/sign-in/${qrCode}`,
-        {
-          headers: {
-            accept: 'application/json',
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const token = localStorage.getItem("token");
+      console.log("token is", token);
+      const response = await axios.get(`/api/sign_in/sign-in/${qrCode}`, {
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.data === "You have signed in") {
         alert("You're checked in!");
-        localStorage.removeItem('qrCode');
-        navigate('/dashboard', { replace: true });
+        localStorage.removeItem("qrCode");
+        navigate("/dashboard", { replace: true });
       } else {
         alert(response.data.message || "Unexpected response from server");
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         alert(error.response.data.message);
       } else {
         alert("An error occurred during check-in. Please try again.");
@@ -77,11 +79,11 @@ const QrCodeCheckIn = () => {
           <p className="text-wrapper">sign in</p>
         </div>
       </div>
-      
+
       <div className="text-wrapper-4">K-17</div>
       <div className="content-container">
         <img className="image" alt="" src="/img/image-159.png" />
-        
+
         <div className="div-wrapper" onClick={handleGoToRoomPage}>
           <div className="text-wrapper-2">book</div>
         </div>
