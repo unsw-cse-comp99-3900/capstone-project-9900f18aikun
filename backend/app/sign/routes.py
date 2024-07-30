@@ -80,7 +80,7 @@ class Detail(Resource):
                 db.session.commit()
                 end_time = booking.end_time
                 book_date = booking.date
-                booking_end_time = datetime.strptime(f"{book_date} {end_time}", "%Y-%m-%d %H:%M")
+                booking_end_time = datetime.strptime(f"{book_date} {end_time}", "%Y-%m-%d %H:%M:%S")
                 scheduler.add_job(schedule_set_completed, 'date', run_date=booking_end_time, args=[booking.id])
                 return {"message": "You have signed in"}, 200
             case _:
