@@ -10,7 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { Spin, Space, Table as ArcoTable } from "@arco-design/web-react";
+import { Spin, Space, Table as ArcoTable, Notification } from "@arco-design/web-react";
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
 
@@ -55,6 +55,17 @@ const ReservationHistory = () => {
 
     fetchHistory();
   }, [change]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      Notification.error({
+        title: 'Error',
+        content: errorMessage,
+        duration: 0, // 0 means the notification will not auto close
+        onClose: () => setErrorMessage("")
+      });
+    }
+  }, [errorMessage]);
 
   const toggleCalendarVisibility = (e) => {
     setIsCalendarVisible(!isCalendarVisible);
@@ -208,7 +219,9 @@ const ReservationHistory = () => {
       key: "operation",
       align: "center",
       render: (_, record) => {
-        let text = "";
+        let text = (
+          <img src="/img/Remove.png" alt="No Operation Allowed" />
+        );
 
         if (record.booking_status === "completed") {
           text = isCalendarVisible ? "Hide Calendar" : "Rebook";
@@ -226,7 +239,8 @@ const ReservationHistory = () => {
         //     ? "Hide Calendar"
         //     : "Rebook"
         //   : "Cancel";
-        const color = text === "Cancel" ? "red" : "green";
+        const color =
+          text === "Cancel" ? "red" : text === "Rebook" ? "green" : "black";
 
         return (
           <span
@@ -299,9 +313,9 @@ const ReservationHistory = () => {
           />
         </LocalizationProvider>
       )}
-      {errorMessage && (
+      {/* {errorMessage && (
         <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
-      )}
+      )} */}
     </div>
   );
 };

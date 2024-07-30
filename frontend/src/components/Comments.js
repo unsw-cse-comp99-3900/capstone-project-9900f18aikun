@@ -42,12 +42,24 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       console.log("Fetched comments:", commentsData.comments);
     } catch (error) {
       console.error("Error fetching comments:", error);
+      setErrorMessage(error.message);
     }
   }, [roomid, setCurrentUserId]);
 
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      Notification.error({
+        title: 'Error',
+        content: errorMessage,
+        duration: 0, // 0 means the notification will not auto close
+        onClose: () => setErrorMessage("")
+      });
+    }
+  }, [errorMessage]);
 
   const handleReplyClick = (commentId) => {
     setReplyingTo(commentId);
@@ -407,9 +419,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
           </div>
         }
       />
-      {errorMessage && (
-        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
-      )}
+      
     </div>
   );
 };
