@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import './AdminNotification.css';
 import { useNavigate } from 'react-router-dom';
 
-const socketURL = "ws://s2.gnip.vip:37895";
+const socketURL = "ws://3.26.67.188:5001";
 
 function AdminNotification() {
   const [notificationCount, setNotificationCount] = useState(0);

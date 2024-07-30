@@ -96,7 +96,7 @@
 .rebook-container {
   width: 90%;
   max-width: 300px;
-  margin: 0rem 0 0.5rem 1rem; /* Reduced top margin from 2rem to 1rem */
+  margin: 0rem 0 0.5rem 3rem; /* Reduced top margin from 2rem to 1rem */
   padding: 0.2rem; /* Reduced padding from 0.4rem to 0.2rem */
   background-color: #ffffff;
   border-radius: 6px;
