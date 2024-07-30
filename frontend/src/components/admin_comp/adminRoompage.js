@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import "../roompage.css";
 import AdminTable from "./adminTable";
 import Comments from "../Comments"; // Import the Comments component
-import { Spin, Space } from "@arco-design/web-react";
+import { Spin, Space, Modal, Button,ConfigProvider } from "@arco-design/web-react";
+import enUS from '@arco-design/web-react/es/locale/en-US';
 import ErrorBox from "../errorBox";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
@@ -125,7 +126,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   }, [room, data]);
 
   const handleEditClick = () => {
-    setIsEditing(!isEditing);
+    setIsEditing(true); // 修改 handleEditClick 函数
   };
 
   const handleInputChange = (event) => {
@@ -149,7 +150,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsEditing(false);
+    // setIsEditing(false);
     // console.log(editedRoom.roomdetial);
     try {
       const token = localStorage.getItem("token");
@@ -168,13 +169,11 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         }),
       });
 
-      if (response.ok) {
-        setErrorMessage("Failed to Update Room Data");
-
+      if (!response.ok) {
+        setErrorMessage("Failed to Update Room Data"); // 修改错误信息
         throw new Error("Failed to update room data");
-      } else if (response.ok) {
+      } else {
         setErrorMessage("Successfully Updated");
-
         setChange(!change);
       }
 
@@ -207,79 +206,28 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         <div className="room-details">
           <div className="room-title">
             <h1>{room.room_detail.name}</h1>
-
-            <button onClick={handleEditClick} className="edit-button">
-              {isEditing ? "Cancel" : "Edit"}
-            </button>
           </div>
+          <div className="subtitle-button">
           <span className="room-subtitle">
             ({room.room_detail.building}: Level {room.room_detail.level}) Max.
             capacity: {room.room_detail.capacity}
           </span>
+              <Button
+              type="primary"
+              className="edit-button"
+              onClick={handleEditClick}
+              >
+                <img
+                src="/admin_img/edit.png"
+                alt="Edit"
+                className="icon"
+                />
+              Edit
+            </Button>
+          </div>
           <div className="room-image">
             <img src={room.room_detail.image_url} alt="Room" />
           </div>
-          {isEditing ? (
-            <form onSubmit={handleSubmit}>
-              <div>
-                <label>
-                  Name:
-                  <input
-                    type="text"
-                    name="name"
-                    value={editedRoom.room_detail.name}
-                    onChange={handleInputChange}
-                  />
-                </label>
-              </div>
-              <div>
-                <label>
-                  Building:
-                  <input
-                    type="text"
-                    name="building"
-                    value={editedRoom.room_detail.building}
-                    onChange={handleInputChange}
-                  />
-                </label>
-              </div>
-              <div>
-                <label>
-                  Level:
-                  <input
-                    type="text"
-                    name="level"
-                    value={editedRoom.room_detail.level}
-                    onChange={handleInputChange}
-                  />
-                </label>
-              </div>
-              <div>
-                <label>
-                  Capacity:
-                  <input
-                    type="text"
-                    name="capacity"
-                    value={editedRoom.room_detail.capacity}
-                    onChange={handleInputChange}
-                  />
-                </label>
-              </div>
-              <div>
-                <label>
-                  Type:
-                  <select
-                    value={editedRoom.room_type}
-                    onChange={handleTypeChange}
-                  >
-                    <option value="room">Meeting Room</option>
-                    <option value="desk">Hot Desk</option>
-                  </select>
-                </label>
-              </div>
-              <button type="submit">Save</button>
-            </form>
-          ) : (
             <>
               <p>
                 <strong>Type:</strong>{" "}
@@ -291,7 +239,6 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               </p>
               <p>💡 Power available</p>
             </>
-          )}
         </div>
       </div>
 
@@ -316,6 +263,78 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
           />
         )}
       </div>
+    <ConfigProvider locale={enUS}>
+      <Modal
+        title="Edit Room"
+        visible={isEditing}
+        onOk={handleSubmit}
+        onCancel={() => setIsEditing(false)}
+      >
+        <form>
+          <div className="form-group">
+            <label>
+              Name:
+              <input
+                type="text"
+                name="name"
+                value={editedRoom.room_detail.name}
+                onChange={handleInputChange}
+                className="form-control"
+              />
+            </label>
+          </div>
+          <div className="form-group">
+            <label>
+              Building:
+              <input
+                type="text"
+                name="building"
+                value={editedRoom.room_detail.building}
+                onChange={handleInputChange}
+                className="form-control"
+              />
+            </label>
+          </div>
+          <div className="form-group">
+            <label>
+              Level:
+              <input
+                type="text"
+                name="level"
+                value={editedRoom.room_detail.level}
+                onChange={handleInputChange}
+                className="form-control"
+              />
+            </label>
+          </div>
+          <div className="form-group">
+            <label>
+              Capacity:
+              <input
+                type="text"
+                name="capacity"
+                value={editedRoom.room_detail.capacity}
+                onChange={handleInputChange}
+                className="form-control"
+              />
+            </label>
+          </div>
+          <div >
+            <label>
+              Type:
+              <select
+                value={editedRoom.room_type}
+                onChange={handleTypeChange}
+                
+              >
+                <option value="room">Meeting Room</option>
+                <option value="desk">Hot Desk</option>
+              </select>
+            </label>
+          </div>
+        </form>
+      </Modal>
+    </ConfigProvider>
     </div>
   );
 };

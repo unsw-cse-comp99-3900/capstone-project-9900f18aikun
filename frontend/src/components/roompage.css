@@ -60,16 +60,22 @@
 }
 
 .edit-button {
-  position: absolute;
-  left: 50vw;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 14px;
-  border-radius: 5px;
-  width: fit-content;
+  background-color: #E0E0E0 !important;
+  color: #333 !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin-left: 65vh;
+}
+
+.edit-button .icon {
+  margin-right: 5px;
+  width: 16px;
+  height: 16px;
 }
 
 .edit-button:hover {
@@ -147,6 +153,19 @@
 
 .room-card .make-rate-button:hover {
   background-color: #FFF176 !important;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 

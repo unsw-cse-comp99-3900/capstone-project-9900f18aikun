@@ -1,7 +1,8 @@
 import React, { useEffect, useState,useCallback} from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Rate, Spin, Space,Modal, Notification } from "@arco-design/web-react";
+import { Button, Rate, Spin, Space,Modal, Notification ,ConfigProvider} from "@arco-design/web-react";
+import enUS from '@arco-design/web-react/es/locale/en-US';
 import ErrorBox from "./errorBox";
 import MakeRate from "./makerate";
 import Comments from "./Comments"; // Import the new Comments component
@@ -294,7 +295,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               <div className="room-rating">
                 <Rate readonly allowHalf value={ratingData.is_rated ? ratingData.room_score : 0} />
                 <span className="rate-span">
-                  {ratingData.is_rated ? ratingData.room_score : "Nobody rated before"}
+                  {ratingData.is_rated ? ratingData.room_score.toFixed(1) : "Nobody rated before"}
                 </span>
                 <Button className='make-rate-button' type="primary" onClick={() => setIsRateModalVisible(true)}>
                   Make Rate
@@ -345,7 +346,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       {errorMessage && (
         <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
       )}
-
+      <ConfigProvider locale={enUS}>
         <Modal
         title="Report"
         visible={isReportModalVisible}
@@ -359,6 +360,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             style={{ width: '450px', height: '100px', padding: '10px', fontSize: '14px' }}
           />
         </Modal>
+      </ConfigProvider>
     </div>
   );
 };
