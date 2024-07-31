@@ -1,3 +1,12 @@
+.table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  position: relative;
+}
+
 .calendar-container {
   position: relative;
   z-index: 10;
@@ -29,9 +38,9 @@
 /* Table wrapper styling */
 .table-wrapper {
   overflow-x: auto;
-  max-width: 65vw;
+  max-width: 780px;
   overflow-y: scroll;
-  max-height: 55vh;
+  max-height: 600px;
 }
 
 .calendar-row {
@@ -50,91 +59,88 @@
 
 table {
   border-collapse: collapse;
-  /* width: max-content; */
+  width: max-content;
   min-width: 100%;
 }
 
-#mytable td {
+td {
   border: 1px solid black;
   text-align: center;
   position: relative;
   text-align: center;
   vertical-align: middle;
-  height: 60px !important;
-}
-
-#mytable th {
-  background-color: #d3a6d4;
-  color: black;
+  width: 50px;
   height: 50px;
 }
 
+th {
+  background-color: #d3a6d4;
+  color: black;
+}
+
 .box {
-  width: 98%;
-  height: 98%;
-  border-radius: 15px;
+  border: 1px solid white;
+  width: 95%;
+  height: 95%;
+  margin: auto;
 }
 
 td.reserved .box {
   background-color: rgb(204, 202, 200);
-  cursor: not-allowed;
 }
 
 td.selfreserved .box {
   background-color: rgb(245, 238, 175);
-  cursor: not-allowed;
 }
 
 td.requested .box {
   background-color: rgb(203, 237, 205);
-  cursor: not-allowed;
 }
 
 td.signedin .box {
   background-color: rgb(200, 232, 249);
-  cursor: not-allowed;
 }
 
-td.disabled {
-  background-color: rgb(231, 231, 231);
-  cursor: not-allowed;
+td.disabled .box {
+  background-color: rgb(200, 232, 249);
 }
 
 td.no-permission .box {
   background-color: rgb(230, 212, 231);
 }
 
-td.no-permission {
-  cursor: pointer;
-}
-
 td.permission {
   background-color: white;
-  cursor: pointer;
 }
 
-#mytable thead tr th:first-child,
-#mytable tbody tr td.room-column {
+thead tr th:first-child,
+tbody tr td.room-column {
   background-color: rgb(249, 249, 249) !important;
   position: sticky;
   left: 0;
-  z-index: 5;
+  z-index: 2;
 }
 
 .time-column {
-  min-width: 60px;
-  max-width: 60px;
+  min-width: 50px;
+  max-width: 50px;
 }
 
 .room-column {
   min-width: 80px;
   max-width: 80px;
-  max-height: 100px;
-  min-height: 100px;
   /* width: max-content; */
   position: absolute;
   z-index: 2;
-  cursor: pointer;
+}
+
+.select-window {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
 
 .button-class {
@@ -207,7 +213,8 @@ td.permission {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* justify-content: center; */
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .calendar-container {
@@ -271,37 +278,20 @@ td.permission {
   z-index: 1; /* Ensure the header stays above other content */
 }
 
+#mytable thead th.select-space {
+  z-index: 5;
+  background-color: rgb(208, 181, 228) !important;
+}
+
 .singletable-wrapper {
   overflow-x: scroll;
   max-width: 780px;
 }
 
-td.reserved .requested .selfreserved {
+td:not(.no-permission):not(.permission) {
   cursor: not-allowed;
 }
 
-td.reserved .requested .selfreserved:hover {
+td:not(.no-permission):not(.permission):hover {
   cursor: not-allowed;
-}
-
-.table-content {
-  max-height: 70vh;
-}
-
-.select-window {
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  border-radius: 20px;
-}
-
-#mytable .select-space {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 10 !important;
 }

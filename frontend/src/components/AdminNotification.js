@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef} from 'react';
 import { Badge } from '@arco-design/web-react';
 import io from 'socket.io-client';
 import './AdminNotification.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 
-const socketURL = "ws://s2.gnip.vip:37895";
+const socketURL = "ws://3.26.67.188:5001";
 
-function AdminNotification() {
+function AdminNotification({ contentState, setForceUpdate,refreshAppointment }) {
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const socketRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const fetchNotificationStatus = useCallback(async () => {
     try {
@@ -66,6 +67,7 @@ function AdminNotification() {
         });
         const newNotification = { 
           id: Date.now(), 
+          title: 'Notification',
           message: `${data.user_id} has new request` 
         };
         setNotifications(prevNotifications => [...prevNotifications, newNotification]);
@@ -130,15 +132,20 @@ function AdminNotification() {
         setNotificationCount(0);
         console.log('Notifications marked as viewed, reset notification count to 0');
         
-        // Navigate to the AdminAppointment page
-        navigate('/admin/appointment');
-      } else {
+        // Check if the current path is '/admin/appointment'
+        if (location.pathname === '/admin/appointment') {
+          setForceUpdate(prev => !prev); // Force re-render of AdminAppointment
+        } else {
+            // 导航到 AdminAppointment 页面
+            navigate('/admin/appointment');
+        }
+    } else {
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error('Error marking notifications as viewed:', error);
     }
-  };
+} catch (error) {
+    console.error('Error marking notifications as viewed:', error);
+}
+};
 
   console.log('Rendering with notificationCount:', notificationCount);
   const removeNotification = (id) => {
@@ -162,13 +169,17 @@ function AdminNotification() {
         </button>
       </Badge>
       <div className="notification-container">
-        {notifications.map((notification) => (
-          <div key={notification.id} className="notification-item">
-            {notification.message}
-            <button onClick={() => removeNotification(notification.id)}>×</button>
+      {notifications.map((notification) => (
+        <div key={notification.id} className="notification-item">
+          <div className="notification-icon">i</div>
+          <div className="notification-content">
+            <div className="notification-title">{notification.title}</div>
+            <div className="notification-message">{notification.message}</div>
           </div>
-        ))}
-      </div>
+          <button onClick={() => removeNotification(notification.id)}>×</button>
+        </div>
+      ))}
+    </div>
     </>
   );
 }

@@ -4,28 +4,12 @@ import { Button } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import axios from "axios";
 
 import dayjs from "dayjs";
 import ToMap from "./toMap";
 import "./Table.css";
 
-// get sydney time
-// const getSydneyTime = async () => {
-//   while (true) {
-//     try {
-//       const response = await axios.get(
-//         "http://worldtimeapi.org/api/timezone/Australia/Sydney"
-//       );
-//       const datetime = new Date(response.data.datetime);
-//       return datetime;
-//     } catch (error) {
-//       console.error("Error fetching Sydney time:", error);
-//       await new Promise((resolve) => setTimeout(resolve, 10));
-//     }
-//   }
-// };
-
+// get the current time from backend
 const getSydneyTime = async (setErrorMessage) => {
   const token = localStorage.getItem("token");
 
@@ -71,6 +55,7 @@ const getTime = async (selectedDate) => {
   return times;
 };
 
+// select window function
 const SelectWindow = ({
   visible,
   time,
@@ -175,13 +160,11 @@ const SelectWindow = ({
         }
       } else {
         const errorText = await response.text();
-        setErrorMessage(
-          "Booking Failed.\nYou can only book up to 8 hours a day"
-        );
+        setErrorMessage("Booking Failed.");
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      setErrorMessage("Booking Failed.\nYou can only book up to 8 hours a day");
+      setErrorMessage("Booking Failed.");
     }
 
     close();
@@ -201,7 +184,15 @@ const SelectWindow = ({
   return (
     <div
       className="select-window"
-      style={{ top: position.top, left: position.left, position: "absolute" }}
+      style={{
+        top: position.top,
+        left: position.left,
+        position: "absolute",
+        backgroundColor: "#fff",
+        border: "1px solid #ccc",
+        padding: "10px",
+        zIndex: 100,
+      }}
     >
       <>
         <div>
@@ -263,6 +254,7 @@ const SelectWindow = ({
   );
 };
 
+// main table
 const Table = ({
   data,
   selectedDate,
@@ -335,19 +327,27 @@ const Table = ({
 
   useEffect(() => {
     const calculatePastTimes = async () => {
-      const currentTime = await getSydneyTime();
-      const past = times.filter((time) => {
-        const [timeHours, timeMinutes] = time.split(":").map(Number);
-        return (
-          currentTime.getHours() > timeHours ||
-          (currentTime.getHours() === timeHours &&
-            currentTime.getMinutes() >= timeMinutes + 15)
-        );
-      });
-      setPastTimes(past);
+      if (times.length > 0) {
+        const today = dayjs().format("YYYY-MM-DD");
+        if (selectedDate.format("YYYY-MM-DD") === today) {
+          const currentTime = await getSydneyTime();
+          const past = times.filter((time) => {
+            const [timeHours, timeMinutes] = time.split(":").map(Number);
+            return (
+              currentTime.getHours() > timeHours ||
+              (currentTime.getHours() === timeHours &&
+                currentTime.getMinutes() >= timeMinutes + 15)
+            );
+          });
+          setPastTimes(past);
+          return;
+        }
+      }
+      setPastTimes(null);
     };
 
     const scrollToCurrentTime = async () => {
+      console.log("did this happen");
       const currentTime = await getSydneyTime();
 
       const minutes = currentTime.getMinutes();
@@ -388,17 +388,29 @@ const Table = ({
       }
     };
 
+    if (times.length > 0) {
+      const today = dayjs().format("YYYY-MM-DD");
+      if (selectedDate.format("YYYY-MM-DD") === today) {
+        scrollToCurrentTime();
+      }
+    }
     calculatePastTimes();
-    scrollToCurrentTime();
   }, [times]);
 
+  // handle click on table
   const clickHandler = (room, time, event, roomid) => {
     const target = event.target;
-
+    const targetClassList = target.classList;
+    const tdClassList = target.closest("td").classList;
     if (
-      target.classList.contains("reserved") ||
-      target.classList.contains("selfreserved") ||
-      target.classList.contains("disabled")
+      targetClassList.contains("reserved") ||
+      targetClassList.contains("selfreserved") ||
+      targetClassList.contains("disabled") ||
+      targetClassList.contains("requested") ||
+      tdClassList.contains("reserved") ||
+      tdClassList.contains("selfreserved") ||
+      tdClassList.contains("disabled") ||
+      tdClassList.contains("requested")
     ) {
       return;
     }
@@ -408,7 +420,14 @@ const Table = ({
     if (className.includes("no-permission")) {
       permissionClass = false;
     }
-    const position = { top: event.clientY, left: event.clientX };
+    const dashboardContent =
+      document.querySelector(".dashboard-content") ||
+      document.querySelector(".main-content");
+    const rect = dashboardContent.getBoundingClientRect();
+    const position = {
+      top: event.clientY - rect.top,
+      left: event.clientX - rect.left,
+    };
     setSelectWindow({
       visible: true,
       time,
@@ -422,12 +441,14 @@ const Table = ({
     });
   };
 
+  // only allow 7 days selection on calandar
   const disableDates = (date) => {
     const today = dayjs();
-    const sevenDaysFromNow = today.add(7, "day");
+    const sevenDaysFromNow = today.add(6, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
+  // define td's classname
   const getClassName = (time, room, isPast) => {
     if (!room.is_available || isPast) {
       return "disabled";
@@ -448,7 +469,7 @@ const Table = ({
               case "requested":
                 return "requested";
               case "signed-in":
-                return "signedin";
+                return info.current_user_booking ? "signedin" : "reserved";
               default:
                 return reservation.permission ? "permission" : "no-permission";
             }
@@ -461,7 +482,7 @@ const Table = ({
   };
 
   return (
-    <div className="content">
+    <div className="table-content">
       <div className="table-container">
         {/* calendar */}
         <div className="calendar-container">
@@ -498,37 +519,21 @@ const Table = ({
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "#ffcccc" }}
-              ></div>
-              <div className="legend-text">Disabled Public Use</div>
-            </div>
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "#b9b9b9" }}
+                style={{ backgroundColor: "rgb(204, 202, 200)" }}
               ></div>
               <div className="legend-text">Reserved By Others</div>
             </div>
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "#4c2d83" }}
+                style={{ backgroundColor: "rgb(245, 238, 175)" }}
               ></div>
               <div className="legend-text">Self-Reserved</div>
             </div>
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "#fce8a3" }}
-              ></div>
-              <div className="legend-text">Available</div>
-            </div>
-          </div>
-          <div className="legendbox">
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "rgb(221, 216, 169)" }}
+                style={{ backgroundColor: "rgb(230, 212, 231)" }}
               ></div>
               <div className="legend-text">Booking Request Required</div>
             </div>
@@ -536,7 +541,7 @@ const Table = ({
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "green" }}
+                style={{ backgroundColor: "rgb(203, 237, 205)" }}
               ></div>
               <div className="legend-text">Requested</div>
             </div>
@@ -544,15 +549,16 @@ const Table = ({
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "red" }}
+                style={{ backgroundColor: "rgb(200, 232, 249)" }}
               ></div>
               <div className="legend-text">Signed-In</div>
             </div>
           </div>
         </div>
 
+        {/* table */}
         <div className="table-wrapper">
-          <table id="mytable">
+          <table id="mytable" className="mytable">
             <thead>
               <tr>
                 <th className="select-space">Select Space</th>
@@ -610,7 +616,9 @@ const Table = ({
                                   clickHandler(room.name, time, event, room.id);
                                 }
                               }}
-                            ></td>
+                            >
+                              <div className="box"></div>
+                            </td>
                           );
                         })
                       ) : (

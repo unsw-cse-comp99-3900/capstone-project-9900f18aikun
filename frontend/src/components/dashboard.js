@@ -1,11 +1,11 @@
 // Dashboard.js
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import Filter from "./filter";
 import Rebook from "./rebook";
 import Table from "./Table";
 import ChatBox from "./ChatBox";
 import ErrorBox from "./errorBox";
-import { Notification } from '@arco-design/web-react';
+import { Notification } from "@arco-design/web-react";
 
 const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -109,13 +109,13 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: 'Booking notification',
+        title: "Booking notification",
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
-        onClose: () => setErrorMessage("")
+        onClose: () => setErrorMessage(""),
       });
     }
-  }, [errorMessage]); 
+  }, [errorMessage]);
 
   return (
     <>
@@ -144,7 +144,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
             )} */}
           </div>
         </div>
-        <div className="content">
+        <div className="dashboard-content">
           <Rebook
             change={change}
             setChange={setChange}

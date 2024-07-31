@@ -17,7 +17,14 @@ function AdminPage({token}) {
     const [contentState, setContentState] = useState(1);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showChatbox, setShowChatbox] = useState(false);
+    const [appointmentKey, setAppointmentKey] = useState(0); // 新增状态用于控制 key
+    const [forceUpdate, setForceUpdate] = useState(false);
     const navigate = useNavigate();
+
+    
+    const refreshAppointment = () => {
+        setAppointmentKey(prevKey => prevKey + 1); // 更新 key 以刷新组件
+    };
 
     const toggleSidebar = () => {
         setSidebarOpen(!isSidebarOpen);
@@ -54,7 +61,7 @@ function AdminPage({token}) {
             case 2:
                 return <AdminClassroom />;
             case 3:
-                return <AdminAppointment token={token} />;
+                return <AdminAppointment token={token}  key={appointmentKey} forceUpdate={forceUpdate} />;
             case 4:
                 return <AdminStatistics />;
             case 5:
@@ -100,7 +107,7 @@ function AdminPage({token}) {
                 <button onClick={toggleSidebar} className='admin-closebar'>☰</button>
                 
                 <div className="admin-top-bar-right">
-                    <AdminNotification />
+                    <AdminNotification refreshAppointment={refreshAppointment} contentState={contentState} setForceUpdate={setForceUpdate} />
                     <AdminChatbox onToggle={setShowChatbox} />
                     <button className='admin-user' onClick={() => setShowDropdown(!showDropdown)}>
                         <img src="/admin_img/user.png" alt="User" />
@@ -118,7 +125,7 @@ function AdminPage({token}) {
                     <Route path="/" element={<AdminHome />} />
                     <Route path="/users" element={<AdminUser />} />
                     <Route path="/classrooms" element={<AdminClassroom />} />
-                    <Route path="/appointment" element={<AdminAppointment token={token} />} />
+                    <Route path="/appointment" element={<AdminAppointment token={token} forceUpdate={forceUpdate}  key={forceUpdate}  />} />
                     <Route path="/statistics" element={<AdminStatistics />} />
                 </Routes>
             </div>

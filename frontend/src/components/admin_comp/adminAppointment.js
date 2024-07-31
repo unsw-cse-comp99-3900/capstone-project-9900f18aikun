@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import './adminAppointment.css';
 
-function AdminAppointment({ token }) {
+function AdminAppointment({ token,forceUpdate }) {
     const [date, setDate] = useState(dayjs());
     const [bookingData, setBookingData] = useState([]);
     const [requestData, setRequestData] = useState([]);
@@ -57,7 +57,7 @@ function AdminAppointment({ token }) {
 
         fetchBookingData();
         fetchRequestData(); // 调用新增的数据获取函数
-    }, [date, token]);
+    }, [date, token,forceUpdate]);
 
     const formatTime = (time) => {
         return time.slice(0, 5); // 只取前5个字符，即 "HH:MM"

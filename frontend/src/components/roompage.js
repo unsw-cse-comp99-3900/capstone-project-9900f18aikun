@@ -1,8 +1,16 @@
-import React, { useEffect, useState,useCallback} from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "./roompage.css";
 import Table from "./Table";
-import { Button, Rate, Spin, Space,Modal, Notification ,ConfigProvider} from "@arco-design/web-react";
-import enUS from '@arco-design/web-react/es/locale/en-US';
+import {
+  Button,
+  Rate,
+  Spin,
+  Space,
+  Modal,
+  Notification,
+  ConfigProvider,
+} from "@arco-design/web-react";
+import enUS from "@arco-design/web-react/es/locale/en-US";
 // import ErrorBox from "./errorBox";
 
 import MakeRate from "./makerate";
@@ -30,12 +38,15 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   // const [currentUserId, setCurrentUserId] = useState(null);
   // const [editingCommentId, setEditingCommentId] = useState(null);
   // const [editingCommentText, setEditingCommentText] = useState("");// 用于存储编辑评论
-  const [ratingData, setRatingData] = useState({ is_rated: false, my_rate: 0, room_score: 0 });
+  const [ratingData, setRatingData] = useState({
+    is_rated: false,
+    my_rate: 0,
+    room_score: 0,
+  });
   const [isRateModalVisible, setIsRateModalVisible] = useState(false); // State for modal visibility
   const [currentUserId, setCurrentUserId] = useState(null); // Add currentUserId state
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
- 
 
   const handleReportClick = () => {
     setIsReportModalVisible(true);
@@ -56,7 +67,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         },
         body: JSON.stringify(obj),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error("Server responded with an error: " + errorText);
@@ -64,10 +75,10 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         setIsReporting(false);
         setReportText("");
         setIsReportModalVisible(false); // 关闭 Modal
-        
+
         Notification.success({
-          title: 'Success',
-          content: 'You have successfully reported.',
+          title: "Success",
+          content: "You have successfully reported.",
         });
       }
     } catch (error) {
@@ -76,7 +87,6 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       setLoadingData(false);
     }
   };
-
 
   // const handleReportClick = () => {
   //   setIsReporting(!isReporting);
@@ -112,31 +122,30 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   //   }
   // };
 
-
-
-
-
   const fetchComments = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`, {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
+      const response = await fetch(
+        `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (response.status === 204) {
         setComments([]);
         console.log("No comments found for this room.");
         return;
       }
-  
+
       if (!response.ok) {
         throw new Error("Failed to fetch comments");
       }
-  
+
       const commentsData = await response.json();
       setComments(commentsData.comments); // Use comments as received from backend
       setCurrentUserId(commentsData.current_zid); // 获取当前用户ID
@@ -149,13 +158,16 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const fetchRatingData = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/get-rate?room_id=${roomid}`, {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-        },
-      });
+      const response = await fetch(
+        `http://3.26.67.188:5001/comment/get-rate?room_id=${roomid}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch rating data");
@@ -226,14 +238,11 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       }
     };
 
-
-
-
     fetchRatingData();
     fetchComments();
     fetchBookingData();
     fetchRoom();
-  }, [roomid, selectedDate, change,fetchComments,fetchRatingData]);
+  }, [roomid, selectedDate, change, fetchComments, fetchRatingData]);
 
   useEffect(() => {
     if (room && data.length) {
@@ -242,19 +251,17 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     }
   }, [room, data]);
 
-
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: 'Error',
+        title: "notification",
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
-        onClose: () => setErrorMessage("")
+        onClose: () => setErrorMessage(""),
       });
     }
   }, [errorMessage]);
 
- 
   if (loadingRoom || loadingData) {
     return (
       <div className="loading-container">
@@ -265,30 +272,20 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     );
   }
 
-
   return (
-    <div className="content">
+    <div className="main-content">
       {room ? (
-        <div>
+        <div className="roompage-content">
           <div className="room-card">
             <div className="room-details">
               <div className="room-title">
                 <h1>{room.room_detail.name}</h1>
               </div>
               <div className="subtitle-button">
-              <span className="room-subtitle">
-                ({room.room_detail.building}: Level {room.room_detail.level})
-                Max. capacity: {room.room_detail.capacity}
-              </span>
-              <Button
-                  type="primary"
-                  status={isReporting ? "default" : "danger"}
-                  className="report-button"
-                  onClick={handleReportClick}
-              >
-                  <img src="/img/Setting.png" alt="Setting" className="icon" />
-                  {isReporting ? "Cancel" : "Report"}
-              </Button>
+                <span className="room-subtitle">
+                  ({room.room_detail.building}: Level {room.room_detail.level})
+                  Max. capacity: {room.room_detail.capacity}
+                </span>
               </div>
               {/* {isReporting && (
                 <div>
@@ -304,11 +301,21 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               )} */}
               {/*  rating component */}
               <div className="room-rating">
-                <Rate readonly allowHalf value={ratingData.is_rated ? ratingData.room_score : 0} />
+                <Rate
+                  readonly
+                  allowHalf
+                  value={ratingData.is_rated ? ratingData.room_score : 0}
+                />
                 <span className="rate-span">
-                  {ratingData.is_rated ? ratingData.room_score.toFixed(1) : "Nobody rated before"}
+                  {ratingData.is_rated
+                    ? ratingData.room_score.toFixed(1)
+                    : "Nobody rated before"}
                 </span>
-                <Button className='make-rate-button' type="primary" onClick={() => setIsRateModalVisible(true)}>
+                <Button
+                  className="make-rate-button"
+                  type="primary"
+                  onClick={() => setIsRateModalVisible(true)}
+                >
                   Make Rate
                 </Button>
               </div>
@@ -326,14 +333,25 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               </p>
               <p>💡 Power available</p>
             </div>
-          {/* Add MakeRate modal here */}
-          <MakeRate
-            visible={isRateModalVisible}
-            onClose={() => setIsRateModalVisible(false)}
-            roomid={roomid}
-            myRate={ratingData.my_rate}
-            fetchRatingData={fetchRatingData} // Pass fetchRatingData to MakeRate
-          />
+            {/* Add MakeRate modal here */}
+            <MakeRate
+              visible={isRateModalVisible}
+              onClose={() => setIsRateModalVisible(false)}
+              roomid={roomid}
+              myRate={ratingData.my_rate}
+              fetchRatingData={fetchRatingData} // Pass fetchRatingData to MakeRate
+            />
+            <div className="report-div">
+              <Button
+                type="primary"
+                status={isReporting ? "default" : "danger"}
+                className="report-button"
+                onClick={handleReportClick}
+              >
+                <img src="/img/Setting.png" alt="Setting" className="icon" />
+                {isReporting ? "Cancel" : "Report"}
+              </Button>
+            </div>
           </div>
 
           {roomData && (
@@ -344,12 +362,16 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               map={false}
               change={change}
               setChange={setChange}
+              setErrorMessage={setErrorMessage}
             />
           )}
 
           {/* Add a comment section below the table */}
-          <Comments roomid={roomid} currentUserId={currentUserId} setCurrentUserId={setCurrentUserId} />
-              
+          <Comments
+            roomid={roomid}
+            currentUserId={currentUserId}
+            setCurrentUserId={setCurrentUserId}
+          />
         </div>
       ) : (
         <div>No room information</div>
@@ -359,16 +381,21 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       )} */}
       <ConfigProvider locale={enUS}>
         <Modal
-        title="Report"
-        visible={isReportModalVisible}
-        onOk={handleSubmit}
-        onCancel={() => setIsReportModalVisible(false)}
+          title="Report"
+          visible={isReportModalVisible}
+          onOk={handleSubmit}
+          onCancel={() => setIsReportModalVisible(false)}
         >
           <textarea
             placeholder="Enter report details"
             value={reportText}
             onChange={(e) => setReportText(e.target.value)}
-            style={{ width: '450px', height: '100px', padding: '10px', fontSize: '14px' }}
+            style={{
+              width: "450px",
+              height: "100px",
+              padding: "10px",
+              fontSize: "14px",
+            }}
           />
         </Modal>
       </ConfigProvider>

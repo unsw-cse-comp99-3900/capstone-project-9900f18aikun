@@ -3,25 +3,26 @@
   bottom: 80px; 
   right: 20px;
   z-index: 1000;
+  bottom:100px;
 }
 .chat-box-container.open .chat-box {
   display: block;
 }
 
 .chat-toggle-button {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #007bff;
+  position: fixed;
+  bottom: 23px;
+  right: 77px;
+  padding: 0;
+  background: none;
   border: none;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  z-index: 1001;
+  height: 48px; 
+  width: 51px;
+  transition: transform 0.3s ease; /* Add smooth transition */
 }
+
 
 .chat-box .overlap-group {
   height: 1060px;
@@ -229,21 +230,11 @@ height: 1050px;
 width: 953px;
 }
 
-.chat-toggle-button {
-  position: fixed;
-  bottom: 23px;
-  right: 77px;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-  height: 48px; 
-  width: 51px; 
-}
+
 .chat-toggle-icon {
   width: 60px; 
   height: 60px; 
+  transition: transform 0.3s ease; /* Add smooth transition to the icon as well */
 }
 
 
@@ -310,11 +301,43 @@ width: 953px;
 
 .exchange-button {
   position: absolute;
-  left: 20px;
+  top: -20px;
+  left: 11px;
   width: 40px;
   height: 40px;
   cursor: pointer;
+  opacity: 0.7;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
+.exchange-button:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
+.exchange-button-container {
+  position: relative;
+}
+.exchange-button-hint {
+  position: absolute;
+  bottom: 100%;
+  left: 100px;
+  bottom: 25px;
+  transform: translateX(-50%);
+  background-color: white;
+  color: rgb(8, 7, 7);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 19px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  margin-bottom: 5px;
+}
+
+.exchange-button-container:hover .exchange-button-hint {
+  opacity: 0.7;
+}
+
 
 .send-button-container {
   display: flex;
@@ -409,6 +432,7 @@ object-fit: cover;
 float: right;
 top: 37px; 
 margin-left: 35px;
+transition: transform 0.3s ease;
 }
 
 .mode-switch-button {
@@ -530,4 +554,112 @@ cursor: pointer;
 
 .send-button:hover {
 background-color: #0056b3;
+}
+.chat-toggle-button:hover {
+  transform: scale(1.2); /* Make the button 20% larger on hover */
+  background: none;
+}
+.chat-toggle-button:hover .chat-toggle-icon {
+  transform: scale(1.2); /* Make the icon 20% larger on hover */
+}
+.chat-toggle-container {
+  position: fixed;
+  bottom: 23px;
+  right: 77px;
+  z-index: 1001;
+}
+.chat-toggle-button {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  height: 48px; 
+  width: 51px;
+  transition: transform 0.3s ease;
+}
+.chat-toggle-button:hover {
+  transform: scale(1.2);
+}
+
+.chat-toggle-icon {
+  width: 60px; 
+  height: 60px; 
+  transition: transform 0.3s ease;
+}
+
+.chat-toggle-button:hover .chat-toggle-icon {
+  transform: scale(1.2);
+}
+
+.chat-toggle-hint {
+  position: absolute;
+  top: -72px;
+  right: 19px;
+  transform: translateX(-50%);
+  background-color: white;
+  color: black;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.chat-toggle-container:hover .chat-toggle-hint {
+  opacity: 0.5;
+}
+.chat-header-container {
+  position: relative;
+}
+
+.chat-header-hint {
+  position: absolute;
+  top: 2px;
+  left: 230px;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  color: rgb(4, 4, 4);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  margin-top: 5px;
+}
+
+.chat-header-container:hover .chat-header-hint {
+  opacity: 0.5;
+}
+.chat-header {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: -3px;
+  left: 0px;
+  right: 610px; 
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.bot-image {
+  position: absolute;
+  height: 70px;
+  width: 85px;
+  object-fit: cover;
+  float: right;
+  top: 34px; 
+  margin-left: 35px;
+  transition: transform 0.3s ease;
+}
+.chat-header:hover .bot-image
+{
+  transform: scale(1.2);
+}
+
+.chat-header:hover .service-image
+ {
+  transform: scale(1.2);
 }

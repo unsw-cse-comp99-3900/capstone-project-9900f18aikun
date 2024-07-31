@@ -52,8 +52,8 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
 
   useEffect(() => {
     if (errorMessage) {
-      Notification.error({
-        title: 'Error',
+      Notification.info({
+        title: 'Notification',
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
         onClose: () => setErrorMessage("")
