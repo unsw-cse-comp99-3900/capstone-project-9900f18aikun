@@ -782,10 +782,10 @@ class unblock_room(Resource):
             }, 400
         
 roomid_edit_model = booking_ns.model('roomid_edit_model', {
-    'room_id': fields.Integer(required=True, description='edit room id', default=1),
+    'room_id': fields.Integer(required=True, description='edit room id', default=3),
     'name': fields.String(description='New name of the room', default="G01"),
     'building': fields.String(description='New level of the room', default="K17"),
-    'capacity': fields.Integer(description='New capacity of the room', default=1),
+    'capacity': fields.Integer(description='New capacity of the room', default=3),
     'level': fields.String(description='New level of the room', default="G"),
 })
 
