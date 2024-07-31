@@ -1,0 +1,314 @@
+{'level': None, 'start_time': None, 'end_time': None, 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '15:00', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:00', 'end_time': '16:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:00', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '19:00', 'end_time': '19:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '18:30', 'end_time': '19:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+Client connected: z82918
+send_message dgsfesthdjdhts
+Message from z82918: dgsfesthdjdhts
+Client disconnected: z82918 at 2024-07-31 13:28:15
+{'level': None, 'start_time': '13:00', 'end_time': '13:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': None, 'start_time': '13:00', 'end_time': '14:00', 'date': '2024-07-31', 'max_capacity': None}
+z1
+z1
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:33:07
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:33:25
+{'level': '2', 'start_time': '18:30', 'end_time': '19:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:34:13
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '19:30', 'end_time': '19:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:34:59
+send_message bcccnbnb
+user is z82918
+Message from z2: bcccnbnb
+Client disconnected: z2 at 2024-07-31 13:37:40
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '18:30', 'end_time': '19:30', 'date': '2024-08-01', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:44:18
+Client disconnected: z2 at 2024-07-31 13:44:20
+{'level': '2', 'start_time': '18:30', 'end_time': '19:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '18:30', 'end_time': '19:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '14:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '14:30', 'end_time': '15:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '15:30', 'end_time': '17:00', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:54:58
+Client disconnected: z2 at 2024-07-31 13:55:43
+{'level': '2', 'start_time': '19:30', 'end_time': '20:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-08-01', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 13:57:43
+{'level': '2', 'start_time': '16:30', 'end_time': '17:00', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:00', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:00', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '18:30', 'end_time': '19:00', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '19:30', 'end_time': '20:00', 'date': '2024-08-01', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 14:03:26
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 14:09:10
+Client disconnected: z2 at 2024-07-31 14:11:37
+Client disconnected: z2 at 2024-07-31 14:15:15
+Client disconnected: z2 at 2024-07-31 14:15:15
+Client disconnected: z2 at 2024-07-31 14:16:01
+Client disconnected: z2 at 2024-07-31 14:16:02
+Client disconnected: z2 at 2024-07-31 14:17:28
+Client disconnected: z2 at 2024-07-31 14:17:28
+Client disconnected: z2 at 2024-07-31 14:17:45
+Client disconnected: z2 at 2024-07-31 14:19:03
+Client disconnected: z2 at 2024-07-31 14:24:45
+Client disconnected: z2 at 2024-07-31 14:40:07
+Client disconnected: z2 at 2024-07-31 14:47:29
+Client disconnected: z2 at 2024-07-31 14:58:57
+Client disconnected: z2 at 2024-07-31 14:58:58
+Client disconnected: z2 at 2024-07-31 15:04:14
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:40', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '18:30', 'end_time': '19:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '20:00', 'end_time': '20:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 15:08:08
+Client disconnected: z2 at 2024-07-31 15:08:08
+{'level': '2', 'start_time': '20:00', 'end_time': '20:30', 'date': '2024-08-01', 'max_capacity': None}
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:13:49
+Client disconnected: z2 at 2024-07-31 15:21:28
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:25:56
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:26:08
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:30:40
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:30:43
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:31:44
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:33:19
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:33:22
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:33:25
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:33:36
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:35:09
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:35:20
+Client disconnected: z2 at 2024-07-31 15:37:49
+Client disconnected: z2 at 2024-07-31 15:52:23
+Client disconnected: z2 at 2024-07-31 15:52:23
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:53:59
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:55:04
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 15:56:02
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 15:56:40
+Client disconnected: z2 at 2024-07-31 15:58:57
+Client disconnected: z2 at 2024-07-31 15:58:57
+Client disconnected: z2 at 2024-07-31 15:59:00
+Client disconnected: z2 at 2024-07-31 15:59:00
+
+z
+z1
+z
+z
+z
+z1
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-02', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-03-08', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 16:12:33
+Client disconnected: z2 at 2024-07-31 16:12:35
+Client disconnected: z2 at 2024-07-31 16:12:35
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-02', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-04', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-03', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-02', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-02', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-02', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-01', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-08-02', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 16:20:41
+Client disconnected: z2 at 2024-07-31 16:20:41
+Client disconnected: z2 at 2024-07-31 16:21:57
+Client disconnected: z2 at 2024-07-31 16:21:57
+Client disconnected: z2 at 2024-07-31 16:28:48
+Client disconnected: z2 at 2024-07-31 16:28:48
+Client disconnected: z2 at 2024-07-31 16:32:06
+Client disconnected: z2 at 2024-07-31 17:03:06
+Client disconnected: z2 at 2024-07-31 17:03:06
+Client disconnected: z2 at 2024-07-31 17:13:13
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:17:25
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:17:49
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:17:56
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:18:00
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:18:15
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:19:02
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': '2', 'start_time': '17:30', 'end_time': '18:30', 'date': '2024-07-31', 'max_capacity': None}
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:21:08
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:21:20
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:21:22
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:21:24
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 17:21:46
+{'level': None, 'start_time': '08:30', 'end_time': '09:00', 'date': '2024-07-31', 'max_capacity': None}
+{'level': None, 'start_time': '13:00', 'end_time': '13:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 17:28:53
+Client disconnected: z2 at 2024-07-31 17:28:56
+Client disconnected: z2 at 2024-07-31 17:28:56
+z82918
+send_message ok
+user is z82918
+Message from z2: ok
+Client disconnected: z2 at 2024-07-31 17:39:45
+Client disconnected: z2 at 2024-07-31 17:39:45
+Client disconnected: z2 at 2024-07-31 17:39:45
+Client disconnected: z2 at 2024-07-31 17:40:35
+Client disconnected: z2 at 2024-07-31 17:40:36
+Client disconnected: z2 at 2024-07-31 17:40:36
+{'level': None, 'start_time': '13:00', 'end_time': '13:30', 'date': '2024-07-31', 'max_capacity': None}
+{'level': None, 'start_time': '13:00', 'end_time': '13:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 18:20:46
+Client connected: z27693
+send_message hi
+Message from z27693: hi
+send_message hhhh
+user is z27693
+Message from z2: hhhh
+send_message hhh
+user is z17887
+Message from z2: hhh
+send_message hhhh
+user is z1
+Message from z2: hhhh
+send_message 88888
+user is z82918
+Message from z2: 88888
+Client disconnected: z27693 at 2024-07-31 18:24:22
+Client connected: z27693
+Client disconnected: z27693 at 2024-07-31 18:24:28
+Client connected: z27693
+Client disconnected: z27693 at 2024-07-31 18:24:31
+Client connected: z27693
+Client disconnected: z27693 at 2024-07-31 18:24:33
+Client connected: z27693
+send_message 999990
+Message from z27693: 999990
+Client disconnected: z27693 at 2024-07-31 18:24:53
+send_message jjjj
+user is z27693
+Message from z2: jjjj
+Client connected: z27693
+Client disconnected: z27693 at 2024-07-31 18:25:17
+Client disconnected: z54322 at 2024-07-31 18:48:19
+Client disconnected: z54322 at 2024-07-31 18:48:19
+Client disconnected: z33652 at 2024-07-31 19:12:58
+Client disconnected: z33652 at 2024-07-31 19:12:58
+{'level': None, 'start_time': '08:00', 'end_time': '08:34', 'date': '2024-07-31', 'max_capacity': None}
+{'level': None, 'start_time': '08:00', 'end_time': '08:30', 'date': '2024-07-31', 'max_capacity': None}
+Client disconnected: z2 at 2024-07-31 19:42:41
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 19:45:28
+Client disconnected: z2 at 2024-07-31 19:56:51
+{'level': None, 'start_time': '16:00', 'end_time': '17:00', 'date': '2024-07-31', 'max_capacity': None}
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 19:58:33
+Client disconnected: z2 at 2024-07-31 20:00:31
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:00:53
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:00:55
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:00:58
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:03:00
+Client disconnected: z2 at 2024-07-31 20:06:12
+Client disconnected: z2 at 2024-07-31 20:06:12
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:06:42
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:06:44
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:07:05
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:18:55
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:18:57
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:18:59
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:19:01
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:19:14
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:20:31
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:20:54
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:20:57
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:20:59
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:21:10
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:21:11
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:21:12
+Client connected: z1
+Client disconnected: z1 at 2024-07-31 20:21:17
+Client disconnected: z2 at 2024-07-31 20:48:28
+Client disconnected: z2 at 2024-07-31 20:48:28
+Client disconnected: z2 at 2024-07-31 20:48:51
+Client disconnected: z2 at 2024-07-31 20:48:51
+Client disconnected: z2 at 2024-07-31 20:49:37
+Client disconnected: z2 at 2024-07-31 20:49:37
+Client disconnected: z2 at 2024-07-31 20:57:30
+Client disconnected: z2 at 2024-07-31 20:57:30
+Client disconnected: z2 at 2024-07-31 21:16:52
+Client disconnected: z2 at 2024-07-31 21:16:53
+Client disconnected: z2 at 2024-07-31 21:28:15
+Client disconnected: z2 at 2024-07-31 21:28:16
+z1
+Client disconnected: z2 at 2024-07-31 21:33:19
+Client disconnected: z2 at 2024-07-31 21:33:21
+Client disconnected: z2 at 2024-07-31 21:38:50
+Client disconnected: z2 at 2024-07-31 21:38:52
+Client disconnected: z2 at 2024-07-31 21:49:51
+Client disconnected: z2 at 2024-07-31 21:49:52
+Client disconnected: z2 at 2024-07-31 22:06:39
+Client disconnected: z2 at 2024-07-31 22:06:41
+Client disconnected: z2 at 2024-07-31 22:08:38
+Client disconnected: z2 at 2024-07-31 22:08:38
