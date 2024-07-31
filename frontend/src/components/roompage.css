@@ -99,6 +99,14 @@
   top: 5vh;
 }
 
+.edit-div {
+  position: relative;
+}
+.edit-button {
+  width: fit-content;
+  top: 5vh;
+}
+
 .room-image {
   margin-top: 15px;
   width: 190px;
