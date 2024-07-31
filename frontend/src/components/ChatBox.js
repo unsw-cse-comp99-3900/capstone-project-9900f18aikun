@@ -185,7 +185,7 @@ export const ChatBox = ({ change, setChange }) => {
         end_time:
           selectedRoom.end_time.split(":")[0] +
           ":" +
-          selectedRoom.start_time.split(":")[1],
+          selectedRoom.end_time.split(":")[1],
       };
 
       console.log("Booking information being sent to API:", bookingInfo);
@@ -324,7 +324,8 @@ export const ChatBox = ({ change, setChange }) => {
     setInputMessage("");
   };
   useEffect(() => {
-    console.log(expressBookMessages);
+    console.log("express booking is", expressBookMessages);
+    console.log("selected room is", selectedRoom);
   }, [expressBookMessages]);
   const handleRequestRoom = async (roomName) => {
     try {
@@ -347,7 +348,7 @@ export const ChatBox = ({ change, setChange }) => {
         end_time:
           selectedRoom.end_time.split(":")[0] +
           ":" +
-          selectedRoom.start_time.split(":")[1],
+          selectedRoom.end_time.split(":")[1],
       };
 
       console.log("Booking information being sent to API:", bookingInfo);
