@@ -1,14 +1,19 @@
-.content {
-  width: 100%; /* 占据整个页面宽度 */
-  height: 100%; /* 占据整个页面高度 */
+.roompage-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .room-card {
   position: relative;
   padding: 20px;
-  margin: 0 0 0 18vh;
+  margin: 0;
   font-family: Arial, sans-serif;
   width: 1000px;
-
+  display: flex;
+  flex-direction: row;
+  flex: 5 1 auto;
+  justify-content: space-between;
 }
 
 .room-info {
@@ -60,7 +65,7 @@
 }
 
 .edit-button {
-  background-color: #E0E0E0 !important;
+  background-color: #e0e0e0 !important;
   color: #333 !important;
   border: none !important;
   padding: 5px 10px !important;
@@ -82,25 +87,24 @@
   background-color: #0056b3;
 }
 
-.subtitle-button{
+.subtitle-button {
   display: flex;
 }
 
+.report-div {
+  position: relative;
+}
 .report-button {
-  position: absolute;
-  left: 55vw;
   width: fit-content;
+  top: 5vh;
 }
 
-
-
-
-.room-image{
+.room-image {
   margin-top: 15px;
   width: 190px;
   height: 190px;
 }
-.room-image img{
+.room-image img {
   width: 180px;
   height: 180px;
 }
@@ -120,7 +124,7 @@
 }
 
 .room-card .report-button {
-  background-color: #E0E0E0 !important;
+  background-color: #e0e0e0 !important;
   color: #333 !important;
   border: none !important;
   padding: 5px 10px !important;
@@ -132,7 +136,7 @@
 }
 
 .room-card .report-button:hover {
-  background-color: #BDBDBD !important;
+  background-color: #bdbdbd !important;
 }
 
 .report-button .icon {
@@ -141,7 +145,7 @@
   height: 16px;
 }
 .room-card .make-rate-button {
-  background-color: #FFF9C4 !important;
+  background-color: #fff9c4 !important;
   color: #333 !important;
   border: none !important;
   padding: 5px 10px !important;
@@ -152,7 +156,7 @@
 }
 
 .room-card .make-rate-button:hover {
-  background-color: #FFF176 !important;
+  background-color: #fff176 !important;
 }
 
 .form-group {
@@ -167,6 +171,3 @@
   border-radius: 4px;
   box-sizing: border-box;
 }
-
-
-

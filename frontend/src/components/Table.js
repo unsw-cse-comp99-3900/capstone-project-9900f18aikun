@@ -420,7 +420,9 @@ const Table = ({
     if (className.includes("no-permission")) {
       permissionClass = false;
     }
-    const dashboardContent = document.querySelector(".dashboard-content");
+    const dashboardContent =
+      document.querySelector(".dashboard-content") ||
+      document.querySelector(".main-content");
     const rect = dashboardContent.getBoundingClientRect();
     const position = {
       top: event.clientY - rect.top,
