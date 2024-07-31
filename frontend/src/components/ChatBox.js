@@ -21,6 +21,7 @@ export const ChatBox = ({ change, setChange }) => {
   const textAreaRef = useRef(null);
   const [roomType, setRoomType] = useState("hotdesk");
   const [latestRoomData, setLatestRoomData] = useState(null);
+  const [isRotated, setIsRotated] = useState(false);
   useEffect(() => {
     if (isOpen) {
       const storedMessages = localStorage.getItem('expressBookMessages');
@@ -73,6 +74,7 @@ export const ChatBox = ({ change, setChange }) => {
         timestamp: new Date() 
       };
       setExpressBookMessages(prev => [...prev, message]);
+      setIsRotated(prev => !prev); // Toggle the rotation state
     }
   };
   const scrollToBottom = () => {
@@ -473,14 +475,14 @@ export const ChatBox = ({ change, setChange }) => {
                   </div>
                   <div className="chat-input">
                   <div className="exchange-button-container">
-  <img 
-    src="/chat_box/exchange.png" 
-    alt="Exchange" 
-    className="exchange-button" 
-    onClick={toggleRoomType}
-  />
-  <span className="exchange-button-hint">Switch room type</span>
-</div>
+                      <img 
+                        src="/chat_box/exchange.png" 
+                        alt="Exchange" 
+                        className={`exchange-button ${isRotated ? 'rotated' : ''}`}
+                        onClick={toggleRoomType}
+                      />
+                      <span className="exchange-button-hint">Switch room type</span>
+                    </div>
                     <textarea
                       ref={textAreaRef}
                       value={inputMessage}
