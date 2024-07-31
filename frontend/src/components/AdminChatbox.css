@@ -583,11 +583,12 @@ transition: background-color 0.3s ease;
   height: 27px;
   margin-left: 10px;
   margin-top: 6px;
-  /* opacity: 0.4;  */
-  transition: opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease; /* Add transition for smooth scaling and opacity change */
 }
-
-
+.calendar-button:hover img {
+  transform: scale(1.12); /* Make the image 20% larger on hover */
+  opacity: 1; /* Full opacity on hover */
+}
 .calendar-tooltip {
   visibility: hidden;
   width: 180px;
@@ -618,6 +619,7 @@ transition: background-color 0.3s ease;
   cursor: pointer;
   padding: 0;
   margin-right: 10px;
+  transition: transform 0.3s ease; /* Add transition for smooth scaling */
 }
 .calendar-button:hover {
   background: none;
