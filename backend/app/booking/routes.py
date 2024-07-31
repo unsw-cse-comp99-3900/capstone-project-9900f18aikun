@@ -535,6 +535,11 @@ class ExpressBook(Resource):
 
         if not start_time or not end_time:
             return {'error': "Sorry, we can't get start time or end time, please try again"}, 400
+
+        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[03]0$', start_time) or not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[03]0$', end_time):
+            return {'error': 'time only accept on the hour or on the half hour'}, 400
+
         if not max_capacity:
             max_capacity = 1
         if not date:
