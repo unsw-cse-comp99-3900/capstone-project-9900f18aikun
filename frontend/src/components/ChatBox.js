@@ -178,8 +178,14 @@ export const ChatBox = ({ change, setChange }) => {
       const bookingInfo = {
         room_id: intRoomId,
         date: selectedRoom.date,
-        start_time: selectedRoom.start_time.split(":")[0] + ":00",
-        end_time: selectedRoom.end_time.split(":")[0] + ":00",
+        start_time:
+          selectedRoom.start_time.split(":")[0] +
+          ":" +
+          selectedRoom.start_time.split(":")[1],
+        end_time:
+          selectedRoom.end_time.split(":")[0] +
+          ":" +
+          selectedRoom.start_time.split(":")[1],
       };
 
       console.log("Booking information being sent to API:", bookingInfo);
@@ -317,6 +323,9 @@ export const ChatBox = ({ change, setChange }) => {
 
     setInputMessage("");
   };
+  useEffect(() => {
+    console.log(expressBookMessages);
+  }, [expressBookMessages]);
   const handleRequestRoom = async (roomName) => {
     try {
       const token = localStorage.getItem("token");
@@ -331,8 +340,14 @@ export const ChatBox = ({ change, setChange }) => {
       const bookingInfo = {
         room_id: parseInt(selectedRoom.room_id, 10),
         date: selectedRoom.date,
-        start_time: selectedRoom.start_time.split(":")[0] + ":00",
-        end_time: selectedRoom.end_time.split(":")[0] + ":00",
+        start_time:
+          selectedRoom.start_time.split(":")[0] +
+          ":" +
+          selectedRoom.start_time.split(":")[1],
+        end_time:
+          selectedRoom.end_time.split(":")[0] +
+          ":" +
+          selectedRoom.start_time.split(":")[1],
       };
 
       console.log("Booking information being sent to API:", bookingInfo);
