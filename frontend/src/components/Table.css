@@ -60,48 +60,57 @@ table {
   position: relative;
   text-align: center;
   vertical-align: middle;
-  width: 80px;
-  height: 40px;
+  height: 60px !important;
 }
 
 #mytable th {
   background-color: #d3a6d4;
   color: black;
+  height: 60px;
 }
 
 .box {
-  width: 95%;
-  height: 95%;
-  margin: auto;
-  border-radius: 10px;
+  width: 98%;
+  height: 98%;
+  border-radius: 15px;
 }
 
 td.reserved .box {
   background-color: rgb(204, 202, 200);
+  cursor: not-allowed;
 }
 
 td.selfreserved .box {
   background-color: rgb(245, 238, 175);
+  cursor: not-allowed;
 }
 
 td.requested .box {
   background-color: rgb(203, 237, 205);
+  cursor: not-allowed;
 }
 
 td.signedin .box {
   background-color: rgb(200, 232, 249);
+  cursor: not-allowed;
 }
 
 td.disabled {
   background-color: rgb(231, 231, 231);
+  cursor: not-allowed;
 }
 
 td.no-permission .box {
   background-color: rgb(230, 212, 231);
 }
 
+td.no-permission {
+  cursor: pointer;
+}
+
 td.permission {
   background-color: white;
+  cursor: pointer;
 }
 
 #mytable thead tr th:first-child,
@@ -288,7 +297,6 @@ td.reserved .requested .selfreserved:hover {
 }
 
 #mytable .select-space {
-  background-color: rgb(208, 181, 228) !important;
   position: absolute;
   background-color: white;
   border: 1px solid #ccc;
