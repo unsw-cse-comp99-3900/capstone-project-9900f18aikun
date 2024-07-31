@@ -29,7 +29,7 @@
 /* Table wrapper styling */
 .table-wrapper {
   overflow-x: auto;
-  max-width: 50vw;
+  max-width: 65vw;
   overflow-y: scroll;
   max-height: 55vh;
 }
@@ -109,7 +109,7 @@ td.permission {
   background-color: rgb(249, 249, 249) !important;
   position: sticky;
   left: 0;
-  z-index: 2;
+  z-index: 5;
 }
 
 .time-column {
@@ -125,15 +125,6 @@ td.permission {
   /* width: max-content; */
   position: absolute;
   z-index: 2;
-}
-
-.select-window {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 100;
 }
 
 .button-class {
@@ -270,11 +261,6 @@ td.permission {
   z-index: 1; /* Ensure the header stays above other content */
 }
 
-#mytable thead th.select-space {
-  z-index: 5;
-  background-color: rgb(208, 181, 228) !important;
-}
-
 .singletable-wrapper {
   overflow-x: scroll;
   max-width: 780px;
@@ -290,4 +276,23 @@ td.reserved .requested .selfreserved:hover {
 
 .table-content {
   max-height: 70vh;
+}
+
+.select-window {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+#mytable .select-space {
+  background-color: rgb(208, 181, 228) !important;
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 10 !important;
 }
