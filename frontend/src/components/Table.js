@@ -420,14 +420,25 @@ const Table = ({
     if (className.includes("no-permission")) {
       permissionClass = false;
     }
-    const dashboardContent =
+    const content =
       document.querySelector(".dashboard-content") ||
       document.querySelector(".main-content");
-    const rect = dashboardContent.getBoundingClientRect();
-    const position = {
-      top: event.clientY - rect.top,
-      left: event.clientX - rect.left,
+    let position = {
+      top: event.clientY,
+      left: event.clientX,
     };
+    if (content) {
+      const rect = content.getBoundingClientRect();
+      position = {
+        top: event.clientY - rect.top,
+        left: event.clientX - rect.left,
+      };
+    }
+    // const rect = content.getBoundingClientRect();
+    // const position = {
+    //   top: event.clientY - rect.top,
+    //   left: event.clientX - rect.left,
+    // };
     setSelectWindow({
       visible: true,
       time,

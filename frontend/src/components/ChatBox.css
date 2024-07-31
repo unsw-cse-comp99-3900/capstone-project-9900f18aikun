@@ -1,9 +1,10 @@
 .chat-box-container {
   position: fixed;
-  bottom: 80px; 
-  right: 20px;
+  
+  right: 490px;
   z-index: 1000;
-  bottom:100px;
+  top:170px;
+
 }
 .chat-box-container.open .chat-box {
   display: block;
@@ -224,10 +225,10 @@
 
 
 .chat-box {
-transform: scale(0.5);
-transform-origin: bottom right;
-height: 1050px;
-width: 953px;
+  transform: scale(0.53);
+  transform-origin: bottom right;
+  height: 80px;
+  width: 50px;
 }
 
 
@@ -299,16 +300,7 @@ width: 953px;
   overflow-y: auto;
 }
 
-.exchange-button {
-  position: absolute;
-  top: -20px;
-  left: 11px;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
+
 .exchange-button:hover {
   transform: scale(1.2);
   opacity: 1;
@@ -662,4 +654,18 @@ background-color: #0056b3;
 .chat-header:hover .service-image
  {
   transform: scale(1.2);
+}
+.exchange-button {
+  position: absolute;
+  top: -20px;
+  left: 11px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.exchange-button.rotated {
+  transform: rotate(180deg);
 }

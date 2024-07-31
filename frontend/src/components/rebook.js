@@ -49,7 +49,21 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
 
   const toggleCalendarVisibility = (e) => {
     setIsCalendarVisible(!isCalendarVisible);
-    setCalendarPosition({ x: e.clientX, y: e.clientY });
+    const content =
+      document.querySelector(".dashboard-content") ||
+      document.querySelector(".main-content");
+    let position = {
+      top: e.clientY,
+      left: e.clientX,
+    };
+    if (content) {
+      const rect = content.getBoundingClientRect();
+      position = {
+        top: e.clientY - rect.top,
+        left: e.clientX - rect.left,
+      };
+    }
+    setCalendarPosition({ x: position.left, y: position.top });
   };
 
   function formatTime(time) {
