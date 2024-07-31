@@ -27,7 +27,7 @@ export const ChatBox = ({ change, setChange }) => {
       let messages = storedMessages ? JSON.parse(storedMessages) : [];
   
       const initialMessage = { 
-        text: `Default option is hotdesk. Press "exchange.png" to switch to meeting room.`, 
+        text: `Default option is hotdesk. Press "exchange.png" to switch to meeting room. Click ExpressBook talking to CustomerService.`, 
         sender: "bot", 
         timestamp: new Date(),
         showExchangeButton: true
