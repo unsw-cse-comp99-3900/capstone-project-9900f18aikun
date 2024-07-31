@@ -134,6 +134,7 @@ td.permission {
   /* width: max-content; */
   position: absolute;
   z-index: 2;
+  cursor: pointer;
 }
 
 .button-class {
