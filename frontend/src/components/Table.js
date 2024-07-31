@@ -4,28 +4,12 @@ import { Button } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import axios from "axios";
 
 import dayjs from "dayjs";
 import ToMap from "./toMap";
 import "./Table.css";
 
-// get sydney time
-// const getSydneyTime = async () => {
-//   while (true) {
-//     try {
-//       const response = await axios.get(
-//         "http://worldtimeapi.org/api/timezone/Australia/Sydney"
-//       );
-//       const datetime = new Date(response.data.datetime);
-//       return datetime;
-//     } catch (error) {
-//       console.error("Error fetching Sydney time:", error);
-//       await new Promise((resolve) => setTimeout(resolve, 10));
-//     }
-//   }
-// };
-
+// get the current time from backend
 const getSydneyTime = async (setErrorMessage) => {
   const token = localStorage.getItem("token");
 
@@ -71,6 +55,7 @@ const getTime = async (selectedDate) => {
   return times;
 };
 
+// select window function
 const SelectWindow = ({
   visible,
   time,
@@ -175,13 +160,11 @@ const SelectWindow = ({
         }
       } else {
         const errorText = await response.text();
-        setErrorMessage(
-          "Booking Failed.\nYou can only book up to 8 hours a day"
-        );
+        setErrorMessage("Booking Failed.");
         throw new Error("Something went wrong");
       }
     } catch (error) {
-      setErrorMessage("Booking Failed.\nYou can only book up to 8 hours a day");
+      setErrorMessage("Booking Failed.");
     }
 
     close();
@@ -201,7 +184,15 @@ const SelectWindow = ({
   return (
     <div
       className="select-window"
-      style={{ top: position.top, left: position.left, position: "absolute" }}
+      style={{
+        top: position.top,
+        left: position.left,
+        position: "absolute",
+        backgroundColor: "#fff",
+        border: "1px solid #ccc",
+        padding: "10px",
+        zIndex: 100,
+      }}
     >
       <>
         <div>
@@ -263,6 +254,7 @@ const SelectWindow = ({
   );
 };
 
+// main table
 const Table = ({
   data,
   selectedDate,
@@ -405,6 +397,7 @@ const Table = ({
     calculatePastTimes();
   }, [times]);
 
+  // handle click on table
   const clickHandler = (room, time, event, roomid) => {
     const target = event.target;
     const targetClassList = target.classList;
@@ -427,7 +420,12 @@ const Table = ({
     if (className.includes("no-permission")) {
       permissionClass = false;
     }
-    const position = { top: event.clientY, left: event.clientX };
+    const dashboardContent = document.querySelector(".dashboard-content");
+    const rect = dashboardContent.getBoundingClientRect();
+    const position = {
+      top: event.clientY - rect.top,
+      left: event.clientX - rect.left,
+    };
     setSelectWindow({
       visible: true,
       time,
@@ -441,12 +439,14 @@ const Table = ({
     });
   };
 
+  // only allow 7 days selection on calandar
   const disableDates = (date) => {
     const today = dayjs();
     const sevenDaysFromNow = today.add(6, "day");
     return date.isBefore(today, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
+  // define td's classname
   const getClassName = (time, room, isPast) => {
     if (!room.is_available || isPast) {
       return "disabled";
@@ -514,13 +514,6 @@ const Table = ({
         {/* legend */}
         <div className="legend">
           <div className="legendbox">
-            {/* <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "#ffcccc" }}
-              ></div>
-              <div className="legend-text">Disabled Public Use</div>
-            </div> */}
             <div className="legend-item">
               <div
                 className="legend-color"
@@ -561,6 +554,7 @@ const Table = ({
           </div>
         </div>
 
+        {/* table */}
         <div className="table-wrapper">
           <table id="mytable" className="mytable">
             <thead>

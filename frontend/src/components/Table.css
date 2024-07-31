@@ -50,7 +50,7 @@
 
 table {
   border-collapse: collapse;
-  width: max-content;
+  /* width: max-content; */
   min-width: 100%;
 }
 
@@ -66,7 +66,7 @@ table {
 #mytable th {
   background-color: #d3a6d4;
   color: black;
-  height: 60px;
+  height: 50px;
 }
 
 .box {
@@ -122,8 +122,8 @@ td.permission {
 }
 
 .time-column {
-  min-width: 50px;
-  max-width: 50px;
+  min-width: 60px;
+  max-width: 60px;
 }
 
 .room-column {
@@ -288,12 +288,12 @@ td.reserved .requested .selfreserved:hover {
 }
 
 .select-window {
-  position: absolute;
   background-color: white;
   border: 1px solid #ccc;
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  border-radius: 20px;
 }
 
 #mytable .select-space {
