@@ -2,8 +2,10 @@
   width: 90%;
   min-width: 30vw;
   max-width: 30vw;
+  min-height: 10vh;
+  max-height: 10vh;
   margin-top: 1vh; /* Increased top margin to move it down */
-  margin-bottom: 1vh;
+  margin-bottom: 2vh;
   padding: 0.2rem;
   background-color: #ffffff;
   border-radius: 6px;
@@ -18,7 +20,7 @@
 }
 
 .rebook-container h1 {
-  font-size: 2rem !important;
+  font-size: 1.5rem !important;
   color: #333;
   margin: 0;
 }

@@ -29,9 +29,9 @@
 /* Table wrapper styling */
 .table-wrapper {
   overflow-x: auto;
-  max-width: 70vw;
+  max-width: 50vw;
   overflow-y: scroll;
-  max-height: 70vh;
+  max-height: 55vh;
 }
 
 .calendar-row {
@@ -287,10 +287,7 @@ td.reserved .requested .selfreserved {
 td.reserved .requested .selfreserved:hover {
   cursor: not-allowed;
 }
-.table-wrapper {
-  max-height: 700px; /* Reduced from 600px */
-  max-width: 950px; /* Increased from 780px */
-  overflow-x: auto;
-  overflow-y: scroll;
-  border-radius: 2px;
+
+.table-content {
+  max-height: 70vh;
 }
