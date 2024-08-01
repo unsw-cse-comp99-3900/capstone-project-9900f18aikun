@@ -1,9 +1,9 @@
 .rebook-container {
   width: 90%;
-  min-width: 30vw;
-  max-width: 30vw;
-  min-height: 10vh;
-  max-height: 10vh;
+  min-width: 45vw;
+  max-width: 45vw;
+  min-height: 15vh;
+  max-height: 15vh;
   margin-top: 1vh; /* Increased top margin to move it down */
   margin-bottom: 2vh;
   padding: 0.2rem;
@@ -20,7 +20,7 @@
 }
 
 .rebook-container h1 {
-  font-size: 1.5rem !important;
+  font-size: 1.2rem !important;
   color: #333;
   margin: 0;
 }
@@ -52,7 +52,7 @@
 
 .rebook-container .arco-table td span[style*="cursor: pointer"] {
   padding: 2px 4px;
-  font-size: 0.7rem;
+  font-size: 0.4rem;
   border-radius: 2px;
   transition: background-color 0.3s ease;
 }

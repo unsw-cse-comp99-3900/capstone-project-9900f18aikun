@@ -76,7 +76,7 @@ const QrCodeCheckIn = () => {
         <div className="rectangle" />
         <div className="text-wrapper-3">UNSW</div>
         <div className="overlap" onClick={handleCheckIn}>
-          <p className="text-wrapper">sign in</p>
+          <p className="text-wrapper">Check In</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ const QrCodeCheckIn = () => {
         <img className="image" alt="" src="/img/image-159.png" />
 
         <div className="div-wrapper" onClick={handleGoToRoomPage}>
-          <div className="text-wrapper-2">book</div>
+          <div className="text-wrapper-2">Book</div>
         </div>
       </div>
     </div>

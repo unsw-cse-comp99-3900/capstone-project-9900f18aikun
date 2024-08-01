@@ -52,14 +52,14 @@ body,
   color: #000000;
 
   font-family: "Inter", Helvetica;
-  font-size: 60px;
+  font-size: 50px;
   font-weight: 400;
-  left: 27px;
+  left: 20px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
-  top: -2px;
-  width: 516px;
+  top: 5px;
+  /* width: 516px; */
 }
 
 .QR-code-check-in .div-wrapper {
@@ -88,7 +88,7 @@ body,
   line-height: normal;
   position: absolute;
   margin-top: -5px;
-  width: 300px;
+  /* width: 300px; */
 }
 .QR-code-check-in .text-wrapper-3 {
   font-family: "Inter", Helvetica;
