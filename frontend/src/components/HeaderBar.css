@@ -179,6 +179,7 @@
   padding: 0; /* Remove padding */
   height: 40px; /* Adjust height to make the button smaller */
   width: auto; /* Adjust width to content */
+  left: -30px;
 }
 
 .header-bar .arco-btn:hover {
