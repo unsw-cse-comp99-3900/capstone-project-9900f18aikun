@@ -598,7 +598,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  disabled={!selectedUser || !adminId}
+                  // disabled={!selectedUser || !adminId}
                 />
                 <img
                   className="vector"
