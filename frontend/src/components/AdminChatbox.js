@@ -60,7 +60,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } =
           data.message;
-
         const isAdminMessage = user_id !== chat_id;
 
         if (isAdminMessage && !adminId) {
@@ -266,11 +265,18 @@ const AdminChatbox = ({ onClose, onToggle }) => {
   };
 
   const handleSendMessage = () => {
+    console.log(
+      "this is what i want",
+      message.trim(),
+      socketRef.current,
+      selectedUser,
+      adminId
+    );
     if (
       message.trim() === "" ||
       !socketRef.current ||
-      !selectedUser ||
-      !adminId
+      !selectedUser
+      // ||!adminId
     )
       return;
 

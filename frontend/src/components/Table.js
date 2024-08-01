@@ -26,6 +26,7 @@ const getSydneyTime = async (setErrorMessage) => {
     if (response.ok) {
       const res = await response.json();
       const datetime = new Date(res.datetime);
+      console.log(datetime);
       return datetime;
     } else {
       const errorText = await response.text();
