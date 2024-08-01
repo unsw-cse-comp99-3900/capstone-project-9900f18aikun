@@ -305,3 +305,7 @@ td.reserved .requested .selfreserved:hover {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 10 !important;
 }
+
+#mytable .permission .box:hover {
+  background-color: yellow;
+}
