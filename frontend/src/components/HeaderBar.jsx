@@ -69,7 +69,7 @@ const HeaderBar = ({ onLogout, onHistory }) => {
         <Dropdown
           droplist={menu}
           trigger="click"
-          position="br"
+          position="bottom"
           className="arco-dropdown"
         >
           <Button type="text" className="arco-btn">
