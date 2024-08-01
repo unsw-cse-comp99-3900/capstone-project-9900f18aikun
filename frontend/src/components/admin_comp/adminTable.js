@@ -444,13 +444,13 @@ const Table = ({
             ></div>
             <div className="legend-text">Disabled Public Use</div>
           </div> */}
-          <div className="legend-item">
+          {/* <div className="legend-item">
             <div
               className="legend-color"
               style={{ backgroundColor: "#fce8a3" }}
             ></div>
             <div className="legend-text">Available</div>
-          </div>
+          </div> */}
         </div>
 
         <div className="singletable-wrapper">

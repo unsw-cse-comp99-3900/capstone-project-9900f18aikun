@@ -11,6 +11,7 @@ import {
 } from "@arco-design/web-react";
 import enUS from "@arco-design/web-react/es/locale/en-US";
 import ErrorBox from "../errorBox";
+import { Notification } from "@arco-design/web-react";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -134,7 +135,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: "Error",
+        title: "Notification",
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
         onClose: () => setErrorMessage(""),
