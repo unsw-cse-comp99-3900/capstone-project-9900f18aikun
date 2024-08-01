@@ -1,93 +1,90 @@
-.class-h1{
-    margin: 10px 0 10px 25px;
-    font-family:Arial,Helvetica,sans-serif;
-    font-size:  35px;;
+.class-h1 {
+  margin: 10px 0 10px 25px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 35px;
 }
 
 .search {
-    display: flex;
-    flex-direction: column;
-    margin: 30px;
-    font-family:Arial,Helvetica,sans-serif;
+  display: flex;
+  flex-direction: column;
+  margin: 30px;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.search h2{
-    color: #4E5969;
-    margin-bottom: 5px;
-    font-size:  25px;
-
+.search h2 {
+  color: #4e5969;
+  margin-bottom: 5px;
+  font-size: 25px;
 }
 
 .search_1 {
-    display: flex;
-    flex-direction: row;
-    align-items: center; /* Align items vertically in the center */
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Align items vertically in the center */
 }
 
 .search label {
-    display: inline-block; /* Ensure label is inline-block */
-    font-size: 18px;
-    margin-right: 10px; /* Add margin to separate label from select */
-     /* Align label vertically with select */
+  display: inline-block; /* Ensure label is inline-block */
+  font-size: 18px;
+  margin-right: 10px; /* Add margin to separate label from select */
+  /* Align label vertically with select */
 }
 
 select {
-    width: 200px;
-    height: 35px;
-    display: inline-block; /* Ensure select is also inline-block */
-    font-size: 16px; /* Adjust font size if necessary */
-    padding: 4px; /* Adjust padding to make the select smaller */
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    vertical-align: middle; /* Align select vertically */
+  width: 200px;
+  height: 35px;
+  display: inline-block; /* Ensure select is also inline-block */
+  font-size: 16px; /* Adjust font size if necessary */
+  padding: 4px; /* Adjust padding to make the select smaller */
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  vertical-align: middle; /* Align select vertically */
 }
 
 .input-group {
-    margin: 0 80px 0 0;
-    display: flex;
-    align-items: center;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-top: 10px; /* Add margin-top for spacing between rows */
+  margin: 0 80px 0 0;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 10px; /* Add margin-top for spacing between rows */
 }
 
 .input-group input {
-    /* width: 300px; */
-    height: 30px;
-    flex-grow: 1;
-    padding: 8px;
-    border: none;
-    outline: none;
-    font-size: 15px;
-    /* width: 500px; */
-    /* margin: 0 20px 0; */
+  /* width: 300px; */
+  height: 30px;
+  flex-grow: 1;
+  padding: 8px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  /* width: 500px; */
+  /* margin: 0 20px 0; */
 }
 
 .input-group .search-button {
-    background: none;
-    border: none;
-    padding: 5px 10px;
-    margin-right: 15px;
-    cursor: pointer;
-    width: 35px;
+  background: none;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 15px;
+  cursor: pointer;
+  width: 35px;
 }
 
 .input-group .search-button img {
-    width: 28px;
-    height: 28px;
+  width: 28px;
+  height: 28px;
 }
 
-.class-table{
-    margin: 25px 25px 25px 25px;
+.class-table {
+  margin: 25px 25px 25px 25px;
 }
-
-
 
 /* adminClassroom.css */
 div.admin-page .arco-table {
-    --table-bg: #F7F8FA; /* 修改表格背景颜色 */
-    --table-header-bg: #E5E6EB; /* 修改表头背景颜色 */
+  --table-bg: #f7f8fa; /* 修改表格背景颜色 */
+  --table-header-bg: #e5e6eb; /* 修改表头背景颜色 */
 }
 
 /* div.admin-page .arco-table table {
@@ -99,47 +96,47 @@ div.admin-page .arco-table thead {
 } */
 
 .admin-page .arco-table td {
-    background-color: #F7F8FA !important;  
+  background-color: #f7f8fa !important;
 }
 
 .admin-page .arco-table td:hover {
-    background-color: #E5E6EB !important;  
+  background-color: #e5e6eb !important;
 }
 /* adminClassroom.css */
 .admin-page .arco-table thead th {
-    background-color: #E5E6EB !important;  /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
 }
 /* adminClassroom.css */
 .admin-page .arco-table .table-button {
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding: 5px 5px; /* 调整按钮大小 */
-    display: inline-block;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px 5px; /* 调整按钮大小 */
+  display: inline-block;
 }
 
 /* 确保按钮在 hover 时不显示黄色背景 */
 .admin-page .arco-table td .table-button:hover {
-    background-color: transparent !important;
+  background-color: transparent !important;
 }
 .admin-page .arco-table .table-button img {
-    width: 20px; /* 减小图片的宽度 */
-    height: 20px; /* 减小图片的高度 */
+  width: 20px; /* 减小图片的宽度 */
+  height: 20px; /* 减小图片的高度 */
 }
 
-.table-button-2{
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding: 5px 5px; /* 调整按钮大小 */
-    display: inline-block;
+.table-button-2 {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px 5px; /* 调整按钮大小 */
+  display: inline-block;
 }
 
 .admin-page .arco-table td .table-button-2:hover {
-    background-color: transparent !important;
+  background-color: transparent !important;
 }
 
 .admin-page .arco-table .table-button-2 img {
-    width: 20px; /* 减小图片的宽度 */
-    height: 20px; /* 减小图片的高度 */
+  width: 20px; /* 减小图片的宽度 */
+  height: 20px; /* 减小图片的高度 */
 }

@@ -10,7 +10,12 @@ import TableRow from "@mui/material/TableRow";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { Spin, Space, Table as ArcoTable, Notification } from "@arco-design/web-react";
+import {
+  Spin,
+  Space,
+  Table as ArcoTable,
+  Notification,
+} from "@arco-design/web-react";
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
 
@@ -59,10 +64,10 @@ const ReservationHistory = () => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: 'Notification',
+        title: "Notification",
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
-        onClose: () => setErrorMessage("")
+        onClose: () => setErrorMessage(""),
       });
     }
   }, [errorMessage]);
@@ -219,9 +224,7 @@ const ReservationHistory = () => {
       key: "operation",
       align: "center",
       render: (_, record) => {
-        let text = (
-          <img src="/img/Remove.png" alt="No Operation Allowed" />
-        );
+        let text = <img src="/img/Remove.png" alt="No Operation Allowed" />;
 
         if (record.booking_status === "completed") {
           text = isCalendarVisible ? "Hide Calendar" : "Rebook";

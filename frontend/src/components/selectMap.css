@@ -3,7 +3,6 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
-
 }
 
 .map-title {
@@ -22,7 +21,7 @@
   border-radius: 8px;
 
   margin-top: 10px;
-/* Adjust width to content */
+  /* Adjust width to content */
   /* font-weight: bold;  */
 }
 
@@ -87,12 +86,12 @@
 
 .clickable-area.meetingroom {
   background: rgba(139, 188, 226, 0.4); /* 半透明 #9FD4FD */
-  border-radius: 5px; 
+  border-radius: 5px;
 }
 
 .clickable-area.desk {
   background: rgba(104, 200, 116, 0.3); /* 半透明 #7BE188 */
-  border-radius: 3px; 
+  border-radius: 3px;
 }
 
 .legend {
@@ -116,10 +115,10 @@
 
 .legend-color.meetingroom {
   background: rgba(159, 212, 253, 0.3); /* 半透明 #9FD4FD */
-  border: 1px solid #9FD4FD;
+  border: 1px solid #9fd4fd;
 }
 
 .legend-color.desk {
   background: rgba(123, 225, 136, 0.3); /* 半透明 #7BE188 */
-  border: 1px solid #7BE188;
+  border: 1px solid #7be188;
 }

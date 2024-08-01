@@ -1,271 +1,265 @@
-    .login-page {
-        background-color: #ffffff;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        width: 100vw; /* Use viewport width */
-        height: 100vh; /* Use viewport height */
-        overflow: hidden; /* Prevent overflow */
-    }
-    
-    .login-page .overlap-group-wrapper {
-        background-color: #ffffff;
-        height: 1024px;
-        overflow: hidden;
-        width: 1440px;
-        
-    }
-    
-    .login-page .overlap-group {
-        height: 1091px;
-        position: relative;
-        top: -58px;
-        width: 1619px;
-    }
-    
-    .login-page .IMG {
-        height: 1024px;
-        left: 254px;
-        object-fit: cover;
-        position: absolute;
-        top: 0;
-        width: 1365px;
-        
-    }
-    
-    .login-page .vector {
-        height: 541px;
-        left: 541px;
-        position: absolute;
-        top: 148px;
-        width: 286px;
-    }
-    
-    .login-page .rectangle {
-        background-color: #ffdc00;
-        height: 1024px;
-        left: 0;
-        position: absolute;
-        top: 58px;
-        width: 628px;
-    }
-    
-    .login-page .img {
-        height: 112px;
-        left: 75px;
-        position: absolute;
-        top: 426px;
-        width: 470px;
-    }
-    
-    .login-page .text-wrapper {
-        color: #000000;
-        font-family: "Inter", Helvetica;
-        font-size: 20px;
-        font-weight: 400;
-        left: 218px;
-        letter-spacing: 0;
-        line-height: normal;
-        position: absolute;
-        text-decoration: underline;
-        top: 719px;
-        width: 226px;
-    }
-    
-    .login-page .rectangle-2 {
-        height: 112px;
-        left: 75px;
-        position: absolute;
-        top: 560px;
-        width: 470px;
-    }
-    
-    .login-page .office-logos {
-        height: 92px;
-        left: 94px;
-        position: absolute;
-        top: 566px;
-        width: 92px;
-    }
-    
-    .login-page .div {
-        background-color: #ffffff;
-        box-shadow: 0px 5px 4px #00000040;
-        height: 92px;
-        left: 0;
-        position: absolute;
-        top: 56px;
-        width: 1440px;
-    }
-    
-    .login-page .unsw {
-        height: 90px;
-        left: 23px;
-        position: absolute;
-        top: 58px;
-        width: 92px;
-    }
-    
-    .login-page .rectangle-3 {
-        background-color: #ffffff;
-        height: 135px;
-        left: 0;
-        position: absolute;
-        top: 956px;
-        width: 1440px;
-    }
-    
-    .login-page .p {
-        color: #ffffff;
-        font-family: "Inter", Helvetica;
-        font-size: 30px;
-        font-weight: 400;
-        left: 114px;
-        letter-spacing: 0;
-        line-height: normal;
-        position: absolute;
-        top: 460px;
-        width: 382px;
-    }
-    
-    .login-page .text-wrapper-2 {
-        color: #ffffff;
-        font-family: "Inter", Helvetica;
-        font-size: 30px;
-        font-weight: 400;
-        left: 186px;
-        letter-spacing: 0;
-        line-height: normal;
-        position: absolute;
-        top: 591px;
-        width: 335px;
-    }
-    
-    .login-page .text-wrapper-3 {
-        color: #000000;
-        font-family: "Inter", Helvetica;
-        font-size: 30px;
-        font-weight: 400;
-        left: 180px;
-        letter-spacing: 0;
-        line-height: normal;
-        position: absolute;
-        top: 679px;
-        width: 226px;
-        display: inline-block;
-        border-bottom: 2px solid; /* Single line */
-        padding: 4px;
-        margin: 15px; /* Adjust this value to add space between text and underline */
-    }
-    
-    
-    .login-page .text-wrapper-4 {
-        color: #000000;
-        font-family: "Inter-SemiBold", Helvetica;
-        font-size: 60px;
-        font-weight: 600;
-        left: 87px;
-        letter-spacing: 0;
-        line-height: normal;
-        position: absolute;
-        top: 188px;
-        width: 532px;
-    }
+.login-page {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100vw; /* Use viewport width */
+  height: 100vh; /* Use viewport height */
+  overflow: hidden; /* Prevent overflow */
+}
 
-    .login-page .login-form {
-        position: absolute;
-        top: 430px;
-        left: 114px;
-        width: 382px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-      
-      .login-page .login-form input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 16px;
-      }
-      
-      .login-page .login-form button {
-        width: 100%;
-        padding: 10px;
-        background-color: #ffdc00;
-        border: none;
-        border-radius: 4px;
-        color: #000000;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      
-      .login-page .login-form button:hover {
-        background-color: #e6c600;
-      }
-      
-      .login-page .error-message {
-        color: #ff0000;
-        margin-top: 10px;
-        font-size: 14px;
-        text-align: center;
-      }
-      .login-page .login-form.large {
-        width: 450px;
-        padding: 30px;
-        margin-left: -50px; /* Adjust this value as needed */
-      }
-      
-      .login-page .login-form.large input {
-        font-size: 18px;
-        padding: 12px;
-        margin-bottom: 15px;
-      }
-      
-      .login-page .login-form .button-group {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-      }
-      
-      .login-page .login-form .button-group button {
-        width: 48%;
-        padding: 12px;
-        font-size: 18px;
+.login-page .overlap-group-wrapper {
+  background-color: #ffffff;
+  height: 1024px;
+  overflow: hidden;
+  width: 1440px;
+}
 
-      }
-      
-      .login-page .login-form .back-button {
-        background-color: #f0f0f0;
-        color: #000000;
-        margin: 0;
-      }
-      
-      .login-page .login-form .back-button:hover {
-        background-color: #e0e0e0;
-      }
+.login-page .overlap-group {
+  height: 1091px;
+  position: relative;
+  top: -58px;
+  width: 1619px;
+}
 
-      .login-page .p,
-      .login-page .text-wrapper-2,
-      .login-page .text-wrapper-3 {
-          cursor: pointer; /* Change cursor to pointer */
-          transition: color 0.3s; /* Smooth transition for color change */
-      }
-      
-      .login-page .p:hover,
-      .login-page .text-wrapper-2:hover {
-          color: #e6c600; /* Change color on hover */
-      }
-      .login-page .text-wrapper-3:hover{
-        color: #FFFEF8
-      }
+.login-page .IMG {
+  height: 1024px;
+  left: 254px;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  width: 1365px;
+}
 
-      
+.login-page .vector {
+  height: 541px;
+  left: 541px;
+  position: absolute;
+  top: 148px;
+  width: 286px;
+}
+
+.login-page .rectangle {
+  background-color: #ffdc00;
+  height: 1024px;
+  left: 0;
+  position: absolute;
+  top: 58px;
+  width: 628px;
+}
+
+.login-page .img {
+  height: 112px;
+  left: 75px;
+  position: absolute;
+  top: 426px;
+  width: 470px;
+}
+
+.login-page .text-wrapper {
+  color: #000000;
+  font-family: "Inter", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 218px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-decoration: underline;
+  top: 719px;
+  width: 226px;
+}
+
+.login-page .rectangle-2 {
+  height: 112px;
+  left: 75px;
+  position: absolute;
+  top: 560px;
+  width: 470px;
+}
+
+.login-page .office-logos {
+  height: 92px;
+  left: 94px;
+  position: absolute;
+  top: 566px;
+  width: 92px;
+}
+
+.login-page .div {
+  background-color: #ffffff;
+  box-shadow: 0px 5px 4px #00000040;
+  height: 92px;
+  left: 0;
+  position: absolute;
+  top: 56px;
+  width: 1440px;
+}
+
+.login-page .unsw {
+  height: 90px;
+  left: 23px;
+  position: absolute;
+  top: 58px;
+  width: 92px;
+}
+
+.login-page .rectangle-3 {
+  background-color: #ffffff;
+  height: 135px;
+  left: 0;
+  position: absolute;
+  top: 956px;
+  width: 1440px;
+}
+
+.login-page .p {
+  color: #ffffff;
+  font-family: "Inter", Helvetica;
+  font-size: 30px;
+  font-weight: 400;
+  left: 114px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 460px;
+  width: 382px;
+}
+
+.login-page .text-wrapper-2 {
+  color: #ffffff;
+  font-family: "Inter", Helvetica;
+  font-size: 30px;
+  font-weight: 400;
+  left: 186px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 591px;
+  width: 335px;
+}
+
+.login-page .text-wrapper-3 {
+  color: #000000;
+  font-family: "Inter", Helvetica;
+  font-size: 30px;
+  font-weight: 400;
+  left: 180px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 679px;
+  width: 226px;
+  display: inline-block;
+  border-bottom: 2px solid; /* Single line */
+  padding: 4px;
+  margin: 15px; /* Adjust this value to add space between text and underline */
+}
+
+.login-page .text-wrapper-4 {
+  color: #000000;
+  font-family: "Inter-SemiBold", Helvetica;
+  font-size: 60px;
+  font-weight: 600;
+  left: 87px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 188px;
+  width: 532px;
+}
+
+.login-page .login-form {
+  position: absolute;
+  top: 430px;
+  left: 114px;
+  width: 382px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-page .login-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.login-page .login-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #ffdc00;
+  border: none;
+  border-radius: 4px;
+  color: #000000;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-page .login-form button:hover {
+  background-color: #e6c600;
+}
+
+.login-page .error-message {
+  color: #ff0000;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+.login-page .login-form.large {
+  width: 450px;
+  padding: 30px;
+  margin-left: -50px; /* Adjust this value as needed */
+}
+
+.login-page .login-form.large input {
+  font-size: 18px;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.login-page .login-form .button-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.login-page .login-form .button-group button {
+  width: 48%;
+  padding: 12px;
+  font-size: 18px;
+}
+
+.login-page .login-form .back-button {
+  background-color: #f0f0f0;
+  color: #000000;
+  margin: 0;
+}
+
+.login-page .login-form .back-button:hover {
+  background-color: #e0e0e0;
+}
+
+.login-page .p,
+.login-page .text-wrapper-2,
+.login-page .text-wrapper-3 {
+  cursor: pointer; /* Change cursor to pointer */
+  transition: color 0.3s; /* Smooth transition for color change */
+}
+
+.login-page .p:hover,
+.login-page .text-wrapper-2:hover {
+  color: #e6c600; /* Change color on hover */
+}
+.login-page .text-wrapper-3:hover {
+  color: #fffef8;
+}

@@ -12,21 +12,21 @@ const CustomerService = () => {
   const textAreaRef = useRef(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     currentTokenRef.current = token;
 
     const socketURL = "ws://3.26.67.188:5001";
 
     socketRef.current = io(socketURL, {
       query: { token },
-      transports: ['websocket'],
+      transports: ["websocket"],
       timeout: 10000,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 3000,
     });
 
     const onConnect = () => {
-      console.log('Socket.IO Connected');
+      console.log("Socket.IO Connected");
       setIsConnected(true);
     };
 
@@ -36,7 +36,7 @@ const CustomerService = () => {
     };
 
     const onMessage = (data) => {
-      console.log('Received message:', data);
+      console.log("Received message:", data);
       if (data.message) {
         const newMessage = {
           id: data.message.message_id,
@@ -45,67 +45,68 @@ const CustomerService = () => {
           isFromAdmin: data.message.user_id !== data.message.chat_id,
           userName: data.message.user_name,
           userId: data.message.user_id,
-          chatId: data.message.chat_id
+          chatId: data.message.chat_id,
         };
-        setMessages(prev => {
+        setMessages((prev) => {
           const updatedMessages = [...prev, newMessage];
           setTimeout(scrollToBottom, 0); // Scroll after state update
           return updatedMessages;
         });
       }
     };
-    
+
     const onUserChatHistory = (history) => {
-      console.log('Received chat history:', history);
+      console.log("Received chat history:", history);
       if (history && Array.isArray(history.messages)) {
-        const formattedHistory = history.messages.map(msg => ({
+        const formattedHistory = history.messages.map((msg) => ({
           id: msg.message_id,
           text: msg.message,
           timestamp: msg.timestamp,
           isFromAdmin: msg.user_id !== msg.chat_id,
           userName: msg.user_name,
           userId: msg.user_id,
-          chatId: msg.chat_id
+          chatId: msg.chat_id,
         }));
         setMessages(formattedHistory);
         setTimeout(scrollToBottom, 0); // Scroll after state update
       }
     };
 
-    socketRef.current.on('connect', onConnect);
-    socketRef.current.on('disconnect', onDisconnect);
-    socketRef.current.on('message', onMessage);
-    socketRef.current.on('user_chat_history', onUserChatHistory);
+    socketRef.current.on("connect", onConnect);
+    socketRef.current.on("disconnect", onDisconnect);
+    socketRef.current.on("message", onMessage);
+    socketRef.current.on("user_chat_history", onUserChatHistory);
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.off('connect', onConnect);
-        socketRef.current.off('disconnect', onDisconnect);
-        socketRef.current.off('message', onMessage);
-        socketRef.current.off('user_chat_history', onUserChatHistory);
+        socketRef.current.off("connect", onConnect);
+        socketRef.current.off("disconnect", onDisconnect);
+        socketRef.current.off("message", onMessage);
+        socketRef.current.off("user_chat_history", onUserChatHistory);
         socketRef.current.disconnect();
       }
     };
   }, []);
 
   const sendMessage = () => {
-    if (inputMessage.trim() === "" || !isConnected || !socketRef.current) return;
-  
+    if (inputMessage.trim() === "" || !isConnected || !socketRef.current)
+      return;
+
     const messageData = {
       msg: inputMessage,
     };
-  
-    console.log('Sending message:', messageData);
-  
-    socketRef.current.emit('send_message', messageData, (acknowledgement) => {
+
+    console.log("Sending message:", messageData);
+
+    socketRef.current.emit("send_message", messageData, (acknowledgement) => {
       if (acknowledgement) {
-        console.log('Message acknowledged by server');
+        console.log("Message acknowledged by server");
         scrollToBottom(); // Scroll after the message is sent
       } else {
-        console.warn('Message not acknowledged by server');
+        console.warn("Message not acknowledged by server");
       }
     });
-  
+
     setInputMessage("");
   };
 
@@ -119,38 +120,45 @@ const CustomerService = () => {
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
     });
   };
 
   return (
     <div className="customer-service">
       <div className="chat-messages" ref={messagesEndRef}>
-      {messages.map((msg, index) => (
-        <div key={msg.id || index} className={`message ${msg.isFromAdmin ? 'sent' : 'received'}`}>
-          <div className="message-content">
-            <div className="message-timestamp">{formatDateTime(msg.timestamp)}</div>
-            <div className="message-text">
-              {msg.isFromAdmin ? `Admin (${msg.userId}): ${msg.text}` : `${msg.userName} (${msg.userId}): ${msg.text}`}
+        {messages.map((msg, index) => (
+          <div
+            key={msg.id || index}
+            className={`message ${msg.isFromAdmin ? "sent" : "received"}`}
+          >
+            <div className="message-content">
+              <div className="message-timestamp">
+                {formatDateTime(msg.timestamp)}
+              </div>
+              <div className="message-text">
+                {msg.isFromAdmin
+                  ? `Admin (${msg.userId}): ${msg.text}`
+                  : `${msg.userName} (${msg.userId}): ${msg.text}`}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
       <div className="chat-input">
         <textarea
           ref={textAreaRef}
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyPress={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               sendMessage();
             }

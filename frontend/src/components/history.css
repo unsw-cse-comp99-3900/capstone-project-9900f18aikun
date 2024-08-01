@@ -1,248 +1,252 @@
 .reservation-history {
-    font-family: 'Roboto', Arial, sans-serif;
-    width: 90%;
-    max-width: 1200px;
-    margin: 2rem auto;
-    background-color: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
+  font-family: "Roboto", Arial, sans-serif;
+  width: 90%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
 
-  header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
 
 header h1 {
-    font-size: 2.2rem;
-    color: #333;
-    margin-bottom: 0.5rem;
-  }
-  
+  font-size: 2.2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
 ul {
-    list-style-type: none;
-    padding: 0;
+  list-style-type: none;
+  padding: 0;
 }
 
 .reservation {
-    background-color: #fff7e0;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background-color: #fff7e0;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .uncompleted {
-    background-color: #fff7e0;
+  background-color: #fff7e0;
 }
 
 .completed {
-    background-color: #e0f7e0;
+  background-color: #e0f7e0;
 }
 
 .cancelled {
-    background-color: #f7e0e0;
+  background-color: #f7e0e0;
 }
 
 .buttons {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 button {
-    background-color: #ffd700;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
+  background-color: #ffd700;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 button:hover {
-    background-color: #ffc107;
+  background-color: #ffc107;
 }
 
 .cancel-button {
-    background-color: #ff5722;
-    color: white;
+  background-color: #ff5722;
+  color: white;
 }
 
 .cancel-button:hover {
-    background-color: #e64a19;
+  background-color: #e64a19;
 }
 
 .rebook-button {
-    background-color: #4caf50;
-    color: white;
+  background-color: #4caf50;
+  color: white;
 }
 
 .rebook-button:hover {
-    background-color: #388e3c;
+  background-color: #388e3c;
 }
 
 .evaluation-button {
-    background-color: #ffd700;
-    color: black;
+  background-color: #ffd700;
+  color: black;
 }
 
 .navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 
-.back-button, .next-page-button {
-    background-color: #ffd700;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
+.back-button,
+.next-page-button {
+  background-color: #ffd700;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.back-button:hover, .next-page-button:hover {
-    background-color: #ffc107;
+.back-button:hover,
+.next-page-button:hover {
+  background-color: #ffc107;
 }
 
 .no-history {
-    text-align: center;
-    font-size: 1.4rem;
-    color: #8c8c8c;
-    margin-top: 2rem;
-    padding: 2rem;
-    background-color: #f9fafb;
-    border-radius: 8px;
-  }
+  text-align: center;
+  font-size: 1.4rem;
+  color: #8c8c8c;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
 
-  /* loading */
-  .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 50vh;
-  }
+/* loading */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
 
 .history-table .arco-table td {
-    background-color: #F7F8FA !important;  
+  background-color: #f7f8fa !important;
 }
 
 .history-table .arco-table td:hover {
-    background-color: #E5E6EB !important;  
+  background-color: #e5e6eb !important;
 }
 
 .history-table .arco-table thead th {
-    background-color: #E5E6EB !important;  /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
 }
 
-
-
 .history-table.arco-table thead th {
-    background-color: #f5f5f5; /* 修改表头背景颜色 */
-    font-weight: bold; /* 加粗表头文字 */
+  background-color: #f5f5f5; /* 修改表头背景颜色 */
+  font-weight: bold; /* 加粗表头文字 */
 }
 
 .history-table .arco-table tbody tr:hover {
-    background-color: #f9f9f9; /* 悬停时修改行背景颜色 */}
+  background-color: #f9f9f9; /* 悬停时修改行背景颜色 */
+}
 
 /* --------- */
 .reservation-history .arco-table td {
-    background-color: #F7F8FA !important;  
+  background-color: #f7f8fa !important;
 }
 
 .reservation-history .arco-table td:hover {
-    background-color: #E5E6EB !important;  
+  background-color: #e5e6eb !important;
 }
 
 .reservation-history .arco-table thead th {
-    background-color: #E5E6EB !important;  /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
 }
 
-
-
 .reservation-history.arco-table thead th {
-    background-color: #f5f5f5; /* 修改表头背景颜色 */
-    font-weight: bold; /* 加粗表头文字 */
+  background-color: #f5f5f5; /* 修改表头背景颜色 */
+  font-weight: bold; /* 加粗表头文字 */
 }
 
 .reservation-history .arco-table tbody tr:hover {
-    background-color: #f9f9f9; /* 悬停时修改行背景颜色 */}
+  background-color: #f9f9f9; /* 悬停时修改行背景颜色 */
+}
 
-    .arco-table {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      }
-      
-      .arco-table th {
-        background-color: #f0f2f5 !important;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 16px !important;
-      }
-      
-      .arco-table td {
-        padding: 16px !important;
-      }
-      
-      .arco-table tr:nth-child(even) {
-        background-color: #f9fafb !important;
-      }
-      
-      .arco-table tr:hover {
-        background-color: #e6f7ff !important;
-        transition: background-color 0.3s ease;
-      }
-      
-      .arco-table-pagination {
-        margin-top: 20px;
-        text-align: right;
-      }
-      
-      /* Styling for operation buttons */
-      .arco-table td span[style*="cursor: pointer"] {
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 500;
-      }
-      
-      .arco-table td span[style*="color: red"] {
-        background-color: #ff4d4f;
-        color: white !important;
-      }
-      
-      .arco-table td span[style*="color: green"] {
-        background-color: #52c41a;
-        color: white !important;
-      }
-      
-      .arco-table td span[style*="cursor: pointer"]:hover {
-        opacity: 0.8;
-      }
-      
-      /* Styling for extend booking checkbox */
-      .arco-table td input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-      }
-      .error-box {
-        background-color: #fff2f0;
-        border: 1px solid #ffccc7;
-        border-radius: 4px;
-        padding: 1rem;
-        margin-top: 1rem;
-        color: #ff4d4f;
-        font-weight: 500;
-        animation: fadeIn 0.3s ease;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      
+.arco-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.arco-table th {
+  background-color: #f0f2f5 !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px !important;
+}
+
+.arco-table td {
+  padding: 16px !important;
+}
+
+.arco-table tr:nth-child(even) {
+  background-color: #f9fafb !important;
+}
+
+.arco-table tr:hover {
+  background-color: #e6f7ff !important;
+  transition: background-color 0.3s ease;
+}
+
+.arco-table-pagination {
+  margin-top: 20px;
+  text-align: right;
+}
+
+/* Styling for operation buttons */
+.arco-table td span[style*="cursor: pointer"] {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.arco-table td span[style*="color: red"] {
+  background-color: #ff4d4f;
+  color: white !important;
+}
+
+.arco-table td span[style*="color: green"] {
+  background-color: #52c41a;
+  color: white !important;
+}
+
+.arco-table td span[style*="cursor: pointer"]:hover {
+  opacity: 0.8;
+}
+
+/* Styling for extend booking checkbox */
+.arco-table td input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+.error-box {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: #ff4d4f;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

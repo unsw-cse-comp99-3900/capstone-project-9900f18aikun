@@ -1,31 +1,30 @@
 .appointment-pickDate {
-    margin: 15px 0 10px 40px;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #4E5969;
+  margin: 15px 0 10px 40px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #4e5969;
 }
 
 .appointment-pickDate label {
-    margin-bottom: 5px;
-    font-size: 22px;
+  margin-bottom: 5px;
+  font-size: 22px;
 }
 /* 
 table */
 .class-table {
-    margin: 25px 35px 25px 35px;
+  margin: 25px 35px 25px 35px;
 }
 
 .admin-page .arco-table td {
-    background-color: #F7F8FA !important;  
+  background-color: #f7f8fa !important;
 }
 
 .admin-page .arco-table td:hover {
-    background-color: #E5E6EB !important;  
+  background-color: #e5e6eb !important;
 }
 
 .admin-page .arco-table thead th {
-    background-color: #E5E6EB !important;  /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
 }
-
 
 /* .admin-page .arco-table .table-button {
     border: none;

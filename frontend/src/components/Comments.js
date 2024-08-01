@@ -1,10 +1,20 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Comment, Avatar, Button,Popconfirm, Notification } from "@arco-design/web-react";
-import { IconHeart, IconMessage, IconHeartFill } from "@arco-design/web-react/icon";
+import {
+  Comment,
+  Avatar,
+  Button,
+  Popconfirm,
+  Notification,
+} from "@arco-design/web-react";
+import {
+  IconHeart,
+  IconMessage,
+  IconHeartFill,
+} from "@arco-design/web-react/icon";
 import "./Comments.css";
 // import ErrorBox from "./errorBox";
 
-const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
+const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
@@ -16,13 +26,16 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
   const fetchComments = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`, {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.status === 204) {
         setComments([]);
@@ -53,10 +66,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: 'Notification',
+        title: "Notification",
         content: errorMessage,
         duration: 0, // 0 means the notification will not auto close
-        onClose: () => setErrorMessage("")
+        onClose: () => setErrorMessage(""),
       });
     }
   }, [errorMessage]);
@@ -68,19 +81,22 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
   const handleRootCommentSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          room_id: roomid,
-          comment: rootCommentText,
-          comment_to_id: 0,
-        }),
-      });
+      const response = await fetch(
+        `http://3.26.67.188:5001/comment/make-comment`,
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            room_id: roomid,
+            comment: rootCommentText,
+            comment_to_id: 0,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -89,8 +105,8 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
 
       await fetchComments();
       Notification.success({
-        title: 'Success',
-        content: 'Comment success.',
+        title: "Success",
+        content: "Comment success.",
       });
     } catch (error) {
       setErrorMessage(error.message);
@@ -102,19 +118,22 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
   const handleReplySubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://3.26.67.188:5001/comment/make-comment`, {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          room_id: roomid,
-          comment: replyText,
-          comment_to_id: replyingTo,
-        }),
-      });
+      const response = await fetch(
+        `http://3.26.67.188:5001/comment/make-comment`,
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            room_id: roomid,
+            comment: replyText,
+            comment_to_id: replyingTo,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -164,8 +183,8 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       setEditingCommentId(null);
       setEditingCommentText("");
       Notification.success({
-        title: 'Success',
-        content: 'Edit comment success!',
+        title: "Success",
+        content: "Edit comment success!",
       });
     } catch (error) {
       setErrorMessage(error.message);
@@ -199,8 +218,8 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
 
       await fetchComments();
       Notification.success({
-        title: 'Success',
-        content: 'Comment deleted successfully.',
+        title: "Success",
+        content: "Comment deleted successfully.",
       });
     } catch (error) {
       setErrorMessage(error.message);
@@ -235,7 +254,11 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       const updateComments = (comments) => {
         return comments.map((c) => {
           if (c.id === comment.id) {
-            return { ...c, current_user_liked: !c.current_user_liked, like_count: result.like_count };
+            return {
+              ...c,
+              current_user_liked: !c.current_user_liked,
+              like_count: result.like_count,
+            };
           } else if (c.child_comment) {
             return { ...c, child_comment: updateComments(c.child_comment) };
           }
@@ -249,7 +272,14 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
     }
   };
 
-  const colors = ['#FCE996', '#9FD4FD', '#FB9DC7', '#89E9E0', '#7BE188', '#FCC59F'];
+  const colors = [
+    "#FCE996",
+    "#9FD4FD",
+    "#FB9DC7",
+    "#89E9E0",
+    "#7BE188",
+    "#FCC59F",
+  ];
   const userColors = {};
 
   const getUserColor = (userId) => {
@@ -269,10 +299,15 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
             className="custom-comment-action"
             key="heart"
             onClick={() => handleLikeClick(comment)}
-            style={{ backgroundColor: '#E5E6EB', border: 'none', padding: '5px 10px', borderRadius: '4px' }}
+            style={{
+              backgroundColor: "#E5E6EB",
+              border: "none",
+              padding: "5px 10px",
+              borderRadius: "4px",
+            }}
           >
             {comment.current_user_liked ? (
-              <IconHeartFill style={{ color: '#f53f3f' }} />
+              <IconHeartFill style={{ color: "#f53f3f" }} />
             ) : (
               <IconHeart />
             )}
@@ -294,15 +329,15 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
                 Edit
               </span>
               <Popconfirm
-                  focusLock
-                  title='Do you want to delete the comment?'
-                  okText='Delete'
-                  cancelButtonProps={{ style: { display: 'none' } }}
-                  onOk={() => handleDeleteClick(comment.id)}
+                focusLock
+                title="Do you want to delete the comment?"
+                okText="Delete"
+                cancelButtonProps={{ style: { display: "none" } }}
+                onOk={() => handleDeleteClick(comment.id)}
               >
                 <span
                   className="custom-comment-action"
-                  style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
+                  style={{ color: isAdmin ? "red" : "inherit" }} // Red color for admin delete button
                 >
                   Delete
                 </span>
@@ -310,7 +345,9 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
             </React.Fragment>
           ),
         ]}
-        author={`${comment.user_name}${comment.user_id === currentUserId ? ' (ME)' : ''}`} // Add user identifier
+        author={`${comment.user_name}${
+          comment.user_id === currentUserId ? " (ME)" : ""
+        }`} // Add user identifier
         avatar={
           <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
             {comment.user_name.charAt(0).toUpperCase()}
@@ -325,11 +362,18 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
                 onChange={(e) => setEditingCommentText(e.target.value)}
                 className="edit-input"
               />
-              <div className="edit-comment-actions"> 
-                <Button type="secondary" onClick={() => setEditingCommentId(null)}>
+              <div className="edit-comment-actions">
+                <Button
+                  type="secondary"
+                  onClick={() => setEditingCommentId(null)}
+                >
                   Cancel
                 </Button>
-                <Button type="primary" onClick={handleEditSubmit} style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}>
+                <Button
+                  type="primary"
+                  onClick={handleEditSubmit}
+                  style={{ backgroundColor: "#C396ED", borderColor: "#C396ED" }}
+                >
                   Submit
                 </Button>
               </div>
@@ -344,23 +388,29 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
             : `${comment.date} ${comment.time}`
         }
       >
-        {comment.child_comment && renderComments(comment.child_comment, level + 1)}
+        {comment.child_comment &&
+          renderComments(comment.child_comment, level + 1)}
         {replyingTo === comment.id && (
           <Comment
             align="right"
             actions={[
-              <Button key="0" type="secondary" onClick={() => setReplyingTo(null)}>
+              <Button
+                key="0"
+                type="secondary"
+                onClick={() => setReplyingTo(null)}
+              >
                 Cancel
               </Button>,
-              <Button key="1" type="primary" onClick={handleReplySubmit} style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}>
+              <Button
+                key="1"
+                type="primary"
+                onClick={handleReplySubmit}
+                style={{ backgroundColor: "#C396ED", borderColor: "#C396ED" }}
+              >
                 Reply
               </Button>,
             ]}
-            avatar={
-              <Avatar style={{ backgroundColor: '#14a9f8' }}>
-                Me
-              </Avatar>
-            }
+            avatar={<Avatar style={{ backgroundColor: "#14a9f8" }}>Me</Avatar>}
             content={
               <div>
                 <input
@@ -368,7 +418,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
                   value={replyText}
                   onChange={(e) => {
                     if (!e || !e.target) {
-                      console.error('Event or event target is undefined');
+                      console.error("Event or event target is undefined");
                       return;
                     }
                     setReplyText(e.target.value);
@@ -390,18 +440,23 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
       <Comment
         align="right"
         actions={[
-          <Button key="0" type="secondary" onClick={() => setRootCommentText("")}>
+          <Button
+            key="0"
+            type="secondary"
+            onClick={() => setRootCommentText("")}
+          >
             Cancel
           </Button>,
-          <Button key="1" type="primary" onClick={handleRootCommentSubmit}style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}>
+          <Button
+            key="1"
+            type="primary"
+            onClick={handleRootCommentSubmit}
+            style={{ backgroundColor: "#C396ED", borderColor: "#C396ED" }}
+          >
             Comment
           </Button>,
         ]}
-        avatar={
-          <Avatar style={{ backgroundColor: '#14a9f8' }}>
-            Me
-          </Avatar>
-        }
+        avatar={<Avatar style={{ backgroundColor: "#14a9f8" }}>Me</Avatar>}
         content={
           <div>
             <input
@@ -409,7 +464,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
               value={rootCommentText}
               onChange={(e) => {
                 if (!e || !e.target) {
-                  console.error('Event or event target is undefined');
+                  console.error("Event or event target is undefined");
                   return;
                 }
                 setRootCommentText(e.target.value);
@@ -419,7 +474,6 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin}) => {
           </div>
         }
       />
-      
     </div>
   );
 };
