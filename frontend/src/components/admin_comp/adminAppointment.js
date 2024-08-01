@@ -95,7 +95,7 @@ function AdminAppointment({ token, forceUpdate }) {
       const data = await response.json();
       console.log(data.message);
       Notification.success({
-        closable: false,
+        closable: true,
         title: "Notification",
         content: "You have approved the booking request.",
       });
@@ -124,8 +124,8 @@ function AdminAppointment({ token, forceUpdate }) {
       });
       const data = await response.json();
       console.log(data.message);
-      Notification.success({
-        closable: false,
+      Notification.info({
+        closable: true,
         title: "Notification",
         content: "You have rejected the booking request.",
       });
