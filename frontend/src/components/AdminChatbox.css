@@ -285,7 +285,7 @@
 
 .admin-chatbox .chatbox-container {
   position: fixed; /* Ensure it's positioned relative to the viewport */
-  right: 110px; /* Reduced from 2000px to move left */
+  right: 73px; /* Reduced from 2000px to move left */
   top: 110px; /* Reduced from 7000px to move up */
   height: 600px;
   display: flex;
