@@ -1,6 +1,7 @@
 import "./LoginPage.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import api from "../api.js";
 
 const LoginPage = ({ onLogin }) => {
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -39,7 +40,7 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setError("");
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(api + "/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +62,7 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleOutlookLogin = () => {
-    window.location.href = "/api/auth/outlook-login";
+    window.location.href = api + "/auth/outlook-login";
   };
 
   const handleForgotPassword = () => {

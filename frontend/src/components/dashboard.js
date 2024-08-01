@@ -6,6 +6,7 @@ import Table from "./Table";
 import ChatBox from "./ChatBox";
 import ErrorBox from "./errorBox";
 import { Notification } from "@arco-design/web-react";
+import api from "../api";
 
 const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,7 +26,9 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   const checkTodayBooking = async () => {
     try {
       const response = await fetch(
-        "/api/booking/is_book_today?date=" + selectedDate.format("YYYY-MM-DD"),
+        api +
+          "/booking/is_book_today?date=" +
+          selectedDate.format("YYYY-MM-DD"),
         {
           method: "GET",
           headers: {
@@ -60,7 +63,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     try {
       const formattedDate = selectedDate.format("YYYY-MM-DD");
       const response = await fetch(
-        `/api/booking/meetingroom?date=${formattedDate}`,
+        api + `/booking/meetingroom?date=${formattedDate}`,
         {
           method: "GET",
           headers: {

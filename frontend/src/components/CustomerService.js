@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./CustomerService.css";
+import socketURL from "../socket";
 
 const CustomerService = () => {
   const [inputMessage, setInputMessage] = useState("");
@@ -15,8 +16,9 @@ const CustomerService = () => {
     const token = localStorage.getItem("token");
     currentTokenRef.current = token;
 
-    const socketURL = "ws://3.26.67.188:5001";
-
+    // const socketURL = "ws://3.26.67.188:5001";
+    // const socketURL = "ws://0.0.0.0:5001";
+    console.log("socket url is ", socketURL);
     socketRef.current = io(socketURL, {
       query: { token },
       transports: ["websocket"],

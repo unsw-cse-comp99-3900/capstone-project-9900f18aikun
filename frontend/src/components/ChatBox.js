@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import CustomerService from "./CustomerService";
 import "./ChatBox.css";
+import api from "../socket";
 const Component = ({ className }) => <div className={className}>{}</div>;
 export const ChatBox = ({ change, setChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -178,7 +179,7 @@ export const ChatBox = ({ change, setChange }) => {
 
       console.log("Booking information being sent to API:", bookingInfo);
 
-      const response = await fetch("/api/booking/book", {
+      const response = await fetch(api + "/booking/book", {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -264,7 +265,7 @@ export const ChatBox = ({ change, setChange }) => {
 
       console.log("Sending to server:", JSON.stringify(requestBody, null, 2));
 
-      const response = await fetch("/api/booking/express-book", {
+      const response = await fetch(api + "/booking/express-book", {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -343,7 +344,7 @@ export const ChatBox = ({ change, setChange }) => {
 
       console.log("Booking information being sent to API:", bookingInfo);
 
-      const response = await fetch("/api/booking/book", {
+      const response = await fetch(api + "/booking/book", {
         method: "POST",
         headers: {
           accept: "application/json",

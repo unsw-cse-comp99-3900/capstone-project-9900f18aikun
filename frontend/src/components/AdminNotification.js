@@ -3,8 +3,11 @@ import { Badge } from "@arco-design/web-react";
 import io from "socket.io-client";
 import "./AdminNotification.css";
 import { useNavigate, useLocation } from "react-router-dom";
+import api from "../api";
+import socketURL from "../socket";
 
-const socketURL = "ws://3.26.67.188:5001";
+// const socketURL = "ws://3.26.67.188:5001";
+// const socketURL = "ws://0.0.0.0:5001";
 
 function AdminNotification({
   contentState,
@@ -21,7 +24,7 @@ function AdminNotification({
     try {
       const token = localStorage.getItem("token");
       console.log("Fetching notification status...");
-      const response = await fetch(`/api/admin/view`, {
+      const response = await fetch(api + `/admin/view`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -130,7 +133,7 @@ function AdminNotification({
     try {
       const token = localStorage.getItem("token");
       console.log("Marking notifications as viewed...");
-      const response = await fetch(`/api/admin/view`, {
+      const response = await fetch(api + `/admin/view`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

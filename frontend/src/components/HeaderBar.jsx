@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import "./HeaderBar.css";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, Menu, Button } from "@arco-design/web-react";
+import api from "../api";
 
 const verifyID = async (SetIsAdmin) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(`/api/admin/check_admin`, {
+    const response = await fetch(api + `/admin/check_admin`, {
       method: "GET",
       headers: {
         accept: "application/json",

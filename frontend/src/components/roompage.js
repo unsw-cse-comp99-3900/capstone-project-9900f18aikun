@@ -15,6 +15,7 @@ import enUS from "@arco-design/web-react/es/locale/en-US";
 
 import MakeRate from "./makerate";
 import Comments from "./Comments"; // Import the new Comments component
+import api from "../api";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -58,7 +59,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     };
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/admin/report`, {
+      const response = await fetch(api + `/admin/report`, {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -126,7 +127,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
+        // `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
+        api + `/comment/get-comment?room_id=${roomid}`,
+
         {
           method: "GET",
           headers: {
@@ -159,7 +162,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://3.26.67.188:5001/comment/get-rate?room_id=${roomid}`,
+        // `http://3.26.67.188:5001/comment/get-rate?room_id=${roomid}`,
+        api + `/comment/get-rate?room_id=${roomid}`,
+
         {
           method: "GET",
           headers: {
@@ -187,7 +192,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         const token = localStorage.getItem("token");
         const formattedDate = selectedDate.format("YYYY-MM-DD");
         const response = await fetch(
-          `/api/booking/meetingroom?date=${formattedDate}`,
+          api + `/booking/meetingroom?date=${formattedDate}`,
           {
             method: "GET",
             headers: {
@@ -215,7 +220,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     const fetchRoom = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`/api/room/room-detail/${roomid}`, {
+        const response = await fetch(api + `/room/room-detail/${roomid}`, {
           method: "GET",
           headers: {
             Accept: "application/json",

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Slider } from "@arco-design/web-react";
 import "./filter.css";
+import api from "../api";
 
 function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
   const [filters, setFilters] = useState({
@@ -16,7 +17,7 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
     try {
       const formattedDate = selectedDate.format("YYYY-MM-DD");
       const response = await fetch(
-        `/api/booking/meetingroom?date=${formattedDate}&is_ranked=true`,
+        api + `/booking/meetingroom?date=${formattedDate}&is_ranked=true`,
         {
           method: "GET",
           headers: {

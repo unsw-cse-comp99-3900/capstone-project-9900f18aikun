@@ -7,13 +7,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import ToMap from "../toMap";
+import api from "./api";
 
 // get sydney time
 const getSydneyTime = async (setErrorMessage) => {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch("/api/admin/time", {
+    const response = await fetch(api + "/admin/time", {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -128,7 +129,7 @@ const SelectWindow = ({
     // });
 
     try {
-      const response = await fetch("/api/booking/admin_book", {
+      const response = await fetch(api + "/booking/admin_book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

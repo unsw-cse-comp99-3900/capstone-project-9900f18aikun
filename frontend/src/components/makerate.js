@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Rate, Button } from "@arco-design/web-react";
+import api from "../api";
 
 const MakeRate = ({ visible, onClose, roomid, myRate, fetchRatingData }) => {
   const [rateValue, setRateValue] = useState(myRate);
@@ -9,7 +10,9 @@ const MakeRate = ({ visible, onClose, roomid, myRate, fetchRatingData }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://3.26.67.188:5001/comment/make-rate`,
+        // `http://3.26.67.188:5001/comment/make-rate`,
+        api + `/comment/make-rate`,
+
         {
           method: "PUT",
           headers: {

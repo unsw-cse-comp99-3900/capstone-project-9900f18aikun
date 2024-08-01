@@ -12,6 +12,7 @@ import {
 import enUS from "@arco-design/web-react/es/locale/en-US";
 import ErrorBox from "../errorBox";
 import { Notification } from "@arco-design/web-react";
+import api from "./api";
 
 const RoomCard = ({ selectedDate, setSelectedDate }) => {
   const url = window.location.href;
@@ -34,7 +35,9 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          "http://3.26.67.188:5001/admin/check_admin",
+          // "http://3.26.67.188:5001/admin/check_admin",
+          api + "/admin/check_admin",
+
           {
             method: "GET",
             headers: {
@@ -67,7 +70,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
         const token = localStorage.getItem("token");
         const formattedDate = selectedDate.format("YYYY-MM-DD");
         const response = await fetch(
-          `/api/booking/meetingroom?date=${formattedDate}`,
+          api + `/booking/meetingroom?date=${formattedDate}`,
           {
             method: "GET",
             headers: {
@@ -97,7 +100,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     const fetchRoom = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`/api/room/room-detail/${roomid}`, {
+        const response = await fetch(api + `/room/room-detail/${roomid}`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -172,7 +175,7 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
     // console.log(editedRoom.roomdetial);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/booking/edit-room`, {
+      const response = await fetch(api + `/booking/edit-room`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./QrCodeCheckIn.css";
+import api from "../api";
 
 const QrCodeCheckIn = () => {
   const [qrCode, setQrCode] = useState("");
@@ -37,7 +38,7 @@ const QrCodeCheckIn = () => {
     try {
       const token = localStorage.getItem("token");
       console.log("token is", token);
-      const response = await axios.get(`/api/sign_in/sign-in/${qrCode}`, {
+      const response = await axios.get(api + `/sign_in/sign-in/${qrCode}`, {
         headers: {
           accept: "application/json",
           Authorization: `Bearer ${token}`,

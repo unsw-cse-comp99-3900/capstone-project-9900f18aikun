@@ -13,6 +13,7 @@ import {
 } from "@arco-design/web-react/icon";
 import "./Comments.css";
 // import ErrorBox from "./errorBox";
+import api from "../api";
 
 const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
   const [comments, setComments] = useState([]);
@@ -27,7 +28,9 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
+        api + `/comment/get-comment?room_id=${roomid}`,
+
+        // `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
         {
           method: "GET",
           headers: {
@@ -82,7 +85,9 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://3.26.67.188:5001/comment/make-comment`,
+        api + `/comment/make-comment`,
+
+        // `http://3.26.67.188:5001/comment/make-comment`,
         {
           method: "POST",
           headers: {
@@ -119,7 +124,9 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://3.26.67.188:5001/comment/make-comment`,
+        api + `/comment/make-comment`,
+
+        // `http://3.26.67.188:5001/comment/make-comment`,
         {
           method: "POST",
           headers: {
@@ -158,8 +165,9 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     try {
       const token = localStorage.getItem("token");
       const url = isAdmin
-        ? `http://3.26.67.188:5001/admin/edit-comment`
-        : `/api/comment/edit-comment`;
+        ? // ? `http://3.26.67.188:5001/admin/edit-comment`
+          api + `/admin/edit-comment`
+        : api + `/comment/edit-comment`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -195,8 +203,11 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     try {
       const token = localStorage.getItem("token");
       const url = isAdmin
-        ? `http://3.26.67.188:5001/admin/delete-comment`
-        : `http://3.26.67.188:5001/comment/delete-comment`;
+        ? // ? `http://3.26.67.188:5001/admin/delete-comment`
+          // : `http://3.26.67.188:5001/comment/delete-comment`;
+
+          api + `/admin/delete-comment`
+        : api + `/comment/delete-comment`;
 
       const response = await fetch(url, {
         method: "DELETE",
@@ -230,8 +241,10 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     try {
       const token = localStorage.getItem("token");
       const url = comment.current_user_liked
-        ? `http://3.26.67.188:5001/comment/unlike-comment`
-        : `http://3.26.67.188:5001/comment/like-comment`;
+        ? // ? `http://3.26.67.188:5001/comment/unlike-comment`
+          // : `http://3.26.67.188:5001/comment/like-comment`;
+          api + `/comment/unlike-comment`
+        : api + `/comment/like-comment`;
 
       const response = await fetch(url, {
         method: "PUT",

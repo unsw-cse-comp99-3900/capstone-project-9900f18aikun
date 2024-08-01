@@ -7,6 +7,7 @@ import "./adminStatistics.css";
 import VChart from "@visactor/vchart";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import api from "./api";
 
 function AdminStatistics() {
   const [date, setDate] = useState(dayjs().format("YYYY-MM-DD")); // 设置默认日期为当天
@@ -42,15 +43,16 @@ function AdminStatistics() {
   };
 
   const fetchData = async (formattedDate) => {
+    const token = localStorage.getItem("token");
+
     try {
       const response = await fetch(
-        `/api/booking/meetingroom-report?date=${formattedDate}`,
+        api + `/booking/meetingroom-report?date=${formattedDate}`,
         {
           method: "GET",
           headers: {
             accept: "application/json",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc",
+            Authorization: "Bearer " + token,
           },
         }
       );
@@ -154,15 +156,16 @@ function AdminStatistics() {
   };
 
   const fetchUsageData = async (formattedDate) => {
+    const token = localStorage.getItem("token");
+
     try {
       const response = await fetch(
-        `/api/booking/meetingroom-usage?date=${formattedDate}`,
+        api + `/booking/meetingroom-usage?date=${formattedDate}`,
         {
           method: "GET",
           headers: {
             accept: "application/json",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc",
+            Authorization: "Bearer " + token,
           },
         }
       );
@@ -237,15 +240,16 @@ function AdminStatistics() {
   };
 
   const fetchTopListData = async (formattedDate) => {
+    const token = localStorage.getItem("token");
+
     try {
       const response = await fetch(
-        `/api/booking/meetingroom-top10-byCount?date=${formattedDate}`,
+        api + `/booking/meetingroom-top10-byCount?date=${formattedDate}`,
         {
           method: "GET",
           headers: {
             accept: "application/json",
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTMxMTE2NywianRpIjoiZGE1ODcyMGItOGMzMi00NDYwLTkzMzAtODM3YTg2NTFmNjY3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ6aWQiOiJ6NzM3MzMifSwibmJmIjoxNzE5MzExMTY3LCJjc3JmIjoiNjdkN2IwY2UtYmRhYi00NzJhLTg5MjAtZWU5ZjZkYjBiMTI2IiwiZXhwIjo3NzE5MzExMTA3fQ.fp64sgRuPSw1O4HE6Yc3ZXpd8jKeNxflOpZgGZd5cnc",
+            Authorization: "Bearer " + token,
           },
         }
       );

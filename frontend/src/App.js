@@ -22,6 +22,7 @@ import { Spin, Space } from "@arco-design/web-react";
 
 import "./App.css";
 import "./ChatBoxWrapper.css";
+import api from "./api";
 
 const ProtectedRoute = ({
   children,
@@ -58,7 +59,7 @@ function App() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("/api/auth/auto-login", {
+          const response = await fetch(api + "/auth/auto-login", {
             method: "GET",
             headers: {
               accept: "application/json",

@@ -4,6 +4,9 @@ import "./AdminChatbox.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Badge } from "@arco-design/web-react";
+import api from "../api";
+import socketURL from "../socket";
+
 const AdminChatbox = ({ onClose, onToggle }) => {
   const [message, setMessage] = useState("");
   const [messageHistories, setMessageHistories] = useState({});
@@ -22,7 +25,8 @@ const AdminChatbox = ({ onClose, onToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
   const connectSocket = () => {
     const token = localStorage.getItem("token");
-    const socketURL = "ws://3.26.67.188:5001";
+    // const socketURL = "ws://3.26.67.188:5001";
+    // const socketURL = "ws://0.0.0.0:5001";
 
     console.log("Attempting to connect to:", socketURL);
     console.log("Token:", token);
@@ -215,7 +219,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
     try {
       const response = await fetch(
-        `/api/admin/get-usage-report-txt?date=${formattedDate}`,
+        api + `/admin/get-usage-report-txt?date=${formattedDate}`,
         {
           method: "GET",
           headers: {

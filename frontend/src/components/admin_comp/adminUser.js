@@ -3,6 +3,7 @@ import "./adminUser.css"; // 确保引入了 CSS 样式
 
 import { Table, ConfigProvider } from "@arco-design/web-react";
 import enUS from "@arco-design/web-react/es/locale/en-US"; // 导入英文语言包
+import api from "./api";
 
 function AdminUser() {
   const [userZid, setUserZid] = useState("");
@@ -20,7 +21,7 @@ function AdminUser() {
 
   const fetchBookingHistory = () => {
     const token = localStorage.getItem("token"); // 从 localStorage 获取 token
-    fetch(`/api/history/certain-booking-history?user_zid=${userZid}`, {
+    fetch(api + `/history/certain-booking-history?user_zid=${userZid}`, {
       method: "GET",
       headers: {
         accept: "application/json",

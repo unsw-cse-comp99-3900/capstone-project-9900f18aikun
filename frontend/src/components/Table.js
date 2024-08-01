@@ -8,13 +8,14 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import ToMap from "./toMap";
 import "./Table.css";
+import api from "../api";
 
 // get the current time from backend
 const getSydneyTime = async (setErrorMessage) => {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch("/api/admin/time", {
+    const response = await fetch(api + "/admin/time", {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -140,7 +141,7 @@ const SelectWindow = ({
     const token = localStorage.getItem("token");
     console.log(obj);
     try {
-      const response = await fetch("/api/booking/book", {
+      const response = await fetch(api + "/booking/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

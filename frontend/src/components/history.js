@@ -18,6 +18,7 @@ import {
 } from "@arco-design/web-react";
 import dayjs from "dayjs";
 import ErrorBox from "./errorBox";
+import api from "../api";
 
 const ReservationHistory = () => {
   const [history, setHistory] = useState([]);
@@ -34,7 +35,7 @@ const ReservationHistory = () => {
     const fetchHistory = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await fetch("/api/history/booking-history", {
+        const response = await fetch(api + "/history/booking-history", {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -88,15 +89,18 @@ const ReservationHistory = () => {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch("/api/booking/book/" + entry.booking_id, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + token,
-          },
-          // body: JSON.stringify(obj),
-        });
+        const response = await fetch(
+          api + "/booking/book/" + entry.booking_id,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + token,
+            },
+            // body: JSON.stringify(obj),
+          }
+        );
 
         if (response.ok) {
           setChange(!change);
@@ -134,7 +138,7 @@ const ReservationHistory = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("/api/booking/book", {
+      const response = await fetch(api + "/booking/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -171,7 +175,7 @@ const ReservationHistory = () => {
 
     try {
       const response = await fetch(
-        "/api/booking/extend_book/" + entry.booking_id,
+        api + "/booking/extend_book/" + entry.booking_id,
         {
           method: "POST",
           headers: {

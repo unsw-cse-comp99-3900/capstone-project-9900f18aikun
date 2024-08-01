@@ -3,6 +3,7 @@ import "./adminClassroom.css"; // 确保 CSS 文件被引入
 import { Table, ConfigProvider } from "@arco-design/web-react";
 import enUS from "@arco-design/web-react/es/locale/en-US";
 import { useNavigate } from "react-router-dom";
+import api from "./api";
 
 function AdminClassroom() {
   const [classroomData, setClassroomData] = useState([]);
@@ -22,7 +23,7 @@ function AdminClassroom() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `/api/booking/meetingroom?date=${formattedDate}`,
+        api + `/booking/meetingroom?date=${formattedDate}`,
         {
           method: "GET",
           headers: {
@@ -118,7 +119,7 @@ function AdminClassroom() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `/api/booking/block-room?roomid=` + entry.id,
+        api + `/booking/block-room?roomid=` + entry.id,
         {
           method: "GET",
           headers: {
@@ -144,7 +145,7 @@ function AdminClassroom() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `/api/booking/unblock-room?roomid=` + entry.id,
+        api + `/booking/unblock-room?roomid=` + entry.id,
         {
           method: "GET",
           headers: {

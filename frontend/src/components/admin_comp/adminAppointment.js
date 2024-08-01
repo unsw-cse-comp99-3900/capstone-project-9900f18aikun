@@ -8,6 +8,7 @@ import {
 import dayjs from "dayjs";
 import enUS from "@arco-design/web-react/es/locale/en-US";
 import "./adminAppointment.css";
+import api from "./api";
 
 function AdminAppointment({ token, forceUpdate }) {
   const [date, setDate] = useState(dayjs());
@@ -23,7 +24,7 @@ function AdminAppointment({ token, forceUpdate }) {
       try {
         const formattedDate = date.format("YYYY-MM-DD");
         const response = await fetch(
-          `/api/history/alluser-booking-history?date=${formattedDate}`,
+          api + `/history/alluser-booking-history?date=${formattedDate}`,
           {
             method: "GET",
             headers: {
@@ -46,7 +47,7 @@ function AdminAppointment({ token, forceUpdate }) {
     const fetchRequestData = async () => {
       // 新增请求数据
       try {
-        const response = await fetch("/api/booking/show-request", {
+        const response = await fetch(api + "/booking/show-request", {
           method: "GET",
           headers: {
             accept: "application/json",
@@ -80,7 +81,7 @@ function AdminAppointment({ token, forceUpdate }) {
 
   const handleApprove = async (entry) => {
     try {
-      const response = await fetch("/api/booking/handle-request", {
+      const response = await fetch(api + "/booking/handle-request", {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -110,7 +111,7 @@ function AdminAppointment({ token, forceUpdate }) {
 
   const handleReject = async (entry) => {
     try {
-      const response = await fetch("/api/booking/handle-request", {
+      const response = await fetch(api + "/booking/handle-request", {
         method: "POST",
         headers: {
           accept: "application/json",

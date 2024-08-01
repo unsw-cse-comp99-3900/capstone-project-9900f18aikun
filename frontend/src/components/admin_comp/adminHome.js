@@ -3,6 +3,7 @@ import { Table, ConfigProvider, Tooltip, Button } from "@arco-design/web-react";
 import enUS from "@arco-design/web-react/es/locale/en-US";
 import dayjs from "dayjs";
 import "./adminHome.css"; // 引入CSS文件
+import api from "./api";
 
 function AdminHome() {
   const [bookingData, setBookingData] = useState([]);
@@ -15,7 +16,7 @@ function AdminHome() {
       const formattedDate = dayjs().format("YYYY-MM-DD");
       try {
         const response = await fetch(
-          `/api/history/alluser-booking-history?date=${formattedDate}`,
+          api + `/history/alluser-booking-history?date=${formattedDate}`,
           {
             method: "GET",
             headers: {
@@ -41,7 +42,7 @@ function AdminHome() {
       const formattedDate = dayjs().format("YYYY-MM-DD");
       try {
         const response = await fetch(
-          `/api/booking/meetingroom-usage?date=${formattedDate}`,
+          api + `/booking/meetingroom-usage?date=${formattedDate}`,
           {
             method: "GET",
             headers: {

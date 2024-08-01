@@ -6,6 +6,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import dayjs from "dayjs";
 import { Table as ArcoTable } from "@arco-design/web-react";
+import api from "../api";
 
 const Rebook = ({ change, setChange, setErrorMessage }) => {
   const [history, setHistory] = useState([]);
@@ -16,7 +17,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
     const fetchHistory = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await fetch("/api/history/booking-history", {
+        const response = await fetch(api + "/history/booking-history", {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -82,7 +83,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("/api/booking/book", {
+      const response = await fetch(api + "/booking/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
