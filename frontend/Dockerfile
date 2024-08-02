@@ -1,5 +1,7 @@
 FROM node:16 as build
 
+ENV NODE_ENV=production
+
 WORKDIR /app
 
 COPY package*.json ./
