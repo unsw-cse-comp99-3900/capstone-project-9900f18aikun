@@ -81,7 +81,7 @@ td.reserved .box {
 }
 
 td.selfreserved .box {
-  background-color: rgb(245, 238, 175);
+  background-color: rgb(232, 223, 140);
   cursor: not-allowed;
 }
 
@@ -304,4 +304,12 @@ td.reserved .requested .selfreserved:hover {
   padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 10 !important;
+}
+
+#mytable .permission .box:hover {
+  background-color: #f7f4d7;
+}
+
+#mytable .no-permission .box:hover {
+  background-color: #a871e3;
 }

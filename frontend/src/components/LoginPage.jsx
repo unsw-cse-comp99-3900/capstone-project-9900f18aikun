@@ -13,9 +13,12 @@ const LoginPage = ({ onLogin }) => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
+    const accessToken = queryParams.get("access_token");
     const loginFailed = queryParams.get("false");
 
-    if (loginFailed) {
+    if (accessToken) {
+      localStorage.setItem("token", accessToken);
+    } else if (loginFailed) {
       setError("Outlook login failed. Please try again.");
     }
   }, [location]);
