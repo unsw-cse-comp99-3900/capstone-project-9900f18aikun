@@ -537,7 +537,7 @@ const Table = ({
             <div className="legend-item">
               <div
                 className="legend-color"
-                style={{ backgroundColor: "rgb(245, 238, 175)" }}
+                style={{ backgroundColor: "rgb(232, 223, 140)" }}
               ></div>
               <div className="legend-text">Self-Reserved</div>
             </div>
