@@ -49,11 +49,8 @@ class Detail(Resource):
         bookings = []
         for booking in bookings_on_date:
             start_datetime = datetime.combine(today_date, booking.start_time)
-            print(start_datetime - timedelta(minutes=10))
             end_datetime = datetime.combine(today_date, booking.start_time)
-            print(end_datetime + timedelta(minutes=15))
-            print(now)
-            if start_datetime - timedelta(minutes=10) < now <= end_datetime + timedelta(minutes=15):
+            if start_datetime - timedelta(minutes=14) < now <= end_datetime + timedelta(minutes=15):
                 bookings.append(booking)
 
         if not bookings:
