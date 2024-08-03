@@ -135,15 +135,6 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
         )
     )
 
-    total_duration = timedelta()
-    for booking in user_books:
-        total_duration += calculate_time_difference(date, booking.start_time, booking.end_time)
-    # add this book time
-    total_duration += calculate_time_difference(date, start_time + ":00", end_time + ":00")
-
-    if total_duration > timedelta(hours=8):
-        return {'error': 'Total booking time exceeds 8 hours, no further bookings allowed.'}, 400
-
     user = db.session.get(Users, zid)
     if not user:
         return {'error': 'Invalid zid'}, 400
@@ -156,6 +147,16 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     # set time can't book
     if start_time < "07:00" or end_time > "23:30":
         is_request = True
+
+    total_duration = timedelta()
+    for booking in user_books:
+        total_duration += calculate_time_difference(date, booking.start_time, booking.end_time)
+    # add this book time
+    total_duration += calculate_time_difference(date, start_time + ":00", end_time + ":00")
+
+    if total_duration > timedelta(hours=8):
+        is_request = True
+
     status = 'booked'
     if is_request:
         status = 'requested'
