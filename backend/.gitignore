@@ -3,3 +3,5 @@ venv
 hyz_env
 *.DS_Store
 *.pyc
+.idea
+.pytest_cache  
