@@ -1,7 +1,7 @@
 import requests
 import pytest
+from config import BACKEND_URL, DATE
 
-# 自动登录函数
 def perform_login(url, zid, password):
     headers = {
         "Content-Type": "application/json"
@@ -38,8 +38,7 @@ def perform_get_request(url, token, params=None):
     ("", "", 400, ["error"]),  # 空的用户名和密码
 ])
 def test_login_cases(zid, password, expected_status_code, expected_response_keys):
-    #base_url = "http://3.26.67.188:5001/auth/login"
-    base_url = "http://s2.gnip.vip:37895/auth/login"
+    base_url = f"http://{BACKEND_URL}"
     
     result = perform_login(base_url, zid, password)
 
@@ -54,8 +53,7 @@ def test_login_cases(zid, password, expected_status_code, expected_response_keys
 # 定义一个 fixture 获取正确的 token
 @pytest.fixture(scope='module')
 def get_token():
-    #base_url = "http://3.26.67.188:5001/auth/login"
-    base_url = "http://s2.gnip.vip:37895/auth/login"
+    base_url = f"http://{BACKEND_URL}"
     zid = "z2"
     password = "b"
     result = perform_login(base_url, zid, password)
@@ -70,10 +68,8 @@ def get_token():
 
     return token
 
-# 示例测试，使用 token 进行授权请求
 def test_auto_login(get_token):
-    #base_url = "http://3.26.67.188:5001/auth/auto-login"
-    base_url = "http://s2.gnip.vip:37895/auth/login"
+    base_url = f"http://{BACKEND_URL}"
     headers = {
         "Authorization": f"Bearer {get_token}",
         "accept": "application/json"
@@ -93,8 +89,7 @@ def test_auto_login(get_token):
     ("2024-07-01", 200),
 ])
 def test_alluser_booking_history(get_token, date, expected_status_code):
-    #base_url = "http://3.26.67.188:5001/history/alluser-booking-history"
-    base_url = "http://s2.gnip.vip:37895/history/alluser-booking-history"
+    base_url = f"http://{BACKEND_URL}"
     params = {
         "date": date
     }
@@ -104,8 +99,7 @@ def test_alluser_booking_history(get_token, date, expected_status_code):
     assert json_response is not None, "Response JSON is None"
 
 def test_booking_history(get_token):
-    #base_url = "http://3.26.67.188:5001/history/booking-history"
-    base_url = "http://s2.gnip.vip:37895/history/booking-history"
+    base_url = f"http://{BACKEND_URL}"
     response = perform_get_request(base_url, get_token)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     json_response = response.json()
@@ -116,8 +110,7 @@ def test_booking_history(get_token):
     ("z10000", 200),
 ])
 def test_certain_booking_history(get_token, user_zid, expected_status_code):
-    #base_url = "http://3.26.67.188:5001/history/certain-booking-history"
-    base_url = "http://s2.gnip.vip:37895/history/certain-booking-history"
+    base_url = f"http://{BACKEND_URL}"
     params = {
         "user_zid": user_zid
     }

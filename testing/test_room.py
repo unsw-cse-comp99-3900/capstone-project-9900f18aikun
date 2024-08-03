@@ -1,9 +1,10 @@
 from typing import Any, Literal
 import requests
 import pytest
+from config import BACKEND_URL
 
 # Constants
-BASE_URL = "http://s2.gnip.vip:37895/"
+BASE_URL = f"http://{BACKEND_URL}"
 ZID = "z2"
 PASSWORD = "b"
 

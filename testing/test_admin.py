@@ -1,11 +1,10 @@
 import requests
 import pytest
 from typing import Any
-from config import BACKEND_URL
+from config import BACKEND_URL, DATE
 
 # Constants
 BASE_URL = f"http://{BACKEND_URL}"
-#BASE_URL = "http://3.26.67.188:5001/"
 
 
 def perform_login(zid, password):
@@ -47,10 +46,11 @@ def test_get_usage_report_txt():
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "date":"2024-07-31"
+        "date": DATE
     }
     response = requests.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"get report failed: {response.status_code}, {response.text}"
+
 
 def test_edit_comment():
     token = perform_login("z2", "b")
