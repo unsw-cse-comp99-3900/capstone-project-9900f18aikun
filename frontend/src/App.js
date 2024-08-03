@@ -15,7 +15,6 @@ import SelectMap from "./components/selectMap";
 import History from "./components/history";
 import RoomInfo from "./components/roompage";
 import AdminPage from "./components/Admin_page";
-import AdminRoomPage from "./components/admin_comp/adminRoompage";
 import QrCodeCheckIn from "./components/QrCodeCheckIn";
 //loading
 import { Spin, Space } from "@arco-design/web-react";
@@ -53,7 +52,7 @@ function App() {
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [outlook, setOutlook] = useState(false)
+  const [outlook, setOutlook] = useState(false);
 
   useEffect(() => {
     const autoLogin = async () => {
@@ -162,7 +161,10 @@ function App() {
           path="/login"
           element={
             !isLoggedIn ? (
-              <LoginPage onLogin={(admin) => handleLogin(admin)} setOutlook={setOutlook}/>
+              <LoginPage
+                onLogin={(admin) => handleLogin(admin)}
+                setOutlook={setOutlook}
+              />
             ) : (
               <Navigate to="/dashboard" replace />
             )
@@ -227,7 +229,7 @@ function App() {
           element={
             <ProtectedRoute
               isLoggedIn={isLoggedIn}
-              userOnly={true}
+              userOnly={false}
               isAdmin={isAdmin}
             >
               <>
@@ -235,6 +237,7 @@ function App() {
                 <RoomInfo
                   selectedDate={selectedDate}
                   setSelectedDate={setSelectedDate}
+                  isAdmin={isAdmin}
                 />
               </>
             </ProtectedRoute>
@@ -249,24 +252,6 @@ function App() {
               isLoggedIn={isLoggedIn}
             >
               <AdminPage token={token} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/room/admin/*"
-          element={
-            <ProtectedRoute
-              isLoggedIn={isLoggedIn}
-              adminOnly={true}
-              isAdmin={isAdmin}
-            >
-              <>
-                <HeaderBar onLogout={handleLogout} onHistory={handleHistory} />
-                <AdminRoomPage
-                  selectedDate={selectedDate}
-                  setSelectedDate={setSelectedDate}
-                />
-              </>
             </ProtectedRoute>
           }
         />

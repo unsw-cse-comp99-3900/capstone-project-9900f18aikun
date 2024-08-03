@@ -111,7 +111,7 @@ function AdminClassroom() {
   const handleCellClick = (entry) => {
     // Custom logic for cell click
     console.log(`Clicked on :`, entry);
-    navigate("/room/admin/" + entry.id);
+    navigate("/room/" + entry.id);
   };
 
   const handleDisable = async (entry) => {
