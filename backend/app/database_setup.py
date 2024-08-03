@@ -1,9 +1,13 @@
+"""
+This file is used for setup database from given excel data
+"""
 from .extensions import db
 import pandas as pd
 from .models import HDRStudent, CSEStaff, Users
 from app.booking.models import RoomDetail, Space, HotDeskDetail
 import numpy as np
 def set_up_HDRstudent_db():
+    # pre process data
     file_path = "data/CSE Active HDR candidates staff details 210624.xlsx"
     student_sheet = pd.read_excel(file_path, sheet_name='HDR students')
     staff_sheet = pd.read_excel(file_path, sheet_name='CSE staff')
@@ -105,7 +109,7 @@ def set_up_space_db():
                                       'Capacity': 'capacity',
                                       }, inplace=True)
 
-
+    # update data to db
     for index, row in room_detail_sheet.iterrows():
         exists = db.session.query(
             db.exists().where(

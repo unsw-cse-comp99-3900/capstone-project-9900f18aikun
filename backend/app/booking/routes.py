@@ -4,7 +4,6 @@ from flask import request, Flask, jsonify
 from app.extensions import db, api, scheduler, app
 from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
-from sqlalchemy.orm import joinedload
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student, is_booking_today, calculate_time_difference
 from app.email import schedule_reminder, send_confirm_email_async
@@ -14,8 +13,6 @@ from app.config import Config
 from app.admin.models import NotificationView
 from app.comment.routes import get_room_score
 import re
-from apscheduler.schedulers.background import BackgroundScheduler
-
 import google.generativeai as genai
 from datetime import datetime
 import json

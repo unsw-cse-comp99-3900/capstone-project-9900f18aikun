@@ -1,3 +1,6 @@
+"""
+This file will init this project
+"""
 from .config import Config
 from .extensions import db, migrate, jwt, app, api, scheduler, socketio
 from .database_setup import set_up_database
@@ -7,19 +10,22 @@ from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 
 def create_app():
+    # Enable CORS support for the Flask app
     CORS(app)
+    # add config
     app.config.from_object(Config)
 
     # in docker the web a faster than db just wait for db to set up
     time.sleep(3)
 
-
+    # init extensions
     db.init_app(app)
     migrate.init_app(app, db)
     api.init_app(app)
     jwt.init_app(app)
     socketio.init_app(app, cors_allowed_origins='*')
 
+    # add namespace to api
     from .auth.routes import auth_ns
     api.add_namespace(auth_ns, path='/auth')
 
@@ -44,6 +50,7 @@ def create_app():
     from .chat.routes import chat_ns
     api.add_namespace(chat_ns, path='/chat')
 
+    # add socket io
     from app.chat.routes import handle_connect, handle_disconnect, handle_send_message, handle_join, handle_leave
 
     socketio.on_event('connect', handle_connect)
@@ -52,6 +59,7 @@ def create_app():
     socketio.on_event('join', handle_join)
     socketio.on_event('leave', handle_leave)
 
+    # init db
     with app.app_context():
         db.create_all()
         if not Users.query.first():
