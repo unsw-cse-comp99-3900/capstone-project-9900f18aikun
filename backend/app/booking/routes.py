@@ -1,3 +1,6 @@
+"""
+This name space contain the booking api
+"""
 from datetime import datetime, timedelta, timezone
 from flask_restx import Namespace, Resource, fields
 from flask import request, Flask, jsonify
@@ -24,16 +27,32 @@ import random
 booking_ns = Namespace('booking', description='Booking operations')
 
 # booking room model
-booking_model = booking_ns.model('Booking request', {
-    'room_id': fields.Integer(required=True, description='The room id', default=1),
-    'date': fields.Date(required=True, description='Date of the booking', default="2024-07-16"),
-    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)', default="12:00"),
-    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00"),
-    'weeks_of_duration': fields.Integer(required=False, description='Number of weeks to repeat the booking', default=1)
-})
+booking_model = booking_ns.model(
+    'Booking request',
+    {
+        'room_id': fields.Integer(
+            required=True,
+            description='The room id',
+            default=1),
+        'date': fields.Date(
+            required=True,
+            description='Date of the booking',
+            default="2024-07-16"),
+        'start_time': fields.String(
+            required=True,
+            description='Start time of the booking (HH:MM)',
+            default="12:00"),
+        'end_time': fields.String(
+            required=True,
+            description='End time of the booking (HH:MM)',
+            default="13:00"),
+        'weeks_of_duration': fields.Integer(
+            required=False,
+            description='Number of weeks to repeat the booking',
+            default=1)})
 
 
-# Apis about booking
+# Book api, used for book a space
 @booking_ns.route('/book')
 class BookSpace(Resource):
     # Book a room
@@ -41,7 +60,9 @@ class BookSpace(Resource):
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Book a space")
     @booking_ns.expect(booking_model)
-    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @booking_ns.header('Authorization',
+                       'Bearer <your_access_token>',
+                       required=True)
     def post(self):
         jwt_error = verify_jwt()
         if jwt_error:
@@ -59,11 +80,16 @@ class BookSpace(Resource):
         if not isinstance(data['room_id'], int):
             return {'error': 'room id must be integer'}, 400
 
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', start_time) or not re.match(
-                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', end_time):
+        if not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
+                start_time) or not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
+                end_time):
             return {'error': 'time must be in HH:MM format'}, 400
 
         if start_time > end_time:
@@ -73,7 +99,7 @@ class BookSpace(Resource):
             return {'error': 'Start time and end time are same'}, 400
         try:
             room_name = get_room_name(room_id)
-        except:
+        except BaseException:
             return {'error': 'Invalid room id'}, 400
 
         date = datetime.strptime(date, "%Y-%m-%d").date()
@@ -83,11 +109,23 @@ class BookSpace(Resource):
 
         for week in range(weeks_of_duration):
             new_date = date + timedelta(weeks=week)
-            error = book_or_request(new_date, room_id, start_time, end_time, zid, room_name)
+            error = book_or_request(
+                new_date,
+                room_id,
+                start_time,
+                end_time,
+                zid,
+                room_name)
             if error:
                 return error
 
-        send_confirm_email_async(zid, room_id, date, start_time, end_time, weeks_of_duration)
+        send_confirm_email_async(
+            zid,
+            room_id,
+            date,
+            start_time,
+            end_time,
+            weeks_of_duration)
 
         return {'message': f"Booking confirmed\n"
                            f"room id: {room_id}\n"
@@ -96,6 +134,7 @@ class BookSpace(Resource):
                            f"date: {date}\n"
                 }, 200
 
+
 def check_conflict_booking(date, room_id, start_time, end_time, zid):
     conflict_bookings = Booking.query.filter(
         Booking.date == date,
@@ -103,21 +142,27 @@ def check_conflict_booking(date, room_id, start_time, end_time, zid):
         Booking.booking_status != "cancelled",
         Booking.booking_status != BookingStatus.absent.value,
         or_(
-            and_(Booking.start_time >= start_time, Booking.start_time < end_time),
-            and_(Booking.end_time > start_time, Booking.end_time <= end_time),
-            and_(Booking.start_time <= start_time, Booking.end_time >= end_time),
-            and_(Booking.start_time >= start_time, Booking.end_time <= end_time)
-        )
-    ).filter(
+            and_(
+                Booking.start_time >= start_time,
+                Booking.start_time < end_time),
+            and_(
+                Booking.end_time > start_time,
+                Booking.end_time <= end_time),
+            and_(
+                Booking.start_time <= start_time,
+                Booking.end_time >= end_time),
+            and_(
+                Booking.start_time >= start_time,
+                Booking.end_time <= end_time))).filter(
         or_(
             Booking.room_id == room_id,
-            Booking.user_id == zid
-        )
-    ).all()
+            Booking.user_id == zid)).all()
     return conflict_bookings
 
+
 def book_or_request(date, room_id, start_time, end_time, zid, room_name):
-    conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, zid)
+    conflict_bookings = check_conflict_booking(
+        date, room_id, start_time, end_time, zid)
 
     if conflict_bookings:
         return {'error': 'Booking conflict, please check other time'}, 400
@@ -139,7 +184,8 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     is_request = False
     if user_type != "CSE_staff" and not is_student_permit(room_id):
         is_request = True
-    if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+    if user_type == "CSE_staff" and db.session.get(
+            CSEStaff, zid).school_name != "CSE":
         is_request = True
     # set time can't book
     if start_time < "07:00" or end_time > "23:30":
@@ -147,9 +193,11 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
 
     total_duration = timedelta()
     for booking in user_books:
-        total_duration += calculate_time_difference(date, booking.start_time, booking.end_time)
+        total_duration += calculate_time_difference(
+            date, booking.start_time, booking.end_time)
     # add this book time
-    total_duration += calculate_time_difference(date, start_time + ":00", end_time + ":00")
+    total_duration += calculate_time_difference(
+        date, start_time + ":00", end_time + ":00")
 
     if total_duration > timedelta(hours=8):
         is_request = True
@@ -172,34 +220,64 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     db.session.add(new_booking)
     db.session.commit()
     if statu == BookingStatus.requested.value:
-        emit('request_notification', {'user_id': zid, 'name': get_user_name(zid)}, room="notification", namespace='/')
-        db.session.query(NotificationView).update({NotificationView.is_viewed: False}, synchronize_session='fetch')
+        emit('request_notification',
+             {'user_id': zid,
+              'name': get_user_name(zid)},
+             room="notification",
+             namespace='/')
+        db.session.query(NotificationView).update(
+            {NotificationView.is_viewed: False}, synchronize_session='fetch')
         db.session.commit()
 
     bookingid = new_booking.id
     schedule_reminder(zid, room_id, start_time, date, end_time)
     dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
     check_time = dt_start_time + timedelta(minutes=15)
-    scheduler.add_job(schedule_check_sign_in, 'date', run_date=check_time, args=[bookingid])
+    scheduler.add_job(
+        schedule_check_sign_in,
+        'date',
+        run_date=check_time,
+        args=[bookingid])
+
 
 def schedule_check_sign_in(bookingid):
     from app.extensions import db, app
-    with app.app_context():  
+    with app.app_context():
         booking = Booking.query.get(bookingid)
-        if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
+        if booking and (booking.booking_status ==
+                        "booked" or booking.booking_status == "requested"):
             booking.booking_status = "absent"
             db.session.commit()
 
+
 # booking room model
-admin_booking_model = booking_ns.model('admin booking request', {
-    'user_id': fields.String(required=True, description='Start time of the booking (HH:MM)', default="z1"),
-    'room_id': fields.Integer(required=True, description='The room id', default=1),
-    'date': fields.Date(required=True, description='Date of the booking', default="2024-07-19"),
-    'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)', default="12:00"),
-    'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00")
-})
+admin_booking_model = booking_ns.model(
+    'admin booking request',
+    {
+        'user_id': fields.String(
+            required=True,
+            description='Start time of the booking (HH:MM)',
+            default="z1"),
+        'room_id': fields.Integer(
+            required=True,
+            description='The room id',
+            default=1),
+        'date': fields.Date(
+            required=True,
+            description='Date of the booking',
+            default="2024-07-19"),
+        'start_time': fields.String(
+            required=True,
+            description='Start time of the booking (HH:MM)',
+            default="12:00"),
+        'end_time': fields.String(
+            required=True,
+            description='End time of the booking (HH:MM)',
+            default="13:00")})
 
 # Apis about booking
+
+
 @booking_ns.route('/admin_book')
 class AdminBook(Resource):
     @booking_ns.response(200, "success")
@@ -207,7 +285,9 @@ class AdminBook(Resource):
     @booking_ns.response(403, "Forbidden")
     @booking_ns.doc(description="Admin book function")
     @booking_ns.expect(admin_booking_model)
-    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @booking_ns.header('Authorization',
+                       'Bearer <your_access_token>',
+                       required=True)
     @jwt_required()
     def post(self):
         jwt_error = verify_jwt()
@@ -228,11 +308,16 @@ class AdminBook(Resource):
         if not isinstance(data['room_id'], int):
             return {'error': 'room id must be integer'}, 400
 
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
-        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', start_time) or not re.match(
-                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$', end_time):
+        if not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
+                start_time) or not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
+                end_time):
             return {'error': 'time must be in HH:MM format'}, 400
 
         if start_time > end_time:
@@ -242,10 +327,11 @@ class AdminBook(Resource):
             return {'error': 'Start time and end time are same'}, 400
         try:
             room_name = get_room_name(room_id)
-        except:
+        except BaseException:
             return {'error': 'Invalid room id'}, 400
 
-        conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, user_id)
+        conflict_bookings = check_conflict_booking(
+            date, room_id, start_time, end_time, user_id)
 
         if not is_room_available(room_id):
             return {'error': f"room {room_id} is unavailable"}, 400
@@ -275,12 +361,15 @@ class AdminBook(Resource):
         db.session.add(new_booking)
         db.session.commit()
 
-        send_confirm_email_async(user_id, room_id, date, start_time, end_time, 1)
+        send_confirm_email_async(
+            user_id, room_id, date, start_time, end_time, 1)
         schedule_reminder(user_id, room_id, start_time, date, end_time)
-        dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+        dt_start_time = datetime.strptime(
+            f"{date} {start_time}", "%Y-%m-%d %H:%M")
         reminder_time = dt_start_time - timedelta(hours=1)
 
         return {'message': f"Booking confirmed"}, 200
+
 
 @booking_ns.route('/book/<int:booking_id>')
 class BookSpace(Resource):
@@ -288,7 +377,9 @@ class BookSpace(Resource):
     @booking_ns.response(404, "Booking not found")
     @booking_ns.response(401, "Unauthorized")
     @booking_ns.doc(description="Cancel a booking")
-    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @booking_ns.header('Authorization',
+                       'Bearer <your_access_token>',
+                       required=True)
     def delete(self, booking_id):
         jwt_error = verify_jwt()
         if jwt_error:
@@ -312,14 +403,32 @@ class BookSpace(Resource):
 
         return {'message': 'Booking cancelled successfully'}, 200
 
+
 date_query = booking_ns.parser()
-date_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-19")
+date_query.add_argument(
+    'date',
+    type=str,
+    required=True,
+    help='Date to request',
+    default="2024-07-19")
 book_time_query = booking_ns.parser()
-book_time_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-19")
-book_time_query.add_argument('is_ranked', type=bool, required=False, help='Flag to indicate if ranking is required', default=False, store_missing=True)
+book_time_query.add_argument(
+    'date',
+    type=str,
+    required=True,
+    help='Date to request',
+    default="2024-07-19")
+book_time_query.add_argument(
+    'is_ranked',
+    type=bool,
+    required=False,
+    help='Flag to indicate if ranking is required',
+    default=False,
+    store_missing=True)
 
 roomid_query = booking_ns.parser()
 roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
+
 
 @booking_ns.route('/meetingroom')
 class MeetingRoom(Resource):
@@ -340,7 +449,9 @@ class MeetingRoom(Resource):
 
         user_type = db.session.get(Users, user_zid).user_type
 
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         # define output list
@@ -354,10 +465,14 @@ class MeetingRoom(Resource):
                 Booking.date == date,
                 Booking.room_id == value["id"],
                 Booking.booking_status != "cancelled",
-                not_(and_(Booking.booking_status == "requested", Booking.user_id != user_zid)),
+                not_(
+                    and_(
+                        Booking.booking_status == "requested",
+                        Booking.user_id != user_zid)),
             ).all()
             for booking in bookings:
-                start_index, end_index = start_end_time_convert(booking.start_time, booking.end_time)
+                start_index, end_index = start_end_time_convert(
+                    booking.start_time, booking.end_time)
                 for index in range(start_index, end_index):
                     if value["time_table"][index]:
                         if not value["time_table"][index]["is_request"]:
@@ -367,13 +482,16 @@ class MeetingRoom(Resource):
                         "user_id": booking.user_id,
                         "booking_status": booking.booking_status,
                         "is_request": booking.is_request,
-                        "current_user_booking": True if booking.user_id == user_zid else False
-                    }
+                        "current_user_booking": True if booking.user_id == user_zid else False}
         if is_rank and is_rank != 'false':
-            output = sorted(output, key=lambda item: (item['rank'] is not None, item['rank']), reverse=True)
+            output = sorted(
+                output,
+                key=lambda item: (
+                    item['rank'] is not None,
+                    item['rank']),
+                reverse=True)
         else:
             output = sorted(output, key=lambda item: (item['id']))
-
 
         return output, 200
 
@@ -399,6 +517,7 @@ class MeetingRoom(Resource):
             })
         return output
 
+
 def check_permission(detail, user_type):
     if user_type == "HDR_student":
         return detail.HDR_student_permission
@@ -406,6 +525,7 @@ def check_permission(detail, user_type):
         return detail.CSE_staff_permission
     else:
         return False
+
 
 @booking_ns.route('/meetingroom-report')
 class meetingroom_report(Resource):
@@ -430,23 +550,26 @@ class meetingroom_report(Resource):
 
         date = request.args.get('date')
 
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         # define output list
         output = self.generate_report_output(date)
         # output["date"] = date
         return output, 200
-    
+
     def generate_report_output(self, date):
         output = {}
         output["date"] = date
         bookings = Booking.query.filter(
-                    Booking.date == date,
-                ).all()
+            Booking.date == date,
+        ).all()
         res = [0 for _ in range(48)]
         for booking in bookings:
-            start_slot, end_slot = start_end_time_convert(booking.start_time, booking.end_time)
+            start_slot, end_slot = start_end_time_convert(
+                booking.start_time, booking.end_time)
             for i in range(start_slot, end_slot):
                 res[i] += 1
         output["time_slot"] = res
@@ -458,13 +581,16 @@ express_booking_model = booking_ns.model('Express booking request', {
     'room_type': fields.String(required=True, description='The description of the room what user want'),
 })
 
+
 @booking_ns.route('/express-book')
 class ExpressBook(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Express booking")
     @booking_ns.expect(express_booking_model)
-    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @booking_ns.header('Authorization',
+                       'Bearer <your_access_token>',
+                       required=True)
     def post(self):
         jwt_error = verify_jwt()
         if jwt_error:
@@ -480,8 +606,10 @@ class ExpressBook(Resource):
         api_key = Config.API_KEY
         genai.configure(api_key=api_key)
 
-        model = genai.GenerativeModel('gemini-1.5-flash',
-                                      generation_config={"response_mime_type": "application/json"})
+        model = genai.GenerativeModel(
+            'gemini-1.5-flash',
+            generation_config={
+                "response_mime_type": "application/json"})
 
         prompt = f"""
           {query}
@@ -491,7 +619,7 @@ class ExpressBook(Resource):
                 "start_time": string "HH:NN", or None if not provide,
                 "end_time": string "HH:NN", or None if not provide,
                  "date": string "YYYY-MM-DD" as type, or None if not provide,
-                 “max_capacity”: int, or None if not provide,   
+                 “max_capacity”: int, or None if not provide,
             }}
           if the data is not provide filled with  Null.
           today is {today}
@@ -505,7 +633,7 @@ class ExpressBook(Resource):
             print(response_json)
         except Exception as e:
             print("Error generating content:", str(e))
-            return {'error':  str(e)}, 500
+            return {'error': str(e)}, 500
 
         level = response_json.get('level')
         start_time = response_json.get('start_time')
@@ -514,11 +642,16 @@ class ExpressBook(Resource):
         max_capacity = response_json.get('max_capacity')
 
         if not start_time or not end_time:
-            return {'error': "Sorry, we can't get start time or end time, please try again"}, 400
+            return {
+                'error': "Sorry, we can't get start time or end time, please try again"}, 400
 
-        if not re.match(r'^([0-1]?[0-9]|2[0-3]):[03]0$', start_time) or not re.match(
-                r'^([0-1]?[0-9]|2[0-3]):[03]0$', end_time):
-            return {'error': 'time only accept on the hour or on the half hour'}, 400
+        if not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[03]0$',
+                start_time) or not re.match(
+                r'^([0-1]?[0-9]|2[0-3]):[03]0$',
+                end_time):
+            return {
+                'error': 'time only accept on the hour or on the half hour'}, 400
 
         if not max_capacity:
             max_capacity = 1
@@ -543,13 +676,15 @@ class ExpressBook(Resource):
         if room_type == "meeting_room":
             query = db.session.query(RoomDetail).filter(
                 RoomDetail.capacity >= max_capacity,
-                RoomDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))
-            )
+                RoomDetail.id.notin_(
+                    db.session.query(
+                        booked_rooms_subquery.c.room_id)))
         else:
             query = db.session.query(HotDeskDetail).filter(
                 HotDeskDetail.capacity >= max_capacity,
-                HotDeskDetail.id.notin_(db.session.query(booked_rooms_subquery.c.room_id))
-            )
+                HotDeskDetail.id.notin_(
+                    db.session.query(
+                        booked_rooms_subquery.c.room_id)))
 
         if level:
             if room_type == "meeting_room":
@@ -563,7 +698,6 @@ class ExpressBook(Resource):
             user_type = "student"
         elif db.session.get(CSEStaff, zid).school_name != "CSE":
             user_type = "non-cse_staff"
-
 
         unfiltered_available_room_details = [
             {"room_id": room.id,
@@ -582,7 +716,8 @@ class ExpressBook(Resource):
                 available_room_details.append(room)
 
         if len(available_room_details) == 0:
-            return {'error': "Sorry, we couldn't find a location that meets your needs."}, 400
+            return {
+                'error': "Sorry, we couldn't find a location that meets your needs."}, 400
 
         rooms_with_permission = []
         rooms_without_permission = []
@@ -598,16 +733,20 @@ class ExpressBook(Resource):
         if len(rooms_with_permission) >= 5:
             output = random.sample(rooms_with_permission, 5)
         else:
-            without_permission_output = random.sample(rooms_without_permission, min((all_room_len - permission_room_len), (5 - permission_room_len)))
+            without_permission_output = random.sample(rooms_without_permission, min(
+                (all_room_len - permission_room_len), (5 - permission_room_len)))
             output = rooms_with_permission + without_permission_output
 
         return output, 200
+
+
 def express_permission(user_type, student_permission):
     if user_type == "student":
         return student_permission
     if user_type == "non-cse_staff":
         return False
     return True
+
 
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
@@ -630,7 +769,9 @@ class meetingroom_usage(Resource):
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
         date = request.args.get('date')
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         total_room = get_total_room()
@@ -653,16 +794,17 @@ class meetingroom_usage(Resource):
             future_date = current_date + timedelta(days=i)
             temp_date = future_date.strftime('%Y-%m-%d')
             booking_number = Booking.query.filter(
-                    Booking.date == temp_date,
-                ).distinct(Booking.room_id).count()
+                Booking.date == temp_date,
+            ).distinct(Booking.room_id).count()
             usage.append(booking_number)
         return usage
-    
+
     def get_sydney_current_date(self):
         sydney_tz = pytz.timezone('Australia/Sydney')
         sydney_time = datetime.now(timezone.utc).astimezone(sydney_tz)
         formatted_date = sydney_time.strftime('%Y-%m-%d')
         return formatted_date
+
 
 @booking_ns.route('/block-room')
 class block_room(Resource):
@@ -685,10 +827,10 @@ class block_room(Resource):
         roomid = int(request.args.get('roomid'))
         if not roomid:
             return {"message": "Room ID is required"}, 400
-        
+
         if is_block(roomid):
             return {"message": f"Room {roomid} is already blocked"}, 200
-        
+
         space = Space.query.get(roomid)
         if space:
             space.is_available = False
@@ -701,14 +843,15 @@ class block_room(Resource):
             return {
                 "error": "invalid roomid"
             }, 400
-    
+
     def clean_booking(self, roomid):
         bookings = Booking.query.filter(
-                    Booking.room_id == roomid,
-                ).all()
+            Booking.room_id == roomid,
+        ).all()
         for booking in bookings:
             booking.booking_status = "cancelled"
         db.session.commit()
+
 
 @booking_ns.route('/unblock-room')
 class unblock_room(Resource):
@@ -732,10 +875,10 @@ class unblock_room(Resource):
         roomid = int(request.args.get('roomid'))
         if not roomid:
             return {"message": "Room ID is required"}, 400
-        
+
         if not is_block(roomid):
             return {"message": f"Room {roomid} is already available"}, 200
-        
+
         space = Space.query.get(roomid)
         if space:
             space.is_available = True
@@ -747,7 +890,8 @@ class unblock_room(Resource):
             return {
                 "error": "invalid roomid"
             }, 400
-        
+
+
 roomid_edit_model = booking_ns.model('roomid_edit_model', {
     'room_id': fields.Integer(required=True, description='edit room id', default=3),
     'name': fields.String(description='New name of the room', default="G01"),
@@ -755,6 +899,7 @@ roomid_edit_model = booking_ns.model('roomid_edit_model', {
     'capacity': fields.Integer(description='New capacity of the room', default=3),
     'level': fields.String(description='New level of the room', default="G"),
 })
+
 
 @booking_ns.route('/edit-room')
 class edit_room(Resource):
@@ -783,7 +928,7 @@ class edit_room(Resource):
             }, 400
         self.set_room(args)
         return self.show_room(args), 200
-    
+
     def set_room(self, args):
         roomid = args["room_id"]
         if is_meeting_room(roomid):
@@ -800,6 +945,7 @@ class edit_room(Resource):
             room.capacity = args["capacity"]
             room.level = args["level"]
             db.session.commit()
+
     def show_room(self, args):
         roomid = args["room_id"]
         if is_meeting_room(roomid):
@@ -814,6 +960,7 @@ class edit_room(Resource):
             "level": detail.level,
             "is_available": is_room_available(roomid)
         }
+
 
 @booking_ns.route('/meetingroom-top10-byCount')
 class meetingroom_top10(Resource):
@@ -830,7 +977,9 @@ class meetingroom_top10(Resource):
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
         date = request.args.get('date')
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         start_date = date
@@ -859,11 +1008,13 @@ class meetingroom_top10(Resource):
             func.count(Booking.id).desc()
         ).limit(10).all()
 
-        top_list = [{
-            'room_id': room_id, 
-            "room_name": room_name,
-            'booking_count': booking_count} for room_id, room_name, booking_count in rooms]
+        top_list = [{'room_id': room_id,
+                     "room_name": room_name,
+                     'booking_count': booking_count} for room_id,
+                    room_name,
+                    booking_count in rooms]
         return top_list
+
 
 @booking_ns.route('/show-request')
 class show_request(Resource):
@@ -886,36 +1037,38 @@ class show_request(Resource):
         return {
             "requests": self.get_request()
         }, 200
-    
+
     def get_request(self):
         res = []
         sydney_tz = pytz.timezone('Australia/Sydney')
         sydney_time = datetime.now(timezone.utc).astimezone(sydney_tz)
         formatted_date = sydney_time.strftime('%Y-%m-%d')
         requests = Booking.query.filter(
-                    Booking.booking_status == "requested",
-                    Booking.date >= formatted_date
-                ).all()
+            Booking.booking_status == "requested",
+            Booking.date >= formatted_date
+        ).all()
         for request in requests:
             temp = {
                 "booking_id": request.id,
                 "room_id": request.room_id,
                 "room_name": request.room_name,
                 "user_id": request.user_id,
-                "user_name":get_user_name(request.user_id),
+                "user_name": get_user_name(request.user_id),
                 "date": request.date.isoformat(),
                 "start_time": request.start_time.isoformat(),
                 "end_time": request.end_time.isoformat(),
                 "booking_status": request.booking_status,
                 "is_request": request.is_request
-            }   
+            }
             res.append(temp)
         return res
+
 
 request_model = booking_ns.model('request handling', {
     'booking_id': fields.Integer(required=True, description='The booking id', default=1),
     'confirmed': fields.Boolean(description='Confirmed status', default=True)
 })
+
 
 @booking_ns.route('/handle-request')
 class handle_request(Resource):
@@ -945,22 +1098,20 @@ class handle_request(Resource):
             my_request.is_request = False
             db.session.commit()
             return {
-                "message": f"admin {user_zid} set booking id {booking_id} as booked"
-            }, 200
+                "message": f"admin {user_zid} set booking id {booking_id} as booked"}, 200
         else:
             my_request = Booking.query.get(booking_id)
             my_request.booking_status = "cancelled"
             db.session.commit()
             return {
-                "message": f"admin {user_zid} set booking id {booking_id} as cancelled"
-            }, 200
+                "message": f"admin {user_zid} set booking id {booking_id} as cancelled"}, 200
+
 
 @booking_ns.route("/is_book_today")
 class CheckBookToday(Resource):
     @booking_ns.doc(description="Check user whether is admin")
     @booking_ns.response(200, "Success")
     @booking_ns.response(400, "Bad request")
-
     @booking_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -971,10 +1122,13 @@ class CheckBookToday(Resource):
         current_user = get_jwt_identity()
         zid = current_user['zid']
 
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         return {'is_booking_today': is_booking_today(date, zid)}, 200
+
 
 @booking_ns.route('/extend_book/<int:booking_id>')
 class ExtendBook(Resource):
@@ -984,7 +1138,9 @@ class ExtendBook(Resource):
     @booking_ns.response(404, "User not found")
     @booking_ns.response(409, "Booking conflict")
     @booking_ns.doc(description="Book a space")
-    @booking_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @booking_ns.header('Authorization',
+                       'Bearer <your_access_token>',
+                       required=True)
     def post(self, booking_id):
         jwt_error = verify_jwt()
         if jwt_error:
@@ -996,7 +1152,12 @@ class ExtendBook(Resource):
         date = original_book.date
         room_id = original_book.room_id
         start_time = original_book.end_time
-        end_time = (datetime.combine(date, start_time) + timedelta(hours=1)).time()
+        end_time = (
+            datetime.combine(
+                date,
+                start_time) +
+            timedelta(
+                hours=1)).time()
 
         user = db.session.get(Users, zid)
         if not user:
@@ -1006,11 +1167,13 @@ class ExtendBook(Resource):
         if user_type != "CSE_staff" and not is_student_permit(room_id):
             return {
                 'error': "Sorry, you don't have the permission to extend this booking, please request a new book"}, 400
-        if user_type == "CSE_staff" and db.session.get(CSEStaff, zid).school_name != "CSE":
+        if user_type == "CSE_staff" and db.session.get(
+                CSEStaff, zid).school_name != "CSE":
             return {
                 'error': "Sorry, you don't have the permission to extend this booking, please request a new book"}, 400
 
-        conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, zid)
+        conflict_bookings = check_conflict_booking(
+            date, room_id, start_time, end_time, zid)
 
         if conflict_bookings:
             return {'error': 'Booking conflict, please check other time'}, 409

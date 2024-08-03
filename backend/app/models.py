@@ -5,10 +5,17 @@ import enum
 
 class Users(db.Model):
     __tablename__ = 'users'
-    zid = db.Column(db.String(128), primary_key=True, unique=True, nullable=False)
+    zid = db.Column(
+        db.String(128),
+        primary_key=True,
+        unique=True,
+        nullable=False)
     password = db.Column(db.String(128), nullable=False)
     user_type = db.Column(db.String(128), nullable=False)
-    last_update = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    last_update = db.Column(
+        db.DateTime,
+        default=datetime.now,
+        onupdate=datetime.now)
 
 
 class HDRStudent(db.Model):
@@ -38,7 +45,3 @@ class CSEStaff(db.Model):
 class UserType(enum.Enum):
     CSEStaff = "CSE_staff"
     HDRStudent = "HDR_student"
-
-
-
-

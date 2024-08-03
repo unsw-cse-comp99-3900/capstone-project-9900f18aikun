@@ -235,8 +235,10 @@ class RequestField:
             data = value
 
         request_param = cls(
-            fieldname, data, filename=filename, header_formatter=header_formatter
-        )
+            fieldname,
+            data,
+            filename=filename,
+            header_formatter=header_formatter)
         request_param.make_multipart(content_type=content_type)
 
         return request_param

@@ -24,8 +24,12 @@ migrate = Migrate()
 jwt = JWTManager()
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 socketio = SocketIO()
-api = Api(authorizations=authorizations, security='Bearer Auth', version='1.0', title='UNSW CSE booking system',
-          description='An api helping you book space in j17 and k17')
+api = Api(
+    authorizations=authorizations,
+    security='Bearer Auth',
+    version='1.0',
+    title='UNSW CSE booking system',
+    description='An api helping you book space in j17 and k17')
 
 sydney_tz = timezone('Australia/Sydney')
 scheduler = BackgroundScheduler(timezone=sydney_tz)
@@ -41,7 +45,6 @@ microsoft = oauth.register(
     access_token_params=None,
     refresh_token_url=None,
     redirect_uri='http://localhost:5001/auth/outlook-login/callback',
-    client_kwargs={'scope': 'User.Read'},
+    client_kwargs={
+        'scope': 'User.Read'},
 )
-
-

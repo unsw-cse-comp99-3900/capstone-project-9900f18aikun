@@ -40,8 +40,14 @@ class BookingHistory(Resource):
 
         return result, 200
 
+
 date_query = history_ns.parser()
-date_query.add_argument('date', type=str, required=True, help='Date to request')
+date_query.add_argument(
+    'date',
+    type=str,
+    required=True,
+    help='Date to request')
+
 
 @history_ns.route('/alluser-booking-history')
 class alluser_booking_history(Resource):
@@ -54,9 +60,11 @@ class alluser_booking_history(Resource):
         jwt_error = verify_jwt()
         if jwt_error:
             return jwt_error
-        
+
         date = request.args.get('date')
-        if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+        if not re.match(
+            r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+                date):
             return {'error': 'Date must be in YYYY-MM-DD format'}, 400
 
         current_user = get_jwt_identity()
@@ -70,7 +78,7 @@ class alluser_booking_history(Resource):
             Booking.date == date,
             Booking.booking_status != 'deleted',
         ).order_by(Booking.date.desc(), Booking.start_time.desc()).all()
-        
+
         if bookings:
             result = get_booking_result(bookings)
         else:
@@ -80,7 +88,14 @@ class alluser_booking_history(Resource):
 
 
 user_zid = history_ns.parser()
-user_zid.add_argument('user_zid', type=str, required=True, help='user zid', default="z1")
+user_zid.add_argument(
+    'user_zid',
+    type=str,
+    required=True,
+    help='user zid',
+    default="z1")
+
+
 @history_ns.route('/certain-booking-history')
 class CertainBookingHistory(Resource):
     @history_ns.doc(description="Get other user's booking history, need jwt token")
@@ -111,15 +126,16 @@ class CertainBookingHistory(Resource):
 
         return result, 200
 
+
 def get_booking_result(bookings):
     return [{"booking_id": booking.id,
-                       "room_id": booking.room_id,
-                       "room_name": booking.room_name,
-                       "user_id": booking.user_id,
-                       "user_name": get_user_name(booking.user_id),
-                       "user_email": get_email(booking.user_id),
-                       "date": booking.date.isoformat() if booking.date else None,
-                       "start_time": booking.start_time.isoformat() if booking.start_time else None,
-                       "end_time": booking.end_time.isoformat() if booking.end_time else None,
-                       "booking_status": booking.booking_status,
-                       "is_request": booking.is_request} for booking in bookings]
+             "room_id": booking.room_id,
+             "room_name": booking.room_name,
+             "user_id": booking.user_id,
+             "user_name": get_user_name(booking.user_id),
+             "user_email": get_email(booking.user_id),
+             "date": booking.date.isoformat() if booking.date else None,
+             "start_time": booking.start_time.isoformat() if booking.start_time else None,
+             "end_time": booking.end_time.isoformat() if booking.end_time else None,
+             "booking_status": booking.booking_status,
+             "is_request": booking.is_request} for booking in bookings]

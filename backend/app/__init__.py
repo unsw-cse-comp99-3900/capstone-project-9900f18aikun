@@ -9,6 +9,7 @@ import time
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 
+
 def create_app():
     # Enable CORS support for the Flask app
     CORS(app)
