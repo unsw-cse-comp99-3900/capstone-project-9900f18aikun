@@ -1,77 +1,78 @@
-import React, { useState, useEffect } from "react";
-import "./adminUser.css"; // 确保引入了 CSS 样式
+import React, { useState, useEffect } from 'react';
+import './adminUser.css';
 
-import { Table, ConfigProvider } from "@arco-design/web-react";
-import enUS from "@arco-design/web-react/es/locale/en-US"; // 导入英文语言包
-import api from "./api";
+import { Table, ConfigProvider } from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US';
+import api from './api';
 
 function AdminUser() {
-  const [userZid, setUserZid] = useState("");
+  const [userZid, setUserZid] = useState('');
   const [bookingHistory, setBookingHistory] = useState([]);
 
+  //handle the input content change
   const handleInputChange = (event) => {
-    setUserZid(event.target.value); // 更新状态
+    setUserZid(event.target.value);
   };
 
+  // handle the input submit button and fetch booking info
   const handleSubmit = (event) => {
-    event.preventDefault(); // 阻止表单默认提交行为
-    // console.log('Submitted user zid:', userZid);
+    event.preventDefault();
     fetchBookingHistory();
   };
 
+  //fetch booking info
   const fetchBookingHistory = () => {
-    const token = localStorage.getItem("token"); // 从 localStorage 获取 token
+    const token = localStorage.getItem('token');
     fetch(api + `/history/certain-booking-history?user_zid=${userZid}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        accept: "application/json",
+        accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
     })
       .then((response) => response.json())
       .then((data) => {
-        setBookingHistory(data); // 将返回的数据存储到状态变量中
-        // console.log(data); // 打印数据以便调试
+        setBookingHistory(data);
       })
       .catch((error) => {
-        console.error("Error fetching booking history:", error);
+        console.error('Error fetching booking history:', error);
       });
   };
-
+  //user booking info table
   const columns = [
     {
-      title: "User Name",
-      dataIndex: "user_name",
-      key: "user_name",
+      title: 'User Name',
+      dataIndex: 'user_name',
+      key: 'user_name',
     },
     {
-      title: "User ID",
-      dataIndex: "user_id",
-      key: "user_id",
+      title: 'User ID',
+      dataIndex: 'user_id',
+      key: 'user_id',
     },
     {
-      title: "User Email",
-      dataIndex: "user_email",
-      key: "user_email",
+      title: 'User Email',
+      dataIndex: 'user_email',
+      key: 'user_email',
     },
     {
-      title: "Room Name",
-      dataIndex: "room_name",
-      key: "room_name",
+      title: 'Room Name',
+      dataIndex: 'room_name',
+      key: 'room_name',
     },
     {
-      title: "Booking Date",
-      dataIndex: "date",
-      key: "date",
+      title: 'Booking Date',
+      dataIndex: 'date',
+      key: 'date',
     },
     {
-      title: "Booking Time",
-      key: "booking_time",
+      title: 'Booking Time',
+      key: 'booking_time',
       render: (_, record) => `${record.start_time} - ${record.end_time}`,
     },
     {
-      title: "Booking Hour (h)",
-      key: "booking_hour",
+      title: 'Booking Hour (h)',
+      key: 'booking_hour',
       render: (_, record) => {
         const startTime = new Date(`2021-01-01T${record.start_time}`);
         const endTime = new Date(`2021-01-01T${record.end_time}`);
@@ -79,9 +80,9 @@ function AdminUser() {
       },
     },
     {
-      title: "Booking Status",
-      dataIndex: "booking_status",
-      key: "booking_status",
+      title: 'Booking Status',
+      dataIndex: 'booking_status',
+      key: 'booking_status',
     },
   ];
 
@@ -97,7 +98,6 @@ function AdminUser() {
               placeholder="Please input user zid"
               value={userZid}
               onChange={handleInputChange}
-              // className="input-group input" // 使用 adminClassroom.css 中定义的样式
             />
             <button type="submit" className="search-button">
               <img src="/admin_img/search.png" alt="Search" />

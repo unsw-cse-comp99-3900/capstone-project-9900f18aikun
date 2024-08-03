@@ -21,7 +21,7 @@
   align-items: center;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-top: 10px; /* Add margin-top for spacing between rows */
+  margin-top: 10px;
 }
 
 .user-input-group input {
@@ -63,5 +63,5 @@
 }
 
 .admin-page .arco-table thead th {
-  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important;
 }

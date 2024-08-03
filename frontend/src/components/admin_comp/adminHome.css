@@ -8,27 +8,27 @@
 
 .button-container {
   display: flex;
-  justify-content: space-around; /* 保持按钮之间均匀分布 */
-  margin: 20px 40px; /* 上下保持20px, 左右保持40px的边距 */
+  justify-content: space-around;
+  margin: 20px 40px;
 }
 
 .button-style {
   min-width: 280px;
-  height: 65px; /* 增加按钮的高度 */
+  height: 65px;
   color: #fff;
   font-size: 18px;
-  margin: 0 15px; /* 每个按钮左右间隔10px */
-  border-radius: 8px; /* 圆角按钮 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
-  transition: transform 0.2s; /* 添加过渡效果 */
+  margin: 0 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
 .button-style:hover {
-  transform: translateY(-5px); /* 悬停时上移 */
+  transform: translateY(-5px);
 }
 
 .recent-appointment {
-  margin: 25px 35px; /* 设置表格的外边距 */
+  margin: 25px 35px;
 }
 
 .admin-page .arco-table td {
@@ -40,7 +40,7 @@
 }
 
 .admin-page .arco-table thead th {
-  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important;
 }
 
 .user-table {
@@ -49,10 +49,10 @@
 }
 
 .arco-table thead th {
-  background-color: #f5f5f5; /* 修改表头背景颜色 */
-  font-weight: bold; /* 加粗表头文字 */
+  background-color: #f5f5f5;
+  font-weight: bold;
 }
 
 .arco-table tbody tr:hover {
-  background-color: #f9f9f9; /* 悬停时修改行背景颜色 */
+  background-color: #f9f9f9;
 }

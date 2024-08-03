@@ -20,22 +20,21 @@
 .search_1 {
   display: flex;
   flex-direction: row;
-  align-items: center; /* Align items vertically in the center */
+  align-items: center;
 }
 
 .search label {
-  display: inline-block; /* Ensure label is inline-block */
+  display: inline-block;
   font-size: 18px;
-  margin-right: 10px; /* Add margin to separate label from select */
-  /* Align label vertically with select */
+  margin-right: 10px;
 }
 
 select {
   width: 200px;
   height: 35px;
-  display: inline-block; /* Ensure select is also inline-block */
-  font-size: 16px; /* Adjust font size if necessary */
-  padding: 4px; /* Adjust padding to make the select smaller */
+  display: inline-block;
+  font-size: 16px;
+  padding: 4px;
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -48,7 +47,7 @@ select {
   align-items: center;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-top: 10px; /* Add margin-top for spacing between rows */
+  margin-top: 10px;
 }
 
 .input-group input {
@@ -83,17 +82,9 @@ select {
 
 /* adminClassroom.css */
 div.admin-page .arco-table {
-  --table-bg: #f7f8fa; /* 修改表格背景颜色 */
-  --table-header-bg: #e5e6eb; /* 修改表头背景颜色 */
+  --table-bg: #f7f8fa;
+  --table-header-bg: #e5e6eb;
 }
-
-/* div.admin-page .arco-table table {
-    background-color: var(--table-bg) !important;
-}
-
-div.admin-page .arco-table thead {
-    background-color: var(--table-header-bg) !important;
-} */
 
 .admin-page .arco-table td {
   background-color: #f7f8fa !important;
@@ -104,31 +95,30 @@ div.admin-page .arco-table thead {
 }
 /* adminClassroom.css */
 .admin-page .arco-table thead th {
-  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important;
 }
 /* adminClassroom.css */
 .admin-page .arco-table .table-button {
   border: none;
   background: none;
   cursor: pointer;
-  padding: 5px 5px; /* 调整按钮大小 */
+  padding: 5px 5px;
   display: inline-block;
 }
 
-/* 确保按钮在 hover 时不显示黄色背景 */
 .admin-page .arco-table td .table-button:hover {
   background-color: transparent !important;
 }
 .admin-page .arco-table .table-button img {
-  width: 20px; /* 减小图片的宽度 */
-  height: 20px; /* 减小图片的高度 */
+  width: 20px;
+  height: 20px;
 }
 
 .table-button-2 {
   border: none;
   background: none;
   cursor: pointer;
-  padding: 5px 5px; /* 调整按钮大小 */
+  padding: 5px 5px;
   display: inline-block;
 }
 
@@ -137,6 +127,6 @@ div.admin-page .arco-table thead {
 }
 
 .admin-page .arco-table .table-button-2 img {
-  width: 20px; /* 减小图片的宽度 */
-  height: 20px; /* 减小图片的高度 */
+  width: 20px;
+  height: 20px;
 }

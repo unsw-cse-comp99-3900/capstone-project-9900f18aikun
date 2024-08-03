@@ -8,8 +8,8 @@
   margin-bottom: 5px;
   font-size: 22px;
 }
-/* 
-table */
+
+/* table */
 .class-table {
   margin: 25px 35px 25px 35px;
 }
@@ -23,7 +23,7 @@ table */
 }
 
 .admin-page .arco-table thead th {
-  background-color: #e5e6eb !important; /* 修改表头的背景颜色 */
+  background-color: #e5e6eb !important;
 }
 
 /* .admin-page .arco-table .table-button {
