@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "./history.css";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -17,7 +11,6 @@ import {
   Notification,
 } from "@arco-design/web-react";
 import dayjs from "dayjs";
-import ErrorBox from "./errorBox";
 import api from "../api";
 
 const ReservationHistory = () => {
@@ -31,6 +24,7 @@ const ReservationHistory = () => {
   const [obj, setObj] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
+  // get booking history for user
   useEffect(() => {
     const fetchHistory = async () => {
       const token = localStorage.getItem("token");
@@ -45,7 +39,6 @@ const ReservationHistory = () => {
 
         if (response.ok) {
           const result = await response.json();
-          console.log("history result is ", result);
           setHistory(result);
         } else {
           const errorText = await response.text();
@@ -62,6 +55,7 @@ const ReservationHistory = () => {
     fetchHistory();
   }, [change]);
 
+  // error handling
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
@@ -83,8 +77,8 @@ const ReservationHistory = () => {
     return `${hours}:${minutes}`;
   }
 
+  // handle cancel booking or requests
   const cancelHandler = async (entry, e) => {
-    console.log(e.target.innerText);
     if (e.target.innerText === "Cancel") {
       const token = localStorage.getItem("token");
 
@@ -98,7 +92,6 @@ const ReservationHistory = () => {
               Accept: "application/json",
               Authorization: "Bearer " + token,
             },
-            // body: JSON.stringify(obj),
           }
         );
 
@@ -126,6 +119,7 @@ const ReservationHistory = () => {
     }
   };
 
+  // once select a date, rebook
   const handleDateChange = async (date) => {
     setSelectedDate(date);
     // send request to backend
@@ -150,10 +144,10 @@ const ReservationHistory = () => {
 
       if (response.ok) {
         setErrorMessage("Successfully Booked");
-        const result = await response.json();
+        await response.json();
         setChange(!change);
       } else {
-        const errorText = await response.text();
+        await response.text();
         setErrorMessage("Booking was Unsuccessful");
         throw new Error("Something went wrong");
       }
@@ -163,6 +157,7 @@ const ReservationHistory = () => {
     setIsCalendarVisible(!isCalendarVisible);
   };
 
+  // allowing book for 6 days from tomorrow
   const disableDates = (date) => {
     const today = dayjs();
     const sevenDaysFromNow = today.add(7, "day");
@@ -170,6 +165,7 @@ const ReservationHistory = () => {
     return date.isBefore(tmr, "day") || date.isAfter(sevenDaysFromNow, "day");
   };
 
+  // extend booking
   const handleExtend = async (entry) => {
     const token = localStorage.getItem("token");
 
@@ -189,7 +185,7 @@ const ReservationHistory = () => {
         setErrorMessage("Successfully Extended");
         setChange(!change);
       } else {
-        const errorText = await response.text();
+        await response.text();
         setErrorMessage("Extension was Unsuccessful");
         throw new Error("Something went wrong");
       }
@@ -238,14 +234,6 @@ const ReservationHistory = () => {
         ) {
           text = "Cancel";
         }
-        // const isRebook =
-        //   record.booking_status === "cancelled" ||
-        //   record.booking_status === "signed-in";
-        // const text = isRebook
-        //   ? isCalendarVisible
-        //     ? "Hide Calendar"
-        //     : "Rebook"
-        //   : "Cancel";
         const color =
           text === "Cancel" ? "red" : text === "Rebook" ? "green" : "black";
 
@@ -264,6 +252,7 @@ const ReservationHistory = () => {
       title: "Extend Booking",
       key: "extend",
       align: "center",
+      // only allow extend booking on signed-in status
       render: (_, record) => {
         if (record.booking_status === "signed-in") {
           return <input type="checkbox" onClick={() => handleExtend(record)} />;
@@ -320,9 +309,6 @@ const ReservationHistory = () => {
           />
         </LocalizationProvider>
       )}
-      {/* {errorMessage && (
-        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
-      )} */}
     </div>
   );
 };

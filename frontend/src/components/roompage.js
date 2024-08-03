@@ -11,13 +11,12 @@ import {
   ConfigProvider,
 } from "@arco-design/web-react";
 import enUS from "@arco-design/web-react/es/locale/en-US";
-// import ErrorBox from "./errorBox";
-
 import MakeRate from "./makerate";
-import Comments from "./Comments"; // Import the new Comments component
+import Comments from "./Comments";
 import api from "../api";
 
 const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
+  // get room id
   const url = window.location.href;
   const roomid = url.split("room/")[1];
 
@@ -28,28 +27,24 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   const [loadingData, setLoadingData] = useState(true);
   const [isReporting, setIsReporting] = useState(false);
   const [reportText, setReportText] = useState("");
-  const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedRoom, setEditedRoom] = useState({});
   const [change, setChange] = useState(false);
-
-  // //评论评分state
-  const [comments, setComments] = useState([]);
+  const [isRateModalVisible, setIsRateModalVisible] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [ratingData, setRatingData] = useState({
     is_rated: false,
     my_rate: 0,
     room_score: 0,
   });
-  const [isRateModalVisible, setIsRateModalVisible] = useState(false); // State for modal visibility
-  const [currentUserId, setCurrentUserId] = useState(null); // Add currentUserId state
-  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleReportClick = () => {
     setIsReportModalVisible(true);
   };
 
+  // submit report
   const handleSubmit = async () => {
     const obj = {
       message: reportText,
@@ -86,11 +81,11 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
     }
   };
 
+  // fetch comments
   const fetchComments = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        // `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
         api + `/comment/get-comment?room_id=${roomid}`,
 
         {
@@ -103,7 +98,6 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       );
 
       if (response.status === 204) {
-        setComments([]);
         return;
       }
 
@@ -112,18 +106,17 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       }
 
       const commentsData = await response.json();
-      setComments(commentsData.comments); // Use comments as received from backend
       setCurrentUserId(commentsData.current_zid); // 获取当前用户ID
     } catch (error) {
       setErrorMessage(error.message);
     }
   }, [roomid]);
 
+  // fetch rating data
   const fetchRatingData = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        // `http://3.26.67.188:5001/comment/get-rate?room_id=${roomid}`,
         api + `/comment/get-rate?room_id=${roomid}`,
 
         {
@@ -147,6 +140,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
     }
   }, [roomid]);
 
+  // get booking info for timetable
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
@@ -200,7 +194,6 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
         setRoom(result.message);
         setEditedRoom(result.message);
       } catch (error) {
-        // console.error("Error fetching room data:", error);
         setErrorMessage("Failed to Fetch Room Info");
       } finally {
         setLoadingRoom(false);
@@ -213,6 +206,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
     fetchRoom();
   }, [roomid, selectedDate, change, fetchComments, fetchRatingData]);
 
+  // find info for this room
   useEffect(() => {
     if (room && data.length) {
       const roomData = [data.find((info) => info.id === room.room_id)];
@@ -220,19 +214,21 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
     }
   }, [room, data]);
 
+  // error handle
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
         title: "Notification",
         content: errorMessage,
-        duration: 0, // 0 means the notification will not auto close
+        duration: 0,
         onClose: () => setErrorMessage(""),
       });
     }
   }, [errorMessage]);
 
+  // functions for edit handling
   const handleEditClick = () => {
-    setIsEditing(true); // 修改 handleEditClick 函数
+    setIsEditing(true);
   };
 
   const handleInputChange = (event) => {
@@ -275,7 +271,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       });
 
       if (!response.ok) {
-        setErrorMessage("Failed to Update Room Data"); // 修改错误信息
+        setErrorMessage("Failed to Update Room Data");
         throw new Error("Failed to update room data");
       } else {
         setErrorMessage("Successfully Updated");
@@ -287,10 +283,10 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating room data:", error);
-      setError(error);
     }
   };
 
+  // loading
   if (loadingRoom || loadingData) {
     return (
       <div className="loading-container">
@@ -390,6 +386,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
               </>
             )}
           </div>
+          {/* timetable */}
           {roomData && (
             <Table
               data={roomData}
@@ -415,9 +412,6 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       ) : (
         <div>No room information</div>
       )}
-      {/* {errorMessage && (
-        <ErrorBox message={errorMessage} onClose={() => setErrorMessage("")} />
-      )} */}
       <ConfigProvider locale={enUS}>
         {!isAdmin ? (
           <Modal
