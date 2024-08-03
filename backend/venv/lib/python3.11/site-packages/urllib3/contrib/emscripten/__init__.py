@@ -12,5 +12,7 @@ def inject_into_urllib3() -> None:
     # if it isn't ignored
     HTTPConnectionPool.ConnectionCls = EmscriptenHTTPConnection
     HTTPSConnectionPool.ConnectionCls = EmscriptenHTTPSConnection
-    urllib3.connection.HTTPConnection = EmscriptenHTTPConnection  # type: ignore[misc,assignment]
-    urllib3.connection.HTTPSConnection = EmscriptenHTTPSConnection  # type: ignore[misc,assignment]
+    # type: ignore[misc,assignment]
+    urllib3.connection.HTTPConnection = EmscriptenHTTPConnection
+    # type: ignore[misc,assignment]
+    urllib3.connection.HTTPSConnection = EmscriptenHTTPSConnection

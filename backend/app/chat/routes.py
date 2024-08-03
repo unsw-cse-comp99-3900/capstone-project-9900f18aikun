@@ -59,7 +59,8 @@ def handle_connect():
     else:
         is_view = db.session.get(NotificationView, user_id)
         if not is_view:
-            notification_view = NotificationView(user_id=user_id, is_viewed=False)
+            notification_view = NotificationView(
+                user_id=user_id, is_viewed=False)
             db.session.add(notification_view)
             db.session.commit()
         join_room(user_id)
@@ -105,13 +106,10 @@ def convert_chat_output(chat):
         "user_id": chat.user_id,
         "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S"),
         "last_message_time": chat.last_message_time.strftime("%Y-%m-%d %H:%M:%S"),
-        "views": get_chat_views(chat.chat_id),
-        "messages": []
-    }
+        "views": get_chat_views(
+            chat.chat_id),
+        "messages": []}
     return chat_data
-
-
-
 
 
 def handle_disconnect():
@@ -199,7 +197,9 @@ def handle_join(data):
     user_id = session.get('user_id')
     if room and user_id:
         join_room(room)
-        emit('message', {'msg': f'{user_id} has joined the room {room}'}, room=room)
+        emit(
+            'message', {
+                'msg': f'{user_id} has joined the room {room}'}, room=room)
         print(f'{user_id} joined room: {room}')
 
 
@@ -209,7 +209,9 @@ def handle_leave(data):
     user_id = session.get('user_id')
     if room and user_id:
         leave_room(room)
-        emit('message', {'msg': f'{user_id} has left the room {room}'}, room=room)
+        emit(
+            'message', {
+                'msg': f'{user_id} has left the room {room}'}, room=room)
         print(f'{user_id} left room: {room}')
 
 
@@ -219,17 +221,22 @@ class View(Resource):
     @chat_ns.response(200, "success")
     @chat_ns.response(400, "Bad request")
     @chat_ns.doc(description="Book a space")
-    @chat_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @chat_ns.header('Authorization',
+                    'Bearer <your_access_token>',
+                    required=True)
     def post(self, chat_id):
         jwt_error = verify_jwt()
         if jwt_error:
             return jwt_error
         current_user = get_jwt_identity()
         zid = current_user['zid']
-        exists = db.session.query(Chat.chat_id).filter_by(chat_id=chat_id).first()
+        exists = db.session.query(
+            Chat.chat_id).filter_by(
+            chat_id=chat_id).first()
         if not exists:
             return {'error': 'Chat ID does not exist.'}, 400
-        existing_view = ChatView.query.filter_by(user_id=zid, chat_id=chat_id).first()
+        existing_view = ChatView.query.filter_by(
+            user_id=zid, chat_id=chat_id).first()
 
         if existing_view:
             return {'message': 'Chat already viewed.'}, 200
@@ -253,5 +260,3 @@ def reset_chat_views(chat_id, user_id):
     new_view = ChatView(user_id=user_id, chat_id=chat_id)
     db.session.add(new_view)
     db.session.commit()
-
-

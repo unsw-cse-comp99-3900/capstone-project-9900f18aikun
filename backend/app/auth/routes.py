@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask import redirect, send_file, make_response,  request, Flask, jsonify, current_app, url_for
+from flask import redirect, send_file, make_response, request, Flask, jsonify, current_app, url_for
 import requests
 from app.extensions import db, jwt, microsoft
 from app.models import Users
@@ -46,13 +46,12 @@ class UserLogin(Resource):
             return {
                 'access_token': access_token,
                 "is_admin": True
-                }, 200
+            }, 200
         else:
             return {
                 'access_token': access_token,
                 "is_admin": False
-                }, 200
-        
+            }, 200
 
 
 @auth_ns.route('/auto-login')
@@ -71,26 +70,28 @@ class AutoLogin(Resource):
             if user_data:
                 if is_admin(user_data.zid):
                     return {
-                        'zid': user_data.zid, 
+                        'zid': user_data.zid,
                         'message': 'User verified',
                         "is_admin": True
-                        }, 200
+                    }, 200
                 else:
                     return {
-                        'zid': user_data.zid, 
+                        'zid': user_data.zid,
                         'message': 'User verified',
                         "is_admin": False
-                        }, 200
+                    }, 200
             else:
                 return {'message': 'User not found'}, 404
         except Exception as e:
             return {'error': str(e)}, 401
-        
+
+
 @auth_ns.route('/outlook-login')
 class OutlookLogin(Resource):
     def get(self):
         redirect_uri = url_for('auth_outlook_login_callback', _external=True)
         return microsoft.authorize_redirect(redirect_uri)
+
 
 @auth_ns.route('/outlook-login/callback')
 class OutlookLoginCallback(Resource):
@@ -100,17 +101,16 @@ class OutlookLoginCallback(Resource):
         user_info = resp.json()
         user_email = user_info.get('mail')
         # {"info": {"@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users/$entity", "userPrincipalName": "wangweiyi6191@outlook.com", "id": "fc04e2dba170b844", "displayName": "Escalade Wang", "surname": "Wang", "givenName": "Escalade", "preferredLanguage": "zh-CN", "mail": "wangweiyi6191@outlook.com", "mobilePhone": null, "jobTitle": null, "officeLocation": null, "businessPhones": []}}
-        
+
         if check_is_student_email(user_email):
             zid = get_student_zid(user_email)
             access_token = create_access_token(identity={'zid': zid})
-            return redirect(f'http://localhost:3001/login?access_token={access_token}')
+            return redirect(
+                f'http://localhost:3001/login?access_token={access_token}')
         elif check_is_staff_email(user_email):
             zid = get_staff_zid(user_email)
             access_token = create_access_token(identity={'zid': zid})
-            return redirect(f'http://localhost:3001/login?access_token={access_token}')
+            return redirect(
+                f'http://localhost:3001/login?access_token={access_token}')
         else:
             return redirect(f'http://localhost:3001/login?access_token=false')
-                
-
-        

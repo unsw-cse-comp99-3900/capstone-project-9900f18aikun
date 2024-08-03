@@ -18,7 +18,12 @@ class Space(db.Model):
 
 class RoomDetail(db.Model):
     __tablename__ = "room_detail"
-    id = db.Column(db.Integer, db.ForeignKey('space.id'), primary_key=True, unique=True, nullable=False)
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey('space.id'),
+        primary_key=True,
+        unique=True,
+        nullable=False)
     building = db.Column(db.String(128), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     level = db.Column(db.String(128), nullable=False)
@@ -29,7 +34,12 @@ class RoomDetail(db.Model):
 
 class HotDeskDetail(db.Model):
     __tablename__ = "hot_desk_detail"
-    id = db.Column(db.Integer, db.ForeignKey('space.id'), primary_key=True, unique=True, nullable=False)
+    id = db.Column(
+        db.Integer,
+        db.ForeignKey('space.id'),
+        primary_key=True,
+        unique=True,
+        nullable=False)
     building = db.Column(db.String(128), nullable=False)
     name = db.Column(db.String(128), nullable=False)
     level = db.Column(db.String(128), nullable=False)
@@ -45,7 +55,10 @@ class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     room_id = db.Column(db.Integer, db.ForeignKey('space.id'), nullable=False)
     room_name = db.Column(db.String(128), nullable=False)
-    user_id = db.Column(db.String(128), db.ForeignKey('users.zid'), nullable=False)
+    user_id = db.Column(
+        db.String(128),
+        db.ForeignKey('users.zid'),
+        nullable=False)
     date = db.Column(db.Date, nullable=False)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
@@ -65,6 +78,3 @@ class BookingStatus(enum.Enum):
     signed_in = "signed-in"
     absent = "absent"
     completed = "completed"
-
-
-

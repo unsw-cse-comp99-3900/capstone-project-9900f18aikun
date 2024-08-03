@@ -84,7 +84,8 @@ def add_stderr_logger(
     # even if urllib3 is vendored within another package.
     logger = logging.getLogger(__name__)
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s %(message)s"))
     logger.addHandler(handler)
     logger.setLevel(level)
     logger.debug("Added a stderr logging handler to logger: %s", __name__)
@@ -101,7 +102,10 @@ del NullHandler
 # SecurityWarning's always go off by default.
 warnings.simplefilter("always", exceptions.SecurityWarning, append=True)
 # InsecurePlatformWarning's don't vary between requests, so we keep it default.
-warnings.simplefilter("default", exceptions.InsecurePlatformWarning, append=True)
+warnings.simplefilter(
+    "default",
+    exceptions.InsecurePlatformWarning,
+    append=True)
 
 
 def disable_warnings(category: type[Warning] = exceptions.HTTPWarning) -> None:

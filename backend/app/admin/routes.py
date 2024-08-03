@@ -18,6 +18,7 @@ from .models import NotificationView
 
 admin_ns = Namespace('admin', description='Admin operations')
 
+
 @admin_ns.route("/check_admin")
 class CheckAdmin(Resource):
     @admin_ns.doc(description="Check user whether is admin")
@@ -33,14 +34,14 @@ class CheckAdmin(Resource):
         user_zid = current_user['zid']
         try:
             whether_admin = is_admin(user_zid)
-        except:
+        except BaseException:
             return {'error': "can't get admin"}, 403
         return {"is_admin": whether_admin}, 200
 
 
-report_model = admin_ns.model('send report', {
-    'message': fields.String(required=True, description='report content', default="G01 table missing")
-})
+report_model = admin_ns.model('send report', {'message': fields.String(
+    required=True, description='report content', default="G01 table missing")})
+
 
 @admin_ns.route("/report")
 class report(Resource):
@@ -70,8 +71,15 @@ class report(Resource):
             "to_name": f"{to_name}"
         }, 200
 
+
 date_query = admin_ns.parser()
-date_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-18")
+date_query.add_argument(
+    'date',
+    type=str,
+    required=True,
+    help='Date to request',
+    default="2024-07-18")
+
 
 @admin_ns.route("/get-usage-report-txt")
 class get_usage_report_txt(Resource):
@@ -85,7 +93,7 @@ class get_usage_report_txt(Resource):
         jwt_error = verify_jwt()
         if jwt_error:
             return jwt_error
-        
+
         date = request.args.get('date')
         current_user = get_jwt_identity()
         user_zid = current_user['zid']
@@ -97,55 +105,68 @@ class get_usage_report_txt(Resource):
             }, 403
         top_room, room_times = self.most_booked_room(date)
         top_user, user_times = self.most_booked_user_name(date)
-        if user_times > 0 :
+        if user_times > 0:
             user_name = get_user_name(top_user)
         else:
             user_name = "No user"
-        
+
         res = f"""The total number of rooms, including hot desks and meeting rooms, is {get_total_room()}. \
 On {date}, there were {self.get_booking_count_by_date(date)} reservations made, covering {self.get_booking_room_count_by_date(date)} different rooms, booked by {self.get_booking_user_count_by_date(date)} users.\
 The most frequently booked room was {top_room}, which had {room_times} reservations on that day. \
 The user with the most bookings was {user_name}({top_user}), who made {user_times} reservations."""
         return {
-            "msg":res
+            "msg": res
         }, 200
-        
+
     def get_booking_count_by_date(self, date) -> int:
         return Booking.query.filter(Booking.date == date).count()
-    
+
     def get_booking_room_count_by_date(self, date) -> int:
-        return Booking.query.with_entities(Booking.room_id).filter(Booking.date == date).distinct().count()
+        return Booking.query.with_entities(
+            Booking.room_id).filter(
+            Booking.date == date).distinct().count()
 
     def get_booking_user_count_by_date(self, date) -> int:
-        return Booking.query.with_entities(Booking.user_id).filter(Booking.date == date).distinct().count()
+        return Booking.query.with_entities(
+            Booking.user_id).filter(
+            Booking.date == date).distinct().count()
 
     def most_booked_room(self, date):
-        most_booked_room_name = Booking.query \
-    .with_entities(Booking.room_id, Booking.room_name, db.func.count(Booking.room_id).label('count')) \
-    .filter(Booking.date == date) \
-    .group_by(Booking.room_id, Booking.room_name) \
-    .order_by(db.desc('count')) \
-    .first()
+        most_booked_room_name = Booking.query .with_entities(
+            Booking.room_id,
+            Booking.room_name,
+            db.func.count(
+                Booking.room_id).label('count')) .filter(
+            Booking.date == date) .group_by(
+                Booking.room_id,
+                Booking.room_name) .order_by(
+                    db.desc('count')) .first()
         if most_booked_room_name:
-            return (most_booked_room_name.room_name, most_booked_room_name.count)
+            return (
+                most_booked_room_name.room_name,
+                most_booked_room_name.count)
         else:
             return ("No room", 0)
-        
+
     def most_booked_user_name(self, date):
-        most_booked_user_name = Booking.query \
-    .with_entities(Booking.user_id, db.func.count(Booking.user_id).label('count')) \
-    .filter(Booking.date == date) \
-    .group_by(Booking.user_id) \
-    .order_by(db.desc('count')) \
-    .first()
+        most_booked_user_name = Booking.query .with_entities(
+            Booking.user_id,
+            db.func.count(
+                Booking.user_id).label('count')) .filter(
+            Booking.date == date) .group_by(
+                Booking.user_id) .order_by(
+                    db.desc('count')) .first()
         if most_booked_user_name:
             return (most_booked_user_name.user_id, most_booked_user_name.count)
         else:
             return ("_", 0)
 
-delete_comment_model = admin_ns.model('admin Delete comment', {
-    'comment_id': fields.Integer(required=True, description='The comment id', default=1),
-})
+
+delete_comment_model = admin_ns.model(
+    'admin Delete comment', {
+        'comment_id': fields.Integer(
+            required=True, description='The comment id', default=1), })
+
 
 @admin_ns.route('/delete-comment')
 class delete_test(Resource):
@@ -169,13 +190,13 @@ class delete_test(Resource):
             return {
                 "error": f"invalid comment_id {comment_id}"
             }, 400
-        
+
         self.delete_comment_and_children(comment_id)
 
         return {
             "message": f"admin({user_zid}) delete Comment {comment_id} successfully."
         }, 200
-    
+
     def delete_comment_and_children(self, comment_id):
         def delete_likes(comment_id):
             likes = Like.query.filter_by(comment_id=comment_id).all()
@@ -197,11 +218,14 @@ class delete_test(Resource):
             delete_likes(comment_id)
             db.session.delete(comment)
             db.session.commit()
-    
-edit_comment_model = admin_ns.model('Edit comment', {
-    'comment_id': fields.Integer(required=True, description='The comment id', default=1),
-    'comment': fields.String(required=True, description='comment', default="AHHHH! Great room."),
-})
+
+
+edit_comment_model = admin_ns.model(
+    'Edit comment', {
+        'comment_id': fields.Integer(
+            required=True, description='The comment id', default=1), 'comment': fields.String(
+                required=True, description='comment', default="AHHHH! Great room."), })
+
 
 @admin_ns.route('/edit-comment')
 class edit_comment(Resource):
@@ -226,7 +250,7 @@ class edit_comment(Resource):
             return {
                 "error": f"invalid comment {comment_id}"
             }, 400
-        
+
         return {
             "message": f"successfully edit comment {comment_id}",
             "comment": self.edit_comment(comment_id, comment)
@@ -247,9 +271,10 @@ class edit_comment(Resource):
             "previous_content": previous_content,
             "content": comment.content,
             "is_edited": comment.is_edited,
-            "edit_date": comment.edit_date.isoformat(), 
+            "edit_date": comment.edit_date.isoformat(),
             "edit_time": comment.edit_time.isoformat()
         }
+
 
 @admin_ns.route('/view')
 class NotificationViewApi(Resource):
@@ -257,7 +282,9 @@ class NotificationViewApi(Resource):
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.doc(description="Post notification view function")
-    @admin_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @admin_ns.header('Authorization',
+                     'Bearer <your_access_token>',
+                     required=True)
     def post(self):
         jwt_error = verify_jwt()
         if jwt_error:
@@ -283,7 +310,9 @@ class NotificationViewApi(Resource):
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.doc(description="Get notification view function")
-    @admin_ns.header('Authorization', 'Bearer <your_access_token>', required=True)
+    @admin_ns.header('Authorization',
+                     'Bearer <your_access_token>',
+                     required=True)
     def get(self):
         jwt_error = verify_jwt()
         if jwt_error:

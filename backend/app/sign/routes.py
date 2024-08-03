@@ -45,20 +45,24 @@ class Detail(Resource):
         ).all()
 
         if not bookings_on_date:
-            return {"message": "There is no reservation found for your room now."}, 400
+            return {
+                "message": "There is no reservation found for your room now."}, 400
 
         bookings = []
         for booking in bookings_on_date:
             start_datetime = datetime.combine(today_date, booking.start_time)
             end_datetime = datetime.combine(today_date, booking.start_time)
-            if start_datetime - timedelta(minutes=14) < now <= end_datetime + timedelta(minutes=15):
+            if start_datetime - \
+                    timedelta(minutes=14) < now <= end_datetime + timedelta(minutes=15):
                 bookings.append(booking)
 
         if not bookings:
-            return {"message": "No valid reservations within the time range."}, 400
+            return {
+                "message": "No valid reservations within the time range."}, 400
 
         if len(bookings) == 0:
-            return {"message": "There is no reservation found for your room now."}, 400
+            return {
+                "message": "There is no reservation found for your room now."}, 400
 
         if len(bookings) > 1:
             return {"error": "Booking crash"}, 400
@@ -78,15 +82,22 @@ class Detail(Resource):
                 db.session.commit()
                 end_time = booking.end_time
                 book_date = booking.date
-                booking_end_time = datetime.strptime(f"{book_date} {end_time}", "%Y-%m-%d %H:%M:%S")
-                scheduler.add_job(schedule_set_completed, 'date', run_date=booking_end_time, args=[booking.id])
+                booking_end_time = datetime.strptime(
+                    f"{book_date} {end_time}", "%Y-%m-%d %H:%M:%S")
+                scheduler.add_job(
+                    schedule_set_completed,
+                    'date',
+                    run_date=booking_end_time,
+                    args=[
+                        booking.id])
                 return {"message": "You have signed in"}, 200
             case _:
                 return {"message": "Unknown status"}, 400
 
+
 def schedule_set_completed(bookingid):
     from app.extensions import db, app
-    with app.app_context():  
+    with app.app_context():
         booking = Booking.query.get(bookingid)
         booking.booking_status = "completed"
         db.session.commit()

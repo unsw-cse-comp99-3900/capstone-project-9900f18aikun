@@ -6,6 +6,8 @@ import pandas as pd
 from .models import HDRStudent, CSEStaff, Users
 from app.booking.models import RoomDetail, Space, HotDeskDetail
 import numpy as np
+
+
 def set_up_HDRstudent_db():
     # pre process data
     file_path = "data/CSE Active HDR candidates staff details 210624.xlsx"
@@ -23,15 +25,17 @@ def set_up_HDRstudent_db():
     staff_sheet = staff_sheet.drop('Test', axis=1)
 
     # rename columns
-    student_sheet.rename(columns={'Candidate zID': 'zid',
-                                  'Candidate Name': 'name',
-                                  'Email ID': 'email',
-                                  'Faculty Name': 'faculty_name',
-                                  'School Name': 'school_name',
-                                  'Degree (PhD/MRes)': 'degree',
-                                  'Other roles within CSE': 'other_roles_within_cse',
-                                  'Password': 'password'
-                                  }, inplace=True)
+    student_sheet.rename(
+        columns={
+            'Candidate zID': 'zid',
+            'Candidate Name': 'name',
+            'Email ID': 'email',
+            'Faculty Name': 'faculty_name',
+            'School Name': 'school_name',
+            'Degree (PhD/MRes)': 'degree',
+            'Other roles within CSE': 'other_roles_within_cse',
+            'Password': 'password'},
+        inplace=True)
 
     staff_sheet.rename(columns={'Staff z ID': 'zid',
                                 'Staff Name': 'name',
@@ -89,16 +93,18 @@ def set_up_HDRstudent_db():
             db.session.add(users)
 
     db.session.commit()
+
+
 def set_up_space_db():
     # room information update, excel start from line 3
     meeting_room_path = "data/Meeting Rooms CSE K17 and J17 L5.xlsx"
     room_detail_sheet = pd.read_excel(meeting_room_path, header=2)
 
     # get the accessibility
-    room_detail_sheet['HDR_student_permission'] = room_detail_sheet['Who can use it?'].str.contains(r'HDR students',
-                                                                                                    case=False)
-    room_detail_sheet['CSE_staff_permission'] = room_detail_sheet['Who can use it?'].str.contains(r'CSE staff',
-                                                                                                  case=False)
+    room_detail_sheet['HDR_student_permission'] = room_detail_sheet['Who can use it?'].str.contains(
+        r'HDR students', case=False)
+    room_detail_sheet['CSE_staff_permission'] = room_detail_sheet['Who can use it?'].str.contains(
+        r'CSE staff', case=False)
     room_detail_sheet = room_detail_sheet.drop('Who can use it?', axis=1)
 
     # rename
@@ -127,7 +133,6 @@ def set_up_space_db():
         )
         db.session.add(space)
         db.session.commit()
-
 
         room_detail = RoomDetail(
             id=space.id,
@@ -179,13 +184,7 @@ def set_up_space_db():
     db.session.commit()
 
 
-
-
-
-
-
 # Read user data from given excel
 def set_up_database():
     set_up_HDRstudent_db()
     set_up_space_db()
-

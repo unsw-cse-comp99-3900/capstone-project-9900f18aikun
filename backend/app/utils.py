@@ -64,9 +64,11 @@ def is_meeting_room(room_id: int) -> bool:
     else:
         return False
 
+
 def is_block(room_id: int) -> bool:
     space = db.session.get(Space, room_id)
     return not space.is_available
+
 
 def is_student_permit(room_id: int) -> bool:
     if is_meeting_room(room_id):
@@ -116,20 +118,24 @@ def verify_jwt():
 def calculate_time_difference(date, start_time_str, end_time_str):
     datetime_format = "%Y-%m-%d %H:%M:%S"
     try:
-        start_datetime = datetime.strptime(f"{date} {start_time_str}", datetime_format)
-        end_datetime = datetime.strptime(f"{date} {end_time_str}", datetime_format)
+        start_datetime = datetime.strptime(
+            f"{date} {start_time_str}", datetime_format)
+        end_datetime = datetime.strptime(
+            f"{date} {end_time_str}", datetime_format)
         return end_datetime - start_datetime
     except ValueError as e:
         return None, str(e)
 
 
-def check_valid_room(roomid: int ) -> bool:
+def check_valid_room(roomid: int) -> bool:
     room = Space.query.get(roomid)
-    return room != None
+    return room is not None
 
-def check_valid_comment(comment_id: int ) -> bool:
+
+def check_valid_comment(comment_id: int) -> bool:
     comment = Comment.query.get(comment_id)
-    return comment != None
+    return comment is not None
+
 
 def get_room_image(room_id: int):
     image_directory = 'app/static/images'
@@ -143,42 +149,54 @@ def get_room_image(room_id: int):
     else:
         return "hotdesk.jpg"
 
+
 def is_valid_date(date: str) -> bool:
-    if not re.match(r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$', date):
+    if not re.match(
+        r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
+            date):
         return False
     else:
         return True
 
 # get total number of rooms
+
+
 def get_total_room() -> int:
     room_number = db.session.query(func.count(RoomDetail.id)).scalar()
     desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
     return room_number + desk_number
+
 
 def get_date():
     sydney_tz = pytz.timezone('Australia/Sydney')
     sydney_now = datetime.now(sydney_tz)
     return sydney_now.date()
 
+
 def get_time():
     sydney_tz = pytz.timezone('Australia/Sydney')
     sydney_now = datetime.now(sydney_tz)
     return sydney_now.strftime('%H:%M:%S')
 
-def who_made_comment(comment_id: int ) -> str:
+
+def who_made_comment(comment_id: int) -> str:
     comment = Comment.query.get(comment_id)
     return comment.user_id
 
-def get_like_count(comment_id: int ) -> int:
+
+def get_like_count(comment_id: int) -> int:
     return Like.query.filter_by(comment_id=comment_id).count()
 
+
 def is_booking_today(date, user_id):
-    booking = db.session.query(Booking).filter(Booking.date == date, Booking.user_id == user_id).first()
+    booking = db.session.query(Booking).filter(
+        Booking.date == date, Booking.user_id == user_id).first()
     if booking:
         return True
     else:
         return False
-    
+
+
 def is_who_like_comment(user_id: str, comment_id: int) -> bool:
     likes = Like.query.filter_by(comment_id=comment_id).all()
     if likes:

@@ -18,7 +18,11 @@ class Detail(Resource):
         if jwt_error:
             return jwt_error
         image_path = get_room_image(room_id)
-        image_url = url_for('static', filename='images/' + image_path, _external=True)
+        image_url = url_for(
+            'static',
+            filename='images/' +
+            image_path,
+            _external=True)
 
         output = {
             "room_id": room_id,
@@ -47,7 +51,3 @@ class Detail(Resource):
                 "image_url": image_url
             }
         return {"message": output}, 200
-
-
-
-
