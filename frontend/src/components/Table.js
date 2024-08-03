@@ -426,7 +426,6 @@ const Table = ({
 
   useEffect(() => {
     const calculatePastTimes = async () => {
-      console.log("did this run", times);
       const today = dayjs().format("YYYY-MM-DD");
       if (selectedDate.format("YYYY-MM-DD") === today) {
         const currentTime = await getSydneyTime();
@@ -438,12 +437,6 @@ const Table = ({
               currentTime.getMinutes() >= timeMinutes + 15)
           );
         });
-        console.log(
-          "currenttime is ",
-          currentTime.getHours(),
-          "past is ",
-          past
-        );
 
         setPastTimes(past);
         return;
@@ -729,7 +722,6 @@ const Table = ({
                             let isPast = false;
                             const today = dayjs().format("YYYY-MM-DD");
                             if (selectedDate.format("YYYY-MM-DD") === today) {
-                              console.log("what is", pastTimes);
                               isPast = pastTimes.includes(time);
                             }
                             return (
