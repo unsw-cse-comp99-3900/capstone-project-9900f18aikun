@@ -4,10 +4,10 @@ import Filter from "./filter";
 import Rebook from "./rebook";
 import Table from "./Table";
 import ChatBox from "./ChatBox";
-import ErrorBox from "./errorBox";
 import { Notification } from "@arco-design/web-react";
 import api from "../api";
 
+// main dashboard
 const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [change, setChange] = useState(false);
@@ -23,6 +23,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
 
   const token = localStorage.getItem("token");
 
+  // check if there is already a booking for today
   const checkTodayBooking = async () => {
     try {
       const response = await fetch(
@@ -37,7 +38,6 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
           },
         }
       );
-
       if (response.ok) {
         const result = await response.json();
         if (result.is_booking_today) {
@@ -47,7 +47,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
           setErrorMessage(errorText);
         }
       } else {
-        const errorText = await response.text();
+        await response.text();
         setErrorMessage("Failed to Fetch Booking Data\nPlease Refresh");
       }
     } catch (error) {
@@ -59,6 +59,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     checkTodayBooking();
   }, [selectedDate]);
 
+  // get all booking info
   const fetchBookingData = async () => {
     try {
       const formattedDate = selectedDate.format("YYYY-MM-DD");
@@ -85,6 +86,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     }
   };
 
+  // filter data based on filter selection
   const handleFilter = async (filters) => {
     const newFilteredData = data.filter((item) => {
       return (
@@ -109,6 +111,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
     }
   }, [data]);
 
+  // error handling
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
@@ -130,6 +133,7 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
             className="toggle-icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           />
+          {/* sidebar */}
           {isSidebarOpen && (
             <Filter
               onFilter={handleFilter}
@@ -138,15 +142,9 @@ const Dashboard = ({ isLoggedIn, selectedDate, setSelectedDate }) => {
               setErrorMessage={setErrorMessage}
             />
           )}
-          <div>
-            {/* {errorMessage && (
-              <ErrorBox
-                message={errorMessage}
-                onClose={() => setErrorMessage("")}
-              />
-            )} */}
-          </div>
+          <div></div>
         </div>
+        {/* main dashboard */}
         <div className="dashboard-content">
           <Rebook
             change={change}

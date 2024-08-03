@@ -13,6 +13,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 });
 
+  // fetch user booking history
   useEffect(() => {
     const fetchHistory = async () => {
       const token = localStorage.getItem("token");
@@ -27,13 +28,10 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
 
         if (response.ok) {
           const result = await response.json();
-          // console.log("result is", [result[0]]);
-          // setHistory([result[0]]); // Update here to set the first result item inside an array
-
+          // get first completed status booking history
           const completedBooking =
             result.find((booking) => booking.booking_status === "completed") ||
             null;
-          console.log(completedBooking);
           setHistory([completedBooking]); // Update here to set the first result item inside an array
         } else {
           const errorText = await response.text();
@@ -94,11 +92,11 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         setErrorMessage("Sucessfully Booked");
         setChange(!change);
       } else {
-        const errorText = await response.text();
+        await response.text();
         setErrorMessage("Failed to Rebook\nPlease Refresh");
         throw new Error("Something went wrong");
       }
@@ -108,6 +106,7 @@ const Rebook = ({ change, setChange, setErrorMessage }) => {
     setIsCalendarVisible(!isCalendarVisible);
   };
 
+  // allow 6 days starting from tomorrow
   const disableDates = (date) => {
     const today = dayjs();
     const sevenDaysFromNow = today.add(6, "day");

@@ -4,7 +4,6 @@ import { Button } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-
 import dayjs from "dayjs";
 import ToMap from "./toMap";
 import "./Table.css";
@@ -27,7 +26,7 @@ const getSydneyTime = async (setErrorMessage) => {
       const datetime = new Date(res.datetime);
       return datetime;
     } else {
-      const errorText = await response.text();
+      await response.text();
       setErrorMessage("Failed to Fetch Time\nPlease Refresh");
       throw new Error("Something went wrong");
     }
@@ -159,7 +158,7 @@ const SelectWindow = ({
             setErrorMessage("Successfully Requested");
           }
         } else {
-          const errorText = await response.text();
+          await response.text();
           setErrorMessage("Booking Failed.");
           throw new Error("Something went wrong");
         }
@@ -193,7 +192,7 @@ const SelectWindow = ({
           setChange(!change);
           setErrorMessage("Successfully Booked");
         } else {
-          const errorText = await response.text();
+          await response.text();
           setErrorMessage("Booking Failed");
           throw new Error("Something went wrong");
         }
@@ -205,17 +204,20 @@ const SelectWindow = ({
     close();
   };
 
+  // long term booking checkbox
   const handleCheckboxChange = () => {
     setChecked(!checked);
     if (!checked) {
-      setWeeks(""); // Clear the weeks input when checkbox is unchecked
+      setWeeks("");
     }
   };
 
+  // long term booking input
   const handleInputChange = (event) => {
     setWeeks(event.target.value);
   };
 
+  // admin booking zid input
   const handleZIDChange = (e) => {
     const value = e.target.value;
     setZID(value);
@@ -340,6 +342,7 @@ const Table = ({
 
   const navigate = useNavigate();
 
+  // extract data passed from filter
   const extractData = (data, self) => {
     if (!isAdmin) {
       return data.map((item) => ({
@@ -366,6 +369,7 @@ const Table = ({
     }
   };
 
+  // extract available times
   const extractTime = (timeTable, self) => {
     if (!timeTable) {
       return [];
@@ -424,6 +428,7 @@ const Table = ({
     fetchTimes();
   }, [selectedDate]);
 
+  // table auto scroll to current time
   useEffect(() => {
     const calculatePastTimes = async () => {
       const today = dayjs().format("YYYY-MM-DD");
