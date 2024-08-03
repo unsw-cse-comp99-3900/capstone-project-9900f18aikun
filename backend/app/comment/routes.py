@@ -100,7 +100,6 @@ delete_comment_model = comment_ns.model('Delete comment', {
 
 @comment_ns.route('/delete-comment')
 class delete_test(Resource):
-    # Get the
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
@@ -161,7 +160,6 @@ get_comment_query.add_argument('room_id', type=int, required=True, help='The roo
 
 @comment_ns.route('/get-comment')
 class get_comment(Resource):
-    # Get the
     @comment_ns.response(200, "success")
     @comment_ns.response(204, "No Content")
     @comment_ns.response(400, "Bad request")
@@ -235,7 +233,6 @@ edit_comment_model = comment_ns.model('Edit comment', {
 
 @comment_ns.route('/edit-comment')
 class edit_comment(Resource):
-    # Get the
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
@@ -297,7 +294,6 @@ like_comment_model = comment_ns.model('Like comment', {
 
 @comment_ns.route('/like-comment')
 class like_comment(Resource):
-    # Get the
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
@@ -360,7 +356,6 @@ class like_comment(Resource):
 
 @comment_ns.route('/unlike-comment')
 class unlike_comment(Resource):
-    # Get the
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
@@ -401,14 +396,6 @@ class unlike_comment(Resource):
         like = Like.query.filter_by(comment_id = comment_id, who_like_id = user_zid).first()
         db.session.delete(like)
         db.session.commit()
-        
-
-# 15分钟没到加absent
-# 完成后completed
-# 给房间打分 
-# rank room 
-
-
 
 make_rate_model = comment_ns.model('Make rate', {
     'room_id': fields.Integer(required=True, description='The room id', default=1),
@@ -474,12 +461,9 @@ def get_zid_room_score(user_zid, room_id):
         return rank.rate
     else:
         return None
-    
-
 
 get_rate_query = comment_ns.parser()
 get_rate_query.add_argument('room_id', type=int, required=True, help='The room id', default=1)
-
 
 @comment_ns.route('/get-rate')
 class get_rate(Resource):

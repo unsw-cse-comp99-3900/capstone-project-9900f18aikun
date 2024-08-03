@@ -628,17 +628,7 @@ def express_permission(user_type, student_permission):
     if user_type == "non-cse_staff":
         return False
     return True
-#1. 改成当天时间 1 ------
-# 2. admin是prof 1-------
-# 3. admin给别人book ed 如果占着就强行取消 ----------
-# 4.admin block房间 加一列 ed --------
-# 5. admin给别人取消 ed -----------
-# 6.admin编辑房间信息 ed  ----------
-# 7.把request信息返回给admin ziwen -----------
-# 8.express booking改成is_available jackson --------
-# 9. 返回文字版报告
-# 10. 超时15min自动取消 只用改canceled
-# 11. 举报发给admin ed   ---------
+
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     # Get the
@@ -847,7 +837,6 @@ class edit_room(Resource):
             "level": detail.level,
             "is_available": is_room_available(roomid)
         }
-
 
 @booking_ns.route('/meetingroom-top10-byCount')
 class meetingroom_top10(Resource):
