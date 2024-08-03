@@ -24,7 +24,6 @@ from flask_socketio import emit
 import pytz
 import random
 
-
 booking_ns = Namespace('booking', description='Booking operations')
 
 # booking room model
@@ -36,8 +35,6 @@ booking_model = booking_ns.model('Booking request', {
     'weeks_of_duration': fields.Integer(required=False, description='Number of weeks to repeat the booking', default=1)
 })
 
-
-# TODO!: long term booking request
 
 # Apis about booking
 @booking_ns.route('/book')
@@ -102,7 +99,6 @@ class BookSpace(Resource):
                            f"date: {date}\n"
                 }, 200
 
-
 def check_conflict_booking(date, room_id, start_time, end_time, zid):
     conflict_bookings = Booking.query.filter(
         Booking.date == date,
@@ -122,7 +118,6 @@ def check_conflict_booking(date, room_id, start_time, end_time, zid):
         )
     ).all()
     return conflict_bookings
-
 
 def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     conflict_bookings = check_conflict_booking(date, room_id, start_time, end_time, zid)
@@ -189,7 +184,6 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     check_time = dt_start_time + timedelta(minutes=15)
     scheduler.add_job(schedule_check_sign_in, 'date', run_date=check_time, args=[bookingid])
 
-
 def schedule_check_sign_in(bookingid):
     from app.extensions import db, app
     with app.app_context():  
@@ -197,7 +191,6 @@ def schedule_check_sign_in(bookingid):
         if booking and (booking.booking_status == "booked" or booking.booking_status == "requested"):
             booking.booking_status = "absent"
             db.session.commit()
-
 
 # booking room model
 admin_booking_model = booking_ns.model('admin booking request', {
@@ -207,7 +200,6 @@ admin_booking_model = booking_ns.model('admin booking request', {
     'start_time': fields.String(required=True, description='Start time of the booking (HH:MM)', default="12:00"),
     'end_time': fields.String(required=True, description='End time of the booking (HH:MM)', default="13:00")
 })
-
 
 # Apis about booking
 @booking_ns.route('/admin_book')
@@ -292,7 +284,6 @@ class AdminBook(Resource):
 
         return {'message': f"Booking confirmed"}, 200
 
-
 @booking_ns.route('/book/<int:booking_id>')
 class BookSpace(Resource):
     @booking_ns.response(200, "Booking cancelled successfully")
@@ -323,7 +314,6 @@ class BookSpace(Resource):
 
         return {'message': 'Booking cancelled successfully'}, 200
 
-
 date_query = booking_ns.parser()
 date_query.add_argument('date', type=str, required=True, help='Date to request', default="2024-07-19")
 book_time_query = booking_ns.parser()
@@ -333,12 +323,8 @@ book_time_query.add_argument('is_ranked', type=bool, required=False, help='Flag 
 roomid_query = booking_ns.parser()
 roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
 
-
-# TODO! permission
-# Apis about meeting room
 @booking_ns.route('/meetingroom')
 class MeetingRoom(Resource):
-    # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Get meeting room time list")
@@ -423,10 +409,8 @@ def check_permission(detail, user_type):
     else:
         return False
 
-
 @booking_ns.route('/meetingroom-report')
 class meetingroom_report(Resource):
-    # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Get meeting room time list to report edition")
@@ -476,10 +460,8 @@ express_booking_model = booking_ns.model('Express booking request', {
     'room_type': fields.String(required=True, description='The description of the room what user want'),
 })
 
-
 @booking_ns.route('/express-book')
 class ExpressBook(Resource):
-    # Book a room
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.doc(description="Express booking")
@@ -628,20 +610,9 @@ def express_permission(user_type, student_permission):
     if user_type == "non-cse_staff":
         return False
     return True
-#1. 改成当天时间 1 ------
-# 2. admin是prof 1-------
-# 3. admin给别人book ed 如果占着就强行取消 ----------
-# 4.admin block房间 加一列 ed --------
-# 5. admin给别人取消 ed -----------
-# 6.admin编辑房间信息 ed  ----------
-# 7.把request信息返回给admin ziwen -----------
-# 8.express booking改成is_available jackson --------
-# 9. 返回文字版报告
-# 10. 超时15min自动取消 只用改canceled
-# 11. 举报发给admin ed   ---------
+
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
-    # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.expect(date_query)
@@ -697,7 +668,6 @@ class meetingroom_usage(Resource):
 
 @booking_ns.route('/block-room')
 class block_room(Resource):
-    # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
     @booking_ns.response(403, "Forbidden")
@@ -742,7 +712,6 @@ class block_room(Resource):
             booking.booking_status = "cancelled"
         db.session.commit()
 
-        
 @booking_ns.route('/unblock-room')
 class unblock_room(Resource):
     # Get the
@@ -848,7 +817,6 @@ class edit_room(Resource):
             "is_available": is_room_available(roomid)
         }
 
-
 @booking_ns.route('/meetingroom-top10-byCount')
 class meetingroom_top10(Resource):
     # Get the
@@ -898,7 +866,6 @@ class meetingroom_top10(Resource):
             "room_name": room_name,
             'booking_count': booking_count} for room_id, room_name, booking_count in rooms]
         return top_list
-
 
 @booking_ns.route('/show-request')
 class show_request(Resource):
@@ -952,7 +919,6 @@ request_model = booking_ns.model('request handling', {
     'confirmed': fields.Boolean(description='Confirmed status', default=True)
 })
 
-
 @booking_ns.route('/handle-request')
 class handle_request(Resource):
     # Get the
@@ -991,7 +957,6 @@ class handle_request(Resource):
                 "message": f"admin {user_zid} set booking id {booking_id} as cancelled"
             }, 200
 
-
 @booking_ns.route("/is_book_today")
 class CheckBookToday(Resource):
     @booking_ns.doc(description="Check user whether is admin")
@@ -1013,7 +978,6 @@ class CheckBookToday(Resource):
 
         return {'is_booking_today': is_booking_today(date, zid)}, 200
 
-
 @booking_ns.route('/extend_book/<int:booking_id>')
 class ExtendBook(Resource):
     # Book a room
@@ -1029,8 +993,6 @@ class ExtendBook(Resource):
             return jwt_error
         current_user = get_jwt_identity()
         zid = current_user['zid']
-
-
 
         original_book = db.session.get(Booking, booking_id)
         date = original_book.date
