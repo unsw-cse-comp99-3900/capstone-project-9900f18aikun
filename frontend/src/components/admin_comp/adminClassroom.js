@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
-import "./adminClassroom.css"; // 确保 CSS 文件被引入
-import { Table, ConfigProvider } from "@arco-design/web-react";
-import enUS from "@arco-design/web-react/es/locale/en-US";
-import { useNavigate } from "react-router-dom";
-import api from "./api";
+import React, { useEffect, useState, useRef } from 'react';
+import './adminClassroom.css';
+import { Table, ConfigProvider } from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US';
+import { useNavigate } from 'react-router-dom';
+import api from './api';
 
 function AdminClassroom() {
   const [classroomData, setClassroomData] = useState([]);
-  const [roomType, setRoomType] = useState("meeting_room");
-  const [inputValue, setInputValue] = useState("");
-  const [searchCriteria, setSearchCriteria] = useState({ type: "", value: "" });
+  const [roomType, setRoomType] = useState('meeting_room');
+  const [inputValue, setInputValue] = useState('');
+  const [searchCriteria, setSearchCriteria] = useState({ type: '', value: '' });
   const [filteredData, setFilteredData] = useState([]);
   const [change, setChange] = useState(true);
   // const isInitialMount = useRef(true);
@@ -19,16 +19,16 @@ function AdminClassroom() {
   useEffect(() => {
     const fetchData = async () => {
       const today = new Date();
-      const formattedDate = today.toISOString().split("T")[0]; // 获取当天日期并格式化为 YYYY-MM-DD
-      const token = localStorage.getItem("token");
+      const formattedDate = today.toISOString().split('T')[0]; // 获取当天日期并格式化为 YYYY-MM-DD
+      const token = localStorage.getItem('token');
 
       const response = await fetch(
         api + `/booking/meetingroom?date=${formattedDate}`,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
           },
         }
       );
@@ -72,28 +72,28 @@ function AdminClassroom() {
   };
 
   const filter = () => {
-    let criteria = { type: "", value: "" };
+    let criteria = { type: '', value: '' };
 
-    if (["1", "2", "3", "4", "5"].includes(inputValue)) {
-      criteria = { type: "level", value: inputValue };
-    } else if (["G", "LG"].includes(inputValue.toUpperCase())) {
-      criteria = { type: "level", value: inputValue.toUpperCase() };
+    if (['1', '2', '3', '4', '5'].includes(inputValue)) {
+      criteria = { type: 'level', value: inputValue };
+    } else if (['G', 'LG'].includes(inputValue.toUpperCase())) {
+      criteria = { type: 'level', value: inputValue.toUpperCase() };
     } else {
-      criteria = { type: "name", value: inputValue };
+      criteria = { type: 'name', value: inputValue };
     }
 
     setSearchCriteria(criteria);
     // console.log("Search Criteria:", criteria, roomType);
     const filtered = classroomData.filter((room) => {
-      if (criteria.type === "level") {
+      if (criteria.type === 'level') {
         return (
           room.level === criteria.value &&
-          (roomType === "all" || room.type === roomType)
+          (roomType === 'all' || room.type === roomType)
         );
-      } else if (criteria.type === "name") {
+      } else if (criteria.type === 'name') {
         return (
           room.name.toLowerCase().includes(criteria.value.toLowerCase()) &&
-          (roomType === "all" || room.type === roomType)
+          (roomType === 'all' || room.type === roomType)
         );
       }
       return false;
@@ -111,96 +111,96 @@ function AdminClassroom() {
   const handleCellClick = (entry) => {
     // Custom logic for cell click
     console.log(`Clicked on :`, entry);
-    navigate("/room/" + entry.id);
+    navigate('/room/' + entry.id);
   };
 
   const handleDisable = async (entry) => {
     console.log(`Clicked on :`, entry);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/booking/block-room?roomid=` + entry.id,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch booking data");
+        throw new Error('Failed to fetch booking data');
       } else if (response.ok) {
         setChange(!change);
-        console.log("this is ok");
+        console.log('this is ok');
       }
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      console.error('Error fetching booking data:', error);
     }
   };
 
   const handleEnable = async (entry) => {
     console.log(`Clicked on enable :`, entry);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/booking/unblock-room?roomid=` + entry.id,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch booking data");
+        throw new Error('Failed to fetch booking data');
       } else if (response.ok) {
         setChange(!change);
       }
 
-      console.log("this is ok");
+      console.log('this is ok');
     } catch (error) {
-      console.error("Error fetching booking data:", error);
+      console.error('Error fetching booking data:', error);
     }
   };
 
   //arco table
   const columns = [
     {
-      title: "Room Name",
-      dataIndex: "name",
-      key: "name",
+      title: 'Room Name',
+      dataIndex: 'name',
+      key: 'name',
       // render: (text, entry) => (
       //     <td onClick={() => handleCellClick(entry)}>{text}</td>
       // )
     },
     {
-      title: "Building",
-      dataIndex: "building",
-      key: "building",
+      title: 'Building',
+      dataIndex: 'building',
+      key: 'building',
     },
     {
-      title: "Level",
-      dataIndex: "level",
-      key: "level",
+      title: 'Level',
+      dataIndex: 'level',
+      key: 'level',
     },
     {
-      title: "Capacity",
-      dataIndex: "capacity",
-      key: "capacity",
+      title: 'Capacity',
+      dataIndex: 'capacity',
+      key: 'capacity',
     },
     {
-      title: "Room Type",
-      dataIndex: "type",
-      key: "type",
+      title: 'Room Type',
+      dataIndex: 'type',
+      key: 'type',
     },
     {
-      title: "Edit", // 新列的标题
-      dataIndex: "action",
-      key: "edit",
+      title: 'Edit', // 新列的标题
+      dataIndex: 'action',
+      key: 'edit',
       render: (text, entry) => (
         <button className="table-button" onClick={() => handleCellClick(entry)}>
           <img src="/admin_img/edit.png" alt="edit" />
@@ -208,9 +208,9 @@ function AdminClassroom() {
       ),
     },
     {
-      title: "Disable",
-      dataIndex: "usage",
-      key: "disable",
+      title: 'Disable',
+      dataIndex: 'usage',
+      key: 'disable',
       render: (text, entry) =>
         entry.is_available ? (
           <button
@@ -232,7 +232,7 @@ function AdminClassroom() {
 
   return (
     <ConfigProvider locale={enUS}>
-      {" "}
+      {' '}
       {/* 使用 ConfigProvider 设置语言 */}
       <div>
         <h1 className="class-h1">Classroom Management</h1>
