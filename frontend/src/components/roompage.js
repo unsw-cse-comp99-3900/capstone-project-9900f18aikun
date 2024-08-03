@@ -368,6 +368,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
               change={change}
               setChange={setChange}
               setErrorMessage={setErrorMessage}
+              isAdmin={false}
+              isSingle={true}
             />
           )}
 

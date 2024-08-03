@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../roompage.css";
-import AdminTable from "./adminTable";
+import AdminTable from "../Table";
 import Comments from "../Comments"; // Import the Comments component
 import {
   Spin,
@@ -271,6 +271,8 @@ const RoomCard = ({ selectedDate, setSelectedDate }) => {
             change={change}
             setChange={setChange}
             setErrorMessage={setErrorMessage}
+            isAdmin={true}
+            isSingle={true}
           />
         )}
 

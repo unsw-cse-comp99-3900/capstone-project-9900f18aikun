@@ -10,10 +10,10 @@ import ToMap from "./toMap";
 import "./Table.css";
 import api from "../api";
 
-// get the current time from backend
+// get the current time
 const getSydneyTime = async (setErrorMessage) => {
   const token = localStorage.getItem("token");
-
+  // get time from backend
   try {
     const response = await fetch(api + "/admin/time", {
       method: "GET",
@@ -22,11 +22,9 @@ const getSydneyTime = async (setErrorMessage) => {
         Authorization: "Bearer " + token,
       },
     });
-
     if (response.ok) {
       const res = await response.json();
       const datetime = new Date(res.datetime);
-      console.log(datetime);
       return datetime;
     } else {
       const errorText = await response.text();
@@ -41,7 +39,6 @@ const getSydneyTime = async (setErrorMessage) => {
 // get time for table column
 const getTime = async (selectedDate) => {
   const times = [];
-
   const date = new Date(selectedDate.format("YYYY-MM-DD"));
   date.setHours(0, 0, 0, 0);
   for (let i = 0; i < 48; i++) {
@@ -71,55 +68,56 @@ const SelectWindow = ({
   change,
   setChange,
   setErrorMessage,
+  isAdmin,
 }) => {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [zID, setZID] = useState("");
   const [checked, setChecked] = useState(false);
   const [weeks, setWeeks] = useState("");
 
   if (!visible) return null;
 
-  // Filter the reservations for the selected room and date
+  // filter the reservations for the selected room and date
   const filteredReservations = reservations.filter(
     (reservation) =>
       reservation.roomid === roomid &&
       reservation.date === selectedDate.format("DD/MM/YYYY")
   );
 
-  // Extract the reserved times from the filtered reservations
+  // extract the reserved times from the filtered reservations
   const reserved = filteredReservations.flatMap((reservation) =>
     reservation.spec.map((timeslot) => timeslot.time)
   );
 
   // get next x hours
-  const gettimeList = (time, idx, reserved) => {
+  const gettimeList = (time, idx, reserved, isAdmin) => {
     const times = [];
     const [hour, minute] = time.split(":").map(Number);
     const baseTime = new Date();
     baseTime.setHours(hour, minute, 0, 0);
-
     for (let i = 0; i <= idx; i++) {
       const time = baseTime.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
       });
-
-      // stop if meets a already reserved spot
-      if (reserved.includes(time)) {
-        break;
+      if (!isAdmin) {
+        // stop if meets a already reserved spot
+        if (reserved.includes(time)) {
+          break;
+        }
       }
       times.push(time);
       baseTime.setMinutes(baseTime.getMinutes() + 30);
     }
-
     return times;
   };
 
-  const dropdownTime = gettimeList(time, 8, reserved);
+  const dropdownTime = gettimeList(time, 8, reserved, isAdmin);
 
   // confirm selection function
   const confirmHandler = async () => {
-    const newTimes = gettimeList(time, selectedIdx, reserved);
+    const newTimes = gettimeList(time, selectedIdx, reserved, isAdmin);
 
     // getting end time
     const [hour, minute] = newTimes[newTimes.length - 1].split(":").map(Number);
@@ -131,42 +129,77 @@ const SelectWindow = ({
       hour12: false,
     });
 
-    // send request to backend
-    const obj = {
-      room_id: roomid,
-      date: selectedDate.format("YYYY-MM-DD"),
-      start_time: newTimes[0],
-      end_time: endTime,
-      ...(weeks && { weeks_of_duration: parseInt(weeks, 10) }),
-    };
-    const token = localStorage.getItem("token");
-    console.log(obj);
-    try {
-      const response = await fetch(api + "/booking/book", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify(obj),
-      });
+    if (!isAdmin) {
+      // send request to backend
+      const obj = {
+        room_id: roomid,
+        date: selectedDate.format("YYYY-MM-DD"),
+        start_time: newTimes[0],
+        end_time: endTime,
+        ...(weeks && { weeks_of_duration: parseInt(weeks, 10) }),
+      };
+      const token = localStorage.getItem("token");
+      try {
+        const response = await fetch(api + "/booking/book", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify(obj),
+        });
 
-      if (response.ok) {
-        await response.json();
-        setChange(!change);
-        if (permission) {
+        if (response.ok) {
+          await response.json();
+          setChange(!change);
+          if (permission) {
+            setErrorMessage("Successfully Booked");
+          } else {
+            setErrorMessage("Successfully Requested");
+          }
+        } else {
+          const errorText = await response.text();
+          setErrorMessage("Booking Failed.");
+          throw new Error("Something went wrong");
+        }
+      } catch (error) {
+        setErrorMessage("Booking Failed.");
+      }
+    } else if (isAdmin) {
+      // send request to backend
+      const obj = {
+        user_id: zID,
+        room_id: roomid,
+        date: selectedDate.format("YYYY-MM-DD"),
+        start_time: newTimes[0],
+        end_time: endTime,
+      };
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await fetch(api + "/booking/admin_book", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify(obj),
+        });
+
+        if (response.ok) {
+          await response.json();
+          setChange(!change);
           setErrorMessage("Successfully Booked");
         } else {
-          setErrorMessage("Successfully Requested");
+          const errorText = await response.text();
+          setErrorMessage("Booking Failed");
+          throw new Error("Something went wrong");
         }
-      } else {
-        const errorText = await response.text();
-        setErrorMessage("Booking Failed.");
-        throw new Error("Something went wrong");
+      } catch (error) {
+        setErrorMessage("Booking Failed");
       }
-    } catch (error) {
-      setErrorMessage("Booking Failed.");
     }
 
     close();
@@ -181,6 +214,11 @@ const SelectWindow = ({
 
   const handleInputChange = (event) => {
     setWeeks(event.target.value);
+  };
+
+  const handleZIDChange = (e) => {
+    const value = e.target.value;
+    setZID(value);
   };
 
   return (
@@ -218,10 +256,21 @@ const SelectWindow = ({
                 </option>
               );
             })}
-            ;
           </select>
         </div>
-        {permission ? (
+        {isAdmin ? (
+          <div>
+            <label htmlFor="zid-input">for zID:</label>
+            <input
+              type="text"
+              id="zid-input"
+              value={zID}
+              onChange={handleZIDChange}
+              maxLength={8}
+              title="zID must start with 'z' followed by 7 digits"
+            />
+          </div>
+        ) : permission ? (
           <div>
             <label>
               <input
@@ -246,9 +295,21 @@ const SelectWindow = ({
         )}
         <br />
         <div className="button-class">
-          <Button onClick={confirmHandler}>
-            {permission ? "Confirm" : "Request"}
-          </Button>
+          {isAdmin ? (
+            <Button
+              onClick={() => {
+                confirmHandler(change, setChange);
+              }}
+              disabled={zID.length === 0}
+            >
+              Confirm
+            </Button>
+          ) : (
+            <Button onClick={confirmHandler}>
+              {permission ? "Confirm" : "Request"}
+            </Button>
+          )}
+
           <Button onClick={close}>Close</Button>
         </div>
       </>
@@ -264,7 +325,10 @@ const Table = ({
   change,
   setChange,
   setErrorMessage,
+  isAdmin,
+  isSingle,
 }) => {
+  const [adminRes, setAdminRes] = useState([]);
   const [times, setTimes] = useState([]);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [hoveredRoom, setHoveredRoom] = useState(null);
@@ -276,21 +340,38 @@ const Table = ({
 
   const navigate = useNavigate();
 
-  const toggleCalendarVisibility = () => {
-    setIsCalendarVisible(!isCalendarVisible);
+  const extractData = (data, self) => {
+    if (!isAdmin) {
+      return data.map((item) => ({
+        room: item.name,
+        roomid: item.id,
+        permission: item.permission,
+        is_available: item.is_available,
+        date: selectedDate.format("DD/MM/YYYY"),
+        spec: extractTime(item.time_table),
+      }));
+    } else {
+      return data.map((item) => ({
+        room: item.name,
+        roomid: item.id,
+        permission: item.permission,
+        is_available: item.is_available,
+        time: [
+          {
+            date: selectedDate.format("DD/MM/YYYY"),
+            timeslot: extractTime(item.time_table, self),
+          },
+        ],
+      }));
+    }
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    setIsCalendarVisible(false);
-  };
-
-  useEffect(() => {
-    const extractTime = (timeTable) => {
-      if (!timeTable) {
-        return [];
-      }
-      const timeslots = [];
+  const extractTime = (timeTable, self) => {
+    if (!timeTable) {
+      return [];
+    }
+    const timeslots = [];
+    if (!isAdmin) {
       timeTable.forEach((slot, index) => {
         if (!Array.isArray(slot) && slot.booking_status !== "cancelled") {
           const hour = Math.floor(index / 2);
@@ -303,20 +384,36 @@ const Table = ({
           timeslots.push(obj);
         }
       });
-      return timeslots;
-    };
+    } else {
+      timeTable.forEach((slot, index) => {
+        if (!Array.isArray(slot)) {
+          const include = self
+            ? slot.current_user_booking
+            : !slot.current_user_booking;
+          if (include) {
+            const hour = Math.floor(index / 2);
+            const minute = index % 2 === 0 ? "00" : "30";
+            const time = `${hour.toString().padStart(2, "0")}:${minute}`;
+            timeslots.push(time);
+          }
+        }
+      });
+    }
+    return timeslots;
+  };
 
-    const extractData = (data) => {
-      return data.map((item) => ({
-        room: item.name,
-        roomid: item.id,
-        permission: item.permission,
-        is_available: item.is_available,
-        date: selectedDate.format("DD/MM/YYYY"),
-        spec: extractTime(item.time_table),
-      }));
-    };
-    setReservations(extractData(data));
+  const toggleCalendarVisibility = () => {
+    setIsCalendarVisible(!isCalendarVisible);
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setIsCalendarVisible(false);
+  };
+
+  useEffect(() => {
+    setReservations(extractData(data, true));
+    setAdminRes(extractData(data, false));
   }, [data]);
 
   useEffect(() => {
@@ -329,27 +426,33 @@ const Table = ({
 
   useEffect(() => {
     const calculatePastTimes = async () => {
-      if (times.length > 0) {
-        const today = dayjs().format("YYYY-MM-DD");
-        if (selectedDate.format("YYYY-MM-DD") === today) {
-          const currentTime = await getSydneyTime();
-          const past = times.filter((time) => {
-            const [timeHours, timeMinutes] = time.split(":").map(Number);
-            return (
-              currentTime.getHours() > timeHours ||
-              (currentTime.getHours() === timeHours &&
-                currentTime.getMinutes() >= timeMinutes + 15)
-            );
-          });
-          setPastTimes(past);
-          return;
-        }
+      console.log("did this run", times);
+      const today = dayjs().format("YYYY-MM-DD");
+      if (selectedDate.format("YYYY-MM-DD") === today) {
+        const currentTime = await getSydneyTime();
+        const past = times.filter((time) => {
+          const [timeHours, timeMinutes] = time.split(":").map(Number);
+          return (
+            currentTime.getHours() > timeHours ||
+            (currentTime.getHours() === timeHours &&
+              currentTime.getMinutes() >= timeMinutes + 15)
+          );
+        });
+        console.log(
+          "currenttime is ",
+          currentTime.getHours(),
+          "past is ",
+          past
+        );
+
+        setPastTimes(past);
+        return;
       }
+
       setPastTimes(null);
     };
 
     const scrollToCurrentTime = async () => {
-      console.log("did this happen");
       const currentTime = await getSydneyTime();
 
       const minutes = currentTime.getMinutes();
@@ -404,17 +507,23 @@ const Table = ({
     const target = event.target;
     const targetClassList = target.classList;
     const tdClassList = target.closest("td").classList;
-    if (
-      targetClassList.contains("reserved") ||
-      targetClassList.contains("selfreserved") ||
-      targetClassList.contains("disabled") ||
-      targetClassList.contains("requested") ||
-      tdClassList.contains("reserved") ||
-      tdClassList.contains("selfreserved") ||
-      tdClassList.contains("disabled") ||
-      tdClassList.contains("requested")
-    ) {
-      return;
+    if (!isAdmin) {
+      if (
+        targetClassList.contains("reserved") ||
+        targetClassList.contains("selfreserved") ||
+        targetClassList.contains("disabled") ||
+        targetClassList.contains("requested") ||
+        tdClassList.contains("reserved") ||
+        tdClassList.contains("selfreserved") ||
+        tdClassList.contains("disabled") ||
+        tdClassList.contains("requested")
+      ) {
+        return;
+      }
+    } else if (isAdmin) {
+      if (target.classList.contains("disabled")) {
+        return;
+      }
     }
 
     const className = event.currentTarget.className;
@@ -436,11 +545,7 @@ const Table = ({
         left: event.clientX - rect.left,
       };
     }
-    // const rect = content.getBoundingClientRect();
-    // const position = {
-    //   top: event.clientY - rect.top,
-    //   left: event.clientX - rect.left,
-    // };
+
     setSelectWindow({
       visible: true,
       time,
@@ -451,6 +556,7 @@ const Table = ({
       permission: permissionClass,
       setChange: setChange,
       setErrorMessage: setErrorMessage,
+      isAdmin,
     });
   };
 
@@ -527,50 +633,63 @@ const Table = ({
         </div>
 
         {/* legend */}
-        <div className="legend">
+        {isAdmin ? (
           <div className="legendbox">
             <div className="legend-item">
               <div
                 className="legend-color"
                 style={{ backgroundColor: "rgb(204, 202, 200)" }}
               ></div>
-              <div className="legend-text">Reserved By Others</div>
-            </div>
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "rgb(232, 223, 140)" }}
-              ></div>
-              <div className="legend-text">Self-Reserved</div>
-            </div>
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "rgb(230, 212, 231)" }}
-              ></div>
-              <div className="legend-text">Booking Request Required</div>
-            </div>
-
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "rgb(203, 237, 205)" }}
-              ></div>
-              <div className="legend-text">Requested</div>
-            </div>
-
-            <div className="legend-item">
-              <div
-                className="legend-color"
-                style={{ backgroundColor: "rgb(200, 232, 249)" }}
-              ></div>
-              <div className="legend-text">Signed-In</div>
+              <div className="legend-text">Reserved</div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="legend">
+            <div className="legendbox">
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "rgb(204, 202, 200)" }}
+                ></div>
+                <div className="legend-text">Reserved By Others</div>
+              </div>
+
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "rgb(232, 223, 140)" }}
+                ></div>
+                <div className="legend-text">Self-Reserved</div>
+              </div>
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "rgb(230, 212, 231)" }}
+                ></div>
+                <div className="legend-text">Booking Request Required</div>
+              </div>
+
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "rgb(203, 237, 205)" }}
+                ></div>
+                <div className="legend-text">Requested</div>
+              </div>
+
+              <div className="legend-item">
+                <div
+                  className="legend-color"
+                  style={{ backgroundColor: "rgb(200, 232, 249)" }}
+                ></div>
+                <div className="legend-text">Signed-In</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* table */}
-        <div className="table-wrapper">
+        <div className={isSingle ? "singletable-wrapper" : "table-wrapper"}>
           <table id="mytable" className="mytable">
             <thead>
               <tr>
@@ -582,70 +701,165 @@ const Table = ({
                 ))}
               </tr>
             </thead>
+            {isAdmin ? (
+              <tbody>
+                {adminRes && adminRes.length > 0 ? (
+                  adminRes.map((item) => {
+                    const roomData = data.find((d) => d.name === item.room);
+                    return (
+                      <tr key={item.room} id={item.roomid}>
+                        <td
+                          className="room-column"
+                          onMouseEnter={() => setHoveredRoom(roomData)}
+                          onMouseLeave={() => setHoveredRoom(null)}
+                        >
+                          {item.room}
+                          {hoveredRoom && hoveredRoom.name === item.room && (
+                            <div className="room-info">
+                              <p>Name: {hoveredRoom.name}</p>
+                              <p>Building: {hoveredRoom.building}</p>
+                              <p>Level: {hoveredRoom.level}</p>
+                              <p>Capacity: {hoveredRoom.capacity}</p>
+                            </div>
+                          )}
+                        </td>
 
-            <tbody>
-              {data && data.length > 0 ? (
-                data.map((room) => {
-                  const roomData = data.find((d) => d.name === room.name);
-                  return (
-                    <tr key={room.id}>
-                      <td
-                        className="room-column"
-                        onMouseEnter={() => setHoveredRoom(roomData)}
-                        onMouseLeave={() => setHoveredRoom(null)}
-                        onClick={() => {
-                          navigate("/room/" + room.id);
-                        }}
-                      >
-                        {room.name}
-                        {hoveredRoom && hoveredRoom.name === room.name && (
-                          <div className="room-info">
-                            <p>Name: {hoveredRoom.name}</p>
-                            <p>Building: {hoveredRoom.building}</p>
-                            <p>Level: {hoveredRoom.level}</p>
-                            <p>Capacity: {hoveredRoom.capacity}</p>
-                          </div>
+                        {times && times.length > 0 ? (
+                          times.map((time) => {
+                            let isPast = false;
+                            const today = dayjs().format("YYYY-MM-DD");
+                            if (selectedDate.format("YYYY-MM-DD") === today) {
+                              console.log("what is", pastTimes);
+                              isPast = pastTimes.includes(time);
+                            }
+                            return (
+                              <td
+                                key={time}
+                                className={`time-column ${(() => {
+                                  const isReserved = adminRes.some(
+                                    (reservation) =>
+                                      reservation.room === item.room &&
+                                      reservation.time.some(
+                                        (slot) =>
+                                          slot.date ===
+                                            selectedDate.format("DD/MM/YYYY") &&
+                                          slot.timeslot.some((t) => t === time)
+                                      )
+                                  );
+                                  if (isPast || !item.is_available) {
+                                    return "disabled";
+                                  } else if (isReserved) {
+                                    return "reserved";
+                                  } else {
+                                    return "";
+                                  }
+                                })()}`}
+                                onClick={async (event) => {
+                                  event.stopPropagation();
+                                  if (!isPast) {
+                                    clickHandler(
+                                      item.room,
+                                      time,
+                                      event,
+                                      item.roomid
+                                    );
+                                  }
+                                }}
+                              >
+                                <div className="box"></div>
+                              </td>
+                            );
+                          })
+                        ) : (
+                          <td colSpan={times ? times.length : 1}>
+                            No available times
+                          </td>
                         )}
-                      </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={times ? times.length : 1}>
+                      No available reservations
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            ) : (
+              <tbody>
+                {data && data.length > 0 ? (
+                  data.map((room) => {
+                    const roomData = data.find((d) => d.name === room.name);
+                    return (
+                      <tr key={room.id}>
+                        <td
+                          className="room-column"
+                          onMouseEnter={() => setHoveredRoom(roomData)}
+                          onMouseLeave={() => setHoveredRoom(null)}
+                          onClick={() => {
+                            navigate("/room/" + room.id);
+                          }}
+                        >
+                          {room.name}
+                          {hoveredRoom && hoveredRoom.name === room.name && (
+                            <div className="room-info">
+                              <p>Name: {hoveredRoom.name}</p>
+                              <p>Building: {hoveredRoom.building}</p>
+                              <p>Level: {hoveredRoom.level}</p>
+                              <p>Capacity: {hoveredRoom.capacity}</p>
+                            </div>
+                          )}
+                        </td>
 
-                      {times && times.length > 0 ? (
-                        times.map((time) => {
-                          let isPast = false;
-                          if (pastTimes) {
-                            isPast = pastTimes.includes(time);
-                          }
+                        {times && times.length > 0 ? (
+                          times.map((time) => {
+                            let isPast = false;
+                            if (pastTimes) {
+                              isPast = pastTimes.includes(time);
+                            }
 
-                          return (
-                            <td
-                              key={time}
-                              className={`time-column ${getClassName(
-                                time,
-                                room,
-                                isPast
-                              )}`}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                if (!isPast) {
-                                  clickHandler(room.name, time, event, room.id);
-                                }
-                              }}
-                            >
-                              <div className="box"></div>
-                            </td>
-                          );
-                        })
-                      ) : (
-                        <td colSpan={times.length}>No available times</td>
-                      )}
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={times.length}>No available data</td>
-                </tr>
-              )}
-            </tbody>
+                            return (
+                              <td
+                                key={time}
+                                className={`time-column ${getClassName(
+                                  time,
+                                  room,
+                                  isPast
+                                )}`}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  if (!isPast) {
+                                    clickHandler(
+                                      room.name,
+                                      time,
+                                      event,
+                                      room.id
+                                    );
+                                  }
+                                }}
+                              >
+                                <div className="box"></div>
+                              </td>
+                            );
+                          })
+                        ) : (
+                          <td colSpan={times ? times.length : 1}>
+                            No Available Times
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={times ? times.length : 1}>
+                      No Available Reservations
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            )}
           </table>
         </div>
       </div>
@@ -662,6 +876,8 @@ const Table = ({
         change={change}
         setChange={setChange}
         setErrorMessage={setErrorMessage}
+        isAdmin={isAdmin}
+        isSingle={isSingle}
       />
     </div>
   );
