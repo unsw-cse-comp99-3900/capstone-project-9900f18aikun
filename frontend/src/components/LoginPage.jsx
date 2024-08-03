@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api.js";
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = ({ onLogin, setOutlook }) => {
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [zid, setZid] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +18,7 @@ const LoginPage = ({ onLogin }) => {
 
     if (accessToken) {
       localStorage.setItem("token", accessToken);
+      setOutlook(true)
     } else if (loginFailed) {
       setError("Outlook login failed. Please try again.");
     }

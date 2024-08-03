@@ -53,6 +53,7 @@ function App() {
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [outlook, setOutlook] = useState(false)
 
   useEffect(() => {
     const autoLogin = async () => {
@@ -88,7 +89,7 @@ function App() {
     };
 
     autoLogin();
-  }, []);
+  }, [outlook]);
 
   const handleAutoLoginFailure = () => {
     localStorage.removeItem("token");
@@ -161,7 +162,7 @@ function App() {
           path="/login"
           element={
             !isLoggedIn ? (
-              <LoginPage onLogin={(admin) => handleLogin(admin)} />
+              <LoginPage onLogin={(admin) => handleLogin(admin)} setOutlook={setOutlook}/>
             ) : (
               <Navigate to="/dashboard" replace />
             )

@@ -60,6 +60,7 @@ const QrCodeCheckIn = () => {
       ) {
         alert(error.response.data.message);
       } else {
+        console.log(error)
         alert("An error occurred during check-in. Please try again.");
       }
     }

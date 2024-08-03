@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import CustomerService from "./CustomerService";
 import "./ChatBox.css";
-import api from "../socket";
+import api from "../api";
 const Component = ({ className }) => <div className={className}>{}</div>;
 export const ChatBox = ({ change, setChange }) => {
   const [isOpen, setIsOpen] = useState(false);

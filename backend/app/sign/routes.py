@@ -40,7 +40,8 @@ class Detail(Resource):
         bookings_on_date = Booking.query.filter(
             Booking.date == today_date,
             Booking.user_id == zid,
-            Booking.room_id == room_id
+            Booking.room_id == room_id,
+            Booking.booking_status == BookingStatus.booked.value,
         ).all()
 
         if not bookings_on_date:
