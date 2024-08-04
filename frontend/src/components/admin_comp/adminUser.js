@@ -34,9 +34,7 @@ function AdminUser() {
       .then((data) => {
         setBookingHistory(data);
       })
-      .catch((error) => {
-        console.error('Error fetching booking history:', error);
-      });
+      .catch((error) => {});
   };
   //user booking info table
   const columns = [

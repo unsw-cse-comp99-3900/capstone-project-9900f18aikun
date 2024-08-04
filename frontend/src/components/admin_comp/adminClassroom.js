@@ -108,13 +108,12 @@ function AdminClassroom() {
   // Handle cell click to navigate to room details
   const handleCellClick = (entry) => {
     // Custom logic for cell click
-    console.log(`Clicked on :`, entry);
+
     navigate('/room/' + entry.id);
   };
 
   // Handle disabling a room
   const handleDisable = async (entry) => {
-    console.log(`Clicked on :`, entry);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
@@ -132,16 +131,12 @@ function AdminClassroom() {
         throw new Error('Failed to fetch booking data');
       } else if (response.ok) {
         setChange(!change);
-        console.log('this is ok');
       }
-    } catch (error) {
-      console.error('Error fetching booking data:', error);
-    }
+    } catch (error) {}
   };
 
   // Handle enabling a room
   const handleEnable = async (entry) => {
-    console.log(`Clicked on enable :`, entry);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
@@ -160,11 +155,7 @@ function AdminClassroom() {
       } else if (response.ok) {
         setChange(!change);
       }
-
-      console.log('this is ok');
-    } catch (error) {
-      console.error('Error fetching booking data:', error);
-    }
+    } catch (error) {}
   };
 
   // Define columns for the Arco table

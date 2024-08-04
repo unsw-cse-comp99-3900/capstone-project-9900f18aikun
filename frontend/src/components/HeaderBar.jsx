@@ -1,30 +1,28 @@
-import React, { useState } from "react";
-import "./HeaderBar.css";
-import { useNavigate } from "react-router-dom";
-import { Dropdown, Menu, Button } from "@arco-design/web-react";
-import api from "../api";
+import React, { useState } from 'react';
+import './HeaderBar.css';
+import { useNavigate } from 'react-router-dom';
+import { Dropdown, Menu, Button } from '@arco-design/web-react';
+import api from '../api';
 
 // Function to verify if the user is an admin
 const verifyID = async (SetIsAdmin) => {
   try {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     const response = await fetch(api + `/admin/check_admin`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        accept: "application/json",
-        Authorization: "Bearer " + token,
+        accept: 'application/json',
+        Authorization: 'Bearer ' + token,
       },
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch booking data");
+      throw new Error('Failed to fetch booking data');
     } else if (response.ok) {
       const result = await response.json();
       SetIsAdmin(result.is_admin);
     }
-  } catch (error) {
-    console.error("Error fetching booking data:", error);
-  }
+  } catch (error) {}
 };
 
 // HeaderBar component
@@ -56,9 +54,9 @@ const HeaderBar = ({ onLogout, onHistory }) => {
           src="/img/image-164.png"
           onClick={() => {
             if (isAdmin) {
-              navigate("/admin");
+              navigate('/admin');
             } else {
-              navigate("/dashboard");
+              navigate('/dashboard');
             }
           }}
         />
@@ -72,7 +70,7 @@ const HeaderBar = ({ onLogout, onHistory }) => {
             <img
               src="/admin_img/user.png"
               alt="User"
-              style={{ height: "40px" }}
+              style={{ height: '40px' }}
             />
           </Button>
         </Dropdown>

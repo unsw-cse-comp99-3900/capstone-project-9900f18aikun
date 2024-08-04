@@ -1,11 +1,11 @@
 // CustomerService component
-import React, { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
-import "./CustomerService.css";
-import socketURL from "../socket";
+import React, { useState, useEffect, useRef } from 'react';
+import io from 'socket.io-client';
+import './CustomerService.css';
+import socketURL from '../socket';
 
 const CustomerService = () => {
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
@@ -15,32 +15,29 @@ const CustomerService = () => {
 
   // Effect to initialize the socket connection
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     currentTokenRef.current = token;
 
     // const socketURL = "ws://3.26.67.188:5001";
     // const socketURL = "ws://0.0.0.0:5001";
-    console.log("socket url is ", socketURL);
+
     socketRef.current = io(socketURL, {
       query: { token },
-      transports: ["websocket"],
+      transports: ['websocket'],
       timeout: 10000,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 3000,
     });
 
     const onConnect = () => {
-      console.log("Socket.IO Connected");
       setIsConnected(true);
     };
 
     const onDisconnect = (reason) => {
-      console.log(`Socket.IO Disconnected: ${reason}`);
       setIsConnected(false);
     };
 
     const onMessage = (data) => {
-      console.log("Received message:", data);
       if (data.message) {
         const newMessage = {
           id: data.message.message_id,
@@ -60,7 +57,6 @@ const CustomerService = () => {
     };
 
     const onUserChatHistory = (history) => {
-      console.log("Received chat history:", history);
       if (history && Array.isArray(history.messages)) {
         const formattedHistory = history.messages.map((msg) => ({
           id: msg.message_id,
@@ -76,17 +72,17 @@ const CustomerService = () => {
       }
     };
 
-    socketRef.current.on("connect", onConnect);
-    socketRef.current.on("disconnect", onDisconnect);
-    socketRef.current.on("message", onMessage);
-    socketRef.current.on("user_chat_history", onUserChatHistory);
+    socketRef.current.on('connect', onConnect);
+    socketRef.current.on('disconnect', onDisconnect);
+    socketRef.current.on('message', onMessage);
+    socketRef.current.on('user_chat_history', onUserChatHistory);
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.off("connect", onConnect);
-        socketRef.current.off("disconnect", onDisconnect);
-        socketRef.current.off("message", onMessage);
-        socketRef.current.off("user_chat_history", onUserChatHistory);
+        socketRef.current.off('connect', onConnect);
+        socketRef.current.off('disconnect', onDisconnect);
+        socketRef.current.off('message', onMessage);
+        socketRef.current.off('user_chat_history', onUserChatHistory);
         socketRef.current.disconnect();
       }
     };
@@ -94,25 +90,21 @@ const CustomerService = () => {
 
   // Function to send a message
   const sendMessage = () => {
-    if (inputMessage.trim() === "" || !isConnected || !socketRef.current)
+    if (inputMessage.trim() === '' || !isConnected || !socketRef.current)
       return;
 
     const messageData = {
       msg: inputMessage,
     };
 
-    console.log("Sending message:", messageData);
-
-    socketRef.current.emit("send_message", messageData, (acknowledgement) => {
+    socketRef.current.emit('send_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
-        console.log("Message acknowledged by server");
         scrollToBottom(); // Scroll after the message is sent
       } else {
-        console.warn("Message not acknowledged by server");
       }
     });
 
-    setInputMessage("");
+    setInputMessage('');
   };
 
   // Function to scroll to the bottom of the messages
@@ -128,13 +120,13 @@ const CustomerService = () => {
   // Function to format the date and time
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: true,
     });
   };
@@ -145,7 +137,7 @@ const CustomerService = () => {
         {messages.map((msg, index) => (
           <div
             key={msg.id || index}
-            className={`message ${msg.isFromAdmin ? "sent" : "received"}`}
+            className={`message ${msg.isFromAdmin ? 'sent' : 'received'}`}
           >
             <div className="message-content">
               <div className="message-timestamp">
@@ -166,7 +158,7 @@ const CustomerService = () => {
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyPress={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               sendMessage();
             }

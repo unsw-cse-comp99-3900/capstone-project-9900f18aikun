@@ -6,23 +6,20 @@
 }
 
 .map-title {
-  align-self: flex-start; /* Align the title to the left */
-  margin: 10px 0px 0 300px; /* Space between title and button */
+  align-self: flex-start;
+  margin: 10px 0px 0 300px;
 }
 
 .selectMapContainer .selectLabel {
-  background-color: #fff3cd; /* 浅黄色背景 */
-  border-radius: 8px; /* 圆滑边框 */
+  background-color: #fff3cd;
+  border-radius: 8px;
   padding: 8px 10px 0 12px;
-  margin-right: 10px; /* 在标签和选择框之间添加间隔 */
+  margin-right: 10px;
   width: 150px;
   height: 25px;
-  background-color: #e8e8e8; /* Neutral background */
+  background-color: #e8e8e8;
   border-radius: 8px;
-
   margin-top: 10px;
-  /* Adjust width to content */
-  /* font-weight: bold;  */
 }
 
 .selectMapContainer .selectRow {
@@ -41,7 +38,7 @@
 }
 
 .selectMapContainer img {
-  max-width: 100%; /* 控制图片最大宽度，确保不会超出屏幕 */
+  max-width: 100%;
   max-height: 600px;
   margin-top: 20px;
 }
@@ -59,7 +56,6 @@
   background-color: #4b2e83;
 }
 
-/* 地图和地图遮罩 */
 .map-container {
   position: relative;
   display: inline-block;
@@ -85,12 +81,12 @@
 }
 
 .clickable-area.meetingroom {
-  background: rgba(139, 188, 226, 0.4); /* 半透明 #9FD4FD */
+  background: rgba(139, 188, 226, 0.4);
   border-radius: 5px;
 }
 
 .clickable-area.desk {
-  background: rgba(104, 200, 116, 0.3); /* 半透明 #7BE188 */
+  background: rgba(104, 200, 116, 0.3);
   border-radius: 3px;
 }
 
@@ -114,11 +110,11 @@
 }
 
 .legend-color.meetingroom {
-  background: rgba(159, 212, 253, 0.3); /* 半透明 #9FD4FD */
+  background: rgba(159, 212, 253, 0.3);
   border: 1px solid #9fd4fd;
 }
 
 .legend-color.desk {
-  background: rgba(123, 225, 136, 0.3); /* 半透明 #7BE188 */
+  background: rgba(123, 225, 136, 0.3);
   border: 1px solid #7be188;
 }

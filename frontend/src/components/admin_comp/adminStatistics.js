@@ -120,9 +120,7 @@ function AdminStatistics() {
           });
         }, 1000); // Delay 1000 milliseconds
       });
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    }
+    } catch (error) {}
   };
 
   // Fetch usage data for the selected date
@@ -205,9 +203,7 @@ function AdminStatistics() {
           });
         }, 1000);
       });
-    } catch (error) {
-      console.error('Failed to fetch usage data:', error);
-    }
+    } catch (error) {}
   };
 
   // Fetch top list data for the selected date
@@ -371,9 +367,7 @@ function AdminStatistics() {
           });
         }, 1000);
       });
-    } catch (error) {
-      console.error('Failed to fetch top list data:', error);
-    }
+    } catch (error) {}
   };
 
   //function to Prepare chart data
@@ -410,7 +404,6 @@ function AdminStatistics() {
     const barChartImage = localStorage.getItem('barChartImage');
 
     if (!chartImage || !areaChartImage || !barChartImage) {
-      console.error('One or more charts are not rendered yet.');
       return;
     }
 
