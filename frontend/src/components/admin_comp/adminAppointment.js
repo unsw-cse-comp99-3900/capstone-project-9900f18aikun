@@ -39,11 +39,8 @@ function AdminAppointment({ token, forceUpdate }) {
           const data = await response.json();
           setBookingData(data);
         } else {
-          console.error('Failed to fetch booking data');
         }
-      } catch (error) {
-        console.error('Error fetching booking data:', error);
-      }
+      } catch (error) {}
     };
 
     const fetchRequestData = async () => {
@@ -60,11 +57,8 @@ function AdminAppointment({ token, forceUpdate }) {
           const data = await response.json();
           setRequestData(data.requests);
         } else {
-          console.error('Failed to fetch request data');
         }
-      } catch (error) {
-        console.error('Error fetching request data:', error);
-      }
+      } catch (error) {}
     };
 
     fetchBookingData();
@@ -97,7 +91,6 @@ function AdminAppointment({ token, forceUpdate }) {
         }),
       });
       const data = await response.json();
-      console.log(data.message);
       Notification.success({
         closable: true,
         title: 'Notification',
@@ -107,9 +100,7 @@ function AdminAppointment({ token, forceUpdate }) {
       setRequestData((prevData) =>
         prevData.filter((item) => item.booking_id !== entry.booking_id)
       );
-    } catch (error) {
-      console.error('Error approving request:', error);
-    }
+    } catch (error) {}
   };
   //reject the booking request
   const handleReject = async (entry) => {
@@ -127,7 +118,6 @@ function AdminAppointment({ token, forceUpdate }) {
         }),
       });
       const data = await response.json();
-      console.log(data.message);
       Notification.info({
         closable: true,
         title: 'Notification',
@@ -136,9 +126,7 @@ function AdminAppointment({ token, forceUpdate }) {
       setRequestData((prevData) =>
         prevData.filter((item) => item.booking_id !== entry.booking_id)
       );
-    } catch (error) {
-      console.error('Error rejecting request:', error);
-    }
+    } catch (error) {}
   };
 
   //booking table content

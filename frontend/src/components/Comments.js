@@ -1,40 +1,42 @@
-import React, { useState, useCallback, useEffect } from "react";
+// comments component for the room detail page,can add/reply/edit/delete comment
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Comment,
   Avatar,
   Button,
   Popconfirm,
   Notification,
-} from "@arco-design/web-react";
+} from '@arco-design/web-react';
 import {
   IconHeart,
   IconMessage,
   IconHeartFill,
-} from "@arco-design/web-react/icon";
-import "./Comments.css";
+} from '@arco-design/web-react/icon';
+import './Comments.css';
 // import ErrorBox from "./errorBox";
-import api from "../api";
+import api from '../api';
 
 const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
-  const [replyText, setReplyText] = useState("");
-  const [rootCommentText, setRootCommentText] = useState("");
+  const [replyText, setReplyText] = useState('');
+  const [rootCommentText, setRootCommentText] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editingCommentText, setEditingCommentText] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Fetch comments from the backend
   const fetchComments = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/comment/get-comment?room_id=${roomid}`,
 
         // `http://3.26.67.188:5001/comment/get-comment?room_id=${roomid}`,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
+            accept: 'application/json',
             Authorization: `Bearer ${token}`,
           },
         }
@@ -42,12 +44,12 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
 
       if (response.status === 204) {
         setComments([]);
-        console.log("No comments found for this room.");
+
         return;
       }
 
       if (!response.ok) {
-        throw new Error("Failed to fetch comments");
+        throw new Error('Failed to fetch comments');
       }
 
       const commentsData = await response.json();
@@ -55,45 +57,47 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
       if (setCurrentUserId) {
         setCurrentUserId(commentsData.current_zid); // Update currentUserId
       }
-      console.log("Fetched comments:", commentsData.comments);
     } catch (error) {
-      console.error("Error fetching comments:", error);
       setErrorMessage(error.message);
     }
   }, [roomid, setCurrentUserId]);
 
+  // Fetch comments on component mount
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
 
+  // Show notification if there's an error message
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: "Notification",
+        title: 'Notification',
         content: errorMessage,
-        duration: 0, // 0 means the notification will not auto close
-        onClose: () => setErrorMessage(""),
+        duration: 0,
+        onClose: () => setErrorMessage(''),
       });
     }
   }, [errorMessage]);
 
+  // Handle reply button click
   const handleReplyClick = (commentId) => {
     setReplyingTo(commentId);
   };
 
+  // Handle root comment submission
   const handleRootCommentSubmit = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/comment/make-comment`,
 
         // `http://3.26.67.188:5001/comment/make-comment`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             room_id: roomid,
@@ -105,34 +109,35 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
+        throw new Error('Server responded with an error: ' + errorText);
       }
 
       await fetchComments();
       Notification.success({
-        title: "Success",
-        content: "Comment success.",
+        title: 'Success',
+        content: 'Comment success.',
       });
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
-      setRootCommentText("");
+      setRootCommentText('');
     }
   };
 
+  // Handle reply submission
   const handleReplySubmit = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/comment/make-comment`,
 
         // `http://3.26.67.188:5001/comment/make-comment`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             room_id: roomid,
@@ -144,7 +149,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
+        throw new Error('Server responded with an error: ' + errorText);
       }
 
       await fetchComments();
@@ -152,29 +157,31 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
       setErrorMessage(error.message);
     } finally {
       setReplyingTo(null);
-      setReplyText("");
+      setReplyText('');
     }
   };
 
+  // Handle edit button click
   const handleEditClick = (commentId, commentContent) => {
     setEditingCommentId(commentId);
     setEditingCommentText(commentContent);
   };
 
+  // Handle edit submission
   const handleEditSubmit = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const url = isAdmin
         ? // ? `http://3.26.67.188:5001/admin/edit-comment`
           api + `/admin/edit-comment`
         : api + `/comment/edit-comment`;
 
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
+          accept: 'application/json',
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           comment_id: editingCommentId,
@@ -184,24 +191,25 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
+        throw new Error('Server responded with an error: ' + errorText);
       }
 
       await fetchComments();
       setEditingCommentId(null);
-      setEditingCommentText("");
+      setEditingCommentText('');
       Notification.success({
-        title: "Success",
-        content: "Edit comment success!",
+        title: 'Success',
+        content: 'Edit comment success!',
       });
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
+  // Handle delete button click
   const handleDeleteClick = async (commentId) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const url = isAdmin
         ? // ? `http://3.26.67.188:5001/admin/delete-comment`
           // : `http://3.26.67.188:5001/comment/delete-comment`;
@@ -210,11 +218,11 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
         : api + `/comment/delete-comment`;
 
       const response = await fetch(url, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
+          accept: 'application/json',
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           comment_id: commentId,
@@ -224,22 +232,23 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to delete comment");
+        throw new Error(result.message || 'Failed to delete comment');
       }
 
       await fetchComments();
       Notification.success({
-        title: "Success",
-        content: "Comment deleted successfully.",
+        title: 'Success',
+        content: 'Comment deleted successfully.',
       });
     } catch (error) {
       setErrorMessage(error.message);
     }
   };
 
+  // Handle like button click
   const handleLikeClick = async (comment) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const url = comment.current_user_liked
         ? // ? `http://3.26.67.188:5001/comment/unlike-comment`
           // : `http://3.26.67.188:5001/comment/like-comment`;
@@ -247,11 +256,11 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
         : api + `/comment/like-comment`;
 
       const response = await fetch(url, {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
+          accept: 'application/json',
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           comment_id: comment.id,
@@ -261,7 +270,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update like status");
+        throw new Error(result.message || 'Failed to update like status');
       }
 
       const updateComments = (comments) => {
@@ -285,16 +294,18 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   };
 
+  // Colors for user avatars
   const colors = [
-    "#FCE996",
-    "#9FD4FD",
-    "#FB9DC7",
-    "#89E9E0",
-    "#7BE188",
-    "#FCC59F",
+    '#FCE996',
+    '#9FD4FD',
+    '#FB9DC7',
+    '#89E9E0',
+    '#7BE188',
+    '#FCC59F',
   ];
   const userColors = {};
 
+  // Get color for a user
   const getUserColor = (userId) => {
     if (!userColors[userId]) {
       const colorIndex = Object.keys(userColors).length % colors.length;
@@ -303,6 +314,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     return userColors[userId];
   };
 
+  // Render comments recursively
   const renderComments = (comments, level = 0) => {
     return comments.map((comment) => (
       <Comment
@@ -313,14 +325,14 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
             key="heart"
             onClick={() => handleLikeClick(comment)}
             style={{
-              backgroundColor: "#E5E6EB",
-              border: "none",
-              padding: "5px 10px",
-              borderRadius: "4px",
+              backgroundColor: '#E5E6EB',
+              border: 'none',
+              padding: '5px 10px',
+              borderRadius: '4px',
             }}
           >
             {comment.current_user_liked ? (
-              <IconHeartFill style={{ color: "#f53f3f" }} />
+              <IconHeartFill style={{ color: '#f53f3f' }} />
             ) : (
               <IconHeart />
             )}
@@ -345,12 +357,12 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
                 focusLock
                 title="Do you want to delete the comment?"
                 okText="Delete"
-                cancelButtonProps={{ style: { display: "none" } }}
+                cancelButtonProps={{ style: { display: 'none' } }}
                 onOk={() => handleDeleteClick(comment.id)}
               >
                 <span
                   className="custom-comment-action"
-                  style={{ color: isAdmin ? "red" : "inherit" }} // Red color for admin delete button
+                  style={{ color: isAdmin ? 'red' : 'inherit' }} // Red color for admin delete button
                 >
                   Delete
                 </span>
@@ -359,7 +371,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
           ),
         ]}
         author={`${comment.user_name}${
-          comment.user_id === currentUserId ? " (ME)" : ""
+          comment.user_id === currentUserId ? ' (ME)' : ''
         }`} // Add user identifier
         avatar={
           <Avatar style={{ backgroundColor: getUserColor(comment.user_id) }}>
@@ -385,7 +397,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
                 <Button
                   type="primary"
                   onClick={handleEditSubmit}
-                  style={{ backgroundColor: "#C396ED", borderColor: "#C396ED" }}
+                  style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}
                 >
                   Submit
                 </Button>
@@ -418,12 +430,12 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
                 key="1"
                 type="primary"
                 onClick={handleReplySubmit}
-                style={{ backgroundColor: "#C396ED", borderColor: "#C396ED" }}
+                style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}
               >
                 Reply
               </Button>,
             ]}
-            avatar={<Avatar style={{ backgroundColor: "#14a9f8" }}>Me</Avatar>}
+            avatar={<Avatar style={{ backgroundColor: '#14a9f8' }}>Me</Avatar>}
             content={
               <div>
                 <input
@@ -431,7 +443,6 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
                   value={replyText}
                   onChange={(e) => {
                     if (!e || !e.target) {
-                      console.error("Event or event target is undefined");
                       return;
                     }
                     setReplyText(e.target.value);
@@ -456,7 +467,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
           <Button
             key="0"
             type="secondary"
-            onClick={() => setRootCommentText("")}
+            onClick={() => setRootCommentText('')}
           >
             Cancel
           </Button>,
@@ -464,12 +475,12 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
             key="1"
             type="primary"
             onClick={handleRootCommentSubmit}
-            style={{ backgroundColor: "#C396ED", borderColor: "#C396ED" }}
+            style={{ backgroundColor: '#C396ED', borderColor: '#C396ED' }}
           >
             Comment
           </Button>,
         ]}
-        avatar={<Avatar style={{ backgroundColor: "#14a9f8" }}>Me</Avatar>}
+        avatar={<Avatar style={{ backgroundColor: '#14a9f8' }}>Me</Avatar>}
         content={
           <div>
             <input
@@ -477,7 +488,6 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
               value={rootCommentText}
               onChange={(e) => {
                 if (!e || !e.target) {
-                  console.error("Event or event target is undefined");
                   return;
                 }
                 setRootCommentText(e.target.value);

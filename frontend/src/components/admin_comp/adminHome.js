@@ -31,11 +31,8 @@ function AdminHome() {
           setBookingData(data.slice(0, 10)); // Get only the most recent 10 booking records
           setTotalBookings(data.length); //get the total booking numbers today
         } else {
-          console.error('Failed to fetch booking data');
         }
-      } catch (error) {
-        console.error('Error fetching booking data:', error);
-      }
+      } catch (error) {}
     };
 
     //get room usage info
@@ -57,11 +54,8 @@ function AdminHome() {
           const data = await response.json();
           setUsageData(data.usage);
         } else {
-          console.error('Failed to fetch usage data');
         }
-      } catch (error) {
-        console.error('Error fetching usage data:', error);
-      }
+      } catch (error) {}
     };
 
     fetchBookingData();

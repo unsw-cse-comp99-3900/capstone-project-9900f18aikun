@@ -1,56 +1,60 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import "./QrCodeCheckIn.css";
-import api from "../api";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import './QrCodeCheckIn.css';
+import api from '../api';
 
+// QrCodeCheckIn component
 const QrCodeCheckIn = () => {
-  const [qrCode, setQrCode] = useState("");
+  const [qrCode, setQrCode] = useState('');
   const navigate = useNavigate();
 
+  // Effect to handle QR code from local storage and prevent back navigation
   useEffect(() => {
-    const storedQrCode = localStorage.getItem("qrCode");
+    const storedQrCode = localStorage.getItem('qrCode');
     if (!storedQrCode) {
-      navigate("/dashboard", { replace: true });
+      navigate('/dashboard', { replace: true });
     } else {
       setQrCode(storedQrCode);
     }
 
     // Prevent going back
     window.history.pushState(null, document.title, window.location.href);
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener('popstate', handlePopState);
 
     return () => {
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener('popstate', handlePopState);
     };
   }, [navigate]);
 
+  // Function to handle back navigation prevention
   const handlePopState = () => {
     window.history.pushState(null, document.title, window.location.href);
   };
 
+  // Function to handle check-in process
   const handleCheckIn = async () => {
     if (!qrCode) {
-      alert("No QR code available. Please scan a QR code first.");
+      alert('No QR code available. Please scan a QR code first.');
       return;
     }
 
     try {
-      const token = localStorage.getItem("token");
-      console.log("token is", token);
+      const token = localStorage.getItem('token');
+
       const response = await axios.get(api + `/sign_in/sign-in/${qrCode}`, {
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.data === "You have signed in") {
+      if (response.data === 'You have signed in') {
         alert("You're checked in!");
-        localStorage.removeItem("qrCode");
-        navigate("/dashboard", { replace: true });
+        localStorage.removeItem('qrCode');
+        navigate('/dashboard', { replace: true });
       } else {
-        alert(response.data.message || "Unexpected response from server");
+        alert(response.data.message || 'Unexpected response from server');
       }
     } catch (error) {
       if (
@@ -60,8 +64,7 @@ const QrCodeCheckIn = () => {
       ) {
         alert(error.response.data.message);
       } else {
-        console.log(error)
-        alert("An error occurred during check-in. Please try again.");
+        alert('An error occurred during check-in. Please try again.');
       }
     }
   };

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Modal, Rate, Button } from "@arco-design/web-react";
-import api from "../api";
+import React, { useState } from 'react';
+import { Modal, Rate, Button } from '@arco-design/web-react';
+import api from '../api';
 
 const MakeRate = ({ visible, onClose, roomid, myRate, fetchRatingData }) => {
   const [rateValue, setRateValue] = useState(myRate);
@@ -8,17 +8,17 @@ const MakeRate = ({ visible, onClose, roomid, myRate, fetchRatingData }) => {
 
   const handleRateSubmit = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         // `http://3.26.67.188:5001/comment/make-rate`,
         api + `/comment/make-rate`,
 
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json",
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             room_id: roomid,
@@ -29,15 +29,13 @@ const MakeRate = ({ visible, onClose, roomid, myRate, fetchRatingData }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
+        throw new Error('Server responded with an error: ' + errorText);
       }
 
       // Fetch the updated rating data
       await fetchRatingData();
       setIsSubmitted(true);
-    } catch (error) {
-      console.error("Error submitting rating:", error);
-    }
+    } catch (error) {}
   };
 
   const handleClose = () => {

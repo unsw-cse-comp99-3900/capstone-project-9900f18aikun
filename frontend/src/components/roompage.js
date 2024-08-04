@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
-import "./roompage.css";
-import Table from "./Table";
+import React, { useEffect, useState, useCallback } from 'react';
+import './roompage.css';
+import Table from './Table';
 import {
   Button,
   Rate,
@@ -9,16 +9,16 @@ import {
   Modal,
   Notification,
   ConfigProvider,
-} from "@arco-design/web-react";
-import enUS from "@arco-design/web-react/es/locale/en-US";
-import MakeRate from "./makerate";
-import Comments from "./Comments";
-import api from "../api";
+} from '@arco-design/web-react';
+import enUS from '@arco-design/web-react/es/locale/en-US';
+import MakeRate from './makerate';
+import Comments from './Comments';
+import api from '../api';
 
 const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   // get room id
   const url = window.location.href;
-  const roomid = url.split("room/")[1];
+  const roomid = url.split('room/')[1];
 
   const [room, setRoom] = useState(null);
   const [data, setData] = useState([]);
@@ -26,14 +26,14 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   const [loadingRoom, setLoadingRoom] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [isReporting, setIsReporting] = useState(false);
-  const [reportText, setReportText] = useState("");
+  const [reportText, setReportText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedRoom, setEditedRoom] = useState({});
   const [change, setChange] = useState(false);
   const [isRateModalVisible, setIsRateModalVisible] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
   const [ratingData, setRatingData] = useState({
     is_rated: false,
     my_rate: 0,
@@ -50,28 +50,28 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       message: reportText,
     };
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(api + `/admin/report`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          accept: "application/json",
-          Authorization: "Bearer " + token,
-          "Content-Type": "application/json",
+          accept: 'application/json',
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(obj),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error("Server responded with an error: " + errorText);
+        throw new Error('Server responded with an error: ' + errorText);
       } else {
         setIsReporting(false);
-        setReportText("");
-        setIsReportModalVisible(false); // 关闭 Modal
+        setReportText('');
+        setIsReportModalVisible(false);
 
         Notification.success({
-          title: "Success",
-          content: "You have successfully reported.",
+          title: 'Success',
+          content: 'You have successfully reported.',
         });
       }
     } catch (error) {
@@ -84,14 +84,14 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   // fetch comments
   const fetchComments = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/comment/get-comment?room_id=${roomid}`,
 
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
+            accept: 'application/json',
             Authorization: `Bearer ${token}`,
           },
         }
@@ -102,11 +102,11 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       }
 
       if (!response.ok) {
-        throw new Error("Failed to fetch comments");
+        throw new Error('Failed to fetch comments');
       }
 
       const commentsData = await response.json();
-      setCurrentUserId(commentsData.current_zid); // 获取当前用户ID
+      setCurrentUserId(commentsData.current_zid);
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -115,27 +115,26 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   // fetch rating data
   const fetchRatingData = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(
         api + `/comment/get-rate?room_id=${roomid}`,
 
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
-            Authorization: "Bearer " + token,
+            accept: 'application/json',
+            Authorization: 'Bearer ' + token,
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch rating data");
+        throw new Error('Failed to fetch rating data');
       }
 
       const ratingData = await response.json();
       setRatingData(ratingData);
     } catch (error) {
-      console.error("Error fetching rating data:", error);
       setErrorMessage(error.message);
     }
   }, [roomid]);
@@ -144,30 +143,30 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const formattedDate = selectedDate.format("YYYY-MM-DD");
+        const token = localStorage.getItem('token');
+        const formattedDate = selectedDate.format('YYYY-MM-DD');
         const response = await fetch(
           api + `/booking/meetingroom?date=${formattedDate}`,
           {
-            method: "GET",
+            method: 'GET',
             headers: {
-              accept: "application/json",
-              Authorization: "Bearer " + token,
+              accept: 'application/json',
+              Authorization: 'Bearer ' + token,
             },
           }
         );
 
         if (!response.ok) {
-          setErrorMessage("Failed to Fetch Booking Data");
+          setErrorMessage('Failed to Fetch Booking Data');
 
-          throw new Error("Failed to fetch booking data");
+          throw new Error('Failed to fetch booking data');
         }
 
         const bookingData = await response.json();
         const dataArray = Object.values(bookingData);
         setData(dataArray);
       } catch (error) {
-        setErrorMessage("Failed to Fetch Booking Data");
+        setErrorMessage('Failed to Fetch Booking Data');
       } finally {
         setLoadingData(false);
       }
@@ -175,26 +174,26 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
 
     const fetchRoom = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         const response = await fetch(api + `/room/room-detail/${roomid}`, {
-          method: "GET",
+          method: 'GET',
           headers: {
-            Accept: "application/json",
-            Authorization: "Bearer " + token,
+            Accept: 'application/json',
+            Authorization: 'Bearer ' + token,
           },
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          setErrorMessage("Failed to Fetch Room Info");
-          throw new Error("Server responded with an error: " + errorText);
+          setErrorMessage('Failed to Fetch Room Info');
+          throw new Error('Server responded with an error: ' + errorText);
         }
 
         const result = await response.json();
         setRoom(result.message);
         setEditedRoom(result.message);
       } catch (error) {
-        setErrorMessage("Failed to Fetch Room Info");
+        setErrorMessage('Failed to Fetch Room Info');
       } finally {
         setLoadingRoom(false);
       }
@@ -218,10 +217,10 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
-        title: "Notification",
+        title: 'Notification',
         content: errorMessage,
         duration: 0,
-        onClose: () => setErrorMessage(""),
+        onClose: () => setErrorMessage(''),
       });
     }
   }, [errorMessage]);
@@ -254,12 +253,12 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
     event.preventDefault();
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await fetch(api + `/booking/edit-room`, {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
         },
         body: JSON.stringify({
           room_id: roomid,
@@ -271,19 +270,17 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
       });
 
       if (!response.ok) {
-        setErrorMessage("Failed to Update Room Data");
-        throw new Error("Failed to update room data");
+        setErrorMessage('Failed to Update Room Data');
+        throw new Error('Failed to update room data');
       } else {
-        setErrorMessage("Successfully Updated");
+        setErrorMessage('Successfully Updated');
         setChange(!change);
       }
 
       const updatedRoom = await response.json();
       setRoom(updatedRoom.message);
       setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating room data:", error);
-    }
+    } catch (error) {}
   };
 
   // loading
@@ -323,7 +320,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
                   <span className="rate-span">
                     {ratingData.is_rated
                       ? ratingData.room_score.toFixed(1)
-                      : "Nobody rated before"}
+                      : 'Nobody rated before'}
                   </span>
                   <Button
                     className="make-rate-button"
@@ -338,11 +335,11 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
                 <img src={room.room_detail.image_url} alt="Room" />
               </div>
               <p>
-                <strong>Type:</strong>{" "}
-                {room.room_type === "room" ? "Meeting Room" : "Hot Desk"}
+                <strong>Type:</strong>{' '}
+                {room.room_type === 'room' ? 'Meeting Room' : 'Hot Desk'}
               </p>
               <p>
-                <strong>Location:</strong> {room.room_detail.building} Level{" "}
+                <strong>Location:</strong> {room.room_detail.building} Level{' '}
                 {room.room_detail.level}
               </p>
               <p>💡 Power available</p>
@@ -371,7 +368,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
                 <div className="report-div">
                   <Button
                     type="primary"
-                    status={isReporting ? "default" : "danger"}
+                    status={isReporting ? 'default' : 'danger'}
                     className="report-button"
                     onClick={handleReportClick}
                   >
@@ -380,7 +377,7 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
                       alt="Setting"
                       className="icon"
                     />
-                    {isReporting ? "Cancel" : "Report"}
+                    {isReporting ? 'Cancel' : 'Report'}
                   </Button>
                 </div>
               </>
@@ -425,10 +422,10 @@ const RoomCard = ({ selectedDate, setSelectedDate, isAdmin }) => {
               value={reportText}
               onChange={(e) => setReportText(e.target.value)}
               style={{
-                width: "450px",
-                height: "100px",
-                padding: "10px",
-                fontSize: "14px",
+                width: '450px',
+                height: '100px',
+                padding: '10px',
+                fontSize: '14px',
               }}
             />
           </Modal>

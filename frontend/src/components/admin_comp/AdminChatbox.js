@@ -28,9 +28,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     // const socketURL = "ws://3.26.67.188:5001";
     // const socketURL = "ws://0.0.0.0:5001";
 
-    console.log('Attempting to connect to:', socketURL);
-    console.log('Token:', token);
-
     socketRef.current = io(socketURL, {
       query: { token },
       transports: ['websocket'],
@@ -40,8 +37,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     });
 
     socketRef.current.on('connect', () => {
-      console.log('Admin Socket Connected');
-      console.log('Socket id:', socketRef.current.id);
       setConnectionStatus('connected');
 
       socketRef.current.emit('test_connection', {
@@ -51,12 +46,10 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     });
 
     socketRef.current.on('connect_error', (error) => {
-      console.error('Connection Error:', error);
       setConnectionStatus('error');
     });
 
     socketRef.current.on('message', (data) => {
-      console.log('Raw data received:', data);
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } =
           data.message;
@@ -107,12 +100,10 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
         pendingMessages.current.delete(message_id);
       } else {
-        console.warn('Received data in unexpected format:', data);
       }
     });
 
     socketRef.current.on('admin_chat_history', (data) => {
-      console.log('Received admin chat history:', data);
       const newMessageHistories = {};
       const newActiveUsers = new Map();
 
@@ -149,10 +140,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
           newMessageHistories[chatId] = messages;
         });
       } else {
-        console.error(
-          'Unexpected data structure for admin_chat_history:',
-          data
-        );
       }
 
       setMessageHistories(newMessageHistories);
@@ -165,12 +152,10 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     });
 
     socketRef.current.on('error', (error) => {
-      console.error('Socket error:', error);
       setConnectionStatus('error');
     });
 
     socketRef.current.on('disconnect', (reason) => {
-      console.log('Disconnected:', reason);
       setConnectionStatus('disconnected');
       if (reason === 'io server disconnect') {
         socketRef.current.connect();
@@ -178,23 +163,18 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     });
 
     socketRef.current.on('reconnect_attempt', (attemptNumber) => {
-      console.log('Attempting reconnection:', attemptNumber);
       setConnectionStatus('reconnecting');
     });
 
     socketRef.current.on('reconnect', (attemptNumber) => {
-      console.log('Reconnected after', attemptNumber, 'attempts');
       setConnectionStatus('connected');
     });
 
     socketRef.current.on('reconnect_failed', () => {
-      console.log('Failed to reconnect');
       setConnectionStatus('failed');
     });
 
-    socketRef.current.onAny((eventName, ...args) => {
-      console.log(`Received event: ${eventName}`, args);
-    });
+    socketRef.current.onAny((eventName, ...args) => {});
   };
 
   useEffect(() => {
@@ -250,9 +230,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       }));
 
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } catch (error) {
-      console.error('Error fetching usage report:', error);
-    }
+    } catch (error) {}
   };
   const formatDateTime = (date) => {
     return new Date(date).toLocaleString('en-US', {
@@ -265,13 +243,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
   };
 
   const handleSendMessage = () => {
-    console.log(
-      'this is what i want',
-      message.trim(),
-      socketRef.current,
-      selectedUser,
-      adminId
-    );
     if (
       message.trim() === '' ||
       !socketRef.current ||
@@ -284,8 +255,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       msg: message,
       user_id: selectedUser,
     };
-
-    console.log('Admin sending message:', messageData);
 
     const tempId = Date.now().toString();
     const newMessage = {
@@ -323,7 +292,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
     socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
-        console.log('Admin message acknowledged:', acknowledgement);
         if (acknowledgement.message_id) {
           setMessageHistories((prev) => {
             const updatedMessages = {
@@ -349,7 +317,6 @@ const AdminChatbox = ({ onClose, onToggle }) => {
           pendingMessages.current.add(acknowledgement.message_id);
         }
       } else {
-        console.warn('Admin message not acknowledged');
         setMessageHistories((prev) => ({
           ...prev,
           [selectedUser]: prev[selectedUser].filter((msg) => msg.id !== tempId),

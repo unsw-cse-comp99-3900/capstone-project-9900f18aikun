@@ -11,6 +11,7 @@ const LoginPage = ({ onLogin, setOutlook }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Effect to handle URL query parameters for access token and login failure
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const accessToken = queryParams.get("access_token");
@@ -24,6 +25,7 @@ const LoginPage = ({ onLogin, setOutlook }) => {
     }
   }, [location]);
 
+  // Function to handle successful login
   const handleSuccessfulLogin = (data) => {
     localStorage.setItem("token", data.access_token);
     onLogin(data.is_admin);
@@ -36,10 +38,12 @@ const LoginPage = ({ onLogin, setOutlook }) => {
     }
   };
 
+  // Function to show zID login form
   const handleZIDLogin = () => {
     setShowLoginForm(true);
   };
 
+  // Function to handle form submission for zID login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -65,10 +69,12 @@ const LoginPage = ({ onLogin, setOutlook }) => {
     }
   };
 
+  // Function to handle Outlook login
   const handleOutlookLogin = () => {
     window.location.href = api + "/auth/outlook-login";
   };
 
+  // Function to handle forgot password
   const handleForgotPassword = () => {
     window.location.href = "https://iam.unsw.edu.au/home";
   };
