@@ -17,14 +17,6 @@ user_model = auth_ns.model('User', {
 })
 
 
-@jwt.invalid_token_loader
-def custom_invalid_token_callback(error_string):
-    return jsonify({
-        'error': 'Invalid Token',
-        'message': error_string
-    }), 401
-
-
 # login in api, user can login by zid and password
 @auth_ns.route('/login')
 class UserLogin(Resource):

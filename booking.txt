@@ -1,0 +1,119 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-8.3.2, pluggy-1.5.0
+rootdir: /Users/huoyingzhe/Documents/master课程/comp9900/demo3/capstone-project-9900f18aikun
+plugins: cov-5.0.0
+collected 15 items
+
+testing/test_booking.py .F.FF
+
+=================================== FAILURES ===================================
+_______________________________ test_block_room ________________________________
+
+token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMjc1OTQ0MiwianRpIjoiMzI4ZmE2MDUtNGEwOC00MTBhLTk0...JlMzBlYmU1OC05YmQ4LTQzNzEtYjgyOC0wMTdkY2EzOGEzMDkiLCJleHAiOjE3ODI3NTkzODJ9.BsK7e0AWgDGXCQmAS6s1euyo1eTfv1UnodLEch4jsjQ'
+client = <FlaskClient <Flask 'app.extensions'>>
+
+    def test_block_room(token: Any, client: Any):
+        url = "/booking/block-room"
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        query_string = {'roomid': 1}  # Using `query_string` instead of `params`
+        response = client.get(url, headers=headers, query_string=query_string)
+>       assert response.status_code == 200, f"Block room failed: {response.status_code}, {response.text}"
+E       AssertionError: Block room failed: 403, {"error": "user z1 is not admin"}
+E         
+E       assert 403 == 200
+E        +  where 403 = <WrapperTestResponse streamed [403 FORBIDDEN]>.status_code
+
+testing/test_booking.py:80: AssertionError
+_______________________________ test_delete_book _______________________________
+
+token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMjc1OTQ0MiwianRpIjoiMzI4ZmE2MDUtNGEwOC00MTBhLTk0...JlMzBlYmU1OC05YmQ4LTQzNzEtYjgyOC0wMTdkY2EzOGEzMDkiLCJleHAiOjE3ODI3NTkzODJ9.BsK7e0AWgDGXCQmAS6s1euyo1eTfv1UnodLEch4jsjQ'
+client = <FlaskClient <Flask 'app.extensions'>>
+
+    def test_delete_book(token: Any, client: Any):
+        booking_id = 1
+        url = f"/booking/book/{booking_id}"
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        response = client.delete(url, headers=headers)
+>       assert response.status_code == 200, f"Delete book failed: {response.status_code}, {response.text}"
+E       AssertionError: Delete book failed: 409, {"error": "You are not in booked or requested status"}
+E         
+E       assert 409 == 200
+E        +  where 409 = <WrapperTestResponse streamed [409 CONFLICT]>.status_code
+
+testing/test_booking.py:105: AssertionError
+________________________________ test_edit_room ________________________________
+
+token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMjc1OTQ0MiwianRpIjoiMzI4ZmE2MDUtNGEwOC00MTBhLTk0...JlMzBlYmU1OC05YmQ4LTQzNzEtYjgyOC0wMTdkY2EzOGEzMDkiLCJleHAiOjE3ODI3NTkzODJ9.BsK7e0AWgDGXCQmAS6s1euyo1eTfv1UnodLEch4jsjQ'
+client = <FlaskClient <Flask 'app.extensions'>>
+
+    def test_edit_room(token: Any, client: Any):
+        url = f"/booking/edit-room"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "room_id": 3,
+            "name": "G01",
+            "building": "K17",
+            "capacity": 3,
+            "level": "G"
+        }
+        response = client.put(url, headers=headers, json=payload)
+>       assert response.status_code == 200, f"Edit room failed: {response.status_code}, {response.text}"
+E       AssertionError: Edit room failed: 403, {"error": "user z1 is not admin"}
+E         
+E       assert 403 == 200
+E        +  where 403 = <WrapperTestResponse streamed [403 FORBIDDEN]>.status_code
+
+testing/test_booking.py:121: AssertionError
+=============================== warnings summary ===============================
+myenv/lib/python3.12/site-packages/flask_restx/api.py:19
+myenv/lib/python3.12/site-packages/flask_restx/api.py:19
+  /Users/huoyingzhe/Documents/master课程/comp9900/demo3/capstone-project-9900f18aikun/myenv/lib/python3.12/site-packages/flask_restx/api.py:19: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    from jsonschema import RefResolver
+
+testing/test_booking.py::test_admin_book
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+testing/test_booking.py::test_admin_book
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform darwin, python 3.12.4-final-0 ----------
+Name                            Stmts   Miss  Cover
+---------------------------------------------------
+backend/app/__init__.py            43      1    98%
+backend/app/admin/models.py         5      0   100%
+backend/app/admin/routes.py       223    125    44%
+backend/app/auth/routes.py         75     30    60%
+backend/app/booking/models.py      52      1    98%
+backend/app/booking/routes.py     683    379    45%
+backend/app/chat/models.py         23      0   100%
+backend/app/chat/routes.py        168    134    20%
+backend/app/comment/models.py      27      0   100%
+backend/app/comment/routes.py     283    169    40%
+backend/app/config.py              11      0   100%
+backend/app/database_setup.py      65     57    12%
+backend/app/email.py               92     44    52%
+backend/app/extensions.py          22      0   100%
+backend/app/history/routes.py      84     40    52%
+backend/app/models.py              32      0   100%
+backend/app/room/routes.py         29     14    52%
+backend/app/sign/routes.py         63     46    27%
+backend/app/utils.py              134     75    44%
+backend/get-pip.py                 65     65     0%
+backend/run.py                      4      4     0%
+---------------------------------------------------
+TOTAL                            2183   1184    46%
+
+=========================== short test summary info ============================
+FAILED testing/test_booking.py::test_block_room - AssertionError: Block room ...
+FAILED testing/test_booking.py::test_delete_book - AssertionError: Delete boo...
+FAILED testing/test_booking.py::test_edit_room - AssertionError: Edit room fa...
+=================== 3 failed, 2 passed, 4 warnings in 7.76s ====================

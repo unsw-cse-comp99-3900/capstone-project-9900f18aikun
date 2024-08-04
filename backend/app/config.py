@@ -16,7 +16,7 @@ class Config:
     # key for generate token
     JWT_SECRET_KEY = '87654321'
     # token expire time
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=999999)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=9999999)
     # config for outlook login
     OUTLOOK_CLIENT_ID = '67b39034-07bc-49f5-9104-9a1a274a36dc'
     OUTLOOK_CLIENT_SECRET = 'C9t8Q~PMtgidw7Xs~Yn3hv7OdioUBLWLuEfU-cLg'
