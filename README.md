@@ -25,6 +25,7 @@ The Computer Science and Engineering (CSE) Space Allocation Management System is
 - cd frontend
 - docker build -t frontend .
 - docker run -d -p 3000:3000 frontend  
+<br>
 
 **Backend:**
 - cd backend
