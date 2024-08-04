@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Route,
   Routes,
@@ -6,22 +6,22 @@ import {
   useNavigate,
   useLocation,
   useParams,
-} from "react-router-dom";
-import dayjs from "dayjs";
-import Dashboard from "./components/dashboard";
-import LoginPage from "./components/LoginPage";
-import HeaderBar from "./components/HeaderBar";
-import SelectMap from "./components/selectMap";
-import History from "./components/history";
-import RoomInfo from "./components/roompage";
-import AdminPage from "./components/Admin_page";
-import QrCodeCheckIn from "./components/QrCodeCheckIn";
+} from 'react-router-dom';
+import dayjs from 'dayjs';
+import Dashboard from './components/dashboard';
+import LoginPage from './components/LoginPage';
+import HeaderBar from './components/HeaderBar';
+import SelectMap from './components/selectMap';
+import History from './components/history';
+import RoomInfo from './components/roompage';
+import AdminPage from './components/Admin_page';
+import QrCodeCheckIn from './components/QrCodeCheckIn';
 //loading
-import { Spin, Space } from "@arco-design/web-react";
+import { Spin, Space } from '@arco-design/web-react';
 
-import "./App.css";
-import "./ChatBoxWrapper.css";
-import api from "./api";
+import './App.css';
+import './ChatBoxWrapper.css';
+import api from './api';
 
 const ProtectedRoute = ({
   children,
@@ -56,20 +56,20 @@ function App() {
 
   useEffect(() => {
     const autoLogin = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await fetch(api + "/auth/auto-login", {
-            method: "GET",
+          const response = await fetch(api + '/auth/auto-login', {
+            method: 'GET',
             headers: {
-              accept: "application/json",
+              accept: 'application/json',
               Authorization: `Bearer ${token}`,
             },
           });
 
           if (response.ok) {
             const data = await response.json();
-            if (data.message !== "User verified") {
+            if (data.message !== 'User verified') {
               handleAutoLoginFailure();
             } else {
               setIsLoggedIn(true);
@@ -91,58 +91,54 @@ function App() {
   }, [outlook]);
 
   const handleAutoLoginFailure = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
   };
 
   const handleLogin = (admin) => {
     setIsLoggedIn(true);
     setIsAdmin(admin);
-    const qrCode = localStorage.getItem("qrCode");
+    const qrCode = localStorage.getItem('qrCode');
     if (qrCode) {
-      console.log("Navigating to QR check-in");
-      navigate("/qr-check-in");
+      navigate('/qr-check-in');
     } else {
       if (admin) {
-        navigate("/admin");
+        navigate('/admin');
       } else {
-        navigate("/dashboard");
+        navigate('/dashboard');
       }
     }
   };
 
   const handleHistory = () => {
-    navigate("/history");
+    navigate('/history');
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    localStorage.removeItem("token");
-    localStorage.removeItem("qrCode");
-    navigate("/login");
+    localStorage.removeItem('token');
+    localStorage.removeItem('qrCode');
+    navigate('/login');
   };
 
   useEffect(() => {
-    if (location.pathname === "/login" && !location.state) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("qrCode");
+    if (location.pathname === '/login' && !location.state) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('qrCode');
       setIsLoggedIn(false);
     }
   }, [location]);
 
   const handleQrCodeScan = (qrCode) => {
-    console.log("Handling QR code scan:", qrCode);
-    localStorage.setItem("qrCode", qrCode);
+    localStorage.setItem('qrCode', qrCode);
     if (!isLoggedIn) {
-      console.log("Not logged in, navigating to login page");
-      navigate("/login", { state: { fromQr: true } });
+      navigate('/login', { state: { fromQr: true } });
     } else {
-      console.log("Logged in, navigating to QR check-in");
-      navigate("/qr-check-in");
+      navigate('/qr-check-in');
     }
   };
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
   if (isLoading) {
     return (
@@ -288,14 +284,11 @@ const QrCodeRedirect = ({ onQrCodeScan, isLoggedIn }) => {
   // const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
   useEffect(() => {
-    console.log("QR Code Redirect: id =", id, "isLoggedIn =", isLoggedIn);
-    localStorage.setItem("qrCode", id);
+    localStorage.setItem('qrCode', id);
     if (isLoggedIn) {
-      console.log("Navigating to QR check-in");
-      navigate("/qr-check-in");
+      navigate('/qr-check-in');
     } else {
-      console.log("Navigating to login page");
-      navigate("/login", { state: { fromQr: true } });
+      navigate('/login', { state: { fromQr: true } });
     }
   }, [id, isLoggedIn, navigate]);
 
