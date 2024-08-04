@@ -58,6 +58,8 @@ class BookSpace(Resource):
     # Book a room
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="Book a space")
     @booking_ns.expect(booking_model)
     @booking_ns.header('Authorization',
@@ -287,7 +289,9 @@ admin_booking_model = booking_ns.model(
 class AdminBook(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(403, "Forbidden")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="Admin book function")
     @booking_ns.expect(admin_booking_model)
     @booking_ns.header('Authorization',
@@ -381,8 +385,9 @@ class AdminBook(Resource):
 @booking_ns.route('/book/<int:booking_id>')
 class CancelBook(Resource):
     @booking_ns.response(200, "Booking cancelled successfully")
-    @booking_ns.response(404, "Booking not found")
     @booking_ns.response(401, "Unauthorized")
+    @booking_ns.response(404, "Booking not found")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="Cancel a booking")
     @booking_ns.header('Authorization',
                        'Bearer <your_access_token>',
@@ -441,7 +446,9 @@ roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
 class TimeTable(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
-    @booking_ns.doc(description="Get every time table of each space")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
+    @booking_ns.doc(description="Get time table of each space")
     @booking_ns.expect(book_time_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -540,6 +547,8 @@ def check_permission(detail, user_type):
 class meetingroom_report(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="Get meeting room time list to report edition")
     @booking_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -597,6 +606,8 @@ express_booking_model = booking_ns.model('Express booking request', {
 class ExpressBook(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="Express get some room satisfy user's need")
     @booking_ns.expect(express_booking_model)
     @booking_ns.header('Authorization',
@@ -768,6 +779,8 @@ def express_permission(user_type, student_permission):
 class meetingroom_usage(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(date_query)
     @booking_ns.doc(description="Get meeting room usage detail list to report edition")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -826,7 +839,9 @@ class meetingroom_usage(Resource):
 class block_room(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(403, "Forbidden")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(roomid_query)
     @booking_ns.doc(description="admin block room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -875,7 +890,9 @@ class unblock_room(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(403, "Forbidden")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(roomid_query)
     @booking_ns.doc(description="admin unblock room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -924,7 +941,9 @@ class edit_room(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(403, "Forbidden")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(roomid_edit_model)
     @booking_ns.doc(description="admin edit room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -986,6 +1005,8 @@ class meetingroom_top10(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(date_query)
     @booking_ns.doc(description="Get meeting room top10 list")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -1041,7 +1062,9 @@ class show_request(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(403, "Forbidden")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="show request for admin")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -1096,7 +1119,9 @@ class handle_request(Resource):
     # Get the
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(403, "Forbidden")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(request_model)
     @booking_ns.doc(description="handle request for admin")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -1134,6 +1159,8 @@ class CheckBookToday(Resource):
     @booking_ns.doc(description="Check user whether is admin")
     @booking_ns.response(200, "Success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -1158,8 +1185,10 @@ class ExtendBook(Resource):
     # Book a room
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
+    @booking_ns.response(401, "Token is expired")
     @booking_ns.response(404, "User not found")
     @booking_ns.response(409, "Booking conflict")
+    @booking_ns.response(422, "Token is invalid")
     @booking_ns.doc(description="Extend a booking")
     @booking_ns.header('Authorization',
                        'Bearer <your_access_token>',

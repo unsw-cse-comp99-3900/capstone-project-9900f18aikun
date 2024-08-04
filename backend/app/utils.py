@@ -100,12 +100,11 @@ def get_room_name(room_id: int) -> str:
         hot_desk = db.session.get(HotDeskDetail, room_id)
         return hot_desk.name
 
-
 def verify_jwt():
     try:
         verify_jwt_in_request()
     except exceptions.ExpiredSignatureError:
-        return {"error": "Token is invalid"}, 401
+        return {"error": "Token is expired"}, 401
     except exceptions.DecodeError:
         return {"error": "Token decode error"}, 422
     except exceptions.InvalidTokenError:

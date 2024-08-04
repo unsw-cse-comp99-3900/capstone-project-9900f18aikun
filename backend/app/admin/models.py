@@ -1,7 +1,10 @@
+"""
+This file contain the model for admin
+"""
 from app.extensions import db
-from datetime import datetime
 
 
+# a model contain whether admin have seen notification
 class NotificationView(db.Model):
     __tablename__ = "notification_view"
     user_id = db.Column(

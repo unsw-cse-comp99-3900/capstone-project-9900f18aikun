@@ -1,6 +1,8 @@
+"""
+This file contain the api about authentication
+"""
 from flask_restx import Namespace, Resource, fields
-from flask import redirect, send_file, make_response, request, Flask, jsonify, current_app, url_for
-import requests
+from flask import redirect, request, jsonify, url_for
 from app.extensions import db, jwt, microsoft
 from app.models import Users
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
@@ -23,6 +25,7 @@ def custom_invalid_token_callback(error_string):
     }), 401
 
 
+# login in api, user can login by zid and password
 @auth_ns.route('/login')
 class UserLogin(Resource):
     @auth_ns.response(200, "success")
@@ -54,11 +57,13 @@ class UserLogin(Resource):
             }, 200
 
 
+# auto login function, user can use token to auto login
 @auth_ns.route('/auto-login')
 class AutoLogin(Resource):
     @auth_ns.doc(security='Bearer Auth')
     @auth_ns.response(200, "Success")
     @auth_ns.response(400, "Bad Request")
+    @auth_ns.response(401, "Unauthorized")
     @auth_ns.response(404, "Not Found")
     @auth_ns.doc(description="Auto login by token")
     @jwt_required()
@@ -86,15 +91,19 @@ class AutoLogin(Resource):
             return {'error': str(e)}, 401
 
 
+# outlook login function
 @auth_ns.route('/outlook-login')
 class OutlookLogin(Resource):
+    @auth_ns.doc(description="Outlook login function")
     def get(self):
         redirect_uri = url_for('auth_outlook_login_callback', _external=True)
         return microsoft.authorize_redirect(redirect_uri)
 
 
+# call back function of outlook login
 @auth_ns.route('/outlook-login/callback')
 class OutlookLoginCallback(Resource):
+    @auth_ns.doc(description="Outlook login call back function")
     def get(self):
         token = microsoft.authorize_access_token()
         resp = microsoft.get('https://graph.microsoft.com/v1.0/me')

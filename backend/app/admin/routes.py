@@ -1,17 +1,16 @@
-from datetime import datetime, timedelta
+"""
+This file contain the api for admin
+"""
+from datetime import datetime
 from flask_restx import Namespace, Resource, fields
-from flask import request, Flask
+from flask import request
 from app.extensions import db, api
-from app.models import Users, CSEStaff
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_comment, get_total_room, is_valid_date, start_end_time_convert
-from app.email import get_email, schedule_reminder, send_confirm_email_async, send_report_email_async
-from jwt import exceptions
+from flask_jwt_extended import get_jwt_identity
+from app.utils import check_valid_comment, get_total_room, is_valid_date
+from app.email import send_report_email_async
 from app.booking.models import Booking
 from app.comment.models import Comment, Like
-from app.utils import verify_jwt, is_admin
-import re
-from apscheduler.schedulers.background import BackgroundScheduler
+from app.utils import verify_jwt
 from app.utils import is_admin, get_user_name
 from .models import NotificationView
 
@@ -19,12 +18,15 @@ from .models import NotificationView
 admin_ns = Namespace('admin', description='Admin operations')
 
 
+# check whether current is admin
 @admin_ns.route("/check_admin")
 class CheckAdmin(Resource):
-    @admin_ns.doc(description="Check user whether is admin")
+    @admin_ns.doc(description="Check whether user is admin")
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(401, "Token is expired")
     @admin_ns.response(403, "Forbidden")
+    @admin_ns.response(422, "Token is invalid")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
         jwt_error = verify_jwt()
@@ -48,6 +50,8 @@ class report(Resource):
     @admin_ns.doc(description="send report to admin")
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(401, "Token is expired")
+    @admin_ns.response(422, "Token is invalid")
     @admin_ns.expect(report_model)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def post(self):
@@ -87,6 +91,8 @@ class get_usage_report_txt(Resource):
     @admin_ns.response(200, "Success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.response(403, "Forbidden")
+    @admin_ns.response(401, "Token is expired")
+    @admin_ns.response(422, "Token is invalid")
     @admin_ns.expect(date_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -174,6 +180,8 @@ class delete_test(Resource):
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.response(403, "Forbidden")
+    @admin_ns.response(401, "Token is expired")
+    @admin_ns.response(422, "Token is invalid")
     @admin_ns.expect(delete_comment_model)
     @admin_ns.doc(description="admin delete comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -233,6 +241,8 @@ class edit_comment(Resource):
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.response(403, "Forbidden")
+    @admin_ns.response(401, "Token is expired")
+    @admin_ns.response(422, "Token is invalid")
     @admin_ns.expect(edit_comment_model)
     @admin_ns.doc(description="edit comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -281,6 +291,8 @@ class NotificationViewApi(Resource):
     # Book a room
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(401, "Token is expired")
+    @admin_ns.response(422, "Token is invalid")
     @admin_ns.doc(description="Post notification view function")
     @admin_ns.header('Authorization',
                      'Bearer <your_access_token>',
@@ -309,6 +321,8 @@ class NotificationViewApi(Resource):
 
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
+    @admin_ns.response(401, "Token is expired")
+    @admin_ns.response(422, "Token is invalid")
     @admin_ns.doc(description="Get notification view function")
     @admin_ns.header('Authorization',
                      'Bearer <your_access_token>',

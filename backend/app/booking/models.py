@@ -1,3 +1,6 @@
+"""
+This file contain models relate to booking
+"""
 from app.extensions import db
 from datetime import datetime
 import json
@@ -8,6 +11,7 @@ def default_time_slots():
     return json.dumps({str(i): {} for i in range(48)})
 
 
+# This model is a base table, child is room detail and hot desk detail
 class Space(db.Model):
     __tablename__ = "space"
     id = db.Column(db.Integer, primary_key=True)
@@ -16,6 +20,7 @@ class Space(db.Model):
     is_available = db.Column(db.Boolean, nullable=False)
 
 
+# this table contain the detail of meeting room
 class RoomDetail(db.Model):
     __tablename__ = "room_detail"
     id = db.Column(
@@ -32,6 +37,7 @@ class RoomDetail(db.Model):
     CSE_staff_permission = db.Column(db.Boolean, nullable=False)
 
 
+# this table contain the detail of hot desk
 class HotDeskDetail(db.Model):
     __tablename__ = "hot_desk_detail"
     id = db.Column(
@@ -50,6 +56,7 @@ class HotDeskDetail(db.Model):
     CSE_staff_permission = db.Column(db.Boolean, nullable=False)
 
 
+# this table contain the detail of every book
 class Booking(db.Model):
     __tablename__ = "booking"
     id = db.Column(db.Integer, primary_key=True)
@@ -66,11 +73,13 @@ class Booking(db.Model):
     is_request = db.Column(db.Boolean, nullable=False)
 
 
+# enumerate of space type
 class SpaceType(enum.Enum):
     meeting_room = "room"
     hot_desk = "hot_desk"
 
 
+# enumerate of booking status
 class BookingStatus(enum.Enum):
     requested = "requested"
     booked = "booked"
