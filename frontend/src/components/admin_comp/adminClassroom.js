@@ -6,20 +6,20 @@ import { useNavigate } from 'react-router-dom';
 import api from './api';
 
 function AdminClassroom() {
+  // State variables
   const [classroomData, setClassroomData] = useState([]);
   const [roomType, setRoomType] = useState('meeting_room');
   const [inputValue, setInputValue] = useState('');
   const [searchCriteria, setSearchCriteria] = useState({ type: '', value: '' });
   const [filteredData, setFilteredData] = useState([]);
   const [change, setChange] = useState(true);
-  // const isInitialMount = useRef(true);
 
   const navigate = useNavigate();
-
+  // Fetch classroom data from the backend
   useEffect(() => {
     const fetchData = async () => {
       const today = new Date();
-      const formattedDate = today.toISOString().split('T')[0]; // 获取当天日期并格式化为 YYYY-MM-DD
+      const formattedDate = today.toISOString().split('T')[0];
       const token = localStorage.getItem('token');
 
       const response = await fetch(
@@ -44,33 +44,29 @@ function AdminClassroom() {
         type: item.type,
         permission: item.permission,
       }));
-      // 在控制台输出前20条数据
-      // console.log("First 20 items:", formattedData.slice(0, 20));
 
       setClassroomData(formattedData);
     };
 
-    // if (isInitialMount.current) {
-    //   isInitialMount.current = false;
-    // } else {
-    //   fetchData();
-    // }
-
     fetchData();
   }, [change]);
 
+  // Filter classroom data based on search criteria
   useEffect(() => {
     filter();
   }, [classroomData]);
 
+  // Handle room type selection change
   const handleSelectChange = (event) => {
     setRoomType(event.target.value);
   };
 
+  // Handle input value change
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
 
+  // Filter function to filter classroom data based on search criteria
   const filter = () => {
     let criteria = { type: '', value: '' };
 
@@ -83,7 +79,7 @@ function AdminClassroom() {
     }
 
     setSearchCriteria(criteria);
-    // console.log("Search Criteria:", criteria, roomType);
+
     const filtered = classroomData.filter((room) => {
       if (criteria.type === 'level') {
         return (
@@ -102,18 +98,21 @@ function AdminClassroom() {
     setFilteredData(filtered);
   };
 
+  // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
     filter();
     setChange(!change);
   };
 
+  // Handle cell click to navigate to room details
   const handleCellClick = (entry) => {
     // Custom logic for cell click
     console.log(`Clicked on :`, entry);
     navigate('/room/' + entry.id);
   };
 
+  // Handle disabling a room
   const handleDisable = async (entry) => {
     console.log(`Clicked on :`, entry);
     try {
@@ -140,6 +139,7 @@ function AdminClassroom() {
     }
   };
 
+  // Handle enabling a room
   const handleEnable = async (entry) => {
     console.log(`Clicked on enable :`, entry);
     try {
@@ -167,15 +167,12 @@ function AdminClassroom() {
     }
   };
 
-  //arco table
+  // Define columns for the Arco table
   const columns = [
     {
       title: 'Room Name',
       dataIndex: 'name',
       key: 'name',
-      // render: (text, entry) => (
-      //     <td onClick={() => handleCellClick(entry)}>{text}</td>
-      // )
     },
     {
       title: 'Building',
@@ -198,7 +195,7 @@ function AdminClassroom() {
       key: 'type',
     },
     {
-      title: 'Edit', // 新列的标题
+      title: 'Edit',
       dataIndex: 'action',
       key: 'edit',
       render: (text, entry) => (
@@ -232,8 +229,6 @@ function AdminClassroom() {
 
   return (
     <ConfigProvider locale={enUS}>
-      {' '}
-      {/* 使用 ConfigProvider 设置语言 */}
       <div>
         <h1 className="class-h1">Classroom Management</h1>
         <form className="search">
