@@ -45,6 +45,7 @@ report_model = admin_ns.model('send report', {'message': fields.String(
     required=True, description='report content', default="G01 table missing")})
 
 
+# send report to admin
 @admin_ns.route("/report")
 class report(Resource):
     @admin_ns.doc(description="send report to admin")
@@ -85,6 +86,7 @@ date_query.add_argument(
     default="2024-07-18")
 
 
+# get text usage report
 @admin_ns.route("/get-usage-report-txt")
 class get_usage_report_txt(Resource):
     @admin_ns.doc(description="admin get text usage report")
@@ -174,6 +176,7 @@ delete_comment_model = admin_ns.model(
             required=True, description='The comment id', default=1), })
 
 
+# admin delete comment
 @admin_ns.route('/delete-comment')
 class delete_test(Resource):
     # Get the
@@ -235,6 +238,7 @@ edit_comment_model = admin_ns.model(
                 required=True, description='comment', default="AHHHH! Great room."), })
 
 
+# edit comment function
 @admin_ns.route('/edit-comment')
 class edit_comment(Resource):
     # Get the
@@ -286,9 +290,10 @@ class edit_comment(Resource):
         }
 
 
+# notification view api
 @admin_ns.route('/view')
 class NotificationViewApi(Resource):
-    # Book a room
+    # change viewed
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.response(401, "Token is expired")
@@ -319,6 +324,7 @@ class NotificationViewApi(Resource):
             db.session.commit()
             return {"message": "you have viewed notification"}, 200
 
+    # get viewed
     @admin_ns.response(200, "success")
     @admin_ns.response(400, "Bad request")
     @admin_ns.response(401, "Token is expired")
@@ -346,9 +352,9 @@ class NotificationViewApi(Resource):
             return {"is_viewed": view.is_viewed}, 200
 
 
+# get server time api
 @admin_ns.route('/time')
 class GetTime(Resource):
-    @admin_ns.response(200, "success")
     @admin_ns.doc(description="Get current sydney time")
     def get(self):
         current_time = datetime.now().isoformat()
