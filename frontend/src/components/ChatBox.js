@@ -1,7 +1,10 @@
+// This file defines the ChatBox component, which provides a chat interface for users to interact with either an ExpressBook bot or CustomerService.
 import React, { useState, useEffect, useRef } from "react";
 import CustomerService from "./CustomerService";
 import "./ChatBox.css";
 import api from "../api";
+
+// ChatBox component
 const Component = ({ className }) => <div className={className}>{}</div>;
 export const ChatBox = ({ change, setChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,11 +17,11 @@ export const ChatBox = ({ change, setChange }) => {
   const [bookedRooms, setBookedRooms] = useState(new Set());
   const [storedQuery, setStoredQuery] = useState("");
   const messagesEndRef = useRef(null);
-  const [optionSelected, setOptionSelected] = useState(false);
+  const [optionSelected, setOptionSelected] = useState(false);// Tracks if an option has been selected
   const textAreaRef = useRef(null);
   const [roomType, setRoomType] = useState("hotdesk");
-  const [latestRoomData, setLatestRoomData] = useState(null);
-  const [isRotated, setIsRotated] = useState(false);
+  const [latestRoomData, setLatestRoomData] = useState(null);// Stores the latest room data
+  const [isRotated, setIsRotated] = useState(false);// Tracks the rotation state of the exchange button
   useEffect(() => {
     if (isOpen) {
       const storedMessages = localStorage.getItem("expressBookMessages");
@@ -39,12 +42,16 @@ export const ChatBox = ({ change, setChange }) => {
       setExpressBookMessages(messages);
     }
   }, [isOpen]);
+
+  // Effect to store messages in local storage whenever they change
   useEffect(() => {
     localStorage.setItem(
       "expressBookMessages",
       JSON.stringify(expressBookMessages)
     );
   }, [expressBookMessages]);
+
+  // Function to toggle the chat box visibility
   const toggleChatBox = () => {
     setIsOpen((prevState) => !prevState);
   };
@@ -60,12 +67,14 @@ export const ChatBox = ({ change, setChange }) => {
     setSelectedRoom(null);
     setOptionSelected(false);
   };
+  // Function to toggle between ExpressBook and CustomerService modes
   const toggleMode = () => {
     setMode((prevMode) =>
       prevMode === "ExpressBook" ? "CustomerService" : "ExpressBook"
     );
     setRefreshKey((prevKey) => prevKey + 1);
   };
+  // Function to toggle the room type between hotdesk and meeting room
   const toggleRoomType = () => {
     if (mode === "ExpressBook") {
       const newRoomType = roomType === "hotdesk" ? "meeting_room" : "hotdesk";
@@ -81,11 +90,14 @@ export const ChatBox = ({ change, setChange }) => {
       setIsRotated((prev) => !prev); // Toggle the rotation state
     }
   };
+  // Function to scroll to the bottom of the messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+  // Effect to scroll to the bottom whenever messages change
   useEffect(scrollToBottom, [expressBookMessages, customerServiceMessages]);
 
+  // Function to format room information
   const formatRoomInfo = (rooms) => {
     if (rooms.length === 0) {
       return "No rooms available for the specified time and date.";
@@ -120,6 +132,7 @@ export const ChatBox = ({ change, setChange }) => {
 
     return formattedResponse;
   };
+  // Function to handle room selection
   const handleRoomSelection = (roomName) => {
     const lastMessageWithRooms = [...expressBookMessages]
       .reverse()
@@ -151,6 +164,7 @@ export const ChatBox = ({ change, setChange }) => {
       console.error(`Room ${roomName} not found`);
     }
   };
+  // Function to handle room booking
   const handleBookRoom = async () => {
     try {
       if (!selectedRoom) {
@@ -379,6 +393,7 @@ export const ChatBox = ({ change, setChange }) => {
       setExpressBookMessages((prev) => [...prev, errorMessage]);
     }
   };
+  // Function to format date and time
   const formatDateTime = (date) => {
     return new Date(date).toLocaleString("en-US", {
       year: "numeric",

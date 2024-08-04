@@ -4,10 +4,12 @@ import axios from "axios";
 import "./QrCodeCheckIn.css";
 import api from "../api";
 
+// QrCodeCheckIn component
 const QrCodeCheckIn = () => {
   const [qrCode, setQrCode] = useState("");
   const navigate = useNavigate();
 
+  // Effect to handle QR code from local storage and prevent back navigation
   useEffect(() => {
     const storedQrCode = localStorage.getItem("qrCode");
     if (!storedQrCode) {
@@ -25,10 +27,12 @@ const QrCodeCheckIn = () => {
     };
   }, [navigate]);
 
+  // Function to handle back navigation prevention
   const handlePopState = () => {
     window.history.pushState(null, document.title, window.location.href);
   };
 
+  // Function to handle check-in process
   const handleCheckIn = async () => {
     if (!qrCode) {
       alert("No QR code available. Please scan a QR code first.");

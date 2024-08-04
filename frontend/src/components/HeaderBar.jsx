@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Dropdown, Menu, Button } from "@arco-design/web-react";
 import api from "../api";
 
+// Function to verify if the user is an admin
 const verifyID = async (SetIsAdmin) => {
   try {
     const token = localStorage.getItem("token");
@@ -25,11 +26,14 @@ const verifyID = async (SetIsAdmin) => {
     console.error("Error fetching booking data:", error);
   }
 };
+
+// HeaderBar component
 const HeaderBar = ({ onLogout, onHistory }) => {
   const [isAdmin, SetIsAdmin] = useState(false);
   const navigate = useNavigate();
   verifyID(SetIsAdmin);
 
+  // Menu items for the dropdown
   const menu = (
     <Menu>
       {!isAdmin && (
@@ -58,15 +62,6 @@ const HeaderBar = ({ onLogout, onHistory }) => {
             }
           }}
         />
-        {/* <button
-          className="back-button"
-          onClick={() => {
-            navigate("/dashboard");
-          }}
-        >
-          Back
-        </button> */}
-        {/* <div className="text-wrapper-2">History</div> */}
         <Dropdown
           droplist={menu}
           trigger="click"

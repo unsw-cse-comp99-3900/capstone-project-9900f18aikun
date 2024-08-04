@@ -1,3 +1,4 @@
+// comments component for the room detail page,can add/reply/edit/delete comment
 import React, { useState, useCallback, useEffect } from "react";
 import {
   Comment,
@@ -24,6 +25,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
   const [editingCommentText, setEditingCommentText] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Fetch comments from the backend
   const fetchComments = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
@@ -62,25 +64,29 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   }, [roomid, setCurrentUserId]);
 
+  // Fetch comments on component mount
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
 
+  // Show notification if there's an error message
   useEffect(() => {
     if (errorMessage) {
       Notification.info({
         title: "Notification",
         content: errorMessage,
-        duration: 0, // 0 means the notification will not auto close
+        duration: 0, 
         onClose: () => setErrorMessage(""),
       });
     }
   }, [errorMessage]);
 
+  // Handle reply button click
   const handleReplyClick = (commentId) => {
     setReplyingTo(commentId);
   };
 
+  // Handle root comment submission
   const handleRootCommentSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -120,6 +126,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   };
 
+   // Handle reply submission
   const handleReplySubmit = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -156,11 +163,13 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   };
 
+  // Handle edit button click
   const handleEditClick = (commentId, commentContent) => {
     setEditingCommentId(commentId);
     setEditingCommentText(commentContent);
   };
 
+  // Handle edit submission
   const handleEditSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -199,6 +208,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   };
 
+  // Handle delete button click
   const handleDeleteClick = async (commentId) => {
     try {
       const token = localStorage.getItem("token");
@@ -237,6 +247,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   };
 
+  // Handle like button click
   const handleLikeClick = async (comment) => {
     try {
       const token = localStorage.getItem("token");
@@ -285,6 +296,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     }
   };
 
+  // Colors for user avatars
   const colors = [
     "#FCE996",
     "#9FD4FD",
@@ -295,6 +307,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
   ];
   const userColors = {};
 
+    // Get color for a user
   const getUserColor = (userId) => {
     if (!userColors[userId]) {
       const colorIndex = Object.keys(userColors).length % colors.length;
@@ -303,6 +316,7 @@ const Comments = ({ roomid, currentUserId, setCurrentUserId, isAdmin }) => {
     return userColors[userId];
   };
 
+  // Render comments recursively
   const renderComments = (comments, level = 0) => {
     return comments.map((comment) => (
       <Comment

@@ -1,4 +1,4 @@
-// SelectMap.js
+// This file defines the map overlays for different levels in building A-K17 and other buildings.
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./selectMap.css";
@@ -15,7 +15,7 @@ const level = [
   { id: 9, level: "A-J17-L5" },
 ];
 
-// 配置每张地图的遮罩区域和对应的跳转路径
+// Configure the mask area and corresponding jump path for each map
 const mapOverlays = {
   "A-K17-B": [
     {
@@ -1892,17 +1892,6 @@ function SelectMap() {
       </div>
       {selectedLevel && (
         <div className="map-container">
-          {/* <p>Tap the colored areas to navigate to the  room.</p> */}
-          {/* <div className="legend">
-          <div className="legend-item">
-            <div className="legend-color meetingroom"></div>
-              <span>Meeting Room</span>
-                </div>
-            <div className="legend-item">
-              <div className="legend-color desk"></div>
-              <span>Hot Desk</span>
-            </div>
-        </div> */}
           <img
             src={`/levelMap/${selectedLevel}.jpg`}
             alt={`Level ${selectedLevel}`}

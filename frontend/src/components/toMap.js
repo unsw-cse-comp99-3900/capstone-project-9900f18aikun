@@ -1,4 +1,4 @@
-// ToMap.js
+// This file defines the ToMap component, which provides a link for users to navigate to the map selection page.
 import React from "react";
 import { Link } from "react-router-dom";
 import "./ToMap.css";

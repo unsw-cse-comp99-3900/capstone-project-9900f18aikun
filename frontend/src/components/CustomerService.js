@@ -1,3 +1,4 @@
+// CustomerService component
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./CustomerService.css";
@@ -12,6 +13,7 @@ const CustomerService = () => {
   const currentTokenRef = useRef(null);
   const textAreaRef = useRef(null);
 
+  // Effect to initialize the socket connection
   useEffect(() => {
     const token = localStorage.getItem("token");
     currentTokenRef.current = token;
@@ -90,6 +92,7 @@ const CustomerService = () => {
     };
   }, []);
 
+  // Function to send a message
   const sendMessage = () => {
     if (inputMessage.trim() === "" || !isConnected || !socketRef.current)
       return;
@@ -112,14 +115,17 @@ const CustomerService = () => {
     setInputMessage("");
   };
 
+  // Function to scroll to the bottom of the messages
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
     }
   };
 
+  // Effect to scroll to the bottom whenever messages change
   useEffect(scrollToBottom, [messages]);
 
+  // Function to format the date and time
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-US", {

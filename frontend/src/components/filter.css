@@ -82,6 +82,6 @@ form-group button {
 
 /* Add this to your existing CSS file */
 .arco-slider .arco-input-number {
-  background-color: #6a4f9c !important; /* 使用 !important 确保样式应用 */
+  background-color: #6a4f9c !important; 
   color: white !important;
 }

@@ -3,7 +3,9 @@ import { Slider } from "@arco-design/web-react";
 import "./filter.css";
 import api from "../api";
 
+// Filter component for filtering room data
 function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
+  // State to manage filter options
   const [filters, setFilters] = useState({
     level: "",
     capacity: "",
@@ -11,6 +13,7 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
     sort: "default",
   });
 
+  // Function to fetch ranked data based on selected date
   const fetchRankedData = async () => {
     const token = localStorage.getItem("token");
 
@@ -39,6 +42,7 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
     }
   };
 
+  // Handle changes in filter inputs
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({
@@ -47,6 +51,7 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
     });
   };
 
+  // Handle changes in the capacity slider
   const handleSliderChange = (value) => {
     setFilters({
       ...filters,
@@ -54,6 +59,7 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (filters.sort === "rating") {
@@ -93,7 +99,7 @@ function Filter({ onFilter, setData, selectedDate, setErrorMessage }) {
             onChange={handleSliderChange}
             showInput={{
               style: {
-                backgroundColor: "#6a4f9c", // This attempts to set the background color
+                backgroundColor: "#6a4f9c", 
                 color: "white",
               },
             }}
