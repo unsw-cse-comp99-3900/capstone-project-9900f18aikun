@@ -7,8 +7,8 @@ import AdminClassroom from './admin_comp/adminClassroom';
 import AdminAppointment from './admin_comp/adminAppointment';
 import AdminStatistics from './admin_comp/adminStatistics';
 import AdminUser from './admin_comp/adminUser';
-import AdminChatbox from './AdminChatbox';
-import AdminNotification from './AdminNotification';
+import AdminChatbox from './admin_comp/AdminChatbox';
+import AdminNotification from './admin_comp/AdminNotification';
 import { Route, Routes } from 'react-router-dom';
 import '@arco-design/web-react/dist/css/arco.css';
 
