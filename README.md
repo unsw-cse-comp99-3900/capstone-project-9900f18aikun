@@ -1,46 +1,47 @@
 # CSE Space Allocation Management System
 
-## Team: F18AIkun
+### Team: F18AIkun
 
-### Introduction
+## Introduction
 
 The Computer Science and Engineering (CSE) Space Allocation Management System is a space allocation system which allows HDR students and CSE staff to book a meeting room or hot desk.
 
-### Technology Stack
+## Technology Stack
 
 - **Frontend:** React
 - **Backend:** Python Flask RESTful API
 - **Database:** PostgreSQL
 
-### Installation Guide
+## Installation Guide
 
-#### Run Together
+### Run Together
 
 - Run the following command in the project root directory:
 - docker-compose up --build
 
-#### Run Separate
+### Run Separate
 
 **Frontend:**
 - cd frontend
 - docker build -t frontend .
-- docker run -d -p 3000:3000 frontend
+- docker run -d -p 3000:3000 frontend  
+
 **Backend:**
 - cd backend
 - docker-compose up --build
 
-#### URLs
+### URLs
 
 - **Frontend URL:** http://localhost:3000
 - **Backend URL and Swagger Document URL:** http://localhost:5001
 
-### Frontend
+## Frontend
 
-#### Project Overview
+### Project Overview
 
 This project is a room booking system for the K17 building, designed to facilitate the process of reserving meeting rooms and hot desks. It includes features for both regular users and administrators, with a user-friendly interface for booking, checking in, and managing reservations.
 
-#### Key Features
+### Key Features
 
 - AI-assisted chatbox for quick room booking
 - Users can communicate with admin in real time
@@ -48,7 +49,7 @@ This project is a room booking system for the K17 building, designed to facilita
 - QR code check-in system
 - Admins can view real-time reports and analysis
 
-#### Project Structure
+### Project Structure
 
 The main App.js file serves as the entry point of the application, handling routing and protected routes. Key components include:
 
@@ -75,7 +76,7 @@ Admin components (located in `admin_comp/`):
 - `BookingManagement.js`: Allows admins to view and manage all bookings.
 - `ReportGeneration.js`: Generates various reports for administrative purposes.
 
-#### Technologies Used
+### Technologies Used
 
 - React
 
@@ -85,20 +86,20 @@ Admin components (located in `admin_comp/`):
 
 - Arco Design for UI components
 
-#### API Integration
+### API Integration
 
 The project integrates with a backend API for data management. The base URL for the API is defined in the `api.js` file.
 
 
-### Backend
+## Backend
 
-#### Swagger API Document Guide
+### Swagger API Document Guide
 
 Access the Swagger API documentation through http://localhost:5001.
 You can use the authorize feature to add a token, please prepend "Bearer " before the token.
 ![Token Use](readme_photo/token_use.png 'Token Use')
 
-#### Socket IO Related Function Testing Guide
+### Socket IO Related Function Testing Guide
 
 We use Postman for testing Socket.IO related functions.
 ![Socket IO Connect](readme_photo/user_socket_connect.png 'Socket IO Connect')
