@@ -36,6 +36,10 @@ The Computer Science and Engineering (CSE) Space Allocation Management System is
 - **Frontend URL:** http://localhost:3000
 - **Backend URL and Swagger Document URL:** http://localhost:5001
 
+## Test Account
+please check backend/data/CSE Active HDR candidates staff details 210624.xlsx
+admin is staff with Professional role
+
 ## Frontend
 
 ### Project Overview
