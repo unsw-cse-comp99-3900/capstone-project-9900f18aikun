@@ -1,13 +1,13 @@
 """
 This name space contain the booking api
 """
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 from flask_restx import Namespace, Resource, fields
-from flask import request, Flask, jsonify
-from app.extensions import db, api, scheduler, app
+from flask import request
+from app.extensions import db, api, scheduler
 from .models import Booking, RoomDetail, Space, HotDeskDetail, BookingStatus
 from app.models import Users, CSEStaff
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.utils import check_valid_room, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, is_student, is_booking_today, calculate_time_difference
 from app.email import schedule_reminder, send_confirm_email_async
 from jwt import exceptions
@@ -64,6 +64,7 @@ class BookSpace(Resource):
                        'Bearer <your_access_token>',
                        required=True)
     def post(self):
+        # verify jew
         jwt_error = verify_jwt()
         if jwt_error:
             return jwt_error
@@ -107,6 +108,7 @@ class BookSpace(Resource):
         if not is_room_available(room_id):
             return {'error': f"room {room_id} is unavailable"}, 400
 
+        # book for duration times
         for week in range(weeks_of_duration):
             new_date = date + timedelta(weeks=week)
             error = book_or_request(
@@ -119,6 +121,7 @@ class BookSpace(Resource):
             if error:
                 return error
 
+        # send email
         send_confirm_email_async(
             zid,
             room_id,
@@ -135,6 +138,7 @@ class BookSpace(Resource):
                 }, 200
 
 
+# function used to check whether there are conflict booking
 def check_conflict_booking(date, room_id, start_time, end_time, zid):
     conflict_bookings = Booking.query.filter(
         Booking.date == date,
@@ -159,7 +163,7 @@ def check_conflict_booking(date, room_id, start_time, end_time, zid):
             Booking.user_id == zid)).all()
     return conflict_bookings
 
-
+# book or request
 def book_or_request(date, room_id, start_time, end_time, zid, room_name):
     conflict_bookings = check_conflict_booking(
         date, room_id, start_time, end_time, zid)
@@ -188,7 +192,7 @@ def book_or_request(date, room_id, start_time, end_time, zid, room_name):
             CSEStaff, zid).school_name != "CSE":
         is_request = True
     # set time can't book
-    if start_time < "07:00" or end_time > "23:30":
+    if start_time < "07:00" or end_time > "17:00":
         is_request = True
 
     total_duration = timedelta()
@@ -277,7 +281,8 @@ admin_booking_model = booking_ns.model(
 
 # Apis about booking
 
-
+# api used for admin booking, admin have different private to book
+# admin can overwrite other user's booking
 @booking_ns.route('/admin_book')
 class AdminBook(Resource):
     @booking_ns.response(200, "success")
@@ -371,8 +376,10 @@ class AdminBook(Resource):
         return {'message': f"Booking confirmed"}, 200
 
 
+# cancel book api
+# booking will be logical deleted, which only change the status
 @booking_ns.route('/book/<int:booking_id>')
-class BookSpace(Resource):
+class CancelBook(Resource):
     @booking_ns.response(200, "Booking cancelled successfully")
     @booking_ns.response(404, "Booking not found")
     @booking_ns.response(401, "Unauthorized")
@@ -429,12 +436,12 @@ book_time_query.add_argument(
 roomid_query = booking_ns.parser()
 roomid_query.add_argument('roomid', type=int, required=True, help='roomid')
 
-
+# get the time table of every space
 @booking_ns.route('/meetingroom')
-class MeetingRoom(Resource):
+class TimeTable(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
-    @booking_ns.doc(description="Get meeting room time list")
+    @booking_ns.doc(description="Get every time table of each space")
     @booking_ns.expect(book_time_query)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
@@ -518,6 +525,7 @@ class MeetingRoom(Resource):
         return output
 
 
+# check whether user have permission funcion
 def check_permission(detail, user_type):
     if user_type == "HDR_student":
         return detail.HDR_student_permission
@@ -527,6 +535,7 @@ def check_permission(detail, user_type):
         return False
 
 
+# Get room report
 @booking_ns.route('/meetingroom-report')
 class meetingroom_report(Resource):
     @booking_ns.response(200, "success")
@@ -582,11 +591,13 @@ express_booking_model = booking_ns.model('Express booking request', {
 })
 
 
+# express book function
+# used for express booking, need gemini support
 @booking_ns.route('/express-book')
 class ExpressBook(Resource):
     @booking_ns.response(200, "success")
     @booking_ns.response(400, "Bad request")
-    @booking_ns.doc(description="Express booking")
+    @booking_ns.doc(description="Express get some room satisfy user's need")
     @booking_ns.expect(express_booking_model)
     @booking_ns.header('Authorization',
                        'Bearer <your_access_token>',
@@ -611,6 +622,7 @@ class ExpressBook(Resource):
             generation_config={
                 "response_mime_type": "application/json"})
 
+        # The reqeust send to gemini
         prompt = f"""
           {query}
 
@@ -661,6 +673,7 @@ class ExpressBook(Resource):
         if room_type == "hot_desk" and max_capacity > 1:
             return {'error': "Sorry, the max capacity of hot desk is 1."}, 400
 
+        # find satisfy room
         booked_rooms_subquery = db.session.query(Booking.room_id).filter(
             Booking.date == date,
             Booking.booking_status != "requested",
@@ -719,6 +732,7 @@ class ExpressBook(Resource):
             return {
                 'error': "Sorry, we couldn't find a location that meets your needs."}, 400
 
+        # sort room
         rooms_with_permission = []
         rooms_without_permission = []
 
@@ -740,6 +754,7 @@ class ExpressBook(Resource):
         return output, 200
 
 
+# get student type
 def express_permission(user_type, student_permission):
     if user_type == "student":
         return student_permission
@@ -748,6 +763,7 @@ def express_permission(user_type, student_permission):
     return True
 
 
+# get the room usage
 @booking_ns.route('/meetingroom-usage')
 class meetingroom_usage(Resource):
     @booking_ns.response(200, "success")
@@ -853,6 +869,7 @@ class block_room(Resource):
         db.session.commit()
 
 
+# block the room function
 @booking_ns.route('/unblock-room')
 class unblock_room(Resource):
     # Get the
@@ -901,6 +918,7 @@ roomid_edit_model = booking_ns.model('roomid_edit_model', {
 })
 
 
+# edit room detail
 @booking_ns.route('/edit-room')
 class edit_room(Resource):
     # Get the
@@ -962,6 +980,7 @@ class edit_room(Resource):
         }
 
 
+# Get meeting room top 10 list
 @booking_ns.route('/meetingroom-top10-byCount')
 class meetingroom_top10(Resource):
     # Get the
@@ -1016,6 +1035,7 @@ class meetingroom_top10(Resource):
         return top_list
 
 
+# show request for admin
 @booking_ns.route('/show-request')
 class show_request(Resource):
     # Get the
@@ -1070,6 +1090,7 @@ request_model = booking_ns.model('request handling', {
 })
 
 
+# handle request for admin
 @booking_ns.route('/handle-request')
 class handle_request(Resource):
     # Get the
@@ -1107,6 +1128,7 @@ class handle_request(Resource):
                 "message": f"admin {user_zid} set booking id {booking_id} as cancelled"}, 200
 
 
+# check whether certain user have book today
 @booking_ns.route("/is_book_today")
 class CheckBookToday(Resource):
     @booking_ns.doc(description="Check user whether is admin")
@@ -1130,6 +1152,7 @@ class CheckBookToday(Resource):
         return {'is_booking_today': is_booking_today(date, zid)}, 200
 
 
+# extend booking function
 @booking_ns.route('/extend_book/<int:booking_id>')
 class ExtendBook(Resource):
     # Book a room
@@ -1137,7 +1160,7 @@ class ExtendBook(Resource):
     @booking_ns.response(400, "Bad request")
     @booking_ns.response(404, "User not found")
     @booking_ns.response(409, "Booking conflict")
-    @booking_ns.doc(description="Book a space")
+    @booking_ns.doc(description="Extend a booking")
     @booking_ns.header('Authorization',
                        'Bearer <your_access_token>',
                        required=True)
