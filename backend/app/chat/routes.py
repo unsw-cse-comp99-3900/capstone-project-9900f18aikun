@@ -1,3 +1,7 @@
+"""
+This file contain the api and socket io function for chat
+Most of functions are socket io function, which can't generate swagger document
+"""
 from app.extensions import socketio
 from flask import request, session
 from flask_socketio import emit, join_room, leave_room
@@ -5,17 +9,16 @@ from flask_jwt_extended import decode_token
 from datetime import datetime
 from app.extensions import db
 from .models import Chat, Message, ChatView
-from app.models import Users
 from app.utils import get_user_name, is_admin, verify_jwt
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from sqlalchemy.orm import joinedload
-from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import get_jwt_identity
+from flask_restx import Namespace, Resource
 from app.admin.models import NotificationView
 
 
 chat_ns = Namespace('chat', description='Chatting operations')
 
 
+# this function are used for user or admin socket io connect
 def handle_connect():
     token = request.args.get('token')
     if not token:
@@ -70,6 +73,7 @@ def handle_connect():
         emit('admin_chat_history', {'chat': message}, room=user_id)
 
 
+# this function are used for admin to get every chat history
 def get_chats_and_messages():
     chats = Chat.query.order_by(Chat.last_message_time.desc()).all()
 
@@ -87,6 +91,7 @@ def get_chats_and_messages():
     return output
 
 
+# this function used for convert message to output
 def convert_message_output(message):
     message_data = {
         "message_id": message.message_id,
@@ -99,6 +104,7 @@ def convert_message_output(message):
     return message_data
 
 
+# this is used for convert chat output
 def convert_chat_output(chat):
     chat_data = {
         "chat_id": chat.chat_id,
@@ -112,6 +118,7 @@ def convert_chat_output(chat):
     return chat_data
 
 
+# this function are used for disconnect
 def handle_disconnect():
     user_id = session.get('user_id')
     if user_id:
@@ -122,6 +129,7 @@ def handle_disconnect():
         print('Client disconnected: Unknown user')
 
 
+# this function are used for user to send message
 @socketio.on('send_message')
 def handle_send_message(data):
     user_id = session.get('user_id')
@@ -155,6 +163,7 @@ def handle_send_message(data):
         print(f'Message from {user_id}: {msg}')
 
 
+# this function are used for admin to reply messages
 @socketio.on('reply_message')
 def handle_reply_message(data):
     admin_id = session.get('user_id')
@@ -191,6 +200,8 @@ def handle_reply_message(data):
         print(f'Message from {admin_id}: {msg}')
 
 
+# this function are used for join a socket io chat room
+# this function are only use in debugging
 @socketio.on('join')
 def handle_join(data):
     room = data.get('room')
@@ -203,6 +214,8 @@ def handle_join(data):
         print(f'{user_id} joined room: {room}')
 
 
+# this function are used for leave a socket io chat room
+# this function are only use in debugging
 @socketio.on('leave')
 def handle_leave(data):
     room = data.get('room')
