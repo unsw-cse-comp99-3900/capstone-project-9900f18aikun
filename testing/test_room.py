@@ -1,18 +1,19 @@
 from typing import Any, Literal
-import requests
+
 import pytest
-from config import BACKEND_URL
+import date
+from app import create_app
 
 # Constants
-BASE_URL = f"http://{BACKEND_URL}"
+
 ZID = "z2"
 PASSWORD = "b"
 
 def perform_login(base_url, zid, password):
-    login_url = f"{base_url}/auth/login"
+    login_url = f"/auth/login"
     headers = {"Content-Type": "application/json"}
     payload = {"zid": zid, "password": password}
-    response = requests.post(login_url, headers=headers, json=payload)
+    response = client.post(login_url, headers=headers, json=payload)
     return response
 
 @pytest.fixture(scope='module')
@@ -32,7 +33,7 @@ def perform_get_request(url, token=None):
     }
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    response = requests.get(url, headers=headers)
+    response = client.get(url, headers=headers)
     return response
 
 @pytest.mark.parametrize("room_id, expected_status_code", [
@@ -40,8 +41,8 @@ def perform_get_request(url, token=None):
     (2, 200),  # Another example room ID
 ])
 def test_room_detail(get_token: Any, room_id: int, expected_status_code: int):
-    url = f"{BASE_URL}/room/room-detail/{room_id}"
-    response = perform_get_request(url, get_token)
+    url = f"/room/room-detail/{room_id}"
+    response = perform_get_client(url, get_token)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"
     
@@ -60,8 +61,8 @@ def test_room_detail(get_token: Any, room_id: int, expected_status_code: int):
         assert "error" in json_response, f"Expected 'error' key in response. Response: {json_response}"
 
 def test_room_detail_no_token(room_id=1, expected_status_code=500):
-    url = f"{BASE_URL}/room/room-detail/{room_id}"
-    response = perform_get_request(url)
+    url = f"/room/room-detail/{room_id}"
+    response = perform_get_client(url)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"
     try:
@@ -73,9 +74,9 @@ def test_room_detail_no_token(room_id=1, expected_status_code=500):
     assert "error" in json_response, f"Expected 'error' key in response. Response: {json_response}"
 
 def test_room_detail_expired_token(room_id=1, expected_status_code=422):
-    url = f"{BASE_URL}/room/room-detail/{room_id}"
+    url = f"/room/room-detail/{room_id}"
     expired_token = "expired_or_invalid_token"
-    response = perform_get_request(url, expired_token)
+    response = perform_get_client(url, expired_token)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"
     try:
@@ -87,8 +88,8 @@ def test_room_detail_expired_token(room_id=1, expected_status_code=422):
     assert "error" in json_response, f"Expected 'error' key in response. Response: {json_response}"
 
 def test_room_detail_missing_room_id(get_token: Any, expected_status_code=404):
-    url = f"{BASE_URL}/room/room-detail/"
-    response = perform_get_request(url, get_token)
+    url = f"/room/room-detail/"
+    response = perform_get_client(url, get_token)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"
     try:
@@ -103,7 +104,7 @@ def test_room_detail_missing_room_id(get_token: Any, expected_status_code=404):
         assert "error" in json_response, f"Expected 'error' key in response. Response: {json_response}"
 
 def test_room_detail_non_existent_room(get_token: Any, room_id=999, expected_status_code=500):
-    url = f"{BASE_URL}/room/room-detail/{room_id}"
+    url = f"/room/room-detail/{room_id}"
     response = perform_get_request(url, get_token)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"

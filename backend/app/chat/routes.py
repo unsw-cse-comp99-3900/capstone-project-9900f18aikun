@@ -233,7 +233,7 @@ class View(Resource):
     # Book a room
     @chat_ns.response(200, "success")
     @chat_ns.response(400, "Bad request")
-    @chat_ns.doc(description="Book a space")
+    @chat_ns.doc(description="change view")
     @chat_ns.header('Authorization',
                     'Bearer <your_access_token>',
                     required=True)

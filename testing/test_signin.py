@@ -1,21 +1,22 @@
-import requests
+
 import pytest
-from config import BACKEND_URL
+import date
+from app import create_app
 
 # Constants
-BASE_URL = f"http://{BACKEND_URL}"
+
 ZID = "z2"
 PASSWORD = "b"
 
 def perform_login(base_url, zid, password):
-    login_url = f"{base_url}/auth/login"
+    login_url = f"/auth/login"
     headers = {"Content-Type": "application/json"}
     payload = {"zid": zid, "password": password}
-    response = requests.post(login_url, headers=headers, json=payload)
+    response = client.post(login_url, headers=headers, json=payload)
     return response
 
 @pytest.fixture(scope='module')
-def get_token():
+def get_token(client):
     response = perform_login(BASE_URL, ZID, PASSWORD)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}. Response: {response.text}"
     json_response = response.json()
@@ -31,7 +32,7 @@ def perform_get_request(url, token=None):
     }
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    response = requests.get(url, headers=headers)
+    response = client.get(url, headers=headers)
     return response
 
 @pytest.mark.parametrize("room_id, expected_status_code", [
@@ -41,7 +42,7 @@ def perform_get_request(url, token=None):
     (900, 400),  # The room ID does not exist
 ])
 def test_sign_in(get_token: str, room_id: int, expected_status_code: int):
-    url = f"{BASE_URL}/sign_in/sign-in/{room_id}"
+    url = f"/sign_in/sign-in/{room_id}"
     response = perform_get_request(url, get_token)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"
@@ -58,7 +59,7 @@ def test_sign_in(get_token: str, room_id: int, expected_status_code: int):
     (1, 500),  # Example room ID, no token
 ])
 def test_sign_in_no_token(room_id: int, expected_status_code: int):
-    url = f"{BASE_URL}/sign_in/sign-in/{room_id}"
+    url = f"/sign_in/sign-in/{room_id}"
     response = perform_get_request(url)
     
     assert response.status_code == expected_status_code, f"Expected {expected_status_code}, got {response.status_code}. Response: {response.text}"
@@ -75,7 +76,7 @@ def test_sign_in_no_token(room_id: int, expected_status_code: int):
     (1, 422),  # Example room ID, expired token
 ])
 def test_sign_in_expired_token(room_id: int, expected_status_code: int):
-    url = f"{BASE_URL}/sign_in/sign-in/{room_id}"
+    url = f"/sign_in/sign-in/{room_id}"
     expired_token = "expired_or_invalid_token"
     response = perform_get_request(url, expired_token)
     

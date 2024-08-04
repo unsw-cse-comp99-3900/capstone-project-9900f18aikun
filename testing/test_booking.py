@@ -1,39 +1,50 @@
 from typing import Any
 import pytest
-import requests
-from config import BACKEND_URL
+from datetime import datetime, timedelta
+from app import create_app
+
+@pytest.fixture(scope='session')
+def client():
+    flask_app, socio = create_app() 
+    client = flask_app.test_client()
+    ctx = flask_app.app_context()
+    ctx.push()
+    yield client  # this is where the testing happens!
+    ctx.pop()
 
 # Constants
-BASE_URL = f"http://{BACKEND_URL}"
 ZID = "z2"
 PASSWORD = "b"
 
 @pytest.fixture(scope="module")
-def token():
-    login_url = f"{BASE_URL}/auth/login"
+def token(client):
+    login_url = "/auth/login"
     headers = {"Content-Type": "application/json"}
-    payload = {"zid": ZID, "password": PASSWORD}
-    response = requests.post(login_url, headers=headers, json=payload)
+    payload = {'zid': 'z1', 'password': 'a'}
+    response = client.post(login_url, headers=headers, json=payload)
     assert response.status_code == 200, f"Failed to obtain access token: {response.status_code}"
-    return response.json().get("access_token")
+    return response.json["access_token"]
 
-def get_booking_id(token: Any, room_id: int) -> int:
-    url = f"{BASE_URL}/history"
+def get_booking_id(token: Any, room_id: int, client: Any) -> int:
+    url = "/history"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
         "room_id": room_id
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Failed to fetch history: {response.status_code}, {response.text}"
     history = response.json()
     if not history:
         raise ValueError("No bookings found for the room")
     return history[0]['booking_id']  # 返回第一个预订的ID，实际使用中可能需要调整
 
-def test_admin_book(token: Any):
-    url = f"{BASE_URL}/booking/admin_book"
+def get_future_date(days: int) -> str:
+    return (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
+
+def test_admin_book(token: Any, client: Any):
+    url = "/booking/admin_book"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -41,51 +52,51 @@ def test_admin_book(token: Any):
     payload = {
         "user_id": "z1",
         "room_id": 5,
-        "date": "2024-08-01",
+        "date": get_future_date(1),
         "start_time": "14:30",
         "end_time": "15:00"
     }
-    response = requests.post(url, headers=headers, json=payload)
+    response = client.post(url, headers=headers, json=payload)
     assert response.status_code == 200, f"Admin book failed: {response.status_code}, {response.text}"
 
-def test_block_room(token: Any):
-    url = f"{BASE_URL}/booking/block-room"
+def test_block_room(token: Any, client: Any):
+    url = "/booking/block-room"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
         "roomid": 1
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Block room failed: {response.status_code}, {response.text}"
 
-def test_book_room(token: Any):
-    url = f"{BASE_URL}/booking/book"
+def test_book_room(token: Any, client: Any):
+    url = f"/booking/book"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     payload = {
         "room_id": 3,
-        "date": "2024-08-03",
+        "date": get_future_date(2),
         "start_time": "11:00",
         "end_time": "12:00",
         "weeks_of_duration": 0
     }
-    response = requests.post(url, headers=headers, json=payload)
+    response = client.post(url, headers=headers, json=payload)
     assert response.status_code == 200, f"Book room failed: {response.status_code}, {response.text}"
 
-def test_delete_book(token: Any):
+def test_delete_book(token: Any, client: Any):
     booking_id = 279
-    url = f"{BASE_URL}/booking/book/{booking_id}"
+    url = f"/booking/book/{booking_id}"
     headers = {
         "Authorization": f"Bearer {token}"
     }
-    response = requests.delete(url, headers=headers)
+    response = client.delete(url, headers=headers)
     assert response.status_code == 200, f"Delete book failed: {response.status_code}, {response.text}"
 
-def test_edit_room(token: Any):
-    url = f"{BASE_URL}/booking/edit-room"
+def test_edit_room(token: Any, client: Any):
+    url = f"/booking/edit-room"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -97,35 +108,34 @@ def test_edit_room(token: Any):
         "capacity": 3,
         "level": "G"
     }
-    response = requests.put(url, headers=headers, json=payload)
+    response = client.put(url, headers=headers, json=payload)
     assert response.status_code == 200, f"Edit room failed: {response.status_code}, {response.text}"
 
-def test_express_book(token: Any):
-    url = f"{BASE_URL}/booking/express-book"
+def test_express_book(token: Any, client: Any):
+    url = f"/booking/express-book"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
     payload = {
-        "query": "2024-08-03,13:30-14:00",
+        "query": f"{get_future_date(3)},13:30-14:00",
         "room_type": "meeting_room"
     }
-    response = requests.post(url, headers=headers, json=payload)
+    response = client.post(url, headers=headers, json=payload)
     assert response.status_code == 200, f"Express book failed: {response.status_code}, {response.text}"
 
-def test_extend_book(token: Any):
+def test_extend_book(token: Any, client: Any):
     booking_id = 221
-    url = f"{BASE_URL}/booking/extend_book/{booking_id}"
+    url = f"/booking/extend_book/{booking_id}"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    response = requests.post(url, headers=headers)
+    response = client.post(url, headers=headers)
     assert response.status_code == 200, f"Extend book failed: {response.status_code}, {response.text}"
 
-
-def test_handle_request(token: Any):
-    url = f"{BASE_URL}/booking/handle-request"
+def test_handle_request(token: Any, client: Any):
+    url = f"/booking/handle-request"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -134,80 +144,80 @@ def test_handle_request(token: Any):
         "booking_id": 198,
         "confirmed": True
     }
-    response = requests.post(url, headers=headers, json=payload)
+    response = client.post(url, headers=headers, json=payload)
     assert response.status_code == 200, f"Handle request failed: {response.status_code}, {response.text}"
 
-def test_is_book_today(token: Any):
-    url = f"{BASE_URL}/booking/is_book_today"
+def test_is_book_today(token: Any, client: Any):
+    url = f"/booking/is_book_today"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "date": "2024-08-01"
+        "date": get_future_date(0)
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Is book today failed: {response.status_code}, {response.text}"
 
-def test_meetingroom(token: Any):
-    url = f"{BASE_URL}/booking/meetingroom"
+def test_meetingroom(token: Any, client: Any):
+    url = f"/booking/meetingroom"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "date": "2024-08-01",
+        "date": get_future_date(1),
         "is_ranked": True
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Meeting room failed: {response.status_code}, {response.text}"
 
-def test_get_meetingroom_report(token: Any):
-    url = f"{BASE_URL}/booking/meetingroom-report"
+def test_get_meetingroom_report(token: Any, client: Any):
+    url = f"/booking/meetingroom-report"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "date": "2024-08-01"
+        "date": get_future_date(1)
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Get meeting room report failed: {response.status_code}, {response.text}"
 
-def test_meetingroom_top10(token: Any):
-    url = f"{BASE_URL}/booking/meetingroom-top10-byCount"
+def test_meetingroom_top10(token: Any, client: Any):
+    url = f"/booking/meetingroom-top10-byCount"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "date": "2024-08-01"
+        "date": get_future_date(1)
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Meeting room top 10 failed: {response.status_code}, {response.text}"
 
-def test_get_meetingroom_usage(token: Any):
-    url = f"{BASE_URL}/booking/meetingroom-usage"
+def test_get_meetingroom_usage(token: Any, client: Any):
+    url = f"/booking/meetingroom-usage"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
-        "date": "2024-07-31"
+        "date": get_future_date(-1)
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Get meeting room usage failed: {response.status_code}, {response.text}"
 
-def test_show_request(token: Any):
-    url = f"{BASE_URL}/booking/show-request"
+def test_show_request(token: Any, client: Any):
+    url = f"/booking/show-request"
     headers = {
         "Authorization": f"Bearer {token}"
     }
-    response = requests.get(url, headers=headers)
+    response = client.get(url, headers=headers)
     assert response.status_code == 200, f"Show request failed: {response.status_code}, {response.text}"
 
-def test_unblock_room(token: Any):
-    url = f"{BASE_URL}/booking/unblock-room"
+def test_unblock_room(token: Any, client: Any):
+    url = f"/booking/unblock-room"
     headers = {
         "Authorization": f"Bearer {token}"
     }
     params = {
         "roomid": 3
     }
-    response = requests.get(url, headers=headers, params=params)
+    response = client.get(url, headers=headers, params=params)
     assert response.status_code == 200, f"Unblock room failed: {response.status_code}, {response.text}"
