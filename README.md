@@ -16,52 +16,31 @@ The Computer Science and Engineering (CSE) Space Allocation Management System is
 
 #### Run Together
 
-Run the following command in the project root directory:
-docker-compose up --build
+- Run the following command in the project root directory:
+- docker-compose up --build
 
 #### Run Separate
 
 **Frontend:**
-cd frontend
-docker build -t frontend .
-docker run -d -p 3000:3000 frontend
+- cd frontend
+- docker build -t frontend .
+- docker run -d -p 3000:3000 frontend
 **Backend:**
-cd backend
-docker-compose up --build
+- cd backend
+- docker-compose up --build
 
 #### URLs
 
 - **Frontend URL:** http://localhost:3000
 - **Backend URL and Swagger Document URL:** http://localhost:5001
 
-### Backend
+### Frontend
 
-#### Swagger API Document Guide
-
-Access the Swagger API documentation through http://localhost:5001.
-You can use the authorize feature to add a token, please prepend "Bearer " before the token.
-![Token Use](readme_photo/token_use.png 'Token Use')
-
-#### Socket IO Related Function Testing Guide
-
-We use Postman for testing Socket.IO related functions.
-![Socket IO Connect](readme_photo/user_socket_connect.png 'Socket IO Connect')
-For Socket.IO related functions, we need three accounts to connect:
-
-- One user account as the user
-- One admin account for the admin
-- One admin account for the monitor (We send chat history when connected, but Postman can't receive messages when connected, so we need a monitor to listen to the history).
-
-The monitor needs to listen to messages such as `admin_chat_history`, `user_chat_history`, and `request_notification`.
-The monitor needs to join the user's and admin's room by typing `{"room": "z1"}`. The user and admin need to listen to messages. The user uses `send_message` to send a message `{"msg": "hello"}`, and the admin uses `reply_message` to reply with `{"msg": "good", "user_id": "z5405325"}`. When the user sends a request, the monitor will receive a notification.
-
-# Frontend
-
-## Project Overview
+#### Project Overview
 
 This project is a room booking system for the K17 building, designed to facilitate the process of reserving meeting rooms and hot desks. It includes features for both regular users and administrators, with a user-friendly interface for booking, checking in, and managing reservations.
 
-## Key Features
+#### Key Features
 
 - AI-assisted chatbox for quick room booking
 - Users can communicate with admin in real time
@@ -69,7 +48,7 @@ This project is a room booking system for the K17 building, designed to facilita
 - QR code check-in system
 - Admins can view real-time reports and analysis
 
-## Project Structure
+#### Project Structure
 
 The main App.js file serves as the entry point of the application, handling routing and protected routes. Key components include:
 
@@ -96,7 +75,7 @@ Admin components (located in `admin_comp/`):
 - `BookingManagement.js`: Allows admins to view and manage all bookings.
 - `ReportGeneration.js`: Generates various reports for administrative purposes.
 
-## Technologies Used
+#### Technologies Used
 
 - React
 
@@ -106,6 +85,29 @@ Admin components (located in `admin_comp/`):
 
 - Arco Design for UI components
 
-## API Integration
+#### API Integration
 
 The project integrates with a backend API for data management. The base URL for the API is defined in the `api.js` file.
+
+
+### Backend
+
+#### Swagger API Document Guide
+
+Access the Swagger API documentation through http://localhost:5001.
+You can use the authorize feature to add a token, please prepend "Bearer " before the token.
+![Token Use](readme_photo/token_use.png 'Token Use')
+
+#### Socket IO Related Function Testing Guide
+
+We use Postman for testing Socket.IO related functions.
+![Socket IO Connect](readme_photo/user_socket_connect.png 'Socket IO Connect')
+For Socket.IO related functions, we need three accounts to connect:
+
+- One user account as the user
+- One admin account for the admin
+- One admin account for the monitor (We send chat history when connected, but Postman can't receive messages when connected, so we need a monitor to listen to the history).
+
+The monitor needs to listen to messages such as `admin_chat_history`, `user_chat_history`, and `request_notification`.
+The monitor needs to join the user's and admin's room by typing `{"room": "z1"}`. The user and admin need to listen to messages. The user uses `send_message` to send a message `{"msg": "hello"}`, and the admin uses `reply_message` to reply with `{"msg": "good", "user_id": "z5405325"}`. When the user sends a request, the monitor will receive a notification.
+
