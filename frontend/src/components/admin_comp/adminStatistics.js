@@ -11,8 +11,7 @@ import api from './api';
 
 function AdminStatistics() {
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
-  const [apiDate, setApiDate] = useState('');
-  const [timeSlots, setTimeSlots] = useState([]);
+
   const [hourlyCounts, setHourlyCounts] = useState([]);
   const [usageData, setUsageData] = useState({
     total_number: 0,
@@ -62,8 +61,6 @@ function AdminStatistics() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setApiDate(data.date);
-      setTimeSlots(data.time_slot);
 
       // Calculate the number of bookings per hour
       const counts = new Array(24).fill(0);

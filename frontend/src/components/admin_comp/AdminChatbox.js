@@ -1,18 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import io from "socket.io-client";
-import "./AdminChatbox.css";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { Badge } from "@arco-design/web-react";
-import api from "../api";
-import socketURL from "../socket";
+import React, { useState, useRef, useEffect } from 'react';
+import io from 'socket.io-client';
+import './AdminChatbox.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { Badge } from '@arco-design/web-react';
+import api from '../../api';
+import socketURL from '../../socket';
 
 const AdminChatbox = ({ onClose, onToggle }) => {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [messageHistories, setMessageHistories] = useState({});
   const [activeUsers, setActiveUsers] = useState(new Map());
   const [selectedUser, setSelectedUser] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState("disconnected");
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [adminId, setAdminId] = useState(null);
   const [newMessageUsers, setNewMessageUsers] = useState(new Set());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -20,43 +20,43 @@ const AdminChatbox = ({ onClose, onToggle }) => {
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const pendingMessages = useRef(new Set());
-  const [usageReport, setUsageReport] = useState("");
+  const [usageReport, setUsageReport] = useState('');
   const [messageCount, setMessageCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const connectSocket = () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     // const socketURL = "ws://3.26.67.188:5001";
     // const socketURL = "ws://0.0.0.0:5001";
 
-    console.log("Attempting to connect to:", socketURL);
-    console.log("Token:", token);
+    console.log('Attempting to connect to:', socketURL);
+    console.log('Token:', token);
 
     socketRef.current = io(socketURL, {
       query: { token },
-      transports: ["websocket"],
+      transports: ['websocket'],
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       timeout: 10000,
     });
 
-    socketRef.current.on("connect", () => {
-      console.log("Admin Socket Connected");
-      console.log("Socket id:", socketRef.current.id);
-      setConnectionStatus("connected");
+    socketRef.current.on('connect', () => {
+      console.log('Admin Socket Connected');
+      console.log('Socket id:', socketRef.current.id);
+      setConnectionStatus('connected');
 
-      socketRef.current.emit("test_connection", {
-        message: "Hello from admin",
+      socketRef.current.emit('test_connection', {
+        message: 'Hello from admin',
       });
-      socketRef.current.emit("get_admin_chat_history");
+      socketRef.current.emit('get_admin_chat_history');
     });
 
-    socketRef.current.on("connect_error", (error) => {
-      console.error("Connection Error:", error);
-      setConnectionStatus("error");
+    socketRef.current.on('connect_error', (error) => {
+      console.error('Connection Error:', error);
+      setConnectionStatus('error');
     });
 
-    socketRef.current.on("message", (data) => {
-      console.log("Raw data received:", data);
+    socketRef.current.on('message', (data) => {
+      console.log('Raw data received:', data);
       if (data.message) {
         const { message_id, user_name, user_id, message, timestamp, chat_id } =
           data.message;
@@ -69,7 +69,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
         const newMessage = {
           id: message_id,
           text: message,
-          sender: isAdminMessage ? "admin" : "user",
+          sender: isAdminMessage ? 'admin' : 'user',
           timestamp: new Date(timestamp),
           userId: user_id,
           chatId: chat_id,
@@ -107,12 +107,12 @@ const AdminChatbox = ({ onClose, onToggle }) => {
 
         pendingMessages.current.delete(message_id);
       } else {
-        console.warn("Received data in unexpected format:", data);
+        console.warn('Received data in unexpected format:', data);
       }
     });
 
-    socketRef.current.on("admin_chat_history", (data) => {
-      console.log("Received admin chat history:", data);
+    socketRef.current.on('admin_chat_history', (data) => {
+      console.log('Received admin chat history:', data);
       const newMessageHistories = {};
       const newActiveUsers = new Map();
 
@@ -120,7 +120,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
         data.chat.forEach((chat) => {
           const chatId = chat.chat_id;
           newActiveUsers.set(chatId, {
-            userName: chat.name || "Unknown",
+            userName: chat.name || 'Unknown',
             chatId: chatId,
             lastMessageTime: chat.last_message_time,
             isHandled: chat.is_handled,
@@ -137,7 +137,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                   return {
                     id: msg.message_id,
                     text: msg.message,
-                    sender: isAdminMessage ? "admin" : "user",
+                    sender: isAdminMessage ? 'admin' : 'user',
                     timestamp: new Date(msg.timestamp),
                     userId: msg.user_id,
                     chatId: chatId,
@@ -150,7 +150,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
         });
       } else {
         console.error(
-          "Unexpected data structure for admin_chat_history:",
+          'Unexpected data structure for admin_chat_history:',
           data
         );
       }
@@ -164,32 +164,32 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       );
     });
 
-    socketRef.current.on("error", (error) => {
-      console.error("Socket error:", error);
-      setConnectionStatus("error");
+    socketRef.current.on('error', (error) => {
+      console.error('Socket error:', error);
+      setConnectionStatus('error');
     });
 
-    socketRef.current.on("disconnect", (reason) => {
-      console.log("Disconnected:", reason);
-      setConnectionStatus("disconnected");
-      if (reason === "io server disconnect") {
+    socketRef.current.on('disconnect', (reason) => {
+      console.log('Disconnected:', reason);
+      setConnectionStatus('disconnected');
+      if (reason === 'io server disconnect') {
         socketRef.current.connect();
       }
     });
 
-    socketRef.current.on("reconnect_attempt", (attemptNumber) => {
-      console.log("Attempting reconnection:", attemptNumber);
-      setConnectionStatus("reconnecting");
+    socketRef.current.on('reconnect_attempt', (attemptNumber) => {
+      console.log('Attempting reconnection:', attemptNumber);
+      setConnectionStatus('reconnecting');
     });
 
-    socketRef.current.on("reconnect", (attemptNumber) => {
-      console.log("Reconnected after", attemptNumber, "attempts");
-      setConnectionStatus("connected");
+    socketRef.current.on('reconnect', (attemptNumber) => {
+      console.log('Reconnected after', attemptNumber, 'attempts');
+      setConnectionStatus('connected');
     });
 
-    socketRef.current.on("reconnect_failed", () => {
-      console.log("Failed to reconnect");
-      setConnectionStatus("failed");
+    socketRef.current.on('reconnect_failed', () => {
+      console.log('Failed to reconnect');
+      setConnectionStatus('failed');
     });
 
     socketRef.current.onAny((eventName, ...args) => {
@@ -213,23 +213,23 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     onToggle(!isOpen);
   };
   const fetchUsageReport = async (date) => {
-    const formattedDate = date.toISOString().split("T")[0];
-    const token = localStorage.getItem("token");
+    const formattedDate = date.toISOString().split('T')[0];
+    const token = localStorage.getItem('token');
 
     try {
       const response = await fetch(
         api + `/admin/get-usage-report-txt?date=${formattedDate}`,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            accept: "application/json",
+            accept: 'application/json',
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch usage report");
+        throw new Error('Failed to fetch usage report');
       }
 
       const data = await response.json();
@@ -238,7 +238,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       const reportMessage = {
         id: `report-${Date.now()}`,
         text: data.msg,
-        sender: "system",
+        sender: 'system',
         timestamp: new Date(),
         isUsageReport: true,
         reportDate: formattedDate,
@@ -249,31 +249,31 @@ const AdminChatbox = ({ onClose, onToggle }) => {
         [selectedUser]: [...(prev[selectedUser] || []), reportMessage],
       }));
 
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
-      console.error("Error fetching usage report:", error);
+      console.error('Error fetching usage report:', error);
     }
   };
   const formatDateTime = (date) => {
-    return new Date(date).toLocaleString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(date).toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: true,
     });
   };
 
   const handleSendMessage = () => {
     console.log(
-      "this is what i want",
+      'this is what i want',
       message.trim(),
       socketRef.current,
       selectedUser,
       adminId
     );
     if (
-      message.trim() === "" ||
+      message.trim() === '' ||
       !socketRef.current ||
       !selectedUser
       // ||!adminId
@@ -285,13 +285,13 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       user_id: selectedUser,
     };
 
-    console.log("Admin sending message:", messageData);
+    console.log('Admin sending message:', messageData);
 
     const tempId = Date.now().toString();
     const newMessage = {
       id: tempId,
       text: message,
-      sender: "admin",
+      sender: 'admin',
       timestamp: new Date(),
       userId: adminId,
       chatId: selectedUser,
@@ -321,9 +321,9 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       });
     };
 
-    socketRef.current.emit("reply_message", messageData, (acknowledgement) => {
+    socketRef.current.emit('reply_message', messageData, (acknowledgement) => {
       if (acknowledgement) {
-        console.log("Admin message acknowledged:", acknowledgement);
+        console.log('Admin message acknowledged:', acknowledgement);
         if (acknowledgement.message_id) {
           setMessageHistories((prev) => {
             const updatedMessages = {
@@ -349,7 +349,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
           pendingMessages.current.add(acknowledgement.message_id);
         }
       } else {
-        console.warn("Admin message not acknowledged");
+        console.warn('Admin message not acknowledged');
         setMessageHistories((prev) => ({
           ...prev,
           [selectedUser]: prev[selectedUser].filter((msg) => msg.id !== tempId),
@@ -358,11 +358,11 @@ const AdminChatbox = ({ onClose, onToggle }) => {
       }
     });
 
-    setMessage("");
+    setMessage('');
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleSendMessage();
     }
   };
@@ -372,7 +372,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
     if (newMessageUsers.has(userId)) {
       const newMessagesCount =
         messageHistories[userId]?.filter(
-          (msg) => msg.sender !== "admin" && !msg.isViewed
+          (msg) => msg.sender !== 'admin' && !msg.isViewed
         ).length || 0;
       setMessageCount((prevCount) => Math.max(prevCount - newMessagesCount, 0));
       setNewMessageUsers((prev) => {
@@ -429,9 +429,9 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                       : null;
                   const avatarColor = `hsl(${index * 137.5}, 70%, 65%)`;
                   const initials = userInfo.userName
-                    .split(" ")
+                    .split(' ')
                     .map((n) => n[0])
-                    .join("")
+                    .join('')
                     .slice(0, 2)
                     .toUpperCase();
                   const hasNewMessages = newMessageUsers.has(chatId);
@@ -440,8 +440,8 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                     <div
                       key={chatId}
                       className={`user-item ${
-                        selectedUser === chatId ? "selected" : ""
-                      } ${hasNewMessages ? "new-message" : ""}`}
+                        selectedUser === chatId ? 'selected' : ''
+                      } ${hasNewMessages ? 'new-message' : ''}`}
                       onClick={() => handleUserSelect(chatId)}
                     >
                       <div
@@ -461,15 +461,15 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                           <span className="user-item-time">
                             {latestMessage
                               ? formatDateTime(latestMessage.timestamp)
-                              : ""}
+                              : ''}
                           </span>
                         </div>
                         <div className="user-item-last-message">
                           {latestMessage
-                            ? latestMessage.sender === "admin"
+                            ? latestMessage.sender === 'admin'
                               ? `Admin (${latestMessage.userId}): ${latestMessage.text}`
                               : `${userInfo.userName}: ${latestMessage.text}`
-                            : "No messages yet"}
+                            : 'No messages yet'}
                         </div>
                       </div>
                     </div>
@@ -498,7 +498,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                     alt="Rectangle"
                     src={
                       process.env.PUBLIC_URL +
-                      "/admin_chatbox_img/rectangle-1.svg"
+                      '/admin_chatbox_img/rectangle-1.svg'
                     }
                   />
                 </div>
@@ -506,7 +506,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                   className="customer"
                   alt="Customer"
                   src={
-                    process.env.PUBLIC_URL + "/admin_chatbox_img/customer-1.png"
+                    process.env.PUBLIC_URL + '/admin_chatbox_img/customer-1.png'
                   }
                 />
               </div>
@@ -539,7 +539,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                                 {formatDateTime(msg.timestamp)}
                               </div>
                               <div className="message-text">
-                                {msg.sender === "admin"
+                                {msg.sender === 'admin'
                                   ? `Admin (${msg.userId}): ${msg.text}`
                                   : `${activeUsers.get(msg.chatId).userName}: ${
                                       msg.text
@@ -567,7 +567,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                     <img
                       src={
                         process.env.PUBLIC_URL +
-                        "/admin_chatbox_img/analysis.png"
+                        '/admin_chatbox_img/analysis.png'
                       }
                       alt="Calendar"
                     />
@@ -599,7 +599,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                   type="text"
                   className="message-input"
                   placeholder={`Type your message here... ${
-                    selectedUser ? `(to ${selectedUser})` : "(select a user)"
+                    selectedUser ? `(to ${selectedUser})` : '(select a user)'
                   }`}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -609,7 +609,7 @@ const AdminChatbox = ({ onClose, onToggle }) => {
                 <img
                   className="vector"
                   alt="Send"
-                  src={process.env.PUBLIC_URL + "/admin_chatbox_img/vector.svg"}
+                  src={process.env.PUBLIC_URL + '/admin_chatbox_img/vector.svg'}
                   onClick={handleSendMessage}
                 />
               </div>
