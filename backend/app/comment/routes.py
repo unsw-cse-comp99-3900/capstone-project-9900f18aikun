@@ -1,24 +1,13 @@
-from datetime import datetime, timedelta, timezone
+"""
+This file contain the api used for comment
+"""
 from flask_restx import Namespace, Resource, fields
-from flask import request, Flask
-from app.extensions import db, api, scheduler, app
-from app.models import Users, CSEStaff
+from flask import request
+from app.extensions import db, api
 from .models import Comment, Like, Rank
-from sqlalchemy.orm import joinedload
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import check_valid_comment, check_valid_room, get_date, get_like_count, get_time, get_total_room, get_user_name, is_admin, is_block, is_meeting_room, is_room_available, is_who_like_comment, start_end_time_convert, verify_jwt, get_room_name, is_student_permit, who_made_comment
-from app.email import schedule_reminder, send_confirm_email_async
-from jwt import exceptions
-from sqlalchemy import and_, or_, not_
-from app.config import Config
-import re
-from apscheduler.schedulers.background import BackgroundScheduler
-import google.generativeai as genai
-from datetime import datetime
-import json
-from sqlalchemy import func
-import pytz
-import random
+from flask_jwt_extended import  get_jwt_identity
+from app.utils import check_valid_comment, check_valid_room, get_date, get_like_count, get_time, get_user_name, is_who_like_comment, verify_jwt, get_room_name, who_made_comment
+
 
 comment_ns = Namespace('comment', description='Comment operations')
 
@@ -29,11 +18,13 @@ make_comment_model = comment_ns.model(
                 required=True, description='comment', default="WOW! Nice room!"), 'comment_to_id': fields.Integer(
                     required=True, description='If it is an original, set =0. Else get comment_to_id', default=0), })
 
-
+# api used for make a comment
 @comment_ns.route('/make-comment')
 class make_comment(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(make_comment_model)
     @comment_ns.doc(description="make comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -101,11 +92,14 @@ delete_comment_model = comment_ns.model(
             required=True, description='The comment id', default=1), })
 
 
+# api used for delete a comment
 @comment_ns.route('/delete-comment')
 class delete_test(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(delete_comment_model)
     @comment_ns.doc(description="delete comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -166,11 +160,14 @@ get_comment_query.add_argument(
     default=1)
 
 
+# api used for get comments
 @comment_ns.route('/get-comment')
 class get_comment(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(204, "No Content")
     @comment_ns.response(400, "Bad request")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(get_comment_query)
     @comment_ns.doc(description="get comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -253,11 +250,14 @@ edit_comment_model = comment_ns.model(
                 required=True, description='comment', default="AHHHH! Great room."), })
 
 
+# api used for edit comment
 @comment_ns.route('/edit-comment')
 class edit_comment(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(edit_comment_model)
     @comment_ns.doc(description="edit comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -317,11 +317,14 @@ like_comment_model = comment_ns.model(
             required=True, description='The comment id', default=1), })
 
 
+# api used for like a comment
 @comment_ns.route('/like-comment')
 class like_comment(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(like_comment_model)
     @comment_ns.doc(description="like comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -381,11 +384,14 @@ class like_comment(Resource):
         return like is not None
 
 
+# api used for unlike a comment
 @comment_ns.route('/unlike-comment')
 class unlike_comment(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
     @comment_ns.response(403, "Forbidden")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(like_comment_model)
     @comment_ns.doc(description="unlike comment")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -434,10 +440,13 @@ make_rate_model = comment_ns.model('Make rate', {
 })
 
 
+# api used for make a rate
 @comment_ns.route('/make-rate')
 class make_rate(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(make_rate_model)
     @comment_ns.doc(description="make rate to room")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
@@ -508,11 +517,13 @@ get_rate_query.add_argument(
     help='The room id',
     default=1)
 
-
+# api used for get rate
 @comment_ns.route('/get-rate')
 class get_rate(Resource):
     @comment_ns.response(200, "success")
     @comment_ns.response(400, "Bad request")
+    @comment_ns.response(401, "Token is expired")
+    @comment_ns.response(422, "Token is invalid")
     @comment_ns.expect(get_rate_query)
     @comment_ns.doc(description="get room rate")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)

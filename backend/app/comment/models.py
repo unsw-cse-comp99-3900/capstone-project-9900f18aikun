@@ -1,9 +1,10 @@
+"""
+This file contain the models about comments
+"""
 from app.extensions import db
-from datetime import datetime
-import json
-import enum
 
 
+# comment model
 class Comment(db.Model):
     __tablename__ = "comment"
     id = db.Column(db.Integer, primary_key=True)
@@ -27,6 +28,7 @@ class Comment(db.Model):
     comment_to_id = db.Column(db.Integer, nullable=False)
 
 
+# like model
 class Like(db.Model):
     __tablename__ = "like"
     id = db.Column(db.Integer, primary_key=True)
@@ -47,6 +49,7 @@ class Like(db.Model):
     time = db.Column(db.Time, nullable=False)
 
 
+# rank model
 class Rank(db.Model):
     __tablename__ = "rank"
     id = db.Column(db.Integer, primary_key=True)

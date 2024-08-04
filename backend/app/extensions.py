@@ -1,9 +1,11 @@
-from datetime import timezone
+"""
+This file contain the object for overall use
+"""
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask import Flask
-from flask_restx import Api, fields
+from flask_restx import Api
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
 from authlib.integrations.flask_client import OAuth
@@ -19,6 +21,7 @@ authorizations = {
 }
 
 
+# create object for overall use
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()

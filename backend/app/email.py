@@ -1,3 +1,6 @@
+"""
+This file contain the function to send email
+"""
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 import smtplib
@@ -6,9 +9,8 @@ from app.models import CSEStaff, HDRStudent, Users
 from threading import Thread
 from app.utils import get_room_name, get_user_name, is_staff, is_student
 
+
 # get user's email
-
-
 def get_email(zid: str) -> str:
     if is_student(zid):
         student = db.session.get(HDRStudent, zid)
@@ -17,9 +19,8 @@ def get_email(zid: str) -> str:
         staff = db.session.get(CSEStaff, zid)
         return staff.email
 
+
 # send email
-
-
 def send_confirm_email(
         user_name,
         room_name,
@@ -82,9 +83,8 @@ def send_confirm_email(
         server.login(from_addr, password)
         server.sendmail(from_addr, to_addr, msg.as_string())
 
+
 # send email
-
-
 def send_confirm_email_async(
         zid,
         room_id,
@@ -150,9 +150,8 @@ def send_reminder_email(
         server.login(from_addr, password)
         server.sendmail(from_addr, to_addr, msg.as_string())
 
+
 # reminder email booking
-
-
 def schedule_reminder(zid, room_id, start_time, date, end_time):
     dt_start_time = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
     reminder_time = dt_start_time - timedelta(hours=1)
@@ -171,15 +170,13 @@ def schedule_reminder(zid, room_id, start_time, date, end_time):
             end_time,
             to_addr])
 
+
 # check if this is student email
-
-
 def check_is_student_email(email):
     return db.session.query(HDRStudent).filter_by(email=email).first()
 
+
 # check if this is staff email
-
-
 def check_is_staff_email(email):
     return db.session.query(CSEStaff).filter_by(email=email).first()
 
@@ -193,9 +190,8 @@ def get_staff_zid(email):
     staff = db.session.query(CSEStaff).filter_by(email=email).first()
     return staff.zid
 
+
 # send report email
-
-
 def send_report_email_async(from_id, to_zid, msg):
     from_name = get_user_name(from_id)
     to_addr = get_email(to_zid)

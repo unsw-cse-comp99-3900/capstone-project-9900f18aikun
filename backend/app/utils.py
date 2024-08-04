@@ -1,3 +1,6 @@
+"""
+This file contain the function for over all use
+"""
 from app.extensions import db
 from app.booking.models import RoomDetail, Space, HotDeskDetail, Booking
 from app.comment.models import Comment, Like
@@ -9,9 +12,9 @@ import os
 import re
 from sqlalchemy import func
 import pytz
+
+
 # convert time HH:MM to index for every half hour
-
-
 def time_convert(time):
     index = time.hour * 2 + time.minute / 30
     return index
@@ -48,6 +51,7 @@ def is_staff(zid: str) -> bool:
         return False
 
 
+# check whether user is admin
 def is_admin(zid: str) -> bool:
     admin = db.session.get(CSEStaff, zid)
     if admin is None:
@@ -56,6 +60,7 @@ def is_admin(zid: str) -> bool:
     return admin_title == "Professional"
 
 
+# check whether is meeting room
 def is_meeting_room(room_id: int) -> bool:
     space = db.session.get(Space, room_id)
     space_type = space.space_type
@@ -65,11 +70,13 @@ def is_meeting_room(room_id: int) -> bool:
         return False
 
 
+# check whether is blocked
 def is_block(room_id: int) -> bool:
     space = db.session.get(Space, room_id)
     return not space.is_available
 
 
+# check whether have student permit
 def is_student_permit(room_id: int) -> bool:
     if is_meeting_room(room_id):
         meeting_room = db.session.get(RoomDetail, room_id)
@@ -100,6 +107,9 @@ def get_room_name(room_id: int) -> str:
         hot_desk = db.session.get(HotDeskDetail, room_id)
         return hot_desk.name
 
+
+# verify jwt token
+# return nothing if no error
 def verify_jwt():
     try:
         verify_jwt_in_request()
@@ -114,6 +124,7 @@ def verify_jwt():
     return None
 
 
+# calculate time difference
 def calculate_time_difference(date, start_time_str, end_time_str):
     datetime_format = "%Y-%m-%d %H:%M:%S"
     try:
@@ -126,16 +137,19 @@ def calculate_time_difference(date, start_time_str, end_time_str):
         return None, str(e)
 
 
+# check valid room
 def check_valid_room(roomid: int) -> bool:
     room = Space.query.get(roomid)
     return room is not None
 
 
+# check valid comment
 def check_valid_comment(comment_id: int) -> bool:
     comment = Comment.query.get(comment_id)
     return comment is not None
 
 
+# get room image
 def get_room_image(room_id: int):
     image_directory = 'app/static/images'
     file_name = f'{room_id}.jpg'
@@ -149,6 +163,7 @@ def get_room_image(room_id: int):
         return "hotdesk.jpg"
 
 
+# check whether date i valid
 def is_valid_date(date: str) -> bool:
     if not re.match(
         r'^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$',
@@ -157,36 +172,40 @@ def is_valid_date(date: str) -> bool:
     else:
         return True
 
+
 # get total number of rooms
-
-
 def get_total_room() -> int:
     room_number = db.session.query(func.count(RoomDetail.id)).scalar()
     desk_number = db.session.query(func.count(HotDeskDetail.id)).scalar()
     return room_number + desk_number
 
 
+# get date for sydney time
 def get_date():
     sydney_tz = pytz.timezone('Australia/Sydney')
     sydney_now = datetime.now(sydney_tz)
     return sydney_now.date()
 
 
+# get time now
 def get_time():
     sydney_tz = pytz.timezone('Australia/Sydney')
     sydney_now = datetime.now(sydney_tz)
     return sydney_now.strftime('%H:%M:%S')
 
 
+# check who made comment
 def who_made_comment(comment_id: int) -> str:
     comment = Comment.query.get(comment_id)
     return comment.user_id
 
 
+# get like count
 def get_like_count(comment_id: int) -> int:
     return Like.query.filter_by(comment_id=comment_id).count()
 
 
+# check whether user have book today
 def is_booking_today(date, user_id):
     booking = db.session.query(Booking).filter(
         Booking.date == date, Booking.user_id == user_id).first()
@@ -196,6 +215,7 @@ def is_booking_today(date, user_id):
         return False
 
 
+# check whether certain user like comment
 def is_who_like_comment(user_id: str, comment_id: int) -> bool:
     likes = Like.query.filter_by(comment_id=comment_id).all()
     if likes:

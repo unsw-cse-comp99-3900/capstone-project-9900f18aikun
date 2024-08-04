@@ -1,26 +1,24 @@
-from datetime import datetime, timedelta
-from flask_restx import Namespace, Resource, fields
-from flask import request, Flask
-from app.extensions import db, api
-from app.models import Users, CSEStaff
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, verify_jwt_in_request
-from app.utils import start_end_time_convert
-from app.email import get_email, schedule_reminder, send_confirm_email_async
-from jwt import exceptions
+from flask_restx import Namespace, Resource
+from flask import request
+from app.extensions import api
+from flask_jwt_extended import get_jwt_identity
+from app.email import get_email
 from app.booking.models import Booking
 from app.utils import verify_jwt
 import re
-from apscheduler.schedulers.background import BackgroundScheduler
 from app.utils import is_admin, get_user_name
 
 history_ns = Namespace('history', description='History operations')
 
 
+# get the booking history
 @history_ns.route('/booking-history')
 class BookingHistory(Resource):
     @history_ns.doc(description="Get current user's booking history, need jwt token")
     @history_ns.response(200, "Success")
     @history_ns.response(400, "Bad request")
+    @history_ns.response(401, "Token is expired")
+    @history_ns.response(422, "Token is invalid")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
         jwt_error = verify_jwt()
@@ -49,12 +47,15 @@ date_query.add_argument(
     help='Date to request')
 
 
+# get all user's booking history
 @history_ns.route('/alluser-booking-history')
 class alluser_booking_history(Resource):
     @history_ns.doc(description="Get all user's booking history, need jwt token")
     @history_ns.expect(date_query)
     @history_ns.response(200, "Success")
     @history_ns.response(400, "Bad request")
+    @history_ns.response(401, "Token is expired")
+    @history_ns.response(422, "Token is invalid")
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):
         jwt_error = verify_jwt()
@@ -96,11 +97,14 @@ user_zid.add_argument(
     default="z1")
 
 
+# get other user's booking history
 @history_ns.route('/certain-booking-history')
 class CertainBookingHistory(Resource):
     @history_ns.doc(description="Get other user's booking history, need jwt token")
     @history_ns.response(200, "Success")
     @history_ns.response(400, "Bad request")
+    @history_ns.response(401, "Token is expired")
+    @history_ns.response(422, "Token is invalid")
     @history_ns.expect(user_zid)
     @api.header('Authorization', 'Bearer <your_access_token>', required=True)
     def get(self):

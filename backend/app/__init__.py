@@ -7,7 +7,6 @@ from .database_setup import set_up_database
 from .models import Users
 import time
 from flask_cors import CORS
-from apscheduler.schedulers.background import BackgroundScheduler
 
 
 def create_app():
