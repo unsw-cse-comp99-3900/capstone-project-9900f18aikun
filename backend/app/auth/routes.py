@@ -107,11 +107,11 @@ class OutlookLoginCallback(Resource):
             zid = get_student_zid(user_email)
             access_token = create_access_token(identity={'zid': zid})
             return redirect(
-                f'http://localhost:3001/login?access_token={access_token}')
+                f'http://localhost:3000/login?access_token={access_token}')
         elif check_is_staff_email(user_email):
             zid = get_staff_zid(user_email)
             access_token = create_access_token(identity={'zid': zid})
             return redirect(
-                f'http://localhost:3001/login?access_token={access_token}')
+                f'http://localhost:3000/login?access_token={access_token}')
         else:
-            return redirect(f'http://localhost:3001/login?access_token=false')
+            return redirect(f'http://localhost:3000/login?access_token=false')
