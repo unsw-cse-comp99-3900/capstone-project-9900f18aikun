@@ -113,3 +113,18 @@ For Socket.IO related functions, we need three accounts to connect:
 The monitor needs to listen to messages such as `admin_chat_history`, `user_chat_history`, and `request_notification`.
 The monitor needs to join the user's and admin's room by typing `{"room": "z1"}`. The user and admin need to listen to messages. The user uses `send_message` to send a message `{"msg": "hello"}`, and the admin uses `reply_message` to reply with `{"msg": "good", "user_id": "z5405325"}`. When the user sends a request, the monitor will receive a notification.
 
+## Testing
+The frontend testing are in frontend/cypress/e2e
+use below to install first
+- npm install cypress --save-dev
+
+The backend testing are in testing dictionary
+- export PYTHONPATH=Your path to backend
+- pytest --cov=app --cov-report=term-missing ./testing/test_booking.py
+- pytest --cov=app --cov-report=term-missing ./testing/test_admin.py
+- pytest --cov=app --cov-report=term-missing ./testing/test_comment.py
+- pytest --cov=app --cov-report=term-missing ./testing/test_history.py
+- pytest --cov=app --cov-report=term-missing ./testing/test_auth.py
+- pytest --cov=app --cov-report=term-missing ./testing/test_room.py
+The testing not cover some function like setupdatabse which only run once.
+The testing not cover function use socket io
